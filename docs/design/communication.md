@@ -63,7 +63,6 @@ La memoire flash externe est connectee au microcontroleur d'interface (STM32F103
 
 ## Voir aussi
 
-- [Hardware — Microcontroleur applicatif](../hardware/application-microcontroller)
-- [Hardware — Memoire flash externe](../hardware/flash-memory)
+- [Hardware](../hardware/)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Bus internes](../pin-mapping/internal-bus)

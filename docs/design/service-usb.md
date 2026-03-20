@@ -89,7 +89,6 @@ Le systeme de fichiers flash presente sur le lecteur de la carte est entierement
 
 ## Voir aussi
 
-- [Hardware — Microcontroleur d'interface USB](../hardware/interface-microcontroller)
-- [Hardware — Interface de programmation et debogage](../hardware/programming-debugging-interface)
+- [Hardware](../hardware/)
 - [Software — DAPLink](../software/)
 - [Composants — Circuits integres](../components/integrated-circuits)

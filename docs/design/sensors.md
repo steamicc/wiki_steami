@@ -175,10 +175,7 @@ Pads accessibles avec des pinces crocodile autour de la carte :
 
 ## Voir aussi
 
-- [Hardware — Capteurs internes](../hardware/internal-sensor)
-- [Hardware — Microphone](../hardware/microphone)
-- [Hardware — Extension GPIO](../hardware/gpio-extension-port)
-- [Hardware — Ports E/S specifiques](../hardware/specific-io-port)
+- [Hardware](../hardware/)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Bus internes](../pin-mapping/internal-bus)
 - [Pin Mapping — Edge connector](../pin-mapping/edge-connector)
