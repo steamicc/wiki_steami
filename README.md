@@ -80,6 +80,8 @@ Le déploiement est automatique après merge sur `main`.
 - [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython pour les capteurs et périphériques de la carte
 - [DAPLink](https://github.com/steamicc/DAPLink) — Firmware du STM32F103 (branche `release_letssteam`)
 
-## Copyright
+## Licence
 
-Wiki STeaMi © STeaMi. Tous droits réservés.
+Ce contenu est distribué sous licence [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Voir le fichier [LICENSE](LICENSE) pour les détails.
+
+Wiki STeaMi © STeaMi
