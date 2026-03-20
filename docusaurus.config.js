@@ -70,6 +70,12 @@ const config = {
           },
           {
             type: 'docSidebar',
+            sidebarId: 'softwareSidebar',
+            position: 'left',
+            label: '💻 Software',
+          },
+          {
+            type: 'docSidebar',
             sidebarId: 'pinmappingSidebar',
             position: 'left',
             label: '📍 Pin Mapping',
@@ -85,6 +91,12 @@ const config = {
             sidebarId: 'requirementsSidebar',
             position: 'left',
             label: '📦 Requirements',
+          },
+          {
+            type: 'docSidebar',
+            sidebarId: 'designSidebar',
+            position: 'left',
+            label: '🏗️ Conception',
           },
           {
             href: 'https://steami.cc',
@@ -109,7 +121,9 @@ const config = {
               { label: 'Hardware', to: '/docs/hardware' },
               { label: 'Pin Mapping', to: '/docs/pin-mapping' },
               { label: 'Composants', to: '/docs/components' },
+              { label: 'Software', to: '/docs/software' },
               { label: 'Requirements', to: '/docs/requirements' },
+              { label: 'Conception', to: '/docs/design' },
             ],
           },
           {
