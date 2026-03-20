@@ -7,7 +7,7 @@ title: "Communication"
 
 ## Exigences — Communication sans fil
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-28 | BLE | Le systeme doit pouvoir communiquer par Bluetooth BLE 4.2. | STM32WB55RG — BLE 5.2 (depasse l'exigence) |
 | FCT-29 | BLE - Range | Le systeme necessite une portee physique BLE d'au moins 10 m. | Antenne interne + filtre MLPF-WB55-01E3 |
@@ -17,7 +17,7 @@ title: "Communication"
 
 ## Exigences — Stockage
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-33 | QSPI Flash | Le systeme doit integrer un stockage flash Quad-SPI de 64 Mbit. | Winbond W25Q64JVZPIM |
 | FCT-34 | QSPI Flash - USB Mass Storage | Le stockage flash interne doit etre accessible a travers USB Mass Storage. | STM32F103 DAPLink (endpoint MSC) |
@@ -63,6 +63,7 @@ La memoire flash externe est connectee au microcontroleur d'interface (STM32F103
 
 ## Voir aussi
 
-- [Hardware — Communication](../hardware/)
+- [Hardware — Microcontroleur applicatif](../hardware/application-microcontroller)
+- [Hardware — Memoire flash externe](../hardware/flash-memory)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Bus internes](../pin-mapping/internal-bus)

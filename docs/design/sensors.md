@@ -7,7 +7,7 @@ title: "Capteurs"
 
 ## Exigences — Capteurs internes
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-40 | Magnetometer (LIS2MDL) | Le systeme doit integrer un magnetometre (LIS2MDL). | LIS2MDLTR (I2C, INT_MAG → PD1) |
 | FCT-41 | Distance (VL53L1X) | Le systeme doit integrer un capteur de distance (VL53L1X). | VL53L1CXV0FY/1 (I2C, INT_DIST → PB12) |
@@ -21,7 +21,7 @@ title: "Capteurs"
 
 ## Exigences — Capteurs et connecteurs externes
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-49 | GPIO - Micro:bit edge connector | Le systeme doit fournir un connecteur externe similaire au connecteur edge du micro:bit. | Connecteur edge P0-P20 |
 | FCT-50 | GPIO - Alligator-clip friendly pins | Le systeme doit fournir des broches d'entree/sortie compatibles avec les pinces crocodile. | Pads P0, P1, P2, P24, P25, P28, P29, 3V3, GND |
@@ -35,7 +35,7 @@ title: "Capteurs"
 
 ### Capteurs internes (FP12)
 
-La carte integre 7 capteurs embarques couvrant distance, mouvement, environnement et lumiere. Tous sont connectes sur le bus I2C1 interne avec des lignes d'interruption individuelles.
+La carte integre 7 capteurs embarques couvrant distance, mouvement, environnement et lumiere. Les capteurs I2C sont regroupes sur un bus interne commun ; certains disposent de lignes d'interruption individuelles (VL53L1X, ISM330DLC, LIS2MDL).
 
 #### Capteur de distance — VL53L1X
 
@@ -175,7 +175,10 @@ Pads accessibles avec des pinces crocodile autour de la carte :
 
 ## Voir aussi
 
-- [Hardware — Capteurs](../hardware/)
+- [Hardware — Capteurs internes](../hardware/internal-sensor)
+- [Hardware — Microphone](../hardware/microphone)
+- [Hardware — Extension GPIO](../hardware/gpio-extension-port)
+- [Hardware — Ports E/S specifiques](../hardware/specific-io-port)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Bus internes](../pin-mapping/internal-bus)
 - [Pin Mapping — Edge connector](../pin-mapping/edge-connector)

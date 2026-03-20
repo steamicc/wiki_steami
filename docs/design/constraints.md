@@ -7,7 +7,7 @@ title: "Contraintes"
 
 ## Exigences environnementales
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | ENV-01 | Temperature | Le systeme doit pouvoir fonctionner dans la plage de -20°C a 85°C. | Composants grade industriel |
 | ENV-02 | Lifetime | Le systeme doit pouvoir fonctionner pendant 70 000 heures (environ 8 ans). | Selection composants haute fiabilite |
@@ -17,7 +17,7 @@ title: "Contraintes"
 
 ## Exigences physiques
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | PHY-01 | Size | Le systeme doit etre contenu dans un volume inferieur a 100 mm de longueur par 60 mm de largeur. | PCB < 100 x 60 mm |
 | PHY-02 | Weight | Le poids doit etre inferieur ou egal a 100 g. | ≤ 100 g |
@@ -47,6 +47,6 @@ Le format compact (< 100 x 60 mm, ≤ 100 g) est compatible avec le connecteur e
 
 ## Voir aussi
 
-- [Hardware — Mecanique](../hardware/)
+- [Hardware — Vue d'ensemble](../hardware/)
 - [Conception — Interface utilisateur](./user-interface)
 - [Conception — Alimentation](./power)

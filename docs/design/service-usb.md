@@ -7,7 +7,7 @@ title: "Service et USB"
 
 ## Exigences — Port de service
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-55 | Service Port | Le systeme doit integrer un port de debogage et de chargement logiciel en usine. | Header SWD 1 rangee, pas 1.27 mm |
 | FCT-56 | Service Port - SWD | Le port de service doit etre compatible avec les sondes SWD comme Black Magic Probe ou ST-Link. | SWD (SWCLK PA14, SWDIO PA13 sur F103) |
@@ -16,7 +16,7 @@ title: "Service et USB"
 
 ## Exigences — USB
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-59 | USB | Le systeme doit integrer un connecteur micro-USB. | Connecteur micro-USB |
 | FCT-60 | USB - Programming | Le systeme doit pouvoir charger son logiciel embarque a travers un port USB. | DAPLink drag-and-drop |
@@ -89,6 +89,7 @@ Le systeme de fichiers flash presente sur le lecteur de la carte est entierement
 
 ## Voir aussi
 
-- [Hardware — Interface USB](../hardware/)
+- [Hardware — Microcontroleur d'interface USB](../hardware/interface-microcontroller)
+- [Hardware — Interface de programmation et debogage](../hardware/programming-debugging-interface)
 - [Software — DAPLink](../software/)
 - [Composants — Circuits integres](../components/integrated-circuits)

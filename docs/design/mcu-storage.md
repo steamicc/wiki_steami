@@ -7,7 +7,7 @@ title: "MCU et stockage"
 
 ## Exigences
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-35 | Microcontroller | Le systeme doit integrer un microcontroleur ARM Cortex-M STM32WB55 de STMicroelectronics. | STM32WB55RG (Cortex-M4) |
 | FCT-36 | Microcontroller - RAM | Le systeme doit integrer un MCU avec suffisamment de RAM pour effectuer des operations graphiques de base (minimum pour un framebuffer 128x128). | 256 Ko SRAM |
@@ -47,7 +47,7 @@ Regrouper tous les capteurs internes sur I2C1 simplifie le routage PCB et permet
 
 ## Voir aussi
 
-- [Hardware — Microcontroleur](../hardware/)
+- [Hardware — Microcontroleur](../hardware/application-microcontroller)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Bus internes](../pin-mapping/internal-bus)
 - [Conception — Communication](./communication)

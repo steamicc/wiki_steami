@@ -7,7 +7,7 @@ title: "Interface utilisateur"
 
 ## Exigences — LEDs indicatrices
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-10 | RGB system indicator LED | Le systeme doit pouvoir informer l'utilisateur de son etat de fonctionnement grace a des LEDs RGB. | LED RGB Wurth 150505M173300 + LEDs status F103 |
 | FCT-11 | RGB system indicator LED (extinction) | Le systeme doit pouvoir eteindre toutes les LEDs indicatrices apres 30 secondes si aucune interaction n'est detectee. | Gestion logicielle |
@@ -17,19 +17,19 @@ title: "Interface utilisateur"
 
 ## Exigences — Ecran
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-15 | Display | Le systeme doit pouvoir afficher des informations graphiques ou textuelles sur un ecran haute resolution. | OLED Winstar WEO128128BWPP3N00001 |
-| FCT-16 | Display - Controller | Le controleur d'ecran doit etre ST7735, ILI9341 ou ILI9163C. | SSD1327 (OLED) |
+| FCT-16 | Display - Controller | Le controleur d'ecran doit etre SSD1327, ST7735, ILI9341 ou ILI9163C. | SSD1327 (OLED) |
 | FCT-17 | Display - SPI | Le controleur doit etre connecte sur le bus SPI. | SPI1 interne |
 | FCT-18 | Display - Resolution | La resolution de l'ecran doit etre d'au moins 128x128. | 128 x 128 pixels |
 | FCT-19 | Display - Backlight | L'ecran pourrait integrer un retro-eclairage LED pour ameliorer la lisibilite en exterieur. | OLED auto-emissif (pas de retro-eclairage necessaire) |
 
 ## Exigences — Boutons
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
-| FCT-20 | User buttons - BLE Pairing | Le systeme doit pouvoir appairer un appareil BLE si la duree d'appui sur le bouton d'allumage depasse un seuil defini. | Bouton Menu (PA0) — appui long |
+| FCT-20 | User buttons - BLE Pairing | Le systeme doit pouvoir appairer un appareil BLE si la duree d'appui sur le bouton Menu (PA0) depasse un seuil defini. | Bouton Menu (PA0) — appui long |
 | FCT-21 | User buttons - Arcade requirement | Le systeme necessite 7 boutons utilisateur au total : gauche, haut, droite, bas (en configuration d-pad), A, B et Menu. | D-pad via MCP23009 + A/B GPIO + Menu GPIO |
 | FCT-22 | User buttons - Pull-up | Les 4 boutons directionnels, les boutons A/B et le bouton Menu seront connectes avec des resistances de pull-up. | Resistances pull-up externes |
 | FCT-23 | User buttons - Placement constraints | La disposition recommandee est d'avoir les boutons directionnels en configuration d-pad avec les boutons A et B places separement. | ALPS SKRHABE010 (joystick 4 directions) + C&K PTS636 |
@@ -39,7 +39,7 @@ title: "Interface utilisateur"
 
 ## Exigences — Audio
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-27 | Audio | Le systeme peut optionnellement produire un signal audio. Sortie audio mono un seul canal. | Buzzer PUI Audio SMT-0825-S-HT-R |
 
@@ -133,7 +133,9 @@ Un buzzer piezo permet la generation de sons. Il est alimente par un boost conve
 
 ## Voir aussi
 
-- [Hardware — Interface visuelle](../hardware/)
+- [Hardware — Interface visuelle](../hardware/visual-interface)
+- [Hardware — Boutons de controle](../hardware/control-buttons)
+- [Hardware — Sortie audio](../hardware/audio-output)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — LEDs](../pin-mapping/leds)
 - [Pin Mapping — Boutons](../pin-mapping/buttons)

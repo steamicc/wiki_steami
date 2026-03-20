@@ -7,7 +7,7 @@ title: "Alimentation"
 
 ## Exigences
 
-| ID | Nom | Description | Implementation |
+| ID | Nom | Description | Implémentation |
 |----|-----|-------------|----------------|
 | FCT-01 | Power Input | Le systeme doit pouvoir etre alimente par une alimentation 5V via un connecteur micro-USB. | Connecteur micro-USB + TPS63000DRCT |
 | FCT-02 | Power Input - Low power mode | Afin d'assurer une tres faible consommation de repos apres l'extinction automatique, toutes les alimentations et peripheriques doivent etre coupes. | Switch DIO7003LEST5 |
@@ -77,6 +77,6 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 
 ## Voir aussi
 
-- [Hardware — Alimentation](../hardware/)
+- [Hardware — Vue d'ensemble](../hardware/)
 - [Composants — Circuits integres](../components/integrated-circuits)
 - [Pin Mapping — Alimentation](../pin-mapping/power-pins)
