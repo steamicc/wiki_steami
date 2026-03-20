@@ -47,7 +47,7 @@ Les fichiers statiques sont générés dans `build/`.
 ## Structure du projet
 
 ```
-wiki_steami/
+./
 ├── docs/                  # Contenu Markdown du wiki
 │   ├── overview/          # Vue d'ensemble et pinout
 │   ├── hardware/          # Blocs fonctionnels hardware
@@ -66,11 +66,20 @@ wiki_steami/
 
 Le site est déployé automatiquement sur **GitHub Pages** à chaque push sur `main` via le workflow [deploy.yml](.github/workflows/deploy.yml).
 
+## Contribuer
+
+1. Créer une branche depuis `main`
+2. Ajouter ou modifier les pages Markdown dans `docs/`
+3. Vérifier le rendu avec `npm start`
+4. Ouvrir une Pull Request avec une description du changement
+
+Le déploiement est automatique après merge sur `main`.
+
 ## Repos liés
 
 - [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython pour les capteurs et périphériques de la carte
 - [DAPLink](https://github.com/steamicc/DAPLink) — Firmware du STM32F103 (branche `release_letssteam`)
 
-## Licence
+## Copyright
 
-Wiki STeaMi © STeaMi
+Wiki STeaMi © STeaMi. Tous droits réservés.
