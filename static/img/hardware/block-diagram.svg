@@ -35,8 +35,8 @@
   <text x="350" y="168" text-anchor="middle" class="sublabel" fill="#00838f">FP6 — MCU applicatif</text>
 
   <!-- Antenna (meme ligne que FP13) -->
-  <rect x="540" y="35" width="80" height="35" class="box conn"/>
-  <text x="580" y="56" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
+  <rect x="540" y="32" width="80" height="35" class="box conn"/>
+  <text x="580" y="53" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
   <line x1="450" y1="90" x2="575" y2="90" class="bus" stroke="#00838f" stroke-width="1.5"/>
   <line x1="575" y1="90" x2="575" y2="65" class="bus" stroke="#00838f" stroke-width="1.5"/>
 
@@ -129,21 +129,21 @@
   <text x="175" y="385" text-anchor="middle" class="sublabel" fill="#e65100">FP12 — Capteurs internes</text>
 
   <!-- ==================== Microphone PDM (au-dessus du WB55) ==================== -->
-  <rect x="280" y="35" width="105" height="35" class="box sensor"/>
-  <text x="332" y="51" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
-  <text x="332" y="63" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
-  <line x1="332" y1="70" x2="332" y2="80" class="bus bus-pdm"/>
+  <rect x="280" y="32" width="105" height="35" class="box sensor"/>
+  <text x="332" y="48" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
+  <text x="332" y="60" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
+  <line x1="332" y1="67" x2="332" y2="80" class="bus bus-pdm"/>
   <text x="337" y="76" class="legend-text" fill="#2e7d32">PDM</text>
 
   <!-- ==================== Interface utilisateur (colonne gauche alignee) ==================== -->
 
   <!-- OLED -->
-  <rect x="20" y="35" width="130" height="35" class="box ui"/>
-  <text x="85" y="53" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
-  <text x="85" y="65" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
-  <line x1="150" y1="52" x2="260" y2="52" class="bus bus-spi"/>
-  <line x1="260" y1="52" x2="260" y2="80" class="bus bus-spi"/>
-  <text x="210" y="48" class="legend-text" fill="#283593">SPI1</text>
+  <rect x="20" y="32" width="130" height="35" class="box ui"/>
+  <text x="85" y="50" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
+  <text x="85" y="62" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
+  <line x1="150" y1="49" x2="260" y2="49" class="bus bus-spi"/>
+  <line x1="260" y1="49" x2="260" y2="80" class="bus bus-spi"/>
+  <text x="210" y="45" class="legend-text" fill="#283593">SPI1</text>
 
   <!-- LED RGB -->
   <rect x="20" y="80" width="130" height="25" class="box ui"/>
@@ -183,13 +183,13 @@
   <text x="800" y="114" class="legend-text" fill="#c62828">5V USB</text>
 
   <!-- ==================== Connecteurs externes (au-dessus du WB55) ==================== -->
-  <rect x="390" y="35" width="145" height="35" class="box conn"/>
-  <text x="462" y="50" text-anchor="middle" class="label" font-size="9">Connecteurs</text>
-  <text x="462" y="62" text-anchor="middle" class="sublabel">Edge, Qwiic, Jacdac, Pads — FP13</text>
+  <rect x="390" y="32" width="145" height="35" class="box conn"/>
+  <text x="462" y="47" text-anchor="middle" class="label" font-size="9">Connecteurs</text>
+  <text x="462" y="59" text-anchor="middle" class="sublabel">Edge, Qwiic, Jacdac, Pads — FP13</text>
 
   <!-- I2C3 + SPI2 from WB55 to connectors -->
-  <line x1="420" y1="70" x2="420" y2="80" class="bus bus-i2c" stroke="#6a1b9a"/>
-  <text x="425" y="79" class="legend-text" fill="#6a1b9a">I2C3 / SPI2</text>
+  <line x1="420" y1="67" x2="420" y2="80" class="bus bus-i2c" stroke="#6a1b9a"/>
+  <text x="425" y="76" class="legend-text" fill="#6a1b9a">I2C3 / SPI2</text>
 
   <!-- SWD (en dessous du micro-USB) -->
   <rect x="785" y="265" width="105" height="35" class="box conn"/>
