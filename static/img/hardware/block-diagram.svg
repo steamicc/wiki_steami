@@ -35,8 +35,8 @@
   <text x="350" y="168" text-anchor="middle" class="sublabel" fill="#00838f">FP6 — MCU applicatif</text>
 
   <!-- Antenna (meme ligne que FP13) -->
-  <rect x="540" y="32" width="80" height="35" class="box conn"/>
-  <text x="580" y="53" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
+  <rect x="540" y="35" width="80" height="35" class="box conn"/>
+  <text x="580" y="56" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
   <line x1="450" y1="90" x2="575" y2="90" class="bus" stroke="#00838f" stroke-width="1.5"/>
   <line x1="575" y1="90" x2="575" y2="65" class="bus" stroke="#00838f" stroke-width="1.5"/>
 
@@ -129,10 +129,10 @@
   <text x="175" y="385" text-anchor="middle" class="sublabel" fill="#e65100">FP12 — Capteurs internes</text>
 
   <!-- ==================== Microphone PDM (au-dessus du WB55) ==================== -->
-  <rect x="280" y="32" width="105" height="35" class="box sensor"/>
-  <text x="332" y="48" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
-  <text x="332" y="60" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
-  <line x1="332" y1="67" x2="332" y2="80" class="bus bus-pdm"/>
+  <rect x="280" y="35" width="105" height="35" class="box sensor"/>
+  <text x="332" y="51" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
+  <text x="332" y="63" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
+  <line x1="332" y1="70" x2="332" y2="80" class="bus bus-pdm"/>
   <text x="337" y="76" class="legend-text" fill="#2e7d32">PDM</text>
 
   <!-- ==================== Interface utilisateur (colonne gauche alignee) ==================== -->
