@@ -52,7 +52,6 @@ LEDs gerees par le processeur d'interface pour indiquer l'etat du systeme.
 
 [![Schema FP8-Display_LEDs](/img/schematics/FP8-Display_LEDs.png)](/docs/schematics/FP8-Display_LEDs.pdf)
 
-- [Schema PDF — FP8 Display et LEDs](/docs/schematics/FP8-Display_LEDs.pdf)
 
 - [Schema Altium — FP8](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP8-Display_et_LED_statuts.SchDoc)
 

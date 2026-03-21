@@ -83,9 +83,6 @@ L'expandeur MCP23009 fournit 8 GPIO supplementaires sur le bus I2C1 interne. Il 
 
 [![Schema FP9-Boutons](/img/schematics/FP9-Boutons.png)](/docs/schematics/FP9-Boutons.pdf)
 
-- [Schema PDF — FP7 Extension GPIO](/docs/schematics/FP7-Extension_GPIO.pdf)
-- [Schema PDF — FP9 Boutons](/docs/schematics/FP9-Boutons.pdf)
-- [Schema PDF — FP10 Audio](/docs/schematics/FP10-Sortie_audio.pdf)
 - [Schema Altium — FP9 Boutons](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP9-Bouton_de_controle.SchDoc)
 - [Schema Altium — FP10 Audio](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP10-Sortie_Audio.SchDoc)
 - [Schema Altium — FP7 Extension GPIO](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP7-Port_extention.SchDoc)
