@@ -170,10 +170,12 @@
   <text x="660" y="125" text-anchor="middle" class="sublabel">TPS63000 + BQ24075 + LiPo 1600mAh</text>
   <text x="660" y="138" text-anchor="middle" class="sublabel" fill="#c62828">FP4 / FP1 / FP2 / FP3</text>
 
-  <!-- Power line from FP4 to Ecran (14.5V boost) -->
-  <line x1="560" y1="100" x2="150" y2="100" class="bus bus-pwr"/>
-  <line x1="150" y1="100" x2="150" y2="63" class="bus bus-pwr"/>
-  <text x="350" y="97" class="legend-text" fill="#c62828">14.5V (ecran)</text>
+  <!-- Power line from FP4 to Ecran (14.5V boost) — passe par le haut -->
+  <line x1="560" y1="100" x2="545" y2="100" class="bus bus-pwr"/>
+  <line x1="545" y1="100" x2="545" y2="20" class="bus bus-pwr"/>
+  <line x1="545" y1="20" x2="85" y2="20" class="bus bus-pwr"/>
+  <line x1="85" y1="20" x2="85" y2="28" class="bus bus-pwr"/>
+  <text x="300" y="16" class="legend-text" fill="#c62828">14.5V (ecran)</text>
 
   <!-- Power line from FP4 down to F103 -->
   <line x1="660" y1="145" x2="660" y2="200" class="bus bus-pwr" stroke-dasharray="2,4"/>
