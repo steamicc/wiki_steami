@@ -60,8 +60,8 @@
 
   <!-- ==================== Flash W25Q64 ==================== -->
   <rect x="590" y="320" width="140" height="50" class="box flash"/>
-  <text x="660" y="345" text-anchor="middle" class="label">W25Q64</text>
-  <text x="660" y="358" text-anchor="middle" class="sublabel">64 Mbit SPI Flash — FP15</text>
+  <text x="660" y="345" text-anchor="middle" class="label">Flash SPI</text>
+  <text x="660" y="358" text-anchor="middle" class="sublabel">W25Q64 64 Mbit — FP15</text>
   <line x1="660" y1="290" x2="660" y2="320" class="bus bus-spi"/>
   <text x="665" y="310" class="legend-text" fill="#283593">SPI</text>
 
@@ -79,50 +79,50 @@
   <!-- ==================== Capteurs (below I2C1 bus) ==================== -->
   <!-- VL53L1X -->
   <rect x="30" y="275" width="90" height="40" class="box sensor"/>
-  <text x="75" y="295" text-anchor="middle" class="label" font-size="9">VL53L1X</text>
-  <text x="75" y="307" text-anchor="middle" class="sublabel">Distance ToF</text>
+  <text x="75" y="295" text-anchor="middle" class="label" font-size="9">Distance ToF</text>
+  <text x="75" y="307" text-anchor="middle" class="sublabel">VL53L1X</text>
   <line x1="75" y1="250" x2="75" y2="275" class="bus bus-i2c"/>
 
   <!-- ISM330DLC -->
   <rect x="130" y="275" width="90" height="40" class="box sensor"/>
-  <text x="175" y="295" text-anchor="middle" class="label" font-size="9">ISM330DLC</text>
-  <text x="175" y="307" text-anchor="middle" class="sublabel">Accel/Gyro 6 axes</text>
+  <text x="175" y="295" text-anchor="middle" class="label" font-size="9">Accel/Gyro</text>
+  <text x="175" y="307" text-anchor="middle" class="sublabel">ISM330DLC</text>
   <line x1="175" y1="250" x2="175" y2="275" class="bus bus-i2c"/>
 
   <!-- LIS2MDL -->
   <rect x="230" y="275" width="90" height="40" class="box sensor"/>
-  <text x="275" y="295" text-anchor="middle" class="label" font-size="9">LIS2MDL</text>
-  <text x="275" y="307" text-anchor="middle" class="sublabel">Magnetometre</text>
+  <text x="275" y="295" text-anchor="middle" class="label" font-size="9">Magnetometre</text>
+  <text x="275" y="307" text-anchor="middle" class="sublabel">LIS2MDL</text>
   <line x1="275" y1="250" x2="275" y2="275" class="bus bus-i2c"/>
 
   <!-- WSEN-PADS -->
   <rect x="30" y="330" width="90" height="40" class="box sensor"/>
-  <text x="75" y="350" text-anchor="middle" class="label" font-size="9">WSEN-PADS</text>
-  <text x="75" y="362" text-anchor="middle" class="sublabel">Pression</text>
+  <text x="75" y="350" text-anchor="middle" class="label" font-size="9">Pression</text>
+  <text x="75" y="362" text-anchor="middle" class="sublabel">WSEN-PADS</text>
   <line x1="75" y1="315" x2="75" y2="330" class="bus bus-i2c"/>
 
   <!-- WSEN-HIDS -->
   <rect x="130" y="330" width="90" height="40" class="box sensor"/>
-  <text x="175" y="350" text-anchor="middle" class="label" font-size="9">WSEN-HIDS</text>
-  <text x="175" y="362" text-anchor="middle" class="sublabel">Humidite/Temp</text>
+  <text x="175" y="350" text-anchor="middle" class="label" font-size="9">Humidite/Temp</text>
+  <text x="175" y="362" text-anchor="middle" class="sublabel">WSEN-HIDS</text>
   <line x1="175" y1="315" x2="175" y2="330" class="bus bus-i2c"/>
 
   <!-- APDS-9960 -->
   <rect x="230" y="330" width="90" height="40" class="box sensor"/>
-  <text x="275" y="350" text-anchor="middle" class="label" font-size="9">APDS-9960</text>
-  <text x="275" y="362" text-anchor="middle" class="sublabel">Lumiere/Geste</text>
+  <text x="275" y="350" text-anchor="middle" class="label" font-size="9">Lumiere/Geste</text>
+  <text x="275" y="362" text-anchor="middle" class="sublabel">APDS-9960</text>
   <line x1="275" y1="315" x2="275" y2="330" class="bus bus-i2c"/>
 
   <!-- BQ27441 -->
   <rect x="340" y="275" width="90" height="40" class="box power"/>
-  <text x="385" y="295" text-anchor="middle" class="label" font-size="9">BQ27441</text>
-  <text x="385" y="307" text-anchor="middle" class="sublabel">Jauge batterie — FP3</text>
+  <text x="385" y="295" text-anchor="middle" class="label" font-size="9">Jauge batterie</text>
+  <text x="385" y="307" text-anchor="middle" class="sublabel">BQ27441 — FP3</text>
   <line x1="385" y1="250" x2="385" y2="275" class="bus bus-i2c"/>
 
   <!-- MCP23009 -->
   <rect x="440" y="275" width="90" height="40" class="box conn"/>
-  <text x="485" y="295" text-anchor="middle" class="label" font-size="9">MCP23009</text>
-  <text x="485" y="307" text-anchor="middle" class="sublabel">8 GPIO — FP7</text>
+  <text x="485" y="295" text-anchor="middle" class="label" font-size="9">Extension GPIO</text>
+  <text x="485" y="307" text-anchor="middle" class="sublabel">MCP23009 — FP7</text>
   <line x1="485" y1="250" x2="485" y2="275" class="bus bus-i2c"/>
 
   <!-- FP12 label -->
@@ -130,8 +130,8 @@
 
   <!-- ==================== Microphone PDM (au-dessus du WB55) ==================== -->
   <rect x="280" y="28" width="105" height="35" class="box sensor"/>
-  <text x="332" y="44" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
-  <text x="332" y="52" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
+  <text x="332" y="44" text-anchor="middle" class="label" font-size="9">Microphone PDM</text>
+  <text x="332" y="52" text-anchor="middle" class="sublabel">IMP34DT05 — FP5</text>
   <line x1="332" y1="67" x2="332" y2="80" class="bus bus-pdm"/>
   <text x="337" y="76" class="legend-text" fill="#2e7d32">PDM</text>
 
