@@ -5,8 +5,6 @@ title: "Vue d'ensemble du materiel"
 
 # Vue d'ensemble du materiel
 
-## Vue d'ensemble
-
 La carte STeaMi est un ordinateur monocarte (SBC) educatif base sur deux processeurs : un processeur applicatif (STM32WB55RG) sur lequel s'executent les programmes utilisateur, et un processeur d'interface (STM32F103) qui gere les communications USB et la programmation drag-and-drop via DAPLink.
 
 Deux ressources cles pour comprendre les details internes de la carte :
