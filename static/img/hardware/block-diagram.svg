@@ -139,28 +139,28 @@
   <!-- ==================== Interface utilisateur (colonne gauche alignee) ==================== -->
 
   <!-- OLED -->
-  <rect x="20" y="45" width="130" height="40" class="box ui"/>
-  <text x="85" y="65" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
-  <text x="85" y="78" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
-  <line x1="150" y1="65" x2="250" y2="100" class="bus bus-spi"/>
-  <text x="185" y="72" class="legend-text" fill="#283593">SPI1</text>
-
-  <!-- Boutons -->
-  <rect x="20" y="95" width="130" height="40" class="box ui"/>
-  <text x="85" y="113" text-anchor="middle" class="label" font-size="9">Boutons — FP9</text>
-  <text x="85" y="126" text-anchor="middle" class="sublabel">D-pad(MCP) + A/B + Menu</text>
-  <line x1="150" y1="115" x2="250" y2="120" class="bus bus-gpio"/>
+  <rect x="20" y="40" width="130" height="35" class="box ui"/>
+  <text x="85" y="58" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
+  <text x="85" y="70" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
+  <line x1="150" y1="57" x2="250" y2="95" class="bus bus-spi"/>
+  <text x="185" y="65" class="legend-text" fill="#283593">SPI1</text>
 
   <!-- LED RGB -->
-  <rect x="20" y="145" width="130" height="30" class="box ui"/>
-  <text x="85" y="164" text-anchor="middle" class="label" font-size="9">LED RGB — FP8</text>
-  <line x1="150" y1="160" x2="250" y2="145" class="bus bus-gpio"/>
-  <text x="185" y="143" class="legend-text" fill="#666">GPIO</text>
+  <rect x="20" y="82" width="130" height="28" class="box ui"/>
+  <text x="85" y="100" text-anchor="middle" class="label" font-size="9">LED RGB — FP8</text>
+  <line x1="150" y1="96" x2="250" y2="110" class="bus bus-gpio"/>
+  <text x="185" y="94" class="legend-text" fill="#666">GPIO</text>
 
-  <!-- Buzzer (aligne horizontalement avec STM32WB55 y=80..180, milieu ~130) -->
-  <rect x="20" y="190" width="130" height="30" class="box ui"/>
-  <text x="85" y="209" text-anchor="middle" class="label" font-size="9">Buzzer — FP10</text>
-  <line x1="150" y1="205" x2="250" y2="165" class="bus bus-gpio"/>
+  <!-- Boutons -->
+  <rect x="20" y="117" width="130" height="35" class="box ui"/>
+  <text x="85" y="134" text-anchor="middle" class="label" font-size="9">Boutons — FP9</text>
+  <text x="85" y="146" text-anchor="middle" class="sublabel">D-pad(MCP) + A/B + Menu</text>
+  <line x1="150" y1="134" x2="250" y2="130" class="bus bus-gpio"/>
+
+  <!-- Buzzer — aligne avec le milieu du STM32WB55 (y=80..180 → milieu=130) -->
+  <rect x="20" y="159" width="130" height="28" class="box ui"/>
+  <text x="85" y="177" text-anchor="middle" class="label" font-size="9">Buzzer — FP10</text>
+  <line x1="150" y1="173" x2="250" y2="155" class="bus bus-gpio"/>
 
   <!-- ==================== Alimentation (bottom) ==================== -->
   <rect x="350" y="420" width="200" height="80" class="box power"/>
