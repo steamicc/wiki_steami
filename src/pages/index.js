@@ -142,7 +142,11 @@ function Pinout() {
         <img
           src="/img/pinout/pinout_steami.svg"
           alt="Pinout STeaMi"
-          style={{ maxWidth: '700px', width: '100%' }}
+          loading="lazy"
+          decoding="async"
+          width={700}
+          height={394}
+          style={{ maxWidth: '700px', width: '100%', height: 'auto' }}
         />
       </Link>
     </section>
