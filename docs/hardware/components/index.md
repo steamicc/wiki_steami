@@ -1,11 +1,13 @@
 ---
-sidebar_position: 3
-title: "Composants (BOM)"
+sidebar_position: 4
+title: "BOM complete"
 ---
 
-# Composants - Bill of Materials
+# Bill of Materials (BOM)
 
-Liste complete des composants de la carte STeaMi, regroupes par categorie. La carte contient 101 references distinctes.
+Liste complete de tous les composants de la carte STeaMi, regroupes par categorie. La carte contient 101 references distinctes.
+
+Pour les composants actifs principaux avec liens datasheets, voir [Composants principaux](../main-components).
 
 ## Sommaire par categorie
 
