@@ -130,8 +130,8 @@
 
   <!-- ==================== Microphone PDM (au-dessus du WB55) ==================== -->
   <rect x="280" y="28" width="105" height="35" class="box sensor"/>
-  <text x="332" y="44" text-anchor="middle" class="label" font-size="9">Microphone PDM</text>
-  <text x="332" y="52" text-anchor="middle" class="sublabel">IMP34DT05 — FP5</text>
+  <text x="332" y="42" text-anchor="middle" class="label" font-size="9">Microphone PDM</text>
+  <text x="332" y="54" text-anchor="middle" class="sublabel">IMP34DT05 — FP5</text>
   <line x1="332" y1="67" x2="332" y2="80" class="bus bus-pdm"/>
   <text x="337" y="76" class="legend-text" fill="#2e7d32">PDM</text>
 
