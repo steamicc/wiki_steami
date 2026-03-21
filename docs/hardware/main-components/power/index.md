@@ -53,7 +53,7 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 | Modele | LD3985M33R |
 | Fabricant | STMicroelectronics |
 | Sortie | 3.3V @ 150 mA |
-| Usage | Alimentation STLink, rails sensibles |
+| Usage | Alimentation MCU interface (STM32F103) / DAPLink, rails sensibles |
 
 ## Boost buzzer — LMR62421
 
@@ -78,7 +78,7 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 | Tension | Courant max | Utilisation |
 |---------|-------------|-------------|
 | 3.3V | 1200 mA | MCU, capteurs, affichage |
-| 3.3V | 150 mA | Regulateur lineaire (STLink) |
+| 3.3V | 150 mA | Regulateur lineaire (MCU interface / DAPLink) |
 | 14.5V | 100 mA | Buzzer piezo, ecran OLED |
 | 5V | — | Alimentation Jacdac |
 
