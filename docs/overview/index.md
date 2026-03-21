@@ -26,6 +26,10 @@ La carte STeaMi repose sur deux microcontroleurs :
 1. **STM32WB55RG** (microcontroleur applicatif) : gere les capteurs, l'affichage, les communications sans fil et l'execution du code utilisateur (MicroPython).
 2. **STM32F103CBT6** (microcontroleur interface) : gere la connexion USB, le DAPLink pour la programmation drag-and-drop, le WebUSB, la communication serie et l'acces au stockage flash.
 
+### Schema bloc
+
+![Schema bloc STeaMi](/img/hardware/block-diagram.svg)
+
 ## Blocs fonctionnels
 
 | Id | Bloc fonctionnel | Description |

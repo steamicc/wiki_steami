@@ -14,9 +14,17 @@ Deux ressources cles pour comprendre les details internes de la carte :
 - Les [schemas](./schematic), qui montrent les donnees de connectivite detaillees de chaque composant.
 - Le [reference design](https://github.com/steamicc/steami-reference-design), qui est un design complet de la carte au format Altium.
 
+### Face avant
+
+![STeaMi face avant](/img/hardware/steami-front.png)
+
+### Face arriere
+
+![STeaMi face arriere](/img/hardware/steami-back.png)
+
 ## Schema bloc
 
-*Schema bloc a venir — voir [issue #24](https://github.com/steamicc/wiki_steami/issues/24)*
+![Schema bloc STeaMi](/img/hardware/block-diagram.svg)
 
 ## Description du hardware
 

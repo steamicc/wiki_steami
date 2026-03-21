@@ -1,0 +1,244 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="Inter, -apple-system, sans-serif" font-size="11">
+  <defs>
+    <style>
+      .box { rx: 6; ry: 6; stroke-width: 1.5; }
+      .mcu { fill: #e0f7fa; stroke: #00838f; }
+      .sensor { fill: #fff3e0; stroke: #e65100; }
+      .power { fill: #fce4ec; stroke: #c62828; }
+      .ui { fill: #e8f5e9; stroke: #2e7d32; }
+      .conn { fill: #f3e5f5; stroke: #6a1b9a; }
+      .flash { fill: #e8eaf6; stroke: #283593; }
+      .label { font-weight: 600; font-size: 11px; }
+      .sublabel { font-size: 9px; fill: #666; }
+      .bus { stroke-width: 1.5; fill: none; }
+      .bus-i2c { stroke: #00838f; stroke-dasharray: 6,3; }
+      .bus-spi { stroke: #283593; }
+      .bus-uart { stroke: #e65100; stroke-dasharray: 3,3; }
+      .bus-usb { stroke: #c62828; stroke-width: 2; }
+      .bus-pwr { stroke: #c62828; stroke-width: 1; stroke-dasharray: 2,2; }
+      .bus-pdm { stroke: #2e7d32; stroke-dasharray: 4,2; }
+      .bus-gpio { stroke: #666; stroke-width: 1; }
+      .title { font-size: 16px; font-weight: 700; fill: #004d5a; }
+      .legend-text { font-size: 9px; fill: #444; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="450" y="24" text-anchor="middle" class="title">STeaMi — Schema bloc</text>
+
+  <!-- ==================== MCU Applicatif (center-left) ==================== -->
+  <rect x="250" y="80" width="200" height="100" class="box mcu"/>
+  <text x="350" y="105" text-anchor="middle" class="label">STM32WB55RG</text>
+  <text x="350" y="120" text-anchor="middle" class="sublabel">Cortex-M4 @ 64 MHz</text>
+  <text x="350" y="133" text-anchor="middle" class="sublabel">1 Mo Flash / 256 Ko RAM</text>
+  <text x="350" y="146" text-anchor="middle" class="sublabel">BLE 5.2 / OpenThread / ZigBee</text>
+  <text x="350" y="168" text-anchor="middle" class="sublabel" fill="#00838f">FP6 — MCU applicatif</text>
+
+  <!-- Antenna -->
+  <rect x="470" y="85" width="70" height="30" class="box conn"/>
+  <text x="505" y="104" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
+  <line x1="450" y1="100" x2="470" y2="100" class="bus" stroke="#00838f" stroke-width="1.5"/>
+
+  <!-- ==================== MCU Interface (center-right) ==================== -->
+  <rect x="560" y="200" width="200" height="90" class="box mcu"/>
+  <text x="660" y="225" text-anchor="middle" class="label">STM32F103CBT6</text>
+  <text x="660" y="240" text-anchor="middle" class="sublabel">Cortex-M3 @ 72 MHz</text>
+  <text x="660" y="253" text-anchor="middle" class="sublabel">128 Ko Flash — DAPLink</text>
+  <text x="660" y="278" text-anchor="middle" class="sublabel" fill="#00838f">FP14 — MCU interface</text>
+
+  <!-- USB Connector -->
+  <rect x="800" y="215" width="80" height="40" class="box conn"/>
+  <text x="840" y="237" text-anchor="middle" class="label" font-size="9">micro-USB</text>
+  <text x="840" y="249" text-anchor="middle" class="sublabel">HID/CDC/MSC/WebUSB</text>
+  <line x1="760" y1="235" x2="800" y2="235" class="bus bus-usb"/>
+
+  <!-- UART between MCUs -->
+  <line x1="450" y1="160" x2="510" y2="160" class="bus bus-uart"/>
+  <line x1="510" y1="160" x2="510" y2="240" class="bus bus-uart"/>
+  <line x1="510" y1="240" x2="560" y2="240" class="bus bus-uart"/>
+  <text x="515" y="198" class="legend-text" fill="#e65100">UART</text>
+
+  <!-- ==================== Flash W25Q64 ==================== -->
+  <rect x="590" y="320" width="140" height="50" class="box flash"/>
+  <text x="660" y="345" text-anchor="middle" class="label">W25Q64</text>
+  <text x="660" y="358" text-anchor="middle" class="sublabel">64 Mbit SPI Flash — FP15</text>
+  <line x1="660" y1="290" x2="660" y2="320" class="bus bus-spi"/>
+  <text x="665" y="310" class="legend-text" fill="#283593">SPI</text>
+
+  <!-- ==================== I2C1 Bus (internal) ==================== -->
+  <!-- Horizontal I2C1 bus line -->
+  <line x1="100" y1="250" x2="500" y2="250" class="bus bus-i2c"/>
+  <text x="300" y="245" text-anchor="middle" class="legend-text" fill="#00838f">I2C1 (interne)</text>
+
+  <!-- MCU to I2C1 -->
+  <line x1="350" y1="180" x2="350" y2="250" class="bus bus-i2c"/>
+
+  <!-- F103 to I2C1 -->
+  <line x1="560" y1="260" x2="500" y2="260" class="bus bus-i2c"/>
+  <line x1="500" y1="250" x2="500" y2="260" class="bus bus-i2c"/>
+
+  <!-- ==================== Capteurs (below I2C1 bus) ==================== -->
+  <!-- VL53L1X -->
+  <rect x="30" y="275" width="90" height="40" class="box sensor"/>
+  <text x="75" y="295" text-anchor="middle" class="label" font-size="9">VL53L1X</text>
+  <text x="75" y="307" text-anchor="middle" class="sublabel">Distance ToF</text>
+  <line x1="75" y1="250" x2="75" y2="275" class="bus bus-i2c"/>
+
+  <!-- ISM330DLC -->
+  <rect x="130" y="275" width="90" height="40" class="box sensor"/>
+  <text x="175" y="295" text-anchor="middle" class="label" font-size="9">ISM330DLC</text>
+  <text x="175" y="307" text-anchor="middle" class="sublabel">Accel/Gyro 6 axes</text>
+  <line x1="175" y1="250" x2="175" y2="275" class="bus bus-i2c"/>
+
+  <!-- LIS2MDL -->
+  <rect x="230" y="275" width="90" height="40" class="box sensor"/>
+  <text x="275" y="295" text-anchor="middle" class="label" font-size="9">LIS2MDL</text>
+  <text x="275" y="307" text-anchor="middle" class="sublabel">Magnetometre</text>
+  <line x1="275" y1="250" x2="275" y2="275" class="bus bus-i2c"/>
+
+  <!-- WSEN-PADS -->
+  <rect x="30" y="330" width="90" height="40" class="box sensor"/>
+  <text x="75" y="350" text-anchor="middle" class="label" font-size="9">WSEN-PADS</text>
+  <text x="75" y="362" text-anchor="middle" class="sublabel">Pression</text>
+  <line x1="75" y1="315" x2="75" y2="330" class="bus bus-i2c"/>
+
+  <!-- WSEN-HIDS -->
+  <rect x="130" y="330" width="90" height="40" class="box sensor"/>
+  <text x="175" y="350" text-anchor="middle" class="label" font-size="9">WSEN-HIDS</text>
+  <text x="175" y="362" text-anchor="middle" class="sublabel">Humidite/Temp</text>
+  <line x1="175" y1="315" x2="175" y2="330" class="bus bus-i2c"/>
+
+  <!-- APDS-9960 -->
+  <rect x="230" y="330" width="90" height="40" class="box sensor"/>
+  <text x="275" y="350" text-anchor="middle" class="label" font-size="9">APDS-9960</text>
+  <text x="275" y="362" text-anchor="middle" class="sublabel">Lumiere/Geste</text>
+  <line x1="275" y1="315" x2="275" y2="330" class="bus bus-i2c"/>
+
+  <!-- BQ27441 -->
+  <rect x="340" y="275" width="90" height="40" class="box power"/>
+  <text x="385" y="295" text-anchor="middle" class="label" font-size="9">BQ27441</text>
+  <text x="385" y="307" text-anchor="middle" class="sublabel">Jauge batterie</text>
+  <line x1="385" y1="250" x2="385" y2="275" class="bus bus-i2c"/>
+
+  <!-- MCP23009 -->
+  <rect x="440" y="275" width="90" height="40" class="box conn"/>
+  <text x="485" y="295" text-anchor="middle" class="label" font-size="9">MCP23009</text>
+  <text x="485" y="307" text-anchor="middle" class="sublabel">8 GPIO — FP7</text>
+  <line x1="485" y1="250" x2="485" y2="275" class="bus bus-i2c"/>
+
+  <!-- FP12 label -->
+  <text x="175" y="385" text-anchor="middle" class="sublabel" fill="#e65100">FP12 — Capteurs internes</text>
+
+  <!-- ==================== Microphone PDM ==================== -->
+  <rect x="470" y="80" width="70" height="30" class="box sensor" y="130"/>
+  <rect x="560" y="100" width="90" height="35" class="box sensor"/>
+  <text x="605" y="118" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
+  <text x="605" y="130" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
+  <line x1="450" y1="120" x2="560" y2="120" class="bus bus-pdm"/>
+  <text x="500" y="115" class="legend-text" fill="#2e7d32">PDM</text>
+
+  <!-- ==================== SPI1 — OLED ==================== -->
+  <rect x="100" y="80" width="130" height="50" class="box ui"/>
+  <text x="165" y="102" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
+  <text x="165" y="118" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
+  <line x1="230" y1="105" x2="250" y2="115" class="bus bus-spi"/>
+  <text x="232" y="98" class="legend-text" fill="#283593">SPI1</text>
+
+  <!-- ==================== Boutons ==================== -->
+  <rect x="20" y="130" width="110" height="50" class="box ui"/>
+  <text x="75" y="152" text-anchor="middle" class="label" font-size="9">Boutons</text>
+  <text x="75" y="165" text-anchor="middle" class="sublabel">D-pad(MCP) + A/B + Menu</text>
+  <text x="75" y="175" text-anchor="middle" class="sublabel">FP9</text>
+  <line x1="130" y1="155" x2="250" y2="140" class="bus bus-gpio"/>
+
+  <!-- ==================== LED RGB + Buzzer ==================== -->
+  <rect x="20" y="195" width="60" height="35" class="box ui"/>
+  <text x="50" y="213" text-anchor="middle" class="label" font-size="9">LED RGB</text>
+  <text x="50" y="225" text-anchor="middle" class="sublabel">FP8</text>
+  <line x1="80" y1="212" x2="250" y2="160" class="bus bus-gpio"/>
+
+  <rect x="20" y="80" width="60" height="35" class="box ui"/>
+  <text x="50" y="98" text-anchor="middle" class="label" font-size="9">Buzzer</text>
+  <text x="50" y="110" text-anchor="middle" class="sublabel">FP10</text>
+  <line x1="80" y1="97" x2="250" y2="120" class="bus bus-gpio"/>
+
+  <!-- ==================== Alimentation (bottom) ==================== -->
+  <rect x="350" y="420" width="200" height="80" class="box power"/>
+  <text x="450" y="445" text-anchor="middle" class="label">Alimentation — FP4</text>
+  <text x="450" y="460" text-anchor="middle" class="sublabel">TPS63000 (3.3V) + LD3985 + LMR62421 (14.5V)</text>
+  <text x="450" y="475" text-anchor="middle" class="sublabel">BQ24075 (chargeur) + DIO7003 (switch)</text>
+  <text x="450" y="490" text-anchor="middle" class="sublabel">Batterie LiPo 3.7V 1600 mAh — FP1/FP2/FP3</text>
+
+  <!-- Power lines -->
+  <line x1="450" y1="420" x2="450" y2="400" class="bus bus-pwr"/>
+  <line x1="350" y1="400" x2="660" y2="400" class="bus bus-pwr"/>
+  <line x1="350" y1="180" x2="350" y2="400" class="bus bus-pwr" stroke-dasharray="2,4"/>
+  <line x1="660" y1="290" x2="660" y2="400" class="bus bus-pwr" stroke-dasharray="2,4" stroke="#c62828" stroke-width="0.5"/>
+  <text x="455" y="408" class="legend-text" fill="#c62828">3.3V / 5V</text>
+
+  <!-- USB to power -->
+  <line x1="840" y1="255" x2="840" y2="470" class="bus bus-pwr"/>
+  <line x1="840" y1="470" x2="550" y2="470" class="bus bus-pwr"/>
+  <text x="700" y="465" class="legend-text" fill="#c62828">5V USB</text>
+
+  <!-- ==================== Connecteurs externes (bottom-left) ==================== -->
+  <rect x="30" y="430" width="130" height="70" class="box conn"/>
+  <text x="95" y="452" text-anchor="middle" class="label" font-size="10">Connecteurs — FP13</text>
+  <text x="95" y="467" text-anchor="middle" class="sublabel">Edge connector (micro:bit)</text>
+  <text x="95" y="479" text-anchor="middle" class="sublabel">STEMMA/Qwiic (I2C3)</text>
+  <text x="95" y="491" text-anchor="middle" class="sublabel">Jacdac + Pads crocodile</text>
+
+  <!-- I2C3 + SPI2 from WB55 to connectors -->
+  <line x1="250" y1="170" x2="200" y2="170" class="bus bus-i2c" stroke="#6a1b9a"/>
+  <line x1="200" y1="170" x2="200" y2="430" class="bus bus-i2c" stroke="#6a1b9a"/>
+  <line x1="200" y1="430" x2="160" y2="430" class="bus bus-i2c" stroke="#6a1b9a"/>
+  <text x="205" y="400" class="legend-text" fill="#6a1b9a">I2C3 / SPI2</text>
+
+  <!-- SWD -->
+  <rect x="800" y="135" width="80" height="35" class="box conn"/>
+  <text x="840" y="154" text-anchor="middle" class="label" font-size="9">SWD — FP11</text>
+  <text x="840" y="165" text-anchor="middle" class="sublabel">JTAG debug</text>
+  <line x1="760" y1="210" x2="790" y2="210" class="bus bus-gpio"/>
+  <line x1="790" y1="210" x2="790" y2="152" class="bus bus-gpio"/>
+  <line x1="790" y1="152" x2="800" y2="152" class="bus bus-gpio"/>
+
+  <!-- ==================== Legend ==================== -->
+  <rect x="20" y="540" width="860" height="65" rx="6" fill="#f9f9f9" stroke="#ddd"/>
+  <text x="40" y="560" class="label" font-size="10">Legende</text>
+
+  <line x1="40" y1="575" x2="70" y2="575" class="bus bus-i2c"/>
+  <text x="75" y="579" class="legend-text">I2C</text>
+
+  <line x1="120" y1="575" x2="150" y2="575" class="bus bus-spi"/>
+  <text x="155" y="579" class="legend-text">SPI</text>
+
+  <line x1="190" y1="575" x2="220" y2="575" class="bus bus-uart"/>
+  <text x="225" y="579" class="legend-text">UART</text>
+
+  <line x1="265" y1="575" x2="295" y2="575" class="bus bus-usb"/>
+  <text x="300" y="579" class="legend-text">USB</text>
+
+  <line x1="335" y1="575" x2="365" y2="575" class="bus bus-pdm"/>
+  <text x="370" y="579" class="legend-text">PDM</text>
+
+  <line x1="405" y1="575" x2="435" y2="575" class="bus bus-gpio"/>
+  <text x="440" y="579" class="legend-text">GPIO</text>
+
+  <line x1="480" y1="575" x2="510" y2="575" class="bus bus-pwr"/>
+  <text x="515" y="579" class="legend-text">Alimentation</text>
+
+  <rect x="590" y="567" width="16" height="12" class="box mcu"/>
+  <text x="612" y="578" class="legend-text">MCU</text>
+
+  <rect x="645" y="567" width="16" height="12" class="box sensor"/>
+  <text x="667" y="578" class="legend-text">Capteur</text>
+
+  <rect x="710" y="567" width="16" height="12" class="box ui"/>
+  <text x="732" y="578" class="legend-text">Interface</text>
+
+  <rect x="780" y="567" width="16" height="12" class="box power"/>
+  <text x="802" y="578" class="legend-text">Alim</text>
+
+  <rect x="835" y="567" width="16" height="12" class="box conn"/>
+  <text x="857" y="578" class="legend-text">Conn.</text>
+</svg>
