@@ -96,10 +96,12 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 
 ## Schemas
 
-- [Schema PDF — FP1 Batterie (p.2)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=2)
-- [Schema PDF — FP2 Chargeur (p.3)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=3)
-- [Schema PDF — FP3 Jauge (p.4)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=4)
-- [Schema PDF — FP4 Alimentation (p.5)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=5)
+[![Schema FP4-Alimentation](/img/schematics/FP4-Alimentation.png)](/docs/schematics/FP4-Alimentation.pdf)
+
+- [Schema PDF — FP1 Batterie](/docs/schematics/FP1-Batterie.pdf)
+- [Schema PDF — FP2 Chargeur](/docs/schematics/FP2-Chargeur_batterie.pdf)
+- [Schema PDF — FP3 Jauge](/docs/schematics/FP3-Jauge_batterie.pdf)
+- [Schema PDF — FP4 Alimentation](/docs/schematics/FP4-Alimentation.pdf)
 - [Schema Altium — FP4](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP4-Alimentation.SchDoc)
 - [Schema Altium — FP1](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP1-Batterie.SchDoc)
 

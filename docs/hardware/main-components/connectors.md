@@ -83,8 +83,10 @@ Les broches 3V3 et GND ne sont pas adjacentes pour eviter tout risque de court-c
 
 ## Schemas
 
-- [Schema PDF — FP11 Port JTAG (p.12)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=12)
-- [Schema PDF — FP13 Ports specifiques (p.14)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF#page=14)
+[![Schema FP13-Ports_specifiques](/img/schematics/FP13-Ports_specifiques.png)](/docs/schematics/FP13-Ports_specifiques.pdf)
+
+- [Schema PDF — FP11 Port JTAG](/docs/schematics/FP11-Port_JTAG.pdf)
+- [Schema PDF — FP13 Ports specifiques](/docs/schematics/FP13-Ports_specifiques.pdf)
 - [Schema Altium — FP13 Ports specifiques](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc)
 - [Schema Altium — FP11 Port JTAG](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP11-Port_JTAG.SchDoc)
 
