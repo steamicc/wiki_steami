@@ -34,10 +34,11 @@
   <text x="350" y="146" text-anchor="middle" class="sublabel">BLE 5.2 / OpenThread / ZigBee</text>
   <text x="350" y="168" text-anchor="middle" class="sublabel" fill="#00838f">FP6 — MCU applicatif</text>
 
-  <!-- Antenna -->
-  <rect x="470" y="85" width="70" height="30" class="box conn"/>
-  <text x="505" y="104" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
-  <line x1="450" y1="100" x2="470" y2="100" class="bus" stroke="#00838f" stroke-width="1.5"/>
+  <!-- Antenna (meme ligne que FP13) -->
+  <rect x="540" y="35" width="70" height="30" class="box conn"/>
+  <text x="575" y="54" text-anchor="middle" class="label" font-size="9">Antenne 2.4G</text>
+  <line x1="430" y1="80" x2="430" y2="50" class="bus" stroke="#00838f" stroke-width="1.5"/>
+  <line x1="430" y1="50" x2="540" y2="50" class="bus" stroke="#00838f" stroke-width="1.5"/>
 
   <!-- ==================== MCU Interface (center-right) ==================== -->
   <rect x="560" y="200" width="200" height="90" class="box mcu"/>
