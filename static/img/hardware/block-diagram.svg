@@ -146,11 +146,11 @@
   <text x="210" y="45" class="legend-text" fill="#283593">SPI1</text>
 
   <!-- LED RGB -->
-  <rect x="20" y="78" width="130" height="27" class="box ui"/>
-  <text x="85" y="90" text-anchor="middle" class="label" font-size="9">LED RGB</text>
-  <text x="85" y="100" text-anchor="middle" class="sublabel">FP8</text>
-  <line x1="150" y1="92" x2="250" y2="92" class="bus bus-gpio"/>
-  <text x="185" y="88" class="legend-text" fill="#666">GPIO</text>
+  <rect x="20" y="73" width="130" height="27" class="box ui"/>
+  <text x="85" y="85" text-anchor="middle" class="label" font-size="9">LED RGB</text>
+  <text x="85" y="95" text-anchor="middle" class="sublabel">FP8</text>
+  <line x1="150" y1="87" x2="250" y2="87" class="bus bus-gpio"/>
+  <text x="185" y="83" class="legend-text" fill="#666">GPIO</text>
 
   <!-- Boutons -->
   <rect x="20" y="110" width="130" height="30" class="box ui"/>
@@ -159,10 +159,10 @@
   <line x1="150" y1="125" x2="250" y2="125" class="bus bus-gpio"/>
 
   <!-- Buzzer -->
-  <rect x="20" y="148" width="130" height="28" class="box ui"/>
-  <text x="85" y="161" text-anchor="middle" class="label" font-size="9">Buzzer</text>
-  <text x="85" y="172" text-anchor="middle" class="sublabel">FP10</text>
-  <line x1="150" y1="162" x2="250" y2="162" class="bus bus-gpio"/>
+  <rect x="20" y="150" width="130" height="28" class="box ui"/>
+  <text x="85" y="163" text-anchor="middle" class="label" font-size="9">Buzzer</text>
+  <text x="85" y="174" text-anchor="middle" class="sublabel">FP10</text>
+  <line x1="150" y1="164" x2="250" y2="164" class="bus bus-gpio"/>
 
   <!-- ==================== Alimentation (aligne avec F103) ==================== -->
   <rect x="560" y="95" width="200" height="50" class="box power"/>
