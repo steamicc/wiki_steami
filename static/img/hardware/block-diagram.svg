@@ -175,10 +175,9 @@
   <text x="500" y="115" class="legend-text" fill="#c62828">3.3V</text>
 
   <!-- USB to power -->
-  <line x1="840" y1="215" x2="840" y2="155" class="bus bus-pwr"/>
-  <line x1="840" y1="155" x2="760" y2="155" class="bus bus-pwr"/>
-  <line x1="760" y1="155" x2="760" y2="140" class="bus bus-pwr"/>
-  <text x="800" y="150" class="legend-text" fill="#c62828">5V USB</text>
+  <line x1="840" y1="215" x2="840" y2="120" class="bus bus-pwr"/>
+  <line x1="840" y1="120" x2="760" y2="120" class="bus bus-pwr"/>
+  <text x="800" y="114" class="legend-text" fill="#c62828">5V USB</text>
 
   <!-- ==================== Connecteurs externes (au-dessus du WB55) ==================== -->
   <rect x="400" y="35" width="130" height="30" class="box conn"/>
