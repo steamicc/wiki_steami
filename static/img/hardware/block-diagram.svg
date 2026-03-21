@@ -54,10 +54,9 @@
   <line x1="760" y1="235" x2="800" y2="235" class="bus bus-usb"/>
 
   <!-- UART between MCUs -->
-  <line x1="450" y1="160" x2="510" y2="160" class="bus bus-uart"/>
-  <line x1="510" y1="160" x2="510" y2="240" class="bus bus-uart"/>
-  <line x1="510" y1="240" x2="560" y2="240" class="bus bus-uart"/>
-  <text x="515" y="198" class="legend-text" fill="#e65100">UART</text>
+  <line x1="450" y1="160" x2="620" y2="160" class="bus bus-uart"/>
+  <line x1="620" y1="160" x2="620" y2="200" class="bus bus-uart"/>
+  <text x="530" y="155" class="legend-text" fill="#e65100">UART</text>
 
   <!-- ==================== Flash W25Q64 ==================== -->
   <rect x="590" y="320" width="140" height="50" class="box flash"/>
