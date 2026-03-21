@@ -7,6 +7,18 @@ title: "Alimentation"
 
 Le systeme de gestion de l'alimentation fournit les differentes tensions a partir du 5V USB ou de la batterie LiPo 3.7V.
 
+## Sous-systemes
+
+| Composant | Fonction | Page |
+|-----------|----------|------|
+| Batterie LiPo | 3.7V 1600 mAh | Ci-dessous |
+| [Chargeur BQ24075](./bq24075) | Charge via USB, PowerPath | [Detail →](./bq24075) |
+| [Jauge BQ27441](./bq27441) | Mesure etat de charge, I2C | [Detail →](./bq27441) |
+| TPS63000 | Convertisseur buck-boost 3.3V | Ci-dessous |
+| LD3985 | Regulateur lineaire 3.3V | Ci-dessous |
+| LMR62421 | Boost 14.5V (buzzer + ecran) | Ci-dessous |
+| DIO7003 | Switch basse perte | Ci-dessous |
+
 ## Batterie — LiPo
 
 | Caracteristique | Detail |
@@ -17,30 +29,6 @@ Le systeme de gestion de l'alimentation fournit les differentes tensions a parti
 | Autonomie mode standard | 1 jour |
 | Autonomie mode basse consommation | 5 a 10 jours |
 | Integration | Face arriere de la carte |
-
-## Chargeur de batterie — BQ24075
-
-| Caracteristique | Detail |
-|---|---|
-| Modele | [BQ24075RGT](https://www.ti.com/product/BQ24075) |
-| Fabricant | Texas Instruments |
-| Courant de charge | Minimum 500 mA |
-| Source | Micro-USB |
-| PowerPath | Integre — le systeme fonctionne meme sans batterie |
-| Schema | [FP2](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP2-Chargeur_de_batterie.SchDoc) |
-
-## Jauge de batterie — BQ27441
-
-| Caracteristique | Detail |
-|---|---|
-| Modele | [BQ27441DRZR-G1A](https://www.ti.com/product/BQ27441-G1) |
-| Fabricant | Texas Instruments |
-| Interface | I2C (bus I2C1 interne) |
-| Tension d'alimentation | 2.45V a 4.5V |
-| Technologie batterie | LiCoO2, Li-Ion |
-| Boitier | SON-12 |
-| Driver MicroPython | [bq27441](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bq27441) |
-| Schema | [FP3](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP3-Jauge_Batterie.SchDoc) |
 
 ## Convertisseur principal — TPS63000
 
@@ -103,6 +91,6 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 
 ## Voir aussi
 
-- [Conception — Alimentation](../../design/power)
-- [Pin Mapping — Alimentation](../pin-mapping/power-pins)
-- [Vue d'ensemble du materiel](../)
+- [Conception — Alimentation](../../../design/power)
+- [Pin Mapping — Alimentation](../../pin-mapping/power-pins)
+- [Vue d'ensemble du materiel](../../)
