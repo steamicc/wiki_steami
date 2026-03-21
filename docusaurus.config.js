@@ -10,7 +10,7 @@ const config = {
   baseUrl: '/',
 
   organizationName: 'steamicc',
-  projectName: 'wiki-steami',
+  projectName: 'wiki_steami',
 
   onBrokenLinks: 'warn',
 
@@ -32,7 +32,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/steamicc/wiki-steami/tree/main/',
+          editUrl: 'https://github.com/steamicc/wiki_steami/tree/main/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
         },
