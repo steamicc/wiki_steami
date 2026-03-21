@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: "Hardware"
+title: "Vue d'ensemble du materiel"
 ---
 
 # Hardware
