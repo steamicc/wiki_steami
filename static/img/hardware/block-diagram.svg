@@ -143,8 +143,8 @@
   <rect x="20" y="40" width="130" height="35" class="box ui"/>
   <text x="85" y="58" text-anchor="middle" class="label" font-size="10">OLED 128x128</text>
   <text x="85" y="70" text-anchor="middle" class="sublabel">SSD1327 — FP8</text>
-  <line x1="150" y1="57" x2="300" y2="57" class="bus bus-spi"/>
-  <line x1="300" y1="57" x2="300" y2="80" class="bus bus-spi"/>
+  <line x1="150" y1="57" x2="260" y2="57" class="bus bus-spi"/>
+  <line x1="260" y1="57" x2="260" y2="80" class="bus bus-spi"/>
   <text x="210" y="53" class="legend-text" fill="#283593">SPI1</text>
 
   <!-- LED RGB -->
