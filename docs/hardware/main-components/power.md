@@ -94,7 +94,9 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 | 14.5V | 100 mA | Buzzer piezo, ecran OLED |
 | 5V | — | Alimentation Jacdac |
 
-## Schema
+## Schemas
+
+- [Schema complet (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF)
 
 - [Schema Altium — FP4](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP4-Alimentation.SchDoc)
 - [Schema Altium — FP1](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP1-Batterie.SchDoc)

@@ -83,6 +83,8 @@ Les broches 3V3 et GND ne sont pas adjacentes pour eviter tout risque de court-c
 
 ## Schemas
 
+- [Schema complet (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF)
+
 - [Schema Altium — FP13 Ports specifiques](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc)
 - [Schema Altium — FP11 Port JTAG](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP11-Port_JTAG.SchDoc)
 

@@ -67,7 +67,9 @@ Le bus I2C1 est partage entre le STM32WB55 et le STM32F103 (DAPLink), permettant
 | INT_ACC | PC13 | ISM330DLC (accelerometre) |
 | INT_MAG | PD1 | LIS2MDL (magnetometre) |
 
-## Schema
+## Schemas
+
+- [Schema complet (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF)
 
 - [Schema Altium — FP6](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP6-Microcontroleur.SchDoc)
 

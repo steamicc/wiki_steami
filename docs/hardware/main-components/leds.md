@@ -48,7 +48,9 @@ LEDs gerees par le processeur d'interface pour indiquer l'etat du systeme.
 | LED BLE | Bleue clignotante (50%) | Appairage en cours |
 | LED charge | Rouge | Batterie en charge |
 
-## Schema
+## Schemas
+
+- [Schema complet (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF)
 
 - [Schema Altium — FP8](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP8-Display_et_LED_statuts.SchDoc)
 

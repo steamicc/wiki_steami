@@ -30,7 +30,9 @@ L'ecran OLED blanc 128x128 pixels est connecte au processeur applicatif via le b
 | CS_OLED | PD0 |
 | RST_OLED | PA12 |
 
-## Schema
+## Schemas
+
+- [Schema complet (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/PDF/STeaMi-Schematic.PDF)
 
 - [Schema Altium — FP8](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP8-Display_et_LED_statuts.SchDoc)
 
