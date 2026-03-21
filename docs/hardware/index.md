@@ -3,7 +3,7 @@ sidebar_position: 1
 title: "Vue d'ensemble du materiel"
 ---
 
-# Hardware
+# Vue d'ensemble du materiel
 
 ## Vue d'ensemble
 
