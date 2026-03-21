@@ -130,7 +130,6 @@
   <text x="175" y="385" text-anchor="middle" class="sublabel" fill="#e65100">FP12 — Capteurs internes</text>
 
   <!-- ==================== Microphone PDM ==================== -->
-  <rect x="470" y="80" width="70" height="30" class="box sensor" y="130"/>
   <rect x="560" y="100" width="90" height="35" class="box sensor"/>
   <text x="605" y="118" text-anchor="middle" class="label" font-size="9">IMP34DT05</text>
   <text x="605" y="130" text-anchor="middle" class="sublabel">Micro PDM — FP5</text>
