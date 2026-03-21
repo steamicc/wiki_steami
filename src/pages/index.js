@@ -8,51 +8,72 @@ const features = [
     icon: '📋',
     title: 'Vue d\'ensemble',
     description:
-      'Découvrez la carte STeaMi, ses caractéristiques principales et son architecture générale.',
+      'Architecture générale, pinout, schéma bloc et caractéristiques principales de la carte.',
     link: '/docs/overview',
   },
   {
     icon: '🔌',
     title: 'Hardware',
     description:
-      'Schémas, composants et description détaillée du matériel embarqué sur la carte STeaMi.',
+      'Description détaillée du matériel : MCU, capteurs, écran, alimentation, connecteurs, datasheets.',
     link: '/docs/hardware',
+  },
+  {
+    icon: '💻',
+    title: 'Software',
+    description:
+      'MicroPython, CODAL, Arduino : drivers, tutoriels, exemples de code pour chaque composant.',
+    link: '/docs/software',
   },
   {
     icon: '📍',
     title: 'Pin Mapping',
     description:
-      'Correspondance entre les broches physiques de la carte et les fonctions MicroPython disponibles.',
+      'Correspondance entre les broches physiques et les fonctions du microcontrôleur.',
     link: '/docs/pin-mapping',
   },
   {
     icon: '🧩',
     title: 'Composants',
     description:
-      'Documentation des drivers MicroPython pour chaque composant intégré à la carte STeaMi.',
+      'BOM détaillée : circuits intégrés, passifs, connecteurs, LEDs, cristaux.',
     link: '/docs/components',
   },
   {
-    icon: '📦',
-    title: 'Requirements',
+    icon: '🏗️',
+    title: 'Conception',
     description:
-      'Dépendances, outils et environnement nécessaires pour développer avec la carte STeaMi.',
-    link: '/docs/requirements',
+      'Exigences techniques et justifications des choix de conception pour chaque sous-système.',
+    link: '/docs/design',
   },
+];
+
+const specs = [
+  { label: 'MCU', value: 'STM32WB55RG' },
+  { label: 'Coeur', value: 'Cortex-M4 @ 64 MHz' },
+  { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
+  { label: 'Capteurs', value: '7 capteurs internes' },
+  { label: 'Écran', value: 'OLED 128×128' },
+  { label: 'Batterie', value: 'LiPo 1600 mAh' },
+  { label: 'USB', value: 'DAPLink drag-and-drop' },
+  { label: 'Connecteur', value: 'Edge micro:bit + Qwiic' },
 ];
 
 function Hero() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <header className="hero--steami">
-      <h1>🎛️ {siteConfig.title}</h1>
+      <h1>{siteConfig.title}</h1>
       <p>{siteConfig.tagline}</p>
       <p style={{ fontSize: '1rem', opacity: 0.8, maxWidth: '700px', margin: '0 auto 2rem' }}>
-        MicroPython · Drivers · Hardware · Documentation
+        STM32WB55 · 7 capteurs · BLE 5.2 · OLED 128×128 · MicroPython · DAPLink
       </p>
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link className="button button--primary button--lg" to="/docs/overview">
-          Démarrer
+          Documentation
+        </Link>
+        <Link className="button button--primary button--lg" to="/docs/hardware">
+          Hardware
         </Link>
         <Link
           className="button button--secondary button--lg"
@@ -63,6 +84,37 @@ function Hero() {
         </Link>
       </div>
     </header>
+  );
+}
+
+function Specs() {
+  return (
+    <section style={{ padding: '2rem', background: 'var(--ifm-color-emphasis-100)' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '1rem',
+          maxWidth: '900px',
+          margin: '0 auto',
+        }}
+      >
+        {specs.map(({ label, value }) => (
+          <div
+            key={label}
+            style={{
+              textAlign: 'center',
+              padding: '0.8rem',
+            }}
+          >
+            <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {label}
+            </div>
+            <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{value}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -82,16 +134,36 @@ function Features() {
   );
 }
 
+function Pinout() {
+  return (
+    <section style={{ textAlign: 'center', padding: '2rem' }}>
+      <h2>Pinout</h2>
+      <Link to="/docs/overview/pinout">
+        <img
+          src="/img/pinout/pinout_steami.svg"
+          alt="Pinout STeaMi"
+          loading="lazy"
+          decoding="async"
+          width={700}
+          height={394}
+          style={{ maxWidth: '700px', width: '100%', height: 'auto' }}
+        />
+      </Link>
+    </section>
+  );
+}
+
 export default function Home() {
-  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title="Accueil"
-      description="Wiki STeaMi — Documentation technique de la carte STeaMi. Drivers MicroPython, pin mapping, hardware et composants."
+      description="Wiki STeaMi — Documentation technique de la carte STeaMi. Hardware, drivers MicroPython, pin mapping, conception."
     >
       <Hero />
+      <Specs />
       <main>
         <Features />
+        <Pinout />
         <section
           style={{
             textAlign: 'center',
@@ -99,26 +171,28 @@ export default function Home() {
             background: 'var(--ifm-color-emphasis-100)',
           }}
         >
-          <h2>🚀 Commencer avec STeaMi</h2>
-          <p style={{ maxWidth: '600px', margin: '0 auto 1.5rem' }}>
-            La carte STeaMi est conçue pour l'apprentissage et le prototypage rapide avec
-            MicroPython. Retrouvez tous les drivers et exemples sur GitHub.
-          </p>
+          <h2>Ressources</h2>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link className="button button--primary" href="https://steami.cc">
-              🌐 steami.cc
+              steami.cc
             </Link>
             <Link
               className="button button--outline button--primary"
               href="https://github.com/steamicc/micropython-steami-lib"
             >
-              💻 GitHub
+              Drivers MicroPython
+            </Link>
+            <Link
+              className="button button--outline button--primary"
+              href="https://github.com/steamicc/steami-reference-design"
+            >
+              Reference Design
             </Link>
             <Link
               className="button button--outline button--primary"
               href="https://docs.micropython.org/"
             >
-              📖 MicroPython
+              MicroPython
             </Link>
           </div>
         </section>
