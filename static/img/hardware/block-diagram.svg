@@ -67,7 +67,7 @@
 
   <!-- ==================== I2C1 Bus (internal) ==================== -->
   <!-- Horizontal I2C1 bus line -->
-  <line x1="100" y1="250" x2="500" y2="250" class="bus bus-i2c"/>
+  <line x1="75" y1="250" x2="500" y2="250" class="bus bus-i2c"/>
   <text x="300" y="245" text-anchor="middle" class="legend-text" fill="#00838f">I2C1 (interne)</text>
 
   <!-- MCU to I2C1 -->
