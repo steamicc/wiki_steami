@@ -32,7 +32,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/steamicc/wiki_steami/tree/main/',
+          editUrl: 'https://github.com/steamicc/wiki_steami/edit/main/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
         },
