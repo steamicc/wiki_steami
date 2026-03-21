@@ -75,8 +75,7 @@
   <line x1="350" y1="180" x2="350" y2="250" class="bus bus-i2c"/>
 
   <!-- F103 to I2C1 -->
-  <line x1="560" y1="260" x2="500" y2="260" class="bus bus-i2c"/>
-  <line x1="500" y1="250" x2="500" y2="260" class="bus bus-i2c"/>
+  <line x1="560" y1="250" x2="500" y2="250" class="bus bus-i2c"/>
 
   <!-- ==================== Capteurs (below I2C1 bus) ==================== -->
   <!-- VL53L1X -->
