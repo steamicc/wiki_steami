@@ -26,20 +26,6 @@ const features = [
     link: '/docs/software',
   },
   {
-    icon: '📍',
-    title: 'Pin Mapping',
-    description:
-      'Correspondance entre les broches physiques et les fonctions du microcontrôleur.',
-    link: '/docs/pin-mapping',
-  },
-  {
-    icon: '🧩',
-    title: 'Composants',
-    description:
-      'BOM détaillée : circuits intégrés, passifs, connecteurs, LEDs, cristaux.',
-    link: '/docs/components',
-  },
-  {
     icon: '🏗️',
     title: 'Conception',
     description:

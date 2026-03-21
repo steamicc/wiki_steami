@@ -78,5 +78,5 @@ L'entree peut etre 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET desce
 ## Voir aussi
 
 - [Hardware — Vue d'ensemble](../hardware/)
-- [Composants — Circuits integres](../components/integrated-circuits)
-- [Pin Mapping — Alimentation](../pin-mapping/power-pins)
+- [Composants — Circuits integres](../hardware/components/integrated-circuits)
+- [Pin Mapping — Alimentation](../hardware/pin-mapping/power-pins)

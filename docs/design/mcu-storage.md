@@ -48,6 +48,6 @@ Regrouper tous les capteurs internes sur I2C1 simplifie le routage PCB et permet
 ## Voir aussi
 
 - [Hardware](../hardware/)
-- [Composants — Circuits integres](../components/integrated-circuits)
-- [Pin Mapping — Bus internes](../pin-mapping/internal-bus)
+- [Composants — Circuits integres](../hardware/components/integrated-circuits)
+- [Pin Mapping — Bus internes](../hardware/pin-mapping/internal-bus)
 - [Conception — Communication](./communication)

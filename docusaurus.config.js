@@ -76,18 +76,6 @@ const config = {
           },
           {
             type: 'docSidebar',
-            sidebarId: 'pinmappingSidebar',
-            position: 'left',
-            label: '📍 Pin Mapping',
-          },
-          {
-            type: 'docSidebar',
-            sidebarId: 'componentsSidebar',
-            position: 'left',
-            label: '🧩 Composants',
-          },
-          {
-            type: 'docSidebar',
             sidebarId: 'requirementsSidebar',
             position: 'left',
             label: '📦 Requirements',
@@ -119,8 +107,6 @@ const config = {
             items: [
               { label: 'Vue d\'ensemble', to: '/docs/overview' },
               { label: 'Hardware', to: '/docs/hardware' },
-              { label: 'Pin Mapping', to: '/docs/pin-mapping' },
-              { label: 'Composants', to: '/docs/components' },
               { label: 'Software', to: '/docs/software' },
               { label: 'Requirements', to: '/docs/requirements' },
               { label: 'Conception', to: '/docs/design' },

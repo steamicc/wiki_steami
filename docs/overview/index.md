@@ -54,7 +54,7 @@ La carte STeaMi repose sur deux microcontroleurs :
 
 - [Pinout de la carte](./pinout)
 - [Hardware](../hardware/)
-- [Pin Mapping](../pin-mapping/)
-- [Composants (BOM)](../components/)
+- [Pin Mapping](../hardware/pin-mapping/)
+- [Composants (BOM)](../hardware/components/)
 - [Conception et exigences](../design/)
 - [Schemas](https://github.com/steamicc/steami-reference-design)

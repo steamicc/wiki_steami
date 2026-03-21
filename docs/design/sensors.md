@@ -176,7 +176,7 @@ Pads accessibles avec des pinces crocodile autour de la carte :
 ## Voir aussi
 
 - [Hardware](../hardware/)
-- [Composants — Circuits integres](../components/integrated-circuits)
-- [Pin Mapping — Bus internes](../pin-mapping/internal-bus)
-- [Pin Mapping — Edge connector](../pin-mapping/edge-connector)
-- [Pin Mapping — Connecteurs externes](../pin-mapping/external-connectors)
+- [Composants — Circuits integres](../hardware/components/integrated-circuits)
+- [Pin Mapping — Bus internes](../hardware/pin-mapping/internal-bus)
+- [Pin Mapping — Edge connector](../hardware/pin-mapping/edge-connector)
+- [Pin Mapping — Connecteurs externes](../hardware/pin-mapping/external-connectors)

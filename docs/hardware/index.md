@@ -155,7 +155,7 @@ La carte offre plusieurs options de connectivite externe pour les capteurs, acti
 |---|---|
 | Bus SPI externe | SPI2 — SCK: PB13, MISO: PB14, MOSI: PB15 |
 | Bus UART serie | TX: PB11, RX: PB10 |
-| Plus d'infos | [Pin Mapping — Edge connector](../pin-mapping/edge-connector), [Conception — Capteurs](../design/sensors), [Schema — FP13](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc) |
+| Plus d'infos | [Pin Mapping — Edge connector](./pin-mapping/edge-connector), [Conception — Capteurs](../design/sensors), [Schema — FP13](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc) |
 
 ### Alimentation
 
@@ -235,7 +235,7 @@ L'expandeur GPIO MCP23009 fournit 8 GPIO supplementaires sur le bus I2C1. Il est
 - [Reference design (Altium)](https://github.com/steamicc/steami-reference-design)
 - [Vue 3D (PDF)](https://github.com/steamicc/steami-reference-design/blob/main/3D/STeaMi_3D.pdf)
 - [BOM de fabrication](https://github.com/steamicc/steami-reference-design/blob/main/Manufacturing/BOM/STeaMi-BOM.csv)
-- [Composants (BOM detaillee)](../components/)
-- [Pin Mapping](../pin-mapping/)
+- [Composants (BOM detaillee)](./components/)
+- [Pin Mapping](./pin-mapping/)
 - [Conception et exigences](../design/)
 - [Revisions de la carte](./revisions)

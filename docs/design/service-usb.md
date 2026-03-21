@@ -91,4 +91,4 @@ Le systeme de fichiers flash presente sur le lecteur de la carte est entierement
 
 - [Hardware](../hardware/)
 - [Software — DAPLink](../software/)
-- [Composants — Circuits integres](../components/integrated-circuits)
+- [Composants — Circuits integres](../hardware/components/integrated-circuits)

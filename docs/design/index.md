@@ -13,7 +13,7 @@ Les exigences sont regroupées par domaine fonctionnel. Chaque domaine présente
 - Les **exigences** (identifiées FCT-xx, ENV-xx, PHY-xx) sous forme de tableau
 - Les **choix de conception** qui répondent à ces exigences
 - La **traçabilité** entre exigences et implémentation
-- Des **liens croisés** vers les pages [Hardware](../hardware/), [Pin Mapping](../pin-mapping/) et [Composants](../components/)
+- Des **liens croisés** vers les pages [Hardware](../hardware/), [Pin Mapping](../hardware/pin-mapping/) et [Composants](../hardware/components/)
 
 ## Domaines
 
