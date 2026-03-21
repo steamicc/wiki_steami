@@ -134,6 +134,6 @@ Un buzzer piezo permet la generation de sons. Il est alimente par un boost conve
 ## Voir aussi
 
 - [Hardware](../hardware/)
-- [Composants — Circuits integres](../components/integrated-circuits)
-- [Pin Mapping — LEDs](../pin-mapping/leds)
-- [Pin Mapping — Boutons](../pin-mapping/buttons)
+- [Composants — Circuits integres](../hardware/components/integrated-circuits)
+- [Pin Mapping — LEDs](../hardware/pin-mapping/leds)
+- [Pin Mapping — Boutons](../hardware/pin-mapping/buttons)
