@@ -15,7 +15,9 @@
     "lint:md": "markdownlint \"docs/**/*.md\"",
     "lint:md:fix": "markdownlint --fix \"docs/**/*.md\"",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint:js": "eslint .",
+    "lint:js:fix": "eslint --fix ."
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",
@@ -29,6 +31,10 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/types": "3.9.2",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.1.0",
+    "eslint-plugin-react": "7.37.5",
+    "globals": "17.4.0",
     "markdownlint-cli": "0.48.0",
     "prettier": "3.8.1"
   },
