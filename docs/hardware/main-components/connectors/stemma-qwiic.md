@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: "STEMMA/Qwiic"
+title: 'STEMMA/Qwiic'
 ---
 
 # Connecteur STEMMA/Qwiic
@@ -9,11 +9,11 @@ Deux connecteurs JST 4 broches (pas 2 mm) pour capteurs I2C externes, compatible
 
 ## Caracteristiques
 
-| Caracteristique | Detail |
-|---|---|
-| Type | JST 4-pin, pas 2 mm |
-| Nombre | 2 |
-| Bus | I2C3 (SCL: PC0, SDA: PC1) |
+| Caracteristique | Detail                    |
+| --------------- | ------------------------- |
+| Type            | JST 4-pin, pas 2 mm       |
+| Nombre          | 2                         |
+| Bus             | I2C3 (SCL: PC0, SDA: PC1) |
 
 ## Voir aussi
 

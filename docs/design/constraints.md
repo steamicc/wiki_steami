@@ -1,27 +1,27 @@
 ---
 sidebar_position: 8
-title: "Contraintes"
+title: 'Contraintes'
 ---
 
 # Contraintes environnementales et physiques
 
 ## Exigences environnementales
 
-| ID | Nom | Description | Implémentation |
-|----|-----|-------------|----------------|
-| ENV-01 | Temperature | Le systeme doit pouvoir fonctionner dans la plage de -20°C a 85°C. | Composants grade industriel |
-| ENV-02 | Lifetime | Le systeme doit pouvoir fonctionner pendant 70 000 heures (environ 8 ans). | Selection composants haute fiabilite |
-| ENV-03 | ESD Protection | Les connecteurs d'entree et de sortie doivent etre equipes de protections ESD. | Protections ESD sur connecteurs |
-| ENV-04 | User Interface Position | Le systeme doit integrer les elements d'affichage sur la face avant de la carte. | Ecran OLED et LEDs en face avant |
-| ENV-05 | Command Interface Position | Le systeme doit integrer l'interface de controle (boutons) sur la face avant de la carte. | Boutons en face avant |
+| ID     | Nom                        | Description                                                                               | Implémentation                       |
+| ------ | -------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------ |
+| ENV-01 | Temperature                | Le systeme doit pouvoir fonctionner dans la plage de -20°C a 85°C.                        | Composants grade industriel          |
+| ENV-02 | Lifetime                   | Le systeme doit pouvoir fonctionner pendant 70 000 heures (environ 8 ans).                | Selection composants haute fiabilite |
+| ENV-03 | ESD Protection             | Les connecteurs d'entree et de sortie doivent etre equipes de protections ESD.            | Protections ESD sur connecteurs      |
+| ENV-04 | User Interface Position    | Le systeme doit integrer les elements d'affichage sur la face avant de la carte.          | Ecran OLED et LEDs en face avant     |
+| ENV-05 | Command Interface Position | Le systeme doit integrer l'interface de controle (boutons) sur la face avant de la carte. | Boutons en face avant                |
 
 ## Exigences physiques
 
-| ID | Nom | Description | Implémentation |
-|----|-----|-------------|----------------|
-| PHY-01 | Size | Le systeme doit etre contenu dans un volume inferieur a 100 mm de longueur par 60 mm de largeur. | PCB < 100 x 60 mm |
-| PHY-02 | Weight | Le poids doit etre inferieur ou egal a 100 g. | ≤ 100 g |
-| PHY-03 | Battery integration | Le systeme peut integrer une batterie a l'arriere. | LiPo 1600 mAh en face arriere |
+| ID     | Nom                 | Description                                                                                      | Implémentation                |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------- |
+| PHY-01 | Size                | Le systeme doit etre contenu dans un volume inferieur a 100 mm de longueur par 60 mm de largeur. | PCB < 100 x 60 mm             |
+| PHY-02 | Weight              | Le poids doit etre inferieur ou egal a 100 g.                                                    | ≤ 100 g                       |
+| PHY-03 | Battery integration | Le systeme peut integrer une batterie a l'arriere.                                               | LiPo 1600 mAh en face arriere |
 
 ## Choix de conception
 

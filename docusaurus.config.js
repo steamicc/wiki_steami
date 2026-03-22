@@ -60,7 +60,7 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'overviewSidebar',
             position: 'left',
-            label: '📋 Vue d\'ensemble',
+            label: "📋 Vue d'ensemble",
           },
           {
             type: 'docSidebar',
@@ -99,7 +99,7 @@ const config = {
           {
             title: 'Documentation',
             items: [
-              { label: 'Vue d\'ensemble', to: '/docs/overview' },
+              { label: "Vue d'ensemble", to: '/docs/overview' },
               { label: 'Hardware', to: '/docs/hardware' },
               { label: 'Software', to: '/docs/software' },
               { label: 'Conception', to: '/docs/design' },

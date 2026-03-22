@@ -9,11 +9,11 @@ La carte STeaMi est programmable en plusieurs langages. Cette section documente 
 
 ## Langages supportés
 
-| Langage | Maturité | Description |
-|---------|----------|-------------|
-| **MicroPython** | Complète | 15 drivers, exemples, framework de test |
-| **CODAL** | Partielle | Runtime C++ avec support des principaux composants |
-| **Arduino** | Minimale | Support STM32duino de base, à développer |
+| Langage         | Maturité  | Description                                        |
+| --------------- | --------- | -------------------------------------------------- |
+| **MicroPython** | Complète  | 15 drivers, exemples, framework de test            |
+| **CODAL**       | Partielle | Runtime C++ avec support des principaux composants |
+| **Arduino**     | Minimale  | Support STM32duino de base, à développer           |
 
 ## Sections à venir
 

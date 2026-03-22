@@ -1,0 +1,6 @@
+build/
+node_modules/
+static/docs/
+static/img/
+.docusaurus/
+package-lock.json

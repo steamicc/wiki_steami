@@ -1,25 +1,25 @@
 ---
 sidebar_position: 4
-title: "Communication"
+title: 'Communication'
 ---
 
 # Communication
 
 ## Exigences — Communication sans fil
 
-| ID | Nom | Description | Implémentation |
-|----|-----|-------------|----------------|
-| FCT-28 | BLE | Le systeme doit pouvoir communiquer par Bluetooth BLE 4.2. | STM32WB55RG — BLE 5.2 (depasse l'exigence) |
-| FCT-29 | BLE - Range | Le systeme necessite une portee physique BLE d'au moins 10 m. | Antenne interne + filtre MLPF-WB55-01E3 |
-| FCT-30 | OpenThread | Le systeme doit pouvoir communiquer par OpenThread. | STM32WB55RG — stack OpenThread integre |
-| FCT-31 | ZigBee | Le systeme doit pouvoir communiquer par ZigBee. | STM32WB55RG — stack ZigBee integre |
-| FCT-32 | Antenna | Le systeme doit integrer une antenne interne. | Antenne integree + filtre RF MLPF-WB55-01E3 (passe-bas 2.45 GHz) |
+| ID     | Nom         | Description                                                   | Implémentation                                                   |
+| ------ | ----------- | ------------------------------------------------------------- | ---------------------------------------------------------------- |
+| FCT-28 | BLE         | Le systeme doit pouvoir communiquer par Bluetooth BLE 4.2.    | STM32WB55RG — BLE 5.2 (depasse l'exigence)                       |
+| FCT-29 | BLE - Range | Le systeme necessite une portee physique BLE d'au moins 10 m. | Antenne interne + filtre MLPF-WB55-01E3                          |
+| FCT-30 | OpenThread  | Le systeme doit pouvoir communiquer par OpenThread.           | STM32WB55RG — stack OpenThread integre                           |
+| FCT-31 | ZigBee      | Le systeme doit pouvoir communiquer par ZigBee.               | STM32WB55RG — stack ZigBee integre                               |
+| FCT-32 | Antenna     | Le systeme doit integrer une antenne interne.                 | Antenne integree + filtre RF MLPF-WB55-01E3 (passe-bas 2.45 GHz) |
 
 ## Exigences — Stockage
 
-| ID | Nom | Description | Implémentation |
-|----|-----|-------------|----------------|
-| FCT-33 | QSPI Flash | Le systeme doit integrer un stockage flash Quad-SPI de 64 Mbit. | Winbond W25Q64JVZPIM |
+| ID     | Nom                           | Description                                                                | Implémentation                   |
+| ------ | ----------------------------- | -------------------------------------------------------------------------- | -------------------------------- |
+| FCT-33 | QSPI Flash                    | Le systeme doit integrer un stockage flash Quad-SPI de 64 Mbit.            | Winbond W25Q64JVZPIM             |
 | FCT-34 | QSPI Flash - USB Mass Storage | Le stockage flash interne doit etre accessible a travers USB Mass Storage. | STM32F103 DAPLink (endpoint MSC) |
 
 ## Choix de conception
@@ -52,14 +52,14 @@ La memoire flash externe est connectee au microcontroleur d'interface (STM32F103
 
 #### Signaux SPI (vers STM32F103)
 
-| Signal | Test Point |
-|--------|-----------|
-| SPI1_SCK | TP42 |
-| SPI1_MOSI | TP40 |
-| SPI1_MISO | TP41 |
-| FLASH_CS | TP39 |
-| FLASH_RST | TP37 |
-| FLASH_WP | TP38 |
+| Signal    | Test Point |
+| --------- | ---------- |
+| SPI1_SCK  | TP42       |
+| SPI1_MOSI | TP40       |
+| SPI1_MISO | TP41       |
+| FLASH_CS  | TP39       |
+| FLASH_RST | TP37       |
+| FLASH_WP  | TP38       |
 
 ## Voir aussi
 

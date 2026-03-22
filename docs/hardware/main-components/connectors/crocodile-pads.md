@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-title: "Pads crocodile"
+title: 'Pads crocodile'
 ---
 
 # Pads crocodile
@@ -9,12 +9,12 @@ Pads accessibles avec des pinces crocodile autour de la carte, permettant des co
 
 ## Attribution des pads
 
-| Pad | Fonction |
-|-----|----------|
-| P0, P1, P2 | Entrees analogiques |
+| Pad                | Fonction                    |
+| ------------------ | --------------------------- |
+| P0, P1, P2         | Entrees analogiques         |
 | P24, P25, P28, P29 | GPIO via expandeur MCP23009 |
-| 3V3 | Alimentation 3.3V |
-| GND | Masse |
+| 3V3                | Alimentation 3.3V           |
+| GND                | Masse                       |
 
 ## Voir aussi
 

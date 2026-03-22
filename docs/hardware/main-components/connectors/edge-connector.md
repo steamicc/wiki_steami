@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: "Edge connector"
+title: 'Edge connector'
 ---
 
 # Connecteur Edge (micro:bit compatible)
@@ -17,18 +17,18 @@ Le connecteur edge fournit un acces aux broches P0-P20, compatible avec l'ecosys
 
 ## Bus SPI externe
 
-| Signal | Pin STM32WB55 |
-|--------|---------------|
-| SPI2_SCK_EDGE (P13) | PB13 |
-| SPI2_MISO_EDGE (P14) | PB14 |
-| SPI2_MOSI_EDGE (P15) | PB15 |
+| Signal               | Pin STM32WB55 |
+| -------------------- | ------------- |
+| SPI2_SCK_EDGE (P13)  | PB13          |
+| SPI2_MISO_EDGE (P14) | PB14          |
+| SPI2_MOSI_EDGE (P15) | PB15          |
 
 ## Bus UART serie
 
-| Signal | Pin STM32WB55 |
-|--------|---------------|
-| SERIAL_TX (T_UART2_TX) | PB11 |
-| SERIAL_RX (T_UART2_RX) | PB10 |
+| Signal                 | Pin STM32WB55 |
+| ---------------------- | ------------- |
+| SERIAL_TX (T_UART2_TX) | PB11          |
+| SERIAL_RX (T_UART2_RX) | PB10          |
 
 ## Voir aussi
 

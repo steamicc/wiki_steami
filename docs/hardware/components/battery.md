@@ -1,13 +1,13 @@
 ---
 sidebar_position: 12
-title: "Batterie"
+title: 'Batterie'
 ---
 
 # Batterie
 
-| Composant | Description | Qte |
-|-----------|-------------|-----|
-| Polymer Lithium-Ion Battery | Batterie LiPo 3.7V 1600 mAh | 1 |
+| Composant                   | Description                 | Qte |
+| --------------------------- | --------------------------- | --- |
+| Polymer Lithium-Ion Battery | Batterie LiPo 3.7V 1600 mAh | 1   |
 
 ## Caracteristiques
 

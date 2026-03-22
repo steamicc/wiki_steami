@@ -8,13 +8,13 @@ Documentation technique de la carte **STeaMi**, une carte éducative IoT basée 
 
 Le wiki couvre 5 sections :
 
-| Section | Description |
-|---------|-------------|
-| **Vue d'ensemble** | Architecture générale, pinout |
-| **Hardware** | Blocs fonctionnels (MCU, capteurs, alimentation, audio, etc.) |
-| **Pin Mapping** | Correspondance broches physiques ↔ fonctions |
-| **Composants** | BOM détaillée (CI, passifs, connecteurs, LEDs, etc.) |
-| **Requirements** | Exigences fonctionnelles, environnementales et physiques |
+| Section            | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| **Vue d'ensemble** | Architecture générale, pinout                                 |
+| **Hardware**       | Blocs fonctionnels (MCU, capteurs, alimentation, audio, etc.) |
+| **Pin Mapping**    | Correspondance broches physiques ↔ fonctions                  |
+| **Composants**     | BOM détaillée (CI, passifs, connecteurs, LEDs, etc.)          |
+| **Requirements**   | Exigences fonctionnelles, environnementales et physiques      |
 
 ## Développement local
 
