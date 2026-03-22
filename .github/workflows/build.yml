@@ -1,12 +1,18 @@
 name: Build
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+
 concurrency:
-  group: build-${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -23,7 +29,9 @@ jobs:
       - run: npm ci
 
       - name: Build site
-        run: npm run build 2>&1 | tee build.log
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
 
       - name: Check for broken links
         run: |
