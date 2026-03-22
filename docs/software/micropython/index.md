@@ -20,7 +20,7 @@ MicroPython est le langage le mieux supporté sur la carte STeaMi, avec 15 drive
 | [ssd1327](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/ssd1327)             | Écran OLED              | 15       | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/ssd1327/README.md)       |
 | [mcp23009e](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/mcp23009e)         | Boutons/GPIO            | 9        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/mcp23009e/README.md)     |
 | [bq27441](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bq27441)             | Jauge batterie          | 1        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bq27441/README.md)       |
-| [daplink_flash](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash) | Flash/Config            | 6        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash)           |
+| [daplink_flash](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash) | Flash/Config            | 6        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash/README.md) |
 | [steami_config](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_config) | Config persistante      | 2        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_config/README.md) |
 | [hts221](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/hts221)               | Humidité (ancien)       | 1        | [README](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/hts221/README.md)        |
 | [gc9a01](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/gc9a01)               | Écran rond              | 0        | —                                                                                                  |
@@ -49,6 +49,6 @@ Tous les drivers suivent des conventions standardisées (issues [#56-#82](https:
 
 ## Voir aussi
 
-- [Getting Started](../getting-started) — Premier programme
+- [Premiers pas](../getting-started) — Premier programme
 - [DAPLink](../daplink) — Flash externe et config persistante
 - [Code source](https://github.com/steamicc/micropython-steami-lib) — Tous les drivers

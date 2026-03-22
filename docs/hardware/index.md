@@ -33,17 +33,17 @@ Deux ressources cles pour comprendre les details internes de la carte :
 
 Le STM32WB55RG est le processeur principal sur lequel s'executent les programmes utilisateur (MicroPython, CODAL, Arduino). Il integre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee. Toutes les broches GPIO accessibles a l'utilisateur sont fournies par ce processeur.
 
-| Caracteristique | Detail                                                                                                                                     |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Modele          | [STM32WB55RG](https://www.st.com/en/microcontrollers-microprocessors/stm32wb55rg.html)                                                     |
-| Coeur           | ARM Cortex-M4 @ 64 MHz                                                                                                                     |
-| Flash           | 1 Mo                                                                                                                                       |
-| RAM             | 256 Ko SRAM                                                                                                                                |
-| Radio           | BLE 5.2, OpenThread, ZigBee                                                                                                                |
-| Antenne         | Interne + filtre [MLPF-WB55-01E3](https://www.st.com/en/emi-filtering-and-signal-conditioning/mlpf-wb55-01e3.html) (passe-bas 2.45 GHz)    |
-| Horloge         | Quartz 32 MHz + Quartz 32 KHz (RTC)                                                                                                        |
-| Boitier         | VFQFPN68                                                                                                                                   |
-| Plus d'infos    | [Software](../software/), [Conception — MCU](../design/mcu-storage), [Datasheet](https://www.st.com/resource/en/datasheet/stm32wb55rg.pdf) |
+| Caracteristique | Detail                                                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modele          | [STM32WB55RG](https://www.st.com/en/microcontrollers-microprocessors/stm32wb55rg.html)                                                          |
+| Coeur           | ARM Cortex-M4 @ 64 MHz                                                                                                                          |
+| Flash           | 1 Mo                                                                                                                                            |
+| RAM             | 256 Ko SRAM                                                                                                                                     |
+| Radio           | BLE 5.2, OpenThread, ZigBee                                                                                                                     |
+| Antenne         | Interne + filtre [MLPF-WB55-01E3](https://www.st.com/en/emi-filtering-and-signal-conditioning/mlpf-wb55-01e3.html) (passe-bas 2.45 GHz)         |
+| Horloge         | Quartz 32 MHz + Quartz 32 KHz (RTC)                                                                                                             |
+| Boitier         | VFQFPN68                                                                                                                                        |
+| Plus d'infos    | [Programmation](../software/), [Conception — MCU](../design/mcu-storage), [Datasheet](https://www.st.com/resource/en/datasheet/stm32wb55rg.pdf) |
 
 ### Communication Bluetooth
 

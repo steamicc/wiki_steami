@@ -54,11 +54,10 @@ Créer un fichier `hello.py` :
 
 ```python
 from machine import I2C
-from time import sleep_ms
 
 i2c = I2C(1)
 devices = i2c.scan()
-print(f"Peripheriques I2C detectes : {len(devices)}")
+print(f"Périphériques I2C détectés : {len(devices)}")
 for addr in devices:
     print(f"  0x{addr:02X}")
 ```

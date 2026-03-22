@@ -154,7 +154,7 @@ print(f"Revision: {config.board_revision}")
 
 ## Mise à jour du firmware
 
-Le firmware DAPLink peut être mis à jour via le mode maintenance DFU :
+Le firmware DAPLink peut être mis à jour via le mode maintenance :
 
 1. Maintenir le bouton Reset enfoncé pendant le branchement USB
 2. La carte apparaît comme un disque "MAINTENANCE"

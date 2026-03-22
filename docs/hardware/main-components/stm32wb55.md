@@ -78,4 +78,4 @@ Le bus I2C1 est partage entre le STM32WB55 et le STM32F103 (DAPLink), permettant
 - [STM32F103 — MCU interface](./stm32f103)
 - [Conception — MCU et stockage](../../design/mcu-storage)
 - [Conception — Communication](../../design/communication)
-- [Software](../../software/)
+- [Programmation](../../software/)
