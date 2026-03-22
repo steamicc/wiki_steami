@@ -76,12 +76,6 @@ const config = {
           },
           {
             type: 'docSidebar',
-            sidebarId: 'requirementsSidebar',
-            position: 'left',
-            label: '📦 Requirements',
-          },
-          {
-            type: 'docSidebar',
             sidebarId: 'designSidebar',
             position: 'left',
             label: '🏗️ Conception',
@@ -108,7 +102,6 @@ const config = {
               { label: 'Vue d\'ensemble', to: '/docs/overview' },
               { label: 'Hardware', to: '/docs/hardware' },
               { label: 'Software', to: '/docs/software' },
-              { label: 'Requirements', to: '/docs/requirements' },
               { label: 'Conception', to: '/docs/design' },
             ],
           },
