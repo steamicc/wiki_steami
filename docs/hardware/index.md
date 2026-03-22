@@ -67,8 +67,8 @@ La carte integre 7 capteurs sur le bus I2C1 interne, couvrant distance, mouvemen
 | Accelerometre/Gyroscope | [ISM330DLC](https://www.st.com/en/mems-and-sensors/ism330dlc.html)                                                      | 6 axes + temperature           |
 | Magnetometre            | [LIS2MDL](https://www.st.com/en/mems-and-sensors/lis2mdl.html)                                                          | 3 axes magnetiques             |
 | Distance                | [VL53L1X](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html)                                           | Time-of-Flight, 0-4 m          |
-| Pression                | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS)                                                 | 26-126 kPa, 24 bits            |
-| Humidite/Temperature    | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS)                                                 | RH + °C                        |
+| Pression                | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)                                                 | 26-126 kPa, 24 bits            |
+| Humidite/Temperature    | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)                                                 | RH + °C                        |
 | Lumiere/Geste           | [APDS-9960](https://www.broadcom.com/products/optical-sensors/integrated-ambient-light-and-proximity-sensors/apds-9960) | ALS, couleur, proximite, geste |
 | Microphone              | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)                                                      | PDM MEMS omnidirectionnel      |
 
