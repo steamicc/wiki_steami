@@ -3,14 +3,16 @@ sidebar_position: 8
 title: "Connecteurs"
 ---
 
+import OctopartButton from '@site/src/components/OctopartButton';
+
 # Connecteurs
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| USB3080-30-00-A | Connecteur micro-USB B, Bottom-SMT | [GCT](https://gct.co/) | 1 | — | [Rechercher](https://octopart.com/search?q=USB3080-30-00-A) |
-| 10114830-10102LF | Connecteur batterie SMD 2 positions, pas 1.25 mm | [Amphenol](https://www.amphenol-cs.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=10114830-10102LF) |
-| 52435-2471 | Connecteur FFC/FPC 24 positions, pas 0.50 mm (ecran OLED) | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 1 | — | [Rechercher](https://octopart.com/search?q=52435-2471) |
-| S4B-PH-SM4-TB(LF)(SN) | Connecteur STEMMA/Qwiic JST 4 positions, pas 2.00 mm, angle droit SMD | [JST](https://www.jst.com/) | 2 | — | [Rechercher](https://octopart.com/search?q=S4B-PH-SM4-TB) |
+| USB3080-30-00-A | Connecteur micro-USB B, Bottom-SMT | [GCT](https://gct.co/) | 1 | — | <OctopartButton q="USB3080-30-00-A" /> |
+| 10114830-10102LF | Connecteur batterie SMD 2 positions, pas 1.25 mm | [Amphenol](https://www.amphenol-cs.com/) | 1 | — | <OctopartButton q="10114830-10102LF" /> |
+| 52435-2471 | Connecteur FFC/FPC 24 positions, pas 0.50 mm (ecran OLED) | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 1 | — | <OctopartButton q="52435-2471" /> |
+| S4B-PH-SM4-TB(LF)(SN) | Connecteur STEMMA/Qwiic JST 4 positions, pas 2.00 mm, angle droit SMD | [JST](https://www.jst.com/) | 2 | — | <OctopartButton q="S4B-PH-SM4-TB" /> |
 
 ## Details
 

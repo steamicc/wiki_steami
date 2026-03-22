@@ -3,35 +3,37 @@ sidebar_position: 6
 title: "Semi-conducteurs"
 ---
 
+import OctopartButton from '@site/src/components/OctopartButton';
+
 # Semi-conducteurs
 
 ## Diodes de protection ESD
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| WE-TVS_824015 | Protection ESD haute vitesse 5 uA 5 VDC | [Wurth](https://www.we-online.com/en/components/products/WE-TVS) | 1 | — | [Rechercher](https://octopart.com/search?q=824015) |
-| D5V0H1B2LP-7B | Protection ESD bidirectionnelle TVS | [Diodes Inc.](https://www.diodes.com/) | 5 | — | [Rechercher](https://octopart.com/search?q=D5V0H1B2LP-7B) |
-| ESD8351XV2T1G | Protection ESD unidirectionnelle, faible capacite, snapback | [onsemi](https://www.onsemi.com/) | 13 | — | [Rechercher](https://octopart.com/search?q=ESD8351XV2T1G) |
+| WE-TVS_824015 | Protection ESD haute vitesse 5 uA 5 VDC | [Wurth](https://www.we-online.com/en/components/products/WE-TVS) | 1 | — | <OctopartButton q="824015" /> |
+| D5V0H1B2LP-7B | Protection ESD bidirectionnelle TVS | [Diodes Inc.](https://www.diodes.com/) | 5 | — | <OctopartButton q="D5V0H1B2LP-7B" /> |
+| ESD8351XV2T1G | Protection ESD unidirectionnelle, faible capacite, snapback | [onsemi](https://www.onsemi.com/) | 13 | — | <OctopartButton q="ESD8351XV2T1G" /> |
 
 ## Diodes Schottky
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| SS14HE | Diode Schottky 40V 1A SDO-323HE | [onsemi](https://www.onsemi.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=SS14HE) |
-| XBS104S14R-G | Diode Schottky 40V 1A SOD-123 | [Torex](https://www.torexsemi.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=XBS104S14R-G) |
-| CDBQR0140R-HF | Diode 40V 100 mA 0402C/SOD-923F | [Comchip](https://www.comchiptech.com/) | 2 | — | [Rechercher](https://octopart.com/search?q=CDBQR0140R-HF) |
-| MBR130HWTR | Diode Schottky 30V 1A SOD-123 | [SMC Diode](https://www.smcdiode.com/) | 4 | — | [Rechercher](https://octopart.com/search?q=MBR130HWTR) |
+| SS14HE | Diode Schottky 40V 1A SDO-323HE | [onsemi](https://www.onsemi.com/) | 1 | — | <OctopartButton q="SS14HE" /> |
+| XBS104S14R-G | Diode Schottky 40V 1A SOD-123 | [Torex](https://www.torexsemi.com/) | 1 | — | <OctopartButton q="XBS104S14R-G" /> |
+| CDBQR0140R-HF | Diode 40V 100 mA 0402C/SOD-923F | [Comchip](https://www.comchiptech.com/) | 2 | — | <OctopartButton q="CDBQR0140R-HF" /> |
+| MBR130HWTR | Diode Schottky 30V 1A SOD-123 | [SMC Diode](https://www.smcdiode.com/) | 4 | — | <OctopartButton q="MBR130HWTR" /> |
 
 ## Transistors et MOSFET
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| MMBT2222A-7-F | Transistor bipolaire NPN 40V 600 mA SOT-23 | [onsemi](https://www.onsemi.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=MMBT2222A-7-F) |
-| BSS119N-H6327 | MOSFET N-Channel 100V 190 mA SOT-23-3 | [Infineon](https://www.infineon.com/) | 2 | — | [Rechercher](https://octopart.com/search?q=BSS119N-H6327) |
-| BSS8402DW-7-F | MOSFET N/P-CH 60V/-50V 200 mW SOT363 | [Diodes Inc.](https://www.diodes.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=BSS8402DW-7-F) |
+| MMBT2222A-7-F | Transistor bipolaire NPN 40V 600 mA SOT-23 | [onsemi](https://www.onsemi.com/) | 1 | — | <OctopartButton q="MMBT2222A-7-F" /> |
+| BSS119N-H6327 | MOSFET N-Channel 100V 190 mA SOT-23-3 | [Infineon](https://www.infineon.com/) | 2 | — | <OctopartButton q="BSS119N-H6327" /> |
+| BSS8402DW-7-F | MOSFET N/P-CH 60V/-50V 200 mW SOT363 | [Diodes Inc.](https://www.diodes.com/) | 1 | — | <OctopartButton q="BSS8402DW-7-F" /> |
 
 ## Fusible
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| SF-0603SP125-2 | Fusible 50V 1.25A slow blow 0603 | [Bourns](https://www.bourns.com/) | 1 | — | [Rechercher](https://octopart.com/search?q=SF-0603SP125-2) |
+| SF-0603SP125-2 | Fusible 50V 1.25A slow blow 0603 | [Bourns](https://www.bourns.com/) | 1 | — | <OctopartButton q="SF-0603SP125-2" /> |
