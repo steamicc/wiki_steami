@@ -71,12 +71,6 @@ mpremote rm :main.py
 mpremote reset
 ```
 
-### Entrer en mode bootloader
-
-```bash
-mpremote bootloader
-```
-
 ## Combinaison de commandes
 
 mpremote permet de chaîner plusieurs commandes :

@@ -20,16 +20,6 @@ La carte STeaMi apparaît comme un disque USB (STEAMI) grâce au firmware DAPLin
 2. Glisser-déposer le fichier `.hex` sur le disque STEAMI
 3. La carte redémarre automatiquement avec MicroPython
 
-## Méthode 2 : Via mpremote
-
-Si le firmware MicroPython est déjà installé, on peut le mettre à jour via mpremote :
-
-```bash
-mpremote bootloader
-```
-
-Cela redémarre la carte en mode bootloader USB. Ensuite, glisser-déposer le nouveau firmware.
-
 ## Vérifier l'installation
 
 Ouvrir un terminal REPL :
