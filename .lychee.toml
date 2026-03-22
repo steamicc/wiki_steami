@@ -5,6 +5,10 @@
 include_mail = false
 scheme = ["https", "http"]
 
+# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/schematics/...)
+# En CI : résolu depuis le repo. En Docker local : surchargé par --root-dir
+root_dir = "static"
+
 # User-agent curl pour réduire les blocages anti-bot
 user_agent = "curl/8.0"
 
@@ -28,11 +32,6 @@ exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
-
-  # Assets statiques Docusaurus (root-relatifs, résolus au build)
-  "^/img/",
-  "^/docs/schematics/",
-  "^/assets/",
 
   # Sites incompatibles HTTP/2 avec lychee (vérifiés manuellement OK)
   # TODO: migrer vers linkinator pour supporter HTTP/1.1 — voir issue #98
