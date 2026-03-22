@@ -70,7 +70,7 @@ mpremote run hello.py
 
 ## Lire un capteur
 
-Exemple : lire l'accéléromètre ISM330DL sans installation permanente :
+Exemple : lire l'accéléromètre ISM330DL sans installation permanente. Depuis la racine d'un clone de [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) :
 
 ```bash
 mpremote mount lib/ism330dl run lib/ism330dl/examples/basic_read.py
