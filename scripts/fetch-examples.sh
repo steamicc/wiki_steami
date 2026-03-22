@@ -1,6 +1,6 @@
 #!/bin/bash
 # Fetch or update micropython-steami-lib for code examples
-# Used by prebuild script to provide source files for remark-code-import
+# Used by prebuild script to provide source files for remark-code-file plugin
 
 set -e
 
@@ -9,7 +9,7 @@ TARGET_DIR=".external/micropython-steami-lib"
 
 if [ -d "$TARGET_DIR/.git" ]; then
   echo "Updating micropython-steami-lib..."
-  git -C "$TARGET_DIR" pull --quiet
+  git -C "$TARGET_DIR" pull --ff-only --quiet
 else
   echo "Cloning micropython-steami-lib..."
   mkdir -p "$(dirname "$TARGET_DIR")"
