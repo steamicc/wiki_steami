@@ -23,14 +23,19 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 3
 
-# Exclure les sites incompatibles HTTP/2 avec lychee
-# Lychee ne supporte pas HTTP/1.1 et ces sites bloquent HTTP/2 automatisé
-# Tous vérifiés manuellement comme fonctionnels dans un navigateur
-# TODO: migrer vers linkinator (Node) qui supporte HTTP/1.1 — voir issue à créer
 exclude = [
+  # Liens locaux
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
+
+  # Assets statiques Docusaurus (root-relatifs, résolus au build)
+  "^/img/",
+  "^/docs/schematics/",
+  "^/assets/",
+
+  # Sites incompatibles HTTP/2 avec lychee (vérifiés manuellement OK)
+  # TODO: migrer vers linkinator pour supporter HTTP/1.1 — voir issue #98
   "www\\.st\\.com",
   "www\\.tdk\\.com",
   "www\\.te\\.com",
