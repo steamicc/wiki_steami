@@ -12,7 +12,10 @@ root_dir = "static"
 user_agent = "curl/8.0"
 
 # Accepter les codes de réponse courants
-accept = [200, 204, 301, 302, 403, 429]
+# 200/204: OK, 301/302: redirections, 403: accès refusé (anti-bot),
+# 406: Not Acceptable (kyocera-avx.com), 429: rate limit,
+# 202: Accepted (infineon.com, réponse asynchrone)
+accept = [200, 202, 204, 301, 302, 403, 406, 429]
 
 # Timeout par requête
 timeout = 30
