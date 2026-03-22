@@ -5,7 +5,10 @@
 include_mail = false
 scheme = ["https", "http"]
 
-# Accepter les codes de réponse courants (y compris 403 pour certains sites)
+# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/...)
+root_dir = "static"
+
+# Accepter les codes de réponse courants
 accept = [200, 204, 301, 302, 403, 429]
 
 # Timeout par requête
@@ -17,11 +20,17 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 5
 
-# Exclure les liens internes et localhost
+# Exclure les sites qui bloquent les requêtes automatisées (HTTP/2 errors, connection reset)
 exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
+  "www\\.st\\.com",
+  "www\\.yageo\\.com",
+  "www\\.te\\.com",
+  "www\\.molex\\.com",
+  "www\\.smcdiode\\.com",
+  "industrial\\.panasonic\\.com",
 ]
 
 # Exclure les répertoires
