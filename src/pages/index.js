@@ -20,7 +20,7 @@ const features = [
   },
   {
     icon: '💻',
-    title: 'Software',
+    title: 'Programmation',
     description:
       'MicroPython, CODAL, Arduino : drivers, tutoriels, exemples de code pour chaque composant.',
     link: '/docs/software',

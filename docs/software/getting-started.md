@@ -1,9 +1,9 @@
 ---
-title: Getting Started
+title: Premiers pas
 sidebar_position: 2
 ---
 
-# Getting Started
+# Premiers pas
 
 Guide de démarrage rapide pour la carte STeaMi avec MicroPython.
 
