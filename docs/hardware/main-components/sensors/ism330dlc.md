@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: "ISM330DLC"
+title: 'ISM330DLC'
 ---
 
 # Accelerometre / Gyroscope — ISM330DLC
@@ -9,15 +9,15 @@ IMU 6 axes mesurant acceleration, rotation et temperature. L'orientation de l'IM
 
 ## Caracteristiques
 
-| Caracteristique | Detail |
-|---|---|
-| Modele | [ISM330DLCTR](https://www.st.com/en/mems-and-sensors/ism330dlc.html) |
-| Fabricant | STMicroelectronics |
-| Type | 6 axes (accelerometre + gyroscope + temperature) |
-| Interface | I2C / SPI |
-| Interruption | INT_ACC → PC13 |
-| Boitier | LGA-14 (2.5x3) |
-| Datasheet | [PDF](https://www.st.com/resource/en/datasheet/ism330dlc.pdf) |
+| Caracteristique | Detail                                                               |
+| --------------- | -------------------------------------------------------------------- |
+| Modele          | [ISM330DLCTR](https://www.st.com/en/mems-and-sensors/ism330dlc.html) |
+| Fabricant       | STMicroelectronics                                                   |
+| Type            | 6 axes (accelerometre + gyroscope + temperature)                     |
+| Interface       | I2C / SPI                                                            |
+| Interruption    | INT_ACC → PC13                                                       |
+| Boitier         | LGA-14 (2.5x3)                                                       |
+| Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/ism330dlc.pdf)        |
 
 ## Schemas
 

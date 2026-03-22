@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-title: "VL53L1X"
+title: 'VL53L1X'
 ---
 
 # Capteur de distance — VL53L1X
@@ -9,15 +9,15 @@ Capteur de distance Time-of-Flight (ToF) utilisant un laser infrarouge.
 
 ## Caracteristiques
 
-| Caracteristique | Detail |
-|---|---|
-| Modele | [VL53L1CXV0FY/1](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html) |
-| Fabricant | STMicroelectronics |
-| Type | Time-of-Flight (ToF) |
-| Portee | Jusqu'a 4 m |
-| Interface | I2C |
-| Interruption | INT_DIST → PB12 |
-| Datasheet | [PDF](https://www.st.com/resource/en/datasheet/vl53l1x.pdf) |
+| Caracteristique | Detail                                                                               |
+| --------------- | ------------------------------------------------------------------------------------ |
+| Modele          | [VL53L1CXV0FY/1](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html) |
+| Fabricant       | STMicroelectronics                                                                   |
+| Type            | Time-of-Flight (ToF)                                                                 |
+| Portee          | Jusqu'a 4 m                                                                          |
+| Interface       | I2C                                                                                  |
+| Interruption    | INT_DIST → PB12                                                                      |
+| Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)                          |
 
 ## Schemas
 

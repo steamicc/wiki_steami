@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-title: "LEDs"
+title: 'LEDs'
 ---
 
 # LEDs
@@ -11,19 +11,19 @@ La carte STeaMi integre plusieurs LEDs pour l'indication de statut et l'utilisat
 
 La LED RGB peut etre programmee par l'utilisateur.
 
-| LED | Signal | Pin STM32WB55 |
-|-----|--------|---------------|
-| LED_RED | LED_USER_RED | PC12 |
-| LED_GREEN | LED_USER_GREEN | PC11 |
-| LED_BLUE | LED_USER_BLUE | PC10 |
+| LED       | Signal         | Pin STM32WB55 |
+| --------- | -------------- | ------------- |
+| LED_RED   | LED_USER_RED   | PC12          |
+| LED_GREEN | LED_USER_GREEN | PC11          |
+| LED_BLUE  | LED_USER_BLUE  | PC10          |
 
 **Composant** : Wurth 150505M173300 (LED RGB SMD 5050)
 
 ## LED Bluetooth
 
-| LED | Signal | Pin STM32WB55 |
-|-----|--------|---------------|
-| LED_BLE | BOOT0/LED_BLE | PH3 |
+| LED     | Signal        | Pin STM32WB55 |
+| ------- | ------------- | ------------- |
+| LED_BLE | BOOT0/LED_BLE | PH3           |
 
 Comportement :
 
@@ -34,12 +34,12 @@ Comportement :
 
 Ces LEDs sont gerees par le microcontroleur d'interface et indiquent l'etat du systeme.
 
-| LED | Signal | Pin STM32F103 | PCB | Description |
-|-----|--------|---------------|-----|-------------|
-| LED_CHG | LED_CHG_RED | - | LED2 | Indicateur de charge batterie |
-| LED_DAPLINK | LED_DAP_BLUE | PA6 | LED3 | Indicateur DAPLink actif |
-| LED_FLASH | LED_COM_GRN | PB1 | LED4 | Activite communication/flash |
-| LED_STATUS | LED_STLINK_STATUS | PA9 | LED5 | Statut general STLink |
+| LED         | Signal            | Pin STM32F103 | PCB  | Description                   |
+| ----------- | ----------------- | ------------- | ---- | ----------------------------- |
+| LED_CHG     | LED_CHG_RED       | -             | LED2 | Indicateur de charge batterie |
+| LED_DAPLINK | LED_DAP_BLUE      | PA6           | LED3 | Indicateur DAPLink actif      |
+| LED_FLASH   | LED_COM_GRN       | PB1           | LED4 | Activite communication/flash  |
+| LED_STATUS  | LED_STLINK_STATUS | PA9           | LED5 | Statut general STLink         |
 
 ## LED d'alimentation
 
@@ -48,10 +48,10 @@ Ces LEDs sont gerees par le microcontroleur d'interface et indiquent l'etat du s
 
 ## Composants LED
 
-| Composant | Reference | Couleur | Quantite |
-|-----------|-----------|---------|----------|
-| Wurth 150060RS75000 | LED 0603 | Rouge | 1 |
-| Wurth 150060BS75000 | LED 0603 | Bleu | 2 |
-| Wurth 150060VS75000 | LED 0603 | Vert | 1 |
-| Kingbright APHBM2012LSURKZGKC | LED bicolore | Rouge/Vert | 1 |
-| Wurth 150505M173300 | LED RGB 5050 | RGB | 1 |
+| Composant                     | Reference    | Couleur    | Quantite |
+| ----------------------------- | ------------ | ---------- | -------- |
+| Wurth 150060RS75000           | LED 0603     | Rouge      | 1        |
+| Wurth 150060BS75000           | LED 0603     | Bleu       | 2        |
+| Wurth 150060VS75000           | LED 0603     | Vert       | 1        |
+| Kingbright APHBM2012LSURKZGKC | LED bicolore | Rouge/Vert | 1        |
+| Wurth 150505M173300           | LED RGB 5050 | RGB        | 1        |

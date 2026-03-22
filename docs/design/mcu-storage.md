@@ -1,19 +1,19 @@
 ---
 sidebar_position: 5
-title: "MCU et stockage"
+title: 'MCU et stockage'
 ---
 
 # Microcontroleur et stockage
 
 ## Exigences
 
-| ID | Nom | Description | Implémentation |
-|----|-----|-------------|----------------|
-| FCT-35 | Microcontroller | Le systeme doit integrer un microcontroleur ARM Cortex-M STM32WB55 de STMicroelectronics. | STM32WB55RG (Cortex-M4) |
-| FCT-36 | Microcontroller - RAM | Le systeme doit integrer un MCU avec suffisamment de RAM pour effectuer des operations graphiques de base (minimum pour un framebuffer 128x128). | 256 Ko SRAM |
-| FCT-37 | Microcontroller - Flash | Le systeme doit integrer un MCU avec au moins 512 Ko de memoire flash. | 1 Mo Flash |
-| FCT-38 | Microcontroller - Speed | Le systeme doit integrer un MCU avec une vitesse de processeur d'au moins 64 MHz. | ARM Cortex-M4 @ 64 MHz |
-| FCT-39 | Internal sensors - Bus | Tous les capteurs internes doivent etre connectes sur le premier bus I2C. | I2C1 (PB8/PB9) |
+| ID     | Nom                     | Description                                                                                                                                      | Implémentation          |
+| ------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| FCT-35 | Microcontroller         | Le systeme doit integrer un microcontroleur ARM Cortex-M STM32WB55 de STMicroelectronics.                                                        | STM32WB55RG (Cortex-M4) |
+| FCT-36 | Microcontroller - RAM   | Le systeme doit integrer un MCU avec suffisamment de RAM pour effectuer des operations graphiques de base (minimum pour un framebuffer 128x128). | 256 Ko SRAM             |
+| FCT-37 | Microcontroller - Flash | Le systeme doit integrer un MCU avec au moins 512 Ko de memoire flash.                                                                           | 1 Mo Flash              |
+| FCT-38 | Microcontroller - Speed | Le systeme doit integrer un MCU avec une vitesse de processeur d'au moins 64 MHz.                                                                | ARM Cortex-M4 @ 64 MHz  |
+| FCT-39 | Internal sensors - Bus  | Tous les capteurs internes doivent etre connectes sur le premier bus I2C.                                                                        | I2C1 (PB8/PB9)          |
 
 ## Choix de conception
 

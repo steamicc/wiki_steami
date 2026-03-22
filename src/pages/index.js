@@ -6,7 +6,7 @@ import Layout from '@theme/Layout';
 const features = [
   {
     icon: '📋',
-    title: 'Vue d\'ensemble',
+    title: "Vue d'ensemble",
     description:
       'Architecture générale, pinout, schéma bloc et caractéristiques principales de la carte.',
     link: '/docs/overview',
@@ -93,7 +93,14 @@ function Specs() {
               padding: '0.8rem',
             }}
           >
-            <div style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontSize: '0.8rem',
+                opacity: 0.6,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               {label}
             </div>
             <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{value}</div>

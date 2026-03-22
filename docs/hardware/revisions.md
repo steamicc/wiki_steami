@@ -1,6 +1,6 @@
 ---
 sidebar_position: 6
-title: "Revisions"
+title: 'Revisions'
 ---
 
 # Revisions de la carte
@@ -20,4 +20,4 @@ print(f"Revision: {config.board_revision}")
 
 ## Historique des revisions
 
-*A venir — les details de chaque revision seront documentes ici.*
+_A venir — les details de chaque revision seront documentes ici._

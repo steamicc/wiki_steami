@@ -32,23 +32,23 @@ La carte STeaMi repose sur deux microcontroleurs :
 
 ## Blocs fonctionnels
 
-| Id | Bloc fonctionnel | Description |
-|----|-------------------|-------------|
-| FP1 | [Batterie](../design/power) | Batterie LiPo, autonomie 1 jour (standard) / 5-10 jours (basse consommation) |
-| FP2 | [Chargeur de batterie](../design/power) | Recharge via micro-USB, BQ24075 |
-| FP3 | [Jauge de batterie](../design/power) | Mesure de l'energie restante, BQ27441 (I2C) |
-| FP4 | [Alimentation](../design/power) | Convertisseur DC/DC, gestion des tensions |
-| FP5 | [Microphone](../design/sensors) | Microphone PDM IMP34DT05 |
-| FP6 | [Microcontroleur applicatif](../design/mcu-storage) | STM32WB55RG, Bluetooth, basse consommation |
-| FP7 | [Extension GPIO](../design/sensors) | MCP23009, 8 GPIO supplementaires |
-| FP8 | [Interface visuelle](../design/user-interface) | Ecran OLED, LEDs RGB et status |
-| FP9 | [Boutons de controle](../design/user-interface) | Boutons directionnels, reset, menu |
-| FP10 | [Sortie audio](../design/user-interface) | Buzzer SMT-0825-S-HT-R |
-| FP11 | [Interface de programmation](../design/service-usb) | Connecteur JTAG/SWD |
-| FP12 | [Capteurs internes](../design/sensors) | Distance, acceleration, gyroscope, magnetometre |
-| FP13 | [Ports E/S specifiques](../design/sensors) | Edge connector, STEMMA, Jacdac, clips crocodile |
-| FP14 | [Microcontroleur interface](../design/service-usb) | STM32F103, DAPLink, USB, WebUSB |
-| FP15 | [Memoire flash](../design/communication) | Flash QSPI 64 Mbit, stockage de donnees |
+| Id   | Bloc fonctionnel                                    | Description                                                                  |
+| ---- | --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| FP1  | [Batterie](../design/power)                         | Batterie LiPo, autonomie 1 jour (standard) / 5-10 jours (basse consommation) |
+| FP2  | [Chargeur de batterie](../design/power)             | Recharge via micro-USB, BQ24075                                              |
+| FP3  | [Jauge de batterie](../design/power)                | Mesure de l'energie restante, BQ27441 (I2C)                                  |
+| FP4  | [Alimentation](../design/power)                     | Convertisseur DC/DC, gestion des tensions                                    |
+| FP5  | [Microphone](../design/sensors)                     | Microphone PDM IMP34DT05                                                     |
+| FP6  | [Microcontroleur applicatif](../design/mcu-storage) | STM32WB55RG, Bluetooth, basse consommation                                   |
+| FP7  | [Extension GPIO](../design/sensors)                 | MCP23009, 8 GPIO supplementaires                                             |
+| FP8  | [Interface visuelle](../design/user-interface)      | Ecran OLED, LEDs RGB et status                                               |
+| FP9  | [Boutons de controle](../design/user-interface)     | Boutons directionnels, reset, menu                                           |
+| FP10 | [Sortie audio](../design/user-interface)            | Buzzer SMT-0825-S-HT-R                                                       |
+| FP11 | [Interface de programmation](../design/service-usb) | Connecteur JTAG/SWD                                                          |
+| FP12 | [Capteurs internes](../design/sensors)              | Distance, acceleration, gyroscope, magnetometre                              |
+| FP13 | [Ports E/S specifiques](../design/sensors)          | Edge connector, STEMMA, Jacdac, clips crocodile                              |
+| FP14 | [Microcontroleur interface](../design/service-usb)  | STM32F103, DAPLink, USB, WebUSB                                              |
+| FP15 | [Memoire flash](../design/communication)            | Flash QSPI 64 Mbit, stockage de donnees                                      |
 
 ## Liens utiles
 
