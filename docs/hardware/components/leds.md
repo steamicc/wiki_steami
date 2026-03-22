@@ -7,7 +7,7 @@ title: "LEDs"
 
 | Composant | Description | Fabricant | Couleur | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|---------|-----|-----------|----------|
-| 150060RS75000 | LED CMS 0603 | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | Rouge | 1 | [Web](https://www.we-online.com/en/components/products/WL-SMCW) | [Rechercher](https://octopart.com/search?q=150060RS75000) |
+| 150060RS75000 | LED CMS 0603 | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | Rouge | 1 | — | [Rechercher](https://octopart.com/search?q=150060RS75000) |
 | 150060BS75000 | LED CMS 0603 | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | Bleu | 2 | — | [Rechercher](https://octopart.com/search?q=150060BS75000) |
 | 150060VS75000 | LED CMS 0603 | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | Vert | 1 | — | [Rechercher](https://octopart.com/search?q=150060VS75000) |
 | APHBM2012LSURKZGKC | LED bicolore 2x1.25 mm SMD | [Kingbright](https://www.kingbrightusa.com/) | Rouge/Vert | 1 | — | [Rechercher](https://octopart.com/search?q=APHBM2012LSURKZGKC) |

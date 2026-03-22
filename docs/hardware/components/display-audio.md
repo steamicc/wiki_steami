@@ -23,7 +23,7 @@ title: "Ecran et audio"
 
 | Composant | Description | Fabricant | Qte | Datasheet | Octopart |
 |-----------|-------------|-----------|-----|-----------|----------|
-| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R) | 1 | [Web](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R) | [Rechercher](https://octopart.com/search?q=SMT-0825-S-HT-R) |
+| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R) | 1 | — | [Rechercher](https://octopart.com/search?q=SMT-0825-S-HT-R) |
 
 ### Caracteristiques
 
