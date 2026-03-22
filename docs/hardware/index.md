@@ -195,7 +195,7 @@ La memoire flash externe est connectee au processeur d'interface (STM32F103) pou
 
 | Caracteristique | Detail                                                                                                                                                                        |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Modele          | [W25Q64JVZPIM](https://www.winbond.com/hq/product/code-storage-flash-memory/serial-nor-flash/?__locale=en&partNo=W25Q64JV)                                                    |
+| Modele          | [W25Q64JVZPIM](https://www.winbond.com/hq/new-online-purchasing-guide/?__locale=en&pLine=/product/code-storage-flash/qspi-nor/&pNo=W25Q64JV)                                                    |
 | Capacite        | 64 Mbit (8 Mo)                                                                                                                                                                |
 | Interface       | SPI / Quad-SPI (QPI, DTR)                                                                                                                                                     |
 | Frequence       | Jusqu'a 133 MHz                                                                                                                                                               |
