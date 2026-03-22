@@ -7,9 +7,9 @@ title: "Ecran et audio"
 
 ## Ecran OLED
 
-| Composant | Description | Fabricant | Reference | Qte | Liens |
-|-----------|-------------|-----------|-----------|-----|-------|
-| WEO128128BWPP3N00001 | Module OLED graphique blanc 128x128, COG (Chip on Glass), Longlife | Winstar | WEO128128BWPP3N00001 | 1 | [Detail](../main-components/display) · [Octopart](https://octopart.com/search?q=WEO128128BWPP3N00001) |
+| Composant | Description | Fabricant | Qte | Datasheet | Octopart |
+|-----------|-------------|-----------|-----|-----------|----------|
+| [WEO128128BWPP3N00001](../main-components/display) | Module OLED graphique blanc 128x128, COG (Chip on Glass), Longlife | Winstar | 1 | — | [Rechercher](https://octopart.com/search?q=WEO128128BWPP3N00001) |
 
 ### Caracteristiques
 
@@ -21,9 +21,9 @@ title: "Ecran et audio"
 
 ## Transducteur audio (Buzzer)
 
-| Composant | Description | Fabricant | Reference | Qte | Liens |
-|-----------|-------------|-----------|-----------|-----|-------|
-| SMT-0825-S-HT-R | Transducteur piezo montage en surface, 3.6V pic-a-pic | PUI Audio Inc | SMT-0825-S-HT-R | 1 | [Detail](../main-components/buttons-audio) · [Datasheet](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R) · [Octopart](https://octopart.com/search?q=SMT-0825-S-HT-R) |
+| Composant | Description | Fabricant | Qte | Datasheet | Octopart |
+|-----------|-------------|-----------|-----|-----------|----------|
+| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | PUI Audio Inc | 1 | [Web](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R) | [Rechercher](https://octopart.com/search?q=SMT-0825-S-HT-R) |
 
 ### Caracteristiques
 

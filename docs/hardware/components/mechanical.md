@@ -7,11 +7,11 @@ title: "Composants mecaniques"
 
 ## Boutons et interrupteurs
 
-| Composant | Description | Fabricant | Reference | Qte | Liens |
-|-----------|-------------|-----------|-----------|-----|-------|
-| PTS636 SM25J SMTR LFS | Interrupteur tactile montage en surface | C&K | PTS636 SM25J SMTR LFS | 1 | [Octopart](https://octopart.com/search?q=PTS636+SM25J) |
-| PTS647SM38SMTR2LFS | Interrupteur tactile 50 mA 12 VDC, 1.8N, hauteur 3.8 mm | C&K | PTS647SM38SMTR2LFS | 3 | [Octopart](https://octopart.com/search?q=PTS647SM38SMTR2LFS) |
-| SKRHABE010 | Joystick 4 directions avec fonction push central | ALPS | SKRHABE010 | 1 | [Octopart](https://octopart.com/search?q=SKRHABE010) |
+| Composant | Description | Fabricant | Qte | Datasheet | Octopart |
+|-----------|-------------|-----------|-----|-----------|----------|
+| PTS636 SM25J SMTR LFS | Interrupteur tactile montage en surface | C&K | 1 | — | [Rechercher](https://octopart.com/search?q=PTS636+SM25J) |
+| PTS647SM38SMTR2LFS | Interrupteur tactile 50 mA 12 VDC, 1.8N, hauteur 3.8 mm | C&K | 3 | — | [Rechercher](https://octopart.com/search?q=PTS647SM38SMTR2LFS) |
+| [SKRHABE010](../main-components/buttons-audio) | Joystick 4 directions avec fonction push central | ALPS | 1 | — | [Rechercher](https://octopart.com/search?q=SKRHABE010) |
 
 ## Details
 

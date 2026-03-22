@@ -5,11 +5,11 @@ title: "Cristaux"
 
 # Cristaux et oscillateurs
 
-| Composant | Description | Fabricant | Reference | Qte | Liens |
-|-----------|-------------|-----------|-----------|-----|-------|
-| 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm | Wurth | 830103552209 | 1 | [Datasheet](https://www.we-online.com/en/components/products/WE-QUARZ) · [Octopart](https://octopart.com/search?q=830103552209) |
-| 830062558 | Quartz 32 kHz, 12 pF, 30 ppm | Wurth | 830062558 | 1 | [Octopart](https://octopart.com/search?q=830062558) |
-| 830108313809 | Quartz 8 MHz, 12 pF, 20 ppm | Wurth | 830108313809 | 1 | [Octopart](https://octopart.com/search?q=830108313809) |
+| Composant | Description | Fabricant | Qte | Datasheet | Octopart |
+|-----------|-------------|-----------|-----|-----------|----------|
+| 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm | Wurth | 1 | [Web](https://www.we-online.com/en/components/products/WE-QUARZ) | [Rechercher](https://octopart.com/search?q=830103552209) |
+| 830062558 | Quartz 32 kHz, 12 pF, 30 ppm | Wurth | 1 | — | [Rechercher](https://octopart.com/search?q=830062558) |
+| 830108313809 | Quartz 8 MHz, 12 pF, 20 ppm | Wurth | 1 | — | [Rechercher](https://octopart.com/search?q=830108313809) |
 
 ## Utilisation
 
