@@ -25,11 +25,23 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 3
 
-# Exclure les sites qui bloquent les requêtes automatisées malgré le user-agent
+# Exclure les sites incompatibles avec lychee
+# - localhost/example : pas de réseau
+# - st.com, tdk.com, te.com, molex.com : erreurs HTTP/2 (lychee ne supporte pas HTTP/1.1)
+# - yageo.com, smcdiode.com : connection reset (protection anti-bot)
+# - industrial.panasonic.com : timeout systématique
+# Ces liens sont valides dans un navigateur — vérification manuelle périodique recommandée
 exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
+  "www\\.st\\.com",
+  "www\\.tdk\\.com",
+  "www\\.te\\.com",
+  "www\\.molex\\.com",
+  "www\\.yageo\\.com",
+  "www\\.smcdiode\\.com",
+  "industrial\\.panasonic\\.com",
 ]
 
 # Exclure les répertoires
