@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start",
+    "start": "npm run prebuild && docusaurus start",
     "prebuild": "bash scripts/fetch-examples.sh",
     "build": "npm run prebuild && docusaurus build",
     "swizzle": "docusaurus swizzle",
