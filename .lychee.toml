@@ -1,16 +1,12 @@
 # Configuration lychee pour la vérification des liens externes
 # https://lychee.cli.rs/usage/config/
 
-# Ne vérifier que les liens HTTP/HTTPS (ignorer les liens relatifs Markdown)
+# Ne vérifier que les liens HTTP/HTTPS
+# Les liens internes HTML (relatifs) sont résolus par le build Docusaurus
 include_mail = false
 scheme = ["https", "http"]
 
-# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/...)
-root_dir = "static"
-
-# User-agent qui imite curl pour éviter les blocages anti-bot et HTTP/2
-# Note : lychee ne supporte pas le forçage HTTP/1.1, mais un user-agent
-# reconnu réduit les erreurs avec certains sites (st.com, molex, te.com)
+# User-agent curl pour réduire les blocages anti-bot
 user_agent = "curl/8.0"
 
 # Accepter les codes de réponse courants
@@ -25,7 +21,7 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 3
 
-# Exclure les sites qui bloquent les requêtes automatisées malgré le user-agent
+# Exclure uniquement localhost et exemples
 exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
@@ -35,6 +31,5 @@ exclude = [
 # Exclure les répertoires
 exclude_path = [
   "node_modules",
-  "build",
   ".docusaurus",
 ]
