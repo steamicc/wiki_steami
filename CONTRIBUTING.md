@@ -1,12 +1,12 @@
 # Contribuer au Wiki STeaMi
 
-Merci de contribuer au wiki technique de la carte STeaMi ! Ce guide decrit les conventions et le workflow a suivre.
+Merci de contribuer au wiki technique de la carte STeaMi ! Ce guide décrit les conventions et le workflow à suivre.
 
-## Prerequis
+## Prérequis
 
 - Node.js >= 20.17
 - npm
-- Docker (optionnel, pour la verification des liens externes)
+- Docker (optionnel, pour la vérification des liens externes)
 
 ## Installation
 
@@ -16,25 +16,25 @@ cd wiki_steami
 npm ci
 ```
 
-Les hooks Git (husky) sont installes automatiquement via `npm ci`.
+Les hooks Git (husky) sont installés automatiquement via `npm ci`.
 
 ## Commandes utiles
 
 | Commande               | Description                                         |
 | ---------------------- | --------------------------------------------------- |
-| `npm start`            | Lancer le serveur de developpement (localhost:3000) |
+| `npm start`            | Lancer le serveur de développement (localhost:3000) |
 | `npm run build`        | Builder le site en production                       |
 | `npm run format`       | Formater tous les fichiers (Prettier)               |
-| `npm run format:check` | Verifier le formatage                               |
-| `npm run lint:md`      | Verifier le Markdown (markdownlint)                 |
-| `npm run lint:md:fix`  | Corriger automatiquement le Markdown                |
-| `npm run lint:js`      | Verifier le JavaScript (ESLint)                     |
+| `npm run format:check` | Vérifier le formatage                               |
+| `npm run lint:md`      | Vérifier le Markdown sous `docs/` (markdownlint)    |
+| `npm run lint:md:fix`  | Corriger automatiquement le Markdown sous `docs/`   |
+| `npm run lint:js`      | Vérifier le JavaScript (ESLint)                     |
 | `npm run lint:js:fix`  | Corriger automatiquement le JavaScript              |
-| `npm run lint:links`   | Verifier les liens externes (Docker requis)         |
+| `npm run lint:links`   | Vérifier les liens externes (Docker requis)         |
 
 ## Conventions de branche
 
-Les noms de branche sont valides automatiquement au commit (`validate-branch-name`).
+Les noms de branche sont validés automatiquement au commit (`validate-branch-name`).
 
 | Format                   | Exemple                         |
 | ------------------------ | ------------------------------- |
@@ -46,11 +46,11 @@ Les noms de branche sont valides automatiquement au commit (`validate-branch-nam
 | `refactor/<description>` | `refactor/move-components`      |
 | `release/vX.Y.Z`         | `release/v1.0.0`                |
 
-La description est en **kebab-case** (minuscules, mots separes par des tirets).
+La description est en **kebab-case** (minuscules, mots séparés par des tirets).
 
 ## Conventions de commit
 
-Les messages de commit suivent les [Conventional Commits](https://www.conventionalcommits.org/) et sont valides automatiquement au commit (`commitlint`).
+Les messages de commit suivent les [Conventional Commits](https://www.conventionalcommits.org/) et sont validés automatiquement au commit (`commitlint`).
 
 ### Format
 
@@ -66,12 +66,12 @@ Les messages de commit suivent les [Conventional Commits](https://www.convention
 
 | Type       | Usage                                            |
 | ---------- | ------------------------------------------------ |
-| `feat`     | Nouvelle fonctionnalite, nouveau contenu         |
-| `fix`      | Correction de bug, lien casse, erreur de contenu |
+| `feat`     | Nouvelle fonctionnalité, nouveau contenu         |
+| `fix`      | Correction de bug, lien cassé, erreur de contenu |
 | `docs`     | Documentation uniquement (README, CONTRIBUTING)  |
 | `ci`       | Configuration CI/CD, workflows, hooks            |
-| `chore`    | Maintenance, nettoyage, dependances              |
-| `refactor` | Reorganisation sans changement fonctionnel       |
+| `chore`    | Maintenance, nettoyage, dépendances              |
+| `refactor` | Réorganisation sans changement fonctionnel       |
 | `style`    | Formatage, espaces, points-virgules              |
 
 ### Scopes (optionnels)
@@ -89,18 +89,18 @@ refactor: move components/ under hardware/
 chore: remove old requirements section
 ```
 
-### Regles
+### Règles
 
 - Le sujet est en **minuscules** (lower-case)
-- Pas de point a la fin du sujet
-- Le body est limite a 100 caracteres par ligne (warning)
+- Pas de point à la fin du sujet
+- Le body est limité à 100 caractères par ligne (warning)
 
 ## Workflow de contribution
 
-1. **Creer une issue** decrivant le changement
-2. **Creer une branche** depuis `main` (format : `feat/description`)
-3. **Developper** en commitant regulierement (conventional commits)
-4. **Verifier localement** :
+1. **Créer une issue** décrivant le changement
+2. **Créer une branche** depuis `main` (format : `feat/description`)
+3. **Développer** en commitant régulièrement (conventional commits)
+4. **Vérifier localement** :
 
    ```bash
    npm run format:check
@@ -110,21 +110,26 @@ chore: remove old requirements section
    ```
 
 5. **Ouvrir une Pull Request** avec une description du changement
-6. **Attendre la CI** : format + lint:md + lint:js + build + broken links check
+6. **Attendre la CI** : commitlint + format + lint:md + lint:js + build + broken links check
 7. **Attendre la review** : 1 approbation requise
-8. **Merge** : squash merge sur main (historique lineaire)
+8. **Merge** : squash merge sur main (historique linéaire)
 
-## Hooks pre-commit automatiques
+## Hooks automatiques
 
-Les hooks suivants sont executes automatiquement a chaque commit :
+Les hooks suivants sont exécutés automatiquement à chaque commit :
 
-1. **validate-branch-name** — verifie le nom de la branche
-2. **git-precommit-checks** — detecte FIXME/TODO, marqueurs de conflits, console.log
-3. **lint-staged** — execute les linters sur les fichiers stages :
+### Pre-commit (`.husky/pre-commit`)
+
+1. **validate-branch-name** — vérifie le nom de la branche
+2. **git-precommit-checks** — détecte FIXME/TODO, marqueurs de conflits, console.log
+3. **lint-staged** — exécute sur les fichiers stagés uniquement :
    - `*.md` : markdownlint
-   - `*.js/*.jsx` : eslint + prettier
-   - `*.json/*.css/*.yml` : prettier
-4. **commitlint** (hook commit-msg) — valide le message de commit
+   - `*.js/*.jsx` : eslint + prettier --check
+   - `*.json/*.css/*.yml` : prettier --check
+
+### Commit-msg (`.husky/commit-msg`)
+
+1. **commitlint** — valide le message de commit (conventional commits)
 
 ## Structure du projet
 
@@ -133,12 +138,12 @@ Voir le [README](README.md) pour la structure des dossiers.
 ## Protection de la branche main
 
 - Push direct interdit — toute modification passe par une PR
-- Le build CI doit passer (format + lint + build)
+- Le build CI doit passer (commitlint + format + lint + build)
 - 1 approbation de review requise
-- Historique lineaire (squash merge)
+- Historique linéaire (squash merge)
 
 ## Aide
 
-- [Issues](https://github.com/steamicc/wiki_steami/issues) — signaler un probleme ou proposer un changement
+- [Issues](https://github.com/steamicc/wiki_steami/issues) — signaler un problème ou proposer un changement
 - [Site](https://wiki.steami.cc) — le wiki en production
 - [MicroPython Drivers](https://github.com/steamicc/micropython-steami-lib) — les drivers STeaMi
