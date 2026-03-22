@@ -40,6 +40,7 @@ Le reference design complet (Altium) est disponible sur GitHub :
 - [steamicc/steami-reference-design](https://github.com/steamicc/steami-reference-design)
 
 Il contient :
+
 - Les fichiers schema Altium (`.SchDoc`)
 - Le PCB (`.PcbDoc`)
 - Les fichiers de fabrication (GERBER, BOM, Pick and Place)

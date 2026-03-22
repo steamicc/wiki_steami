@@ -71,7 +71,6 @@ Le bus I2C1 est partage entre le STM32WB55 et le STM32F103 (DAPLink), permettant
 
 [![Schema FP6-Microcontroleur_applicatif](/img/schematics/FP6-Microcontroleur_applicatif.png)](/docs/schematics/FP6-Microcontroleur_applicatif.pdf)
 
-
 - [Schema Altium — FP6](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP6-Microcontroleur.SchDoc)
 
 ## Voir aussi

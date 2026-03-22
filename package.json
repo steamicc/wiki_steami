@@ -11,7 +11,9 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids"
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "lint:md": "markdownlint 'docs/**/*.md'",
+    "lint:md:fix": "markdownlint --fix 'docs/**/*.md'"
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",
@@ -24,7 +26,8 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
-    "@docusaurus/types": "3.9.2"
+    "@docusaurus/types": "3.9.2",
+    "markdownlint-cli": "^0.48.0"
   },
   "browserslist": {
     "production": [

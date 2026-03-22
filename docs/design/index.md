@@ -10,6 +10,7 @@ Cette section documente les choix de conception de la carte STeaMi et les exigen
 ## Organisation
 
 Les exigences sont regroupées par domaine fonctionnel. Chaque domaine présente :
+
 - Les **exigences** (identifiées FCT-xx, ENV-xx, PHY-xx) sous forme de tableau
 - Les **choix de conception** qui répondent à ces exigences
 - La **traçabilité** entre exigences et implémentation

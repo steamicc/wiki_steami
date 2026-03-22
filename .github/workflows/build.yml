@@ -28,6 +28,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Lint Markdown
+        run: npm run lint:md
+
       - name: Build site
         run: |
           set -o pipefail

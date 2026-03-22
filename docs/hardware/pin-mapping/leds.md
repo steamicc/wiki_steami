@@ -26,6 +26,7 @@ La LED RGB peut etre programmee par l'utilisateur.
 | LED_BLE | BOOT0/LED_BLE | PH3 |
 
 Comportement :
+
 - Clignotement bleu (duty cycle 50%) pendant l'appairage BLE
 - Eteinte apres 30 secondes d'inactivite
 
