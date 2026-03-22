@@ -72,7 +72,7 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'softwareSidebar',
             position: 'left',
-            label: '💻 Software',
+            label: '💻 Programmation',
           },
           {
             type: 'docSidebar',
@@ -101,7 +101,7 @@ const config = {
             items: [
               { label: "Vue d'ensemble", to: '/docs/overview' },
               { label: 'Hardware', to: '/docs/hardware' },
-              { label: 'Software', to: '/docs/software' },
+              { label: 'Programmation', to: '/docs/software' },
               { label: 'Conception', to: '/docs/design' },
             ],
           },
