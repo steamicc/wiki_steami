@@ -8,9 +8,7 @@ scheme = ["https", "http"]
 # Racine pour résoudre les chemins root-relatifs (/img/..., /docs/...)
 root_dir = "static"
 
-# User-agent qui imite curl pour éviter les blocages anti-bot et HTTP/2
-# Note : lychee ne supporte pas le forçage HTTP/1.1, mais un user-agent
-# reconnu réduit les erreurs avec certains sites (st.com, molex, te.com)
+# User-agent curl pour réduire les blocages anti-bot
 user_agent = "curl/8.0"
 
 # Accepter les codes de réponse courants
@@ -25,11 +23,21 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 3
 
-# Exclure les sites qui bloquent les requêtes automatisées malgré le user-agent
+# Exclure les sites incompatibles HTTP/2 avec lychee
+# Lychee ne supporte pas HTTP/1.1 et ces sites bloquent HTTP/2 automatisé
+# Tous vérifiés manuellement comme fonctionnels dans un navigateur
+# TODO: migrer vers linkinator (Node) qui supporte HTTP/1.1 — voir issue à créer
 exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
+  "www\\.st\\.com",
+  "www\\.tdk\\.com",
+  "www\\.te\\.com",
+  "www\\.molex\\.com",
+  "www\\.yageo\\.com",
+  "www\\.smcdiode\\.com",
+  "industrial\\.panasonic\\.com",
 ]
 
 # Exclure les répertoires
