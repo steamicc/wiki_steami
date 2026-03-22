@@ -35,6 +35,7 @@ const config = {
           editUrl: 'https://github.com/steamicc/wiki_steami/edit/main/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
+          remarkPlugins: [require('./plugins/remark-code-file')],
         },
         blog: false,
         theme: {
