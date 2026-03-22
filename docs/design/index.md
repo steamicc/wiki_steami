@@ -29,4 +29,5 @@ Les exigences sont regroupées par domaine fonctionnel. Chaque domaine présente
 
 ## Voir aussi
 
-Les exigences dans leur format original sont egalement consultables dans la section [Requirements](../requirements/).
+- [Hardware](../hardware/) — Description du materiel
+- [Schemas](../hardware/schematic) — Fichiers Altium et PDF
