@@ -19,8 +19,8 @@ title: "Batterie"
 
 ## Autonomie
 
-- **Mode standard** : environ 1 jour
-- **Mode basse consommation** : 5 a 10 jours
+- **Mode standard** : environ 1 jour (cf. [FCT-06](../../design/power))
+- **Mode basse consommation** : 5 a 10 jours (cf. [FCT-07](../../design/power))
 
 ## Gestion
 
