@@ -1,6 +1,6 @@
 ---
 title: Conventions API des drivers
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Conventions API des drivers MicroPython
@@ -79,13 +79,13 @@ sensor.power_on()      # reprise des mesures
 
 ### Nommage des méthodes
 
-| Méthode              | Retour                      | Exemple                     |
-| -------------------- | --------------------------- | --------------------------- |
-| `<mesure>_raw()`     | Valeur brute du registre    | `pressure_raw()` → int      |
-| `<mesure>_<unité>()` | Valeur convertie avec unité | `pressure_hpa()` → float    |
-| `temperature()`      | Température en °C           | Exception : pas de suffixe  |
-| `humidity()`         | Humidité relative en %      | Exception : pas de suffixe  |
-| `read()`             | Tuple de toutes les mesures | `read()` → (pression, temp) |
+| Méthode                              | Retour                      | Exemple                     |
+| ------------------------------------ | --------------------------- | --------------------------- |
+| `<mesure>_raw()`                     | Valeur brute du registre    | `pressure_raw()` → int      |
+| `<mesure>_<unité>()`                 | Valeur convertie avec unité | `pressure_hpa()` → float    |
+| `temperature()` ou `temperature_c()` | Température en °C           | Varie selon le driver       |
+| `humidity()`                         | Humidité relative en %      | Sans suffixe                |
+| `read()`                             | Tuple de toutes les mesures | `read()` → (pression, temp) |
 
 ### Exemples concrets
 
@@ -189,6 +189,6 @@ Utilisation : `except Exception` (pas de bare `except`), chaînage avec `from ex
 
 ## Voir aussi
 
-- [Table des drivers](./index#drivers-disponibles) — Liste complète des 15 drivers
+- [Table des drivers](./) — Liste complète des 15 drivers
 - [Code source](https://github.com/steamicc/micropython-steami-lib) — Tous les drivers
 - [Issues de refactoring](https://github.com/steamicc/micropython-steami-lib/issues?q=is%3Aissue+is%3Aclosed+label%3Arefactoring) — Historique des conventions
