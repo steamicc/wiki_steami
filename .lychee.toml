@@ -1,8 +1,12 @@
 # Configuration lychee pour la vérification des liens externes
 # https://lychee.cli.rs/usage/config/
 
-# Accepter les codes de réponse courants
-accept = [200, 204, 301, 302]
+# Ne vérifier que les liens HTTP/HTTPS (ignorer les liens relatifs Markdown)
+include_mail = false
+scheme = ["https", "http"]
+
+# Accepter les codes de réponse courants (y compris 403 pour certains sites)
+accept = [200, 204, 301, 302, 403, 429]
 
 # Timeout par requête
 timeout = 30
