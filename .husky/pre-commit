@@ -1,0 +1,2 @@
+npx git-precommit-checks
+npx lint-staged
