@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: build-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build site
+        run: npm run build 2>&1 | tee build.log
+
+      - name: Check for broken links
+        run: |
+          if grep -q "Docusaurus found broken links" build.log; then
+            echo "::error::Broken links detected in the build output"
+            grep -A 100 "Exhaustive list of all broken links" build.log || true
+            exit 1
+          fi
+          echo "No broken links found"
