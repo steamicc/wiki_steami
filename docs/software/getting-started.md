@@ -76,21 +76,10 @@ Exemple : lire l'accéléromètre ISM330DL sans installation permanente.
 mpremote mount lib/ism330dl run lib/ism330dl/examples/basic_read.py
 ```
 
-Ou avec le code directement :
+Ou avec le code complet de l'exemple :
 
-```python
-from machine import I2C
-from time import sleep_ms
-from ism330dl import ISM330DL
+```python file=.external/micropython-steami-lib/lib/ism330dl/examples/basic_read.py
 
-i2c = I2C(1)
-imu = ISM330DL(i2c)
-
-while True:
-    ax, ay, az = imu.acceleration_g()
-    temp = imu.temperature_c()
-    print(f"Accel: X={ax:+.2f} Y={ay:+.2f} Z={az:+.2f} g  Temp: {temp:.1f}°C")
-    sleep_ms(500)
 ```
 
 ## Installer un driver

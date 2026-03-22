@@ -5,3 +5,4 @@ static/img/
 .docusaurus/
 package-lock.json
 *.toml
+.external/
