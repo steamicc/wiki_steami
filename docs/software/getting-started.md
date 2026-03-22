@@ -70,16 +70,16 @@ mpremote run hello.py
 
 ## Lire un capteur
 
-Exemple : lire l'accéléromètre ISM330DL sans installation permanente.
-
-```python file=.external/micropython-steami-lib/lib/ism330dl/examples/basic_read.py
-
-```
-
-Pour l'exécuter sur la carte :
+Exemple : lire l'accéléromètre ISM330DL sans installation permanente :
 
 ```bash
 mpremote mount lib/ism330dl run lib/ism330dl/examples/basic_read.py
+```
+
+Voici le contenu de cet exemple :
+
+```python file=.external/micropython-steami-lib/lib/ism330dl/examples/basic_read.py
+
 ```
 
 ## Installer un driver
