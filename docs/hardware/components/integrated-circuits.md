@@ -36,7 +36,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 | [LMR62421XMF](../main-components/power/) | Regulateur step-up 24V 2.1A | [Texas Instruments](https://www.ti.com/product/LMR62421) | LMR62421XMF_NOPB <br/><OctopartButton q="LMR62421XMF" /> | 1 | — |
 | AP3015AKTR-G1 | Convertisseur step-down double | [Diodes Inc.](https://www.diodes.com/part/view/AP3015A) | AP3015AKTR-G1 <br/><OctopartButton q="AP3015AKTR-G1" /> | 1 | — |
 | [LD3985M33R](../main-components/power/) | Regulateur LDO 3.3V 150 mA | [STMicroelectronics](https://www.st.com/en/power-management/ld3985.html) | LD3985M33R <br/><OctopartButton q="LD3985M33R" /> | 1 | [PDF](https://www.st.com/resource/en/datasheet/ld3985.pdf) |
-| [DIO7003LEST5](../main-components/power/) | Switch de distribution d'alimentation 5.5V basse perte | DIOO Microcircuits | DIO7003LEST5 <br/><OctopartButton q="DIO7003LEST5" /> | 1 | — |
+| [DIO7003LEST5](../main-components/power/) | Switch de distribution d'alimentation 5.5V basse perte | [DIOO Microcircuits](https://www.dioo.com/#/ProductsDetail?id=1500) | DIO7003LEST5 <br/><OctopartButton q="DIO7003LEST5" /> | 1 | [PDF](https://www.dioo.com/uploads/product/20210527/39809ef9c4aeae798493447426d5dd7c.pdf) |
 
 ## Autres circuits integres
 
