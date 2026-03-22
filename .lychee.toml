@@ -5,7 +5,15 @@
 include_mail = false
 scheme = ["https", "http"]
 
-# Accepter les codes de réponse courants (y compris 403 pour certains sites)
+# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/...)
+root_dir = "static"
+
+# User-agent qui imite curl pour éviter les blocages anti-bot et HTTP/2
+# Note : lychee ne supporte pas le forçage HTTP/1.1, mais un user-agent
+# reconnu réduit les erreurs avec certains sites (st.com, molex, te.com)
+user_agent = "curl/8.0"
+
+# Accepter les codes de réponse courants
 accept = [200, 204, 301, 302, 403, 429]
 
 # Timeout par requête
@@ -15,9 +23,9 @@ timeout = 30
 max_retries = 3
 
 # Limiter la concurrence pour éviter le rate limiting
-max_concurrency = 5
+max_concurrency = 3
 
-# Exclure les liens internes et localhost
+# Exclure les sites qui bloquent les requêtes automatisées malgré le user-agent
 exclude = [
   "localhost",
   "127\\.0\\.0\\.1",
