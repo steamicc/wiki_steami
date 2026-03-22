@@ -11,13 +11,13 @@ Capteur de pression absolue avec haute resolution 24 bits. Permet de mesurer la 
 
 | Caracteristique | Detail                                                                      |
 | --------------- | --------------------------------------------------------------------------- |
-| Modele          | [2511020213301](https://www.we-online.com/en/components/products/WSEN-PADS) |
+| Modele          | [2511020213301](https://www.we-online.com/en/components/products/WSEN-PADS_1) |
 | Fabricant       | Wurth Elektronik                                                            |
 | Plage           | 26 kPa a 126 kPa (absolu)                                                   |
 | Resolution      | 24 bits                                                                     |
 | Interface       | I2C / SPI                                                                   |
 | Boitier         | 10-WFLGA                                                                    |
-| Datasheet       | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS)     |
+| Datasheet       | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)     |
 
 ## Schemas
 
