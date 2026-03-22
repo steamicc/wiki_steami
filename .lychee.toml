@@ -1,0 +1,28 @@
+# Configuration lychee pour la vérification des liens externes
+# https://lychee.cli.rs/usage/config/
+
+# Accepter les codes de réponse courants
+accept = [200, 204, 301, 302]
+
+# Timeout par requête
+timeout = 30
+
+# Nombre max de tentatives
+max_retries = 3
+
+# Limiter la concurrence pour éviter le rate limiting
+max_concurrency = 5
+
+# Exclure les liens internes et localhost
+exclude = [
+  "localhost",
+  "127\\.0\\.0\\.1",
+  "example\\.com",
+]
+
+# Exclure les répertoires
+exclude_path = [
+  "node_modules",
+  "build",
+  ".docusaurus",
+]
