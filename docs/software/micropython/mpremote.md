@@ -71,19 +71,13 @@ mpremote rm :main.py
 mpremote reset
 ```
 
-### Entrer en mode bootloader
-
-```bash
-mpremote bootloader
-```
-
 ## Combinaison de commandes
 
 mpremote permet de chaîner plusieurs commandes :
 
 ```bash
 mpremote mount lib/ism330dl run examples/basic_read.py
-mpremote cp -r lib/ism330dl/ism330dl :lib/ + reset
+mpremote cp -r lib/ism330dl/ism330dl :lib/ + soft-reset
 ```
 
 ## Workflow de développement recommandé
