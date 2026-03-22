@@ -126,6 +126,7 @@ L'expandeur MCP23009 fournit 8 GPIO supplementaires, utilises pour les boutons d
 | GP7 | UP_BUTTON | Bouton directionnel haut |
 
 **Signaux de controle :**
+
 - **RST_EXPANDER** → PB1 (STM32WB55) : Reset de l'expandeur
 - **INT_EXPANDER** → PB0 (STM32WB55) : Interruption de l'expandeur
 
@@ -134,6 +135,7 @@ L'expandeur MCP23009 fournit 8 GPIO supplementaires, utilises pour les boutons d
 #### Connecteur Edge (micro:bit compatible)
 
 Le connecteur edge fournit un acces aux broches P0-P20 avec support pour :
+
 - 6 entrees analogiques (P0-P4, P10)
 - GPIO numeriques
 - SPI (P13-P15)
@@ -143,17 +145,20 @@ Le connecteur edge fournit un acces aux broches P0-P20 avec support pour :
 #### Connecteur STEMMA/Qwiic
 
 Deux connecteurs JST 4 broches (pas 2 mm) pour capteurs I2C externes.
+
 - Bus I2C3 (SCL: PC0, SDA: PC1)
 
 #### Connecteur Jacdac
 
 Interface serie pour la connexion de modules Jacdac.
+
 - JACDAC_DATA (UART2_TX/RX) → PB6/PB7
 - JACDAC_P : alimentation 5V
 
 #### Pads crocodile
 
 Pads accessibles avec des pinces crocodile autour de la carte :
+
 - P0, P1, P2 : entrees analogiques
 - P24, P25, P28, P29 : GPIO via expandeur MCP23009
 - 3V3, GND : alimentation

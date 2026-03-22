@@ -34,6 +34,7 @@ Les boutons A et B sont connectes directement au STM32WB55 et sont partages avec
 | MENU_BUTTON | MENU_BOUTON | PA0 | Menu |
 
 Le bouton Menu a plusieurs fonctions :
+
 - Acces au menu de la carte
 - Reveil depuis le mode basse consommation (sleep)
 - Appairage BLE (appui long a l'allumage)

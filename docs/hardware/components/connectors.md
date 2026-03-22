@@ -21,6 +21,7 @@ Voir les sous-pages connecteurs pour les details fonctionnels : [Connecteurs →
 ### Connecteur micro-USB
 
 Le connecteur micro-USB (GCT USB3080-30-00-A) assure :
+
 - Alimentation 5V de la carte
 - Communication USB (DAPLink, WebUSB, Mass Storage)
 - Programmation du microcontroleur applicatif
@@ -33,12 +34,14 @@ Connecteur 2 broches au pas de 1.25 mm pour batterie LiPo 3.7V.
 ### Connecteur ecran OLED
 
 Connecteur FFC/FPC 24 positions pour l'ecran OLED Winstar WEO128128BWPP3N00001.
+
 - Type : Slider, angle droit, contact superieur
 - Pas : 0.50 mm
 
 ### Connecteurs STEMMA/Qwiic
 
 Deux connecteurs JST 4 broches pour capteurs I2C externes.
+
 - Bus : I2C3 (SCL: PC0, SDA: PC1)
 - Alimentation : 3.3V
 - Compatible avec les ecosystemes Adafruit STEMMA QT et SparkFun Qwiic
