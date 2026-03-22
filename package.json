@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:js": "eslint .",
-    "lint:js:fix": "eslint --fix ."
+    "lint:js:fix": "eslint --fix .",
+    "lint:links": "docker run --rm -v $PWD:/input lycheeverse/lychee --config /input/.lychee.toml '/input/docs/**/*.md' '/input/README.md'"
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",
