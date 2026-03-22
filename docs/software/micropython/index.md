@@ -29,18 +29,15 @@ MicroPython est le langage le mieux supporté sur la carte STeaMi, avec 15 drive
 
 ## Conventions API des drivers
 
-Tous les drivers suivent des conventions standardisées (issues [#56-#82](https://github.com/steamicc/micropython-steami-lib/issues?q=is%3Aissue+is%3Aclosed+label%3Arefactoring)) :
+Tous les drivers suivent des [**conventions standardisées**](./conventions) (issues [#56 à #82](https://github.com/steamicc/micropython-steami-lib/issues?q=is%3Aissue+is%3Aclosed+label%3Arefactoring)) :
 
 - **Initialisation** : `sensor = Driver(i2c)` avec `i2c = I2C(1)`
-- **Paramètre I2C** : nommé `i2c` (pas `bus`)
-- **Constantes** : dans `const.py` avec `micropython.const()`
-- **Helpers I2C** : `_read_reg()`, `_write_reg()` standardisés
-- **Power** : `power_on()`, `power_off()`
-- **ID** : `device_id()` retourne l'identifiant du composant
-- **Lecture** : `read()` ou méthodes spécifiques (`acceleration_g()`, `temperature_c()`)
-- **Nommage** : snake_case partout
-- **Exceptions** : `except Exception` (pas de bare `except`)
+- **Méthodes** : `device_id()`, `power_on()`, `power_off()`, `read()`, `data_ready()`
+- **Mesures** : `temperature()`, `pressure_hpa()`, `acceleration_g()`, `<mesure>_raw()`
 - **Auto-trigger** : les capteurs en mode power-down déclenchent automatiquement une mesure
+- **Calibration** : `set_temp_offset()`, `calibrate_temperature()` (deux points)
+
+[**Voir les conventions détaillées →**](./conventions)
 
 ## Installation et outils
 
