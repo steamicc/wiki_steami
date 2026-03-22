@@ -7,11 +7,11 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Cristaux et oscillateurs
 
-| Composant | Description | Fabricant | Qte | Datasheet | Octopart |
-|-----------|-------------|-----------|-----|-----------|----------|
-| 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 1 | — | <OctopartButton q="830103552209" /> |
-| 830062558 | Quartz 32 kHz, 12 pF, 30 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 1 | — | <OctopartButton q="830062558" /> |
-| 830108313809 | Quartz 8 MHz, 12 pF, 20 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 1 | — | <OctopartButton q="830108313809" /> |
+| Composant | Description | Fabricant | Reference | Qte | Datasheet |
+|-----------|-------------|-----------|-----------|-----|-----------|
+| 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 830103552209 <br/><OctopartButton q="830103552209" /> | 1 | — |
+| 830062558 | Quartz 32 kHz, 12 pF, 30 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 830062558 <br/><OctopartButton q="830062558" /> | 1 | — |
+| 830108313809 | Quartz 8 MHz, 12 pF, 20 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-QUARZ) | 830108313809 <br/><OctopartButton q="830108313809" /> | 1 | — |
 
 ## Utilisation
 

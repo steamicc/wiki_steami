@@ -13,7 +13,7 @@ export default function OctopartButton({ q }) {
         gap: '4px',
         padding: '2px 8px',
         borderRadius: '4px',
-        fontSize: '0.8rem',
+        fontSize: '0.75rem',
         border: '1px solid var(--ifm-color-emphasis-300)',
         textDecoration: 'none',
         color: 'inherit',
