@@ -4,3 +4,4 @@ static/docs/
 static/img/
 .docusaurus/
 package-lock.json
+*.toml

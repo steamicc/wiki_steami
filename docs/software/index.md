@@ -27,4 +27,4 @@ La carte STeaMi est programmable en plusieurs langages. Cette section documente 
 
 - [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython
 - [DAPLink](https://github.com/steamicc/DAPLink) — Firmware du STM32F103
-- [MicroPython](https://docs.micropython.org/) — Documentation officielle MicroPython
+- [MicroPython](https://docs.micropython.org/en/latest/) — Documentation officielle MicroPython

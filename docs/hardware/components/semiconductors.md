@@ -17,12 +17,12 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 ## Diodes Schottky
 
-| Composant     | Description                     | Fabricant                               | Reference                                               | Qte | Datasheet |
-| ------------- | ------------------------------- | --------------------------------------- | ------------------------------------------------------- | --- | --------- |
-| SS14HE        | Diode Schottky 40V 1A SDO-323HE | [onsemi](https://www.onsemi.com/)       | SS14HE <br/><OctopartButton q="SS14HE" />               | 1   | —         |
-| XBS104S14R-G  | Diode Schottky 40V 1A SOD-123   | [Torex](https://www.torexsemi.com/)     | XBS104S14R-G <br/><OctopartButton q="XBS104S14R-G" />   | 1   | —         |
-| CDBQR0140R-HF | Diode 40V 100 mA 0402C/SOD-923F | [Comchip](https://www.comchiptech.com/) | CDBQR0140R-HF <br/><OctopartButton q="CDBQR0140R-HF" /> | 2   | —         |
-| MBR130HWTR    | Diode Schottky 30V 1A SOD-123   | [SMC Diode](https://www.smcdiode.com/)  | MBR130HWTR <br/><OctopartButton q="MBR130HWTR" />       | 4   | —         |
+| Composant     | Description                     | Fabricant                                 | Reference                                               | Qte | Datasheet |
+| ------------- | ------------------------------- | ----------------------------------------- | ------------------------------------------------------- | --- | --------- |
+| SS14HE        | Diode Schottky 40V 1A SDO-323HE | [onsemi](https://www.onsemi.com/)         | SS14HE <br/><OctopartButton q="SS14HE" />               | 1   | —         |
+| XBS104S14R-G  | Diode Schottky 40V 1A SOD-123   | [Torex](https://www.torexsemi.com/)       | XBS104S14R-G <br/><OctopartButton q="XBS104S14R-G" />   | 1   | —         |
+| CDBQR0140R-HF | Diode 40V 100 mA 0402C/SOD-923F | [Comchip](https://www.comchiptech.com/en) | CDBQR0140R-HF <br/><OctopartButton q="CDBQR0140R-HF" /> | 2   | —         |
+| MBR130HWTR    | Diode Schottky 30V 1A SOD-123   | [SMC Diode](https://www.smcdiode.com/)    | MBR130HWTR <br/><OctopartButton q="MBR130HWTR" />       | 4   | —         |
 
 ## Transistors et MOSFET
 

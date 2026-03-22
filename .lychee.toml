@@ -5,14 +5,18 @@
 include_mail = false
 scheme = ["https", "http"]
 
-# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/...)
+# Racine pour résoudre les chemins root-relatifs (/img/..., /docs/schematics/...)
+# En CI : résolu depuis le repo. En Docker local : surchargé par --root-dir
 root_dir = "static"
 
 # User-agent curl pour réduire les blocages anti-bot
 user_agent = "curl/8.0"
 
 # Accepter les codes de réponse courants
-accept = [200, 204, 301, 302, 403, 429]
+# 200/204: OK, 301/302: redirections, 403: accès refusé (anti-bot),
+# 406: Not Acceptable (kyocera-avx.com), 429: rate limit,
+# 202: Accepted (infineon.com, réponse asynchrone)
+accept = [200, 202, 204, 301, 302, 403, 406, 429]
 
 # Timeout par requête
 timeout = 30
@@ -23,14 +27,14 @@ max_retries = 3
 # Limiter la concurrence pour éviter le rate limiting
 max_concurrency = 3
 
-# Exclure les sites incompatibles HTTP/2 avec lychee
-# Lychee ne supporte pas HTTP/1.1 et ces sites bloquent HTTP/2 automatisé
-# Tous vérifiés manuellement comme fonctionnels dans un navigateur
-# TODO: migrer vers linkinator (Node) qui supporte HTTP/1.1 — voir issue à créer
 exclude = [
+  # Liens locaux
   "localhost",
   "127\\.0\\.0\\.1",
   "example\\.com",
+
+  # Sites incompatibles HTTP/2 avec lychee (vérifiés manuellement OK)
+  # TODO: migrer vers linkinator pour supporter HTTP/1.1 — voir issue #98
   "www\\.st\\.com",
   "www\\.tdk\\.com",
   "www\\.te\\.com",

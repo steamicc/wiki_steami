@@ -9,12 +9,12 @@ Capteur double mesurant l'humidite relative et la temperature ambiante.
 
 ## Caracteristiques
 
-| Caracteristique | Detail                                                                      |
-| --------------- | --------------------------------------------------------------------------- |
+| Caracteristique | Detail                                                                        |
+| --------------- | ----------------------------------------------------------------------------- |
 | Modele          | [2525020210001](https://www.we-online.com/en/components/products/WSEN-HIDS_1) |
-| Fabricant       | Wurth Elektronik                                                            |
-| Mesures         | Humidite relative + temperature                                             |
-| Interface       | I2C / SPI                                                                   |
+| Fabricant       | Wurth Elektronik                                                              |
+| Mesures         | Humidite relative + temperature                                               |
+| Interface       | I2C / SPI                                                                     |
 | Datasheet       | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)     |
 
 :::tip
