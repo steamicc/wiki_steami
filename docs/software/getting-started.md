@@ -76,7 +76,7 @@ Exemple : lire l'accéléromètre ISM330DL sans installation permanente :
 mpremote mount lib/ism330dl run lib/ism330dl/examples/basic_read.py
 ```
 
-Voici le contenu de cet exemple :
+Contenu de `lib/ism330dl/examples/basic_read.py` :
 
 ```python file=.external/micropython-steami-lib/lib/ism330dl/examples/basic_read.py
 
