@@ -21,10 +21,16 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 | [**CODAL**](./codal/)             | Partielle | Runtime C++ avec support des principaux composants |
 | [**Arduino**](./arduino/)         | Minimale  | Support STM32duino de base, à développer           |
 
-## Outils et firmware
+## Outils et éditeurs
 
-- [**DAPLink**](./daplink) — Firmware du STM32F103 : protocole I2C, flash externe, config persistante, mise à jour
-- [**Compatibilité par composant**](./compatibility) — Matrice détaillée du support par langage et par composant
+- [**mpremote**](./micropython/mpremote) — Outil en ligne de commande officiel MicroPython
+- [**Thonny**](./micropython/thonny) — Éditeur graphique avec REPL intégré
+- [**Vittascience**](./micropython/vittascience) — IDE en ligne avec programmation par blocs
+
+## Firmware et infrastructure
+
+- [**DAPLink**](./daplink) — Firmware du STM32F103 : protocole I2C, flash externe, config persistante, installation
+- [**Compatibilité par composant**](./compatibility) — Matrice détaillée du support par langage
 
 ## Ressources
 

@@ -42,6 +42,13 @@ Tous les drivers suivent des conventions standardisées (issues [#56-#82](https:
 - **Exceptions** : `except Exception` (pas de bare `except`)
 - **Auto-trigger** : les capteurs en mode power-down déclenchent automatiquement une mesure
 
+## Installation et outils
+
+- [**Installation du firmware**](./install) — Flasher MicroPython sur la carte STeaMi
+- [**mpremote**](./mpremote) — Outil en ligne de commande (recommandé)
+- [**Thonny**](./thonny) — Éditeur graphique avec REPL intégré
+- [**Vittascience**](./vittascience) — IDE en ligne avec programmation par blocs
+
 ## Sections à venir
 
 - Tutoriels par composant (capteurs, écran, I/O, communication, stockage)
