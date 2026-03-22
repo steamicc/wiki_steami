@@ -79,13 +79,15 @@ sensor.power_on()      # reprise des mesures
 
 ### Nommage des méthodes
 
-| Méthode                              | Retour                      | Exemple                     |
-| ------------------------------------ | --------------------------- | --------------------------- |
-| `<mesure>_raw()`                     | Valeur brute du registre    | `pressure_raw()` → int      |
-| `<mesure>_<unité>()`                 | Valeur convertie avec unité | `pressure_hpa()` → float    |
-| `temperature()` ou `temperature_c()` | Température en °C           | Varie selon le driver       |
-| `humidity()`                         | Humidité relative en %      | Sans suffixe                |
-| `read()`                             | Tuple de toutes les mesures | `read()` → (pression, temp) |
+| Méthode              | Retour                      | Exemple                     |
+| -------------------- | --------------------------- | --------------------------- |
+| `<mesure>_raw()`     | Valeur brute du registre    | `pressure_raw()` → int      |
+| `<mesure>_<unité>()` | Valeur convertie avec unité | `pressure_hpa()` → float    |
+| `temperature()`      | Température en °C           | Unité SI → pas de suffixe   |
+| `humidity()`         | Humidité relative en %      | Unité SI → pas de suffixe   |
+| `read()`             | Tuple de toutes les mesures | `read()` → (pression, temp) |
+
+**Règle** : pas de suffixe d'unité quand c'est l'unité SI (°C, %). Suffixe obligatoire pour les unités non-SI (`_hpa`, `_g`, `_dps`, `_ut`).
 
 ### Exemples concrets
 
@@ -93,7 +95,7 @@ sensor.power_on()      # reprise des mesures
 # Accéléromètre
 ax, ay, az = imu.acceleration_g()       # en g
 gx, gy, gz = imu.gyroscope_dps()        # en degrés/s
-temp = imu.temperature_c()              # en °C
+temp = imu.temperature()                # en °C
 
 # Pression
 pressure = sensor.pressure_hpa()         # en hPa
