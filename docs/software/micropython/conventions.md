@@ -113,9 +113,9 @@ x, y, z = mag.magnetic_field_ut()        # en µT
 | `temperature_ready()` | `True` si la température est prête       |
 | `pressure_ready()`    | `True` si la pression est prête          |
 
-## Auto-trigger en mode power-down
+## Réveil automatique en mode power-down
 
-Les capteurs en mode power-down déclenchent automatiquement une mesure quand on lit une valeur. Le mécanisme interne :
+Si le capteur est en mode power-down, le driver déclenche automatiquement une mesure one-shot quand on appelle une méthode de lecture. Le mécanisme interne :
 
 1. `_is_power_down()` vérifie si l'ODR est à 0
 2. `_ensure_data()` déclenche un one-shot et attend les données

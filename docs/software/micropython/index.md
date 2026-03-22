@@ -34,7 +34,7 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 - **Initialisation** : `sensor = Driver(i2c)` avec `i2c = I2C(1)`
 - **Méthodes** : `device_id()`, `power_on()`, `power_off()`, `read()`, `data_ready()`
 - **Mesures** : `temperature()`, `pressure_hpa()`, `acceleration_g()`, `<mesure>_raw()`
-- **Auto-trigger** : les capteurs en mode power-down déclenchent automatiquement une mesure
+- **Réveil automatique** : si le capteur est en power-down, le driver déclenche une mesure one-shot à la lecture
 - **Calibration** : `set_temp_offset()`, `calibrate_temperature()` (deux points)
 
 [**Voir les conventions détaillées →**](./conventions)
