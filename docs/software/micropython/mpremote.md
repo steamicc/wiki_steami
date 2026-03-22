@@ -43,7 +43,7 @@ Permet d'utiliser des drivers sans les copier sur la carte :
 mpremote mount lib/ism330dl run lib/ism330dl/examples/basic_read.py
 ```
 
-Le contenu du dossier `lib/ism330dl` est disponible comme si il était sur la carte, uniquement pendant l'exécution.
+Le contenu du dossier `lib/ism330dl` est disponible comme s'il était sur la carte, uniquement pendant l'exécution.
 
 ### Copier des fichiers sur la carte
 
