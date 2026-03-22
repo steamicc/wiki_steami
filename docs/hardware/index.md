@@ -67,8 +67,8 @@ La carte integre 7 capteurs sur le bus I2C1 interne, couvrant distance, mouvemen
 | Accelerometre/Gyroscope | [ISM330DLC](https://www.st.com/en/mems-and-sensors/ism330dlc.html)                                                      | 6 axes + temperature           |
 | Magnetometre            | [LIS2MDL](https://www.st.com/en/mems-and-sensors/lis2mdl.html)                                                          | 3 axes magnetiques             |
 | Distance                | [VL53L1X](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html)                                           | Time-of-Flight, 0-4 m          |
-| Pression                | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)                                                 | 26-126 kPa, 24 bits            |
-| Humidite/Temperature    | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)                                                 | RH + °C                        |
+| Pression                | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)                                               | 26-126 kPa, 24 bits            |
+| Humidite/Temperature    | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)                                               | RH + °C                        |
 | Lumiere/Geste           | [APDS-9960](https://www.broadcom.com/products/optical-sensors/integrated-ambient-light-and-proximity-sensors/apds-9960) | ALS, couleur, proximite, geste |
 | Microphone              | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)                                                      | PDM MEMS omnidirectionnel      |
 
@@ -195,7 +195,7 @@ La memoire flash externe est connectee au processeur d'interface (STM32F103) pou
 
 | Caracteristique | Detail                                                                                                                                                                        |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Modele          | [W25Q64JVZPIM](https://www.winbond.com/hq/new-online-purchasing-guide/?__locale=en&pLine=/product/code-storage-flash/qspi-nor/&pNo=W25Q64JV)                                                    |
+| Modele          | [W25Q64JVZPIM](https://www.winbond.com/hq/new-online-purchasing-guide/?__locale=en&pLine=/product/code-storage-flash/qspi-nor/&pNo=W25Q64JV)                                  |
 | Capacite        | 64 Mbit (8 Mo)                                                                                                                                                                |
 | Interface       | SPI / Quad-SPI (QPI, DTR)                                                                                                                                                     |
 | Frequence       | Jusqu'a 133 MHz                                                                                                                                                               |

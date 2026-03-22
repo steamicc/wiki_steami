@@ -23,8 +23,8 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 ## Transducteur audio (Buzzer)
 
-| Composant                                           | Description                                           | Fabricant                                                             | Reference                                                   | Qte | Datasheet |
-| --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
+| Composant                                           | Description                                           | Fabricant                                                         | Reference                                                   | Qte | Datasheet |
+| --------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
 | [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/products/detail/SMT-0825-S-HT-R) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
 
 ### Caracteristiques du buzzer
