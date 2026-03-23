@@ -54,7 +54,7 @@ const config = {
         title: 'Documentation STeaMi',
         logo: {
           alt: 'Logo STeaMi',
-          src: 'img/logo-steami.svg',
+          src: 'img/logo-steami.png',
         },
         items: [
           {
