@@ -48,6 +48,9 @@ jobs:
           set -o pipefail
           npm run build 2>&1 | tee build.log
 
+      - name: Validate code examples
+        run: npm run lint:examples
+
       - name: Check for broken links
         run: |
           if grep -q "Docusaurus found broken links" build.log; then
