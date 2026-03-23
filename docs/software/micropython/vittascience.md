@@ -28,7 +28,7 @@ Vittascience nécessite un navigateur Chromium. Firefox et Safari ne supportent 
 
 ## Utilisation
 
-1. Aller sur [fr.vittascience.com/code](https://fr.vittascience.com/steami/)
+1. Aller sur [fr.vittascience.com/steami](https://fr.vittascience.com/steami/)
 2. Sélectionner la carte STM32 (NUCLEO-WB55 ou STeaMi si disponible)
 3. Connecter la carte via USB
 4. Cliquer sur **Connecter** (autoriser la connexion Web USB)
