@@ -63,6 +63,13 @@
   width: 100%;
   height: auto;
   margin: 1.5rem auto;
+  border-radius: 12px;
+}
+
+[data-theme='dark'] .hero--steami .hero-image {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 40px rgba(245, 166, 35, 0.15);
+  padding: 1.5rem 0;
 }
 
 .hero--steami .hero-specs-grid {
@@ -154,8 +161,12 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--steami-yellow);
+  color: var(--ifm-color-primary-darkest);
   margin-bottom: 0.25rem;
+}
+
+[data-theme='dark'] .spec-label {
+  color: var(--steami-yellow);
 }
 
 .spec-value {
