@@ -5,44 +5,29 @@ import Layout from '@theme/Layout';
 
 const features = [
   {
-    icon: '📋',
     title: "Vue d'ensemble",
-    description:
-      'Architecture générale, pinout, schéma bloc et caractéristiques principales de la carte.',
+    description: 'Architecture, pinout, schéma bloc et caractéristiques principales.',
     link: '/docs/overview',
+    image: '/img/hardware/block-diagram.svg',
   },
   {
-    icon: '🔌',
     title: 'Hardware',
-    description:
-      'Description détaillée du matériel : MCU, capteurs, écran, alimentation, connecteurs, datasheets.',
+    description: 'MCU, capteurs, écran, alimentation, connecteurs et datasheets.',
     link: '/docs/hardware',
+    image: '/img/hardware/steami-front.png',
   },
   {
-    icon: '💻',
     title: 'Programmation',
-    description:
-      'MicroPython, CODAL, Arduino : drivers, tutoriels, exemples de code pour chaque composant.',
+    description: 'MicroPython, CODAL, Arduino : drivers, tutoriels et exemples.',
     link: '/docs/software',
+    image: '/img/hardware/steami-back.png',
   },
   {
-    icon: '🏗️',
     title: 'Conception',
-    description:
-      'Exigences techniques et justifications des choix de conception pour chaque sous-système.',
+    description: 'Exigences techniques et justifications des choix de conception.',
     link: '/docs/design',
+    image: '/img/schematics/FP0-Vue_systeme.png',
   },
-];
-
-const specs = [
-  { label: 'MCU', value: 'STM32WB55RG' },
-  { label: 'Coeur', value: 'Cortex-M4 @ 64 MHz' },
-  { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
-  { label: 'Capteurs', value: '7 capteurs internes' },
-  { label: 'Écran', value: 'OLED 128×128' },
-  { label: 'Batterie', value: 'LiPo 1600 mAh' },
-  { label: 'USB', value: 'DAPLink drag-and-drop' },
-  { label: 'Connecteur', value: 'Edge micro:bit + Qwiic' },
 ];
 
 function Hero() {
@@ -50,74 +35,63 @@ function Hero() {
   return (
     <header className="hero--steami">
       <h1>{siteConfig.title}</h1>
-      <p>{siteConfig.tagline}</p>
-      <p style={{ fontSize: '1rem', opacity: 0.8, maxWidth: '700px', margin: '0 auto 2rem' }}>
-        STM32WB55 · 7 capteurs · BLE 5.2 · OLED 128×128 · MicroPython · DAPLink
-      </p>
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link className="button button--primary button--lg" to="/docs/overview">
-          Documentation
+      <p className="hero-subtitle">{siteConfig.tagline}</p>
+      <div className="hero-buttons">
+        <Link className="button button--primary button--lg" to="/docs/software/getting-started">
+          Premiers pas
         </Link>
-        <Link className="button button--primary button--lg" to="/docs/hardware">
+        <Link className="button button--outline button--primary button--lg" to="/docs/hardware">
           Hardware
         </Link>
         <Link
-          className="button button--secondary button--lg"
+          className="button button--outline button--secondary button--lg"
           href="https://github.com/steamicc/micropython-steami-lib"
-          style={{ color: 'white', borderColor: 'white' }}
         >
           GitHub
         </Link>
       </div>
-    </header>
-  );
-}
-
-function Specs() {
-  return (
-    <section style={{ padding: '2rem', background: 'var(--ifm-color-emphasis-100)' }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '1rem',
-          maxWidth: '900px',
-          margin: '0 auto',
-        }}
-      >
-        {specs.map(({ label, value }) => (
-          <div
-            key={label}
-            style={{
-              textAlign: 'center',
-              padding: '0.8rem',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.8rem',
-                opacity: 0.6,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              {label}
+      <img
+        src="/img/hardware/steami-render.png"
+        alt="Carte STeaMi"
+        className="hero-image"
+        loading="eager"
+      />
+      <div className="specs-grid hero-specs-grid">
+        {specs.map(({ label, value, link }) => {
+          const content = (
+            <div className="spec-card" key={label}>
+              <span className="spec-label">{label}</span>
+              <span className="spec-value">{value}</span>
             </div>
-            <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{value}</div>
-          </div>
-        ))}
+          );
+          return link ? (
+            <Link key={label} to={link} style={{ textDecoration: 'none', color: 'inherit' }}>
+              {content}
+            </Link>
+          ) : (
+            <React.Fragment key={label}>{content}</React.Fragment>
+          );
+        })}
       </div>
-    </section>
+    </header>
   );
 }
 
 function Features() {
   return (
     <section className="features-section">
-      {features.map(({ icon, title, description, link }) => (
+      {features.map(({ title, description, link, image }) => (
         <Link key={title} to={link} style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-box">
-            <div className="feature-icon">{icon}</div>
+            {image && (
+              <img
+                src={image}
+                alt={title}
+                className="feature-image"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             <h3>{title}</h3>
             <p>{description}</p>
           </div>
@@ -127,21 +101,62 @@ function Features() {
   );
 }
 
-function Pinout() {
+const specs = [
+  { label: 'MCU', value: 'STM32WB55RG', link: '/docs/hardware/main-components/stm32wb55' },
+  { label: 'Cœur', value: 'Cortex-M4 @ 64 MHz' },
+  { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
+  {
+    label: 'Capteurs',
+    value: '7 capteurs internes',
+    link: '/docs/hardware/main-components/sensors',
+  },
+  { label: 'Écran', value: 'OLED 128×128', link: '/docs/hardware/main-components/display' },
+  { label: 'Batterie', value: 'LiPo 1600 mAh', link: '/docs/hardware/main-components/power' },
+  {
+    label: 'USB',
+    value: 'DAPLink drag-and-drop',
+    link: '/docs/hardware/main-components/stm32f103',
+  },
+  {
+    label: 'Connecteurs',
+    value: 'Edge micro:bit + Qwiic',
+    link: '/docs/hardware/main-components/connectors',
+  },
+];
+
+function Resources() {
   return (
-    <section style={{ textAlign: 'center', padding: '2rem' }}>
-      <h2>Pinout</h2>
-      <Link to="/docs/overview/pinout">
-        <img
-          src="/img/pinout/pinout_steami.svg"
-          alt="Pinout STeaMi"
-          loading="lazy"
-          decoding="async"
-          width={700}
-          height={394}
-          style={{ maxWidth: '700px', width: '100%', height: 'auto' }}
-        />
-      </Link>
+    <section className="resources-section">
+      <h2>Ressources</h2>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Link className="button button--primary" href="https://steami.cc">
+          steami.cc
+        </Link>
+        <Link
+          className="button button--outline button--primary"
+          href="https://github.com/steamicc/micropython-steami-lib"
+        >
+          Drivers MicroPython
+        </Link>
+        <Link
+          className="button button--outline button--primary"
+          href="https://github.com/steamicc/steami-reference-design"
+        >
+          Reference Design
+        </Link>
+        <Link
+          className="button button--outline button--primary"
+          href="https://docs.micropython.org/en/latest/"
+        >
+          MicroPython
+        </Link>
+        <Link
+          className="button button--outline button--primary"
+          href="https://stm32python.gitlab.io/fr/"
+        >
+          STM32Python
+        </Link>
+      </div>
     </section>
   );
 }
@@ -150,45 +165,12 @@ export default function Home() {
   return (
     <Layout
       title="Accueil"
-      description="Wiki STeaMi — Documentation technique de la carte STeaMi. Hardware, drivers MicroPython, pin mapping, conception."
+      description="Documentation STeaMi — Documentation technique de la carte STeaMi : hardware, drivers MicroPython, guides logiciels et ressources de développement."
     >
       <Hero />
-      <Specs />
       <main>
         <Features />
-        <Pinout />
-        <section
-          style={{
-            textAlign: 'center',
-            padding: '3rem 2rem',
-            background: 'var(--ifm-color-emphasis-100)',
-          }}
-        >
-          <h2>Ressources</h2>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link className="button button--primary" href="https://steami.cc">
-              steami.cc
-            </Link>
-            <Link
-              className="button button--outline button--primary"
-              href="https://github.com/steamicc/micropython-steami-lib"
-            >
-              Drivers MicroPython
-            </Link>
-            <Link
-              className="button button--outline button--primary"
-              href="https://github.com/steamicc/steami-reference-design"
-            >
-              Reference Design
-            </Link>
-            <Link
-              className="button button--outline button--primary"
-              href="https://docs.micropython.org/"
-            >
-              MicroPython
-            </Link>
-          </div>
-        </section>
+        <Resources />
       </main>
     </Layout>
   );
