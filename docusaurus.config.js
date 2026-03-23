@@ -2,8 +2,8 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Wiki STeaMi',
-  tagline: 'Documentation technique de la carte STeaMi',
+  title: 'Documentation STeaMi',
+  tagline: "Carte éducative pour l'IoT — Code. Communicate. Create.",
   favicon: 'img/favicon.ico',
 
   url: 'https://wiki.steami.cc',
@@ -51,7 +51,7 @@ const config = {
       image: 'img/steami-social-card.png',
 
       navbar: {
-        title: 'Wiki STeaMi',
+        title: 'Documentation STeaMi',
         logo: {
           alt: 'Logo STeaMi',
           src: 'img/logo-steami.svg',
@@ -121,7 +121,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Wiki STeaMi © ${new Date().getFullYear()} — Documentation technique de la carte STeaMi`,
+        copyright: `Documentation STeaMi © ${new Date().getFullYear()} — Carte éducative pour l'IoT`,
       },
 
       prism: {

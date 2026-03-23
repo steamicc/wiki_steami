@@ -36,17 +36,6 @@ function Hero() {
     <header className="hero--steami">
       <h1>{siteConfig.title}</h1>
       <p className="hero-subtitle">{siteConfig.tagline}</p>
-      <img
-        src="/img/hardware/steami-front.png"
-        alt="Carte STeaMi"
-        className="hero-image"
-        loading="eager"
-        width={350}
-        height={250}
-      />
-      <p className="hero-specs">
-        STM32WB55 · 7 capteurs · BLE 5.2 · OLED 128×128 · MicroPython · DAPLink
-      </p>
       <div className="hero-buttons">
         <Link className="button button--primary button--lg" to="/docs/software/getting-started">
           Premiers pas
@@ -60,6 +49,29 @@ function Hero() {
         >
           GitHub
         </Link>
+      </div>
+      <img
+        src="/img/hardware/steami-render.png"
+        alt="Carte STeaMi"
+        className="hero-image"
+        loading="eager"
+      />
+      <div className="specs-grid hero-specs-grid">
+        {specs.map(({ label, value, link }) => {
+          const content = (
+            <div className="spec-card" key={label}>
+              <span className="spec-label">{label}</span>
+              <span className="spec-value">{value}</span>
+            </div>
+          );
+          return link ? (
+            <Link key={label} to={link} style={{ textDecoration: 'none', color: 'inherit' }}>
+              {content}
+            </Link>
+          ) : (
+            <React.Fragment key={label}>{content}</React.Fragment>
+          );
+        })}
       </div>
     </header>
   );
@@ -89,24 +101,28 @@ function Features() {
   );
 }
 
-function Pinout() {
-  return (
-    <section className="pinout-section">
-      <h2>Pinout</h2>
-      <Link to="/docs/overview/pinout">
-        <img
-          src="/img/pinout/pinout_steami.svg"
-          alt="Pinout STeaMi"
-          loading="lazy"
-          decoding="async"
-          width={700}
-          height={394}
-          style={{ maxWidth: '700px', width: '100%', height: 'auto' }}
-        />
-      </Link>
-    </section>
-  );
-}
+const specs = [
+  { label: 'MCU', value: 'STM32WB55RG', link: '/docs/hardware/main-components/stm32wb55' },
+  { label: 'Coeur', value: 'Cortex-M4 @ 64 MHz' },
+  { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
+  {
+    label: 'Capteurs',
+    value: '7 capteurs internes',
+    link: '/docs/hardware/main-components/sensors',
+  },
+  { label: 'Écran', value: 'OLED 128×128', link: '/docs/hardware/main-components/display' },
+  { label: 'Batterie', value: 'LiPo 1600 mAh', link: '/docs/hardware/main-components/power' },
+  {
+    label: 'USB',
+    value: 'DAPLink drag-and-drop',
+    link: '/docs/hardware/main-components/stm32f103',
+  },
+  {
+    label: 'Connecteurs',
+    value: 'Edge micro:bit + Qwiic',
+    link: '/docs/hardware/main-components/connectors',
+  },
+];
 
 function Resources() {
   return (
@@ -134,6 +150,12 @@ function Resources() {
         >
           MicroPython
         </Link>
+        <Link
+          className="button button--outline button--primary"
+          href="https://stm32python.gitlab.io/fr/"
+        >
+          STM32Python
+        </Link>
       </div>
     </section>
   );
@@ -148,7 +170,6 @@ export default function Home() {
       <Hero />
       <main>
         <Features />
-        <Pinout />
         <Resources />
       </main>
     </Layout>
