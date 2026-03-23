@@ -1,49 +1,82 @@
 /* === Palette STeaMi === */
 :root {
-  /* Bleu-teal STeaMi */
-  --ifm-color-primary: #00838f;
-  --ifm-color-primary-dark: #006978;
-  --ifm-color-primary-darker: #005a67;
-  --ifm-color-primary-darkest: #004d5a;
-  --ifm-color-primary-light: #0097a7;
-  --ifm-color-primary-lighter: #26c6da;
-  --ifm-color-primary-lightest: #4dd0e1;
+  /* Jaune STeaMi — aligné sur steami.cc */
+  --ifm-color-primary: #f5a623;
+  --ifm-color-primary-dark: #e69510;
+  --ifm-color-primary-darker: #d4890e;
+  --ifm-color-primary-darkest: #a86d0b;
+  --ifm-color-primary-light: #f7b740;
+  --ifm-color-primary-lighter: #f9c760;
+  --ifm-color-primary-lightest: #fbd888;
 
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 131, 143, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(245, 166, 35, 0.1);
+
+  --steami-dark: #2d2d2d;
+  --steami-yellow: #f5a623;
+  --steami-yellow-light: #fef3dc;
+  --steami-bg-light: #f5f5f5;
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #4dd0e1;
-  --ifm-color-primary-dark: #26c6da;
-  --ifm-color-primary-darker: #00bcd4;
-  --ifm-color-primary-darkest: #0097a7;
-  --ifm-color-primary-light: #80deea;
-  --ifm-color-primary-lighter: #b2ebf2;
-  --ifm-color-primary-lightest: #e0f7fa;
-  --docusaurus-highlighted-code-line-bg: rgba(77, 208, 225, 0.15);
+  --ifm-color-primary: #f7b740;
+  --ifm-color-primary-dark: #f5a623;
+  --ifm-color-primary-darker: #e69510;
+  --ifm-color-primary-darkest: #d4890e;
+  --ifm-color-primary-light: #f9c760;
+  --ifm-color-primary-lighter: #fbd888;
+  --ifm-color-primary-lightest: #fef3dc;
+  --docusaurus-highlighted-code-line-bg: rgba(247, 183, 64, 0.15);
+
+  --steami-bg-light: #1e1e1e;
 }
 
 /* === Hero Section === */
 .hero--steami {
-  background: linear-gradient(135deg, #004d5a 0%, #00838f 50%, #26c6da 100%);
-  color: white;
-  padding: 4rem 2rem;
+  background: #ffffff;
+  color: var(--steami-dark);
+  padding: 3rem 2rem 2rem;
   text-align: center;
 }
 
+[data-theme='dark'] .hero--steami {
+  background: var(--ifm-background-color);
+  color: #e0e0e0;
+}
+
 .hero--steami h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
 }
 
-.hero--steami p {
-  font-size: 1.3rem;
-  opacity: 0.9;
+.hero--steami .hero-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.7;
   max-width: 600px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.5rem;
+}
+
+.hero--steami .hero-image {
+  max-width: 350px;
+  width: 100%;
+  margin: 1.5rem auto;
+  border-radius: 12px;
+}
+
+.hero--steami .hero-specs {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+}
+
+.hero--steami .hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* === Feature boxes on homepage === */
@@ -58,29 +91,52 @@
 
 .feature-box {
   text-align: center;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem;
   border-radius: 12px;
   background: var(--ifm-card-background-color);
   border: 1px solid var(--ifm-color-emphasis-200);
-  transition: box-shadow 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  overflow: hidden;
 }
 
 .feature-box:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
-.feature-box .feature-icon {
-  font-size: 3rem;
+.feature-box .feature-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
   margin-bottom: 1rem;
 }
 
 .feature-box h3 {
   margin-bottom: 0.5rem;
+  font-size: 1.1rem;
 }
 
 .feature-box p {
   color: var(--ifm-color-emphasis-700);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* === Pinout section === */
+.pinout-section {
+  text-align: center;
+  padding: 2rem;
+  background: var(--steami-bg-light);
+}
+
+/* === Resources section === */
+.resources-section {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--ifm-color-emphasis-100);
 }
 
 /* === Card grid === */
@@ -108,8 +164,8 @@
 
 /* === Tags / badges === */
 .badge--steami {
-  background-color: #e0f7fa;
-  color: #006064;
+  background-color: var(--steami-yellow-light);
+  color: #a86d0b;
   padding: 0.2em 0.6em;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -117,8 +173,8 @@
 }
 
 [data-theme='dark'] .badge--steami {
-  background-color: #004d5a;
-  color: #80deea;
+  background-color: #3d3520;
+  color: #f7b740;
 }
 
 /* === Better admonitions === */
@@ -131,7 +187,11 @@
   .hero--steami h1 {
     font-size: 2rem;
   }
-  .hero--steami p {
-    font-size: 1.1rem;
+  .hero--steami .hero-subtitle {
+    font-size: 1rem;
+  }
+  .features-section {
+    gap: 1rem;
+    padding: 2rem 1rem;
   }
 }
