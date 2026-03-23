@@ -171,10 +171,10 @@ Les méthodes internes de communication I2C sont standardisées :
 Chaque driver définit une hiérarchie d'exceptions :
 
 ```python
-class ISM330DLError(Exception):        # base
-class ISM330DLNotFound(ISM330DLError): # composant non détecté
-class ISM330DLConfigError(ISM330DLError): # configuration invalide
-class ISM330DLIOError(ISM330DLError):  # erreur I2C
+class ISM330DLError(Exception): pass        # base
+class ISM330DLNotFound(ISM330DLError): pass # composant non détecté
+class ISM330DLConfigError(ISM330DLError): pass # configuration invalide
+class ISM330DLIOError(ISM330DLError): pass  # erreur I2C
 ```
 
 Utilisation : `except Exception` (pas de bare `except`), chaînage avec `from exc`.
