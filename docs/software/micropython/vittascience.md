@@ -5,7 +5,7 @@ sidebar_position: 9
 
 # Vittascience
 
-[Vittascience](https://fr.vittascience.com/code/) est un environnement de programmation en ligne qui permet de coder en blocs (type Scratch) ou directement en MicroPython.
+[Vittascience](https://fr.vittascience.com/steami/) est un environnement de programmation en ligne qui permet de coder en blocs (type Scratch) ou directement en MicroPython.
 
 ## Fonctionnalités
 
@@ -28,7 +28,7 @@ Vittascience nécessite un navigateur Chromium. Firefox et Safari ne supportent 
 
 ## Utilisation
 
-1. Aller sur [fr.vittascience.com/code](https://fr.vittascience.com/code/)
+1. Aller sur [fr.vittascience.com/steami](https://fr.vittascience.com/steami/)
 2. Sélectionner la carte STM32 (NUCLEO-WB55 ou STeaMi si disponible)
 3. Connecter la carte via USB
 4. Cliquer sur **Connecter** (autoriser la connexion Web USB)
@@ -48,4 +48,4 @@ Vittascience est particulièrement adapté pour :
 - [mpremote](./mpremote) — Outil en ligne de commande
 - [Thonny](./thonny) — Éditeur graphique local
 - [Premiers pas](../getting-started) — Guide de démarrage
-- [Vittascience](https://fr.vittascience.com/code/) — Accès à la plateforme
+- [Vittascience](https://fr.vittascience.com/steami/) — Accès à la plateforme
