@@ -20,7 +20,7 @@
     "lint:js": "eslint .",
     "lint:js:fix": "eslint --fix .",
     "lint:links": "docker run --rm -v $PWD:/input lycheeverse/lychee --config /input/.lychee.toml --root-dir /input/static '/input/docs/**/*.md' '/input/README.md'",
-    "lint:examples": "python3 scripts/validate-code-examples.py",
+    "lint:examples": "npm run prebuild && python3 scripts/validate-code-examples.py",
     "prepare": "husky"
   },
   "dependencies": {

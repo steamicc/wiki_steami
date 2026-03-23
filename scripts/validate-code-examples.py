@@ -16,7 +16,6 @@ import glob
 import re
 import sys
 import os
-import importlib.util
 from pathlib import Path
 
 
@@ -46,7 +45,8 @@ def check_syntax(code, filepath, line_no):
         compile(code, f"{filepath}:{line_no}", "exec")
         return []
     except SyntaxError as e:
-        return [f"{filepath}:{line_no}: syntax error: {e.msg} (line {e.lineno})"]
+        actual_line = line_no + (e.lineno or 1) - 1
+        return [f"{filepath}:{actual_line}: syntax error: {e.msg}"]
 
 
 def extract_imports(code):
@@ -140,14 +140,27 @@ def validate_file(md_path, lib_path):
             continue  # Skip further checks if syntax is broken
 
         # 2. Check imports exist
+        STDLIB = {"machine", "time", "sys", "gc", "micropython", "os", "struct", "json", "math"}
+        KNOWN_MODULES = {
+            "ism330dl", "lis2mdl", "vl53l1x", "wsen_pads", "wsen_hids",
+            "apds9960", "ssd1327", "mcp23009e", "bq27441", "daplink_flash",
+            "steami_config", "hts221",
+        }
         imports = extract_imports(code)
-        import_map = {}  # variable_name -> (module, class)
+        import_map = {}  # variable_name -> (module, class, methods)
         for module, name in imports:
-            if module in ("machine", "time", "sys", "gc", "micropython", "os"):
-                continue  # Skip stdlib
+            if module in STDLIB:
+                continue
+            mod_key = module.replace("-", "_")
+            if mod_key not in KNOWN_MODULES:
+                continue  # Unknown module, not a driver — skip
             methods = find_class_methods(lib_path, module, name)
-            if methods is not None:
-                # Find what variable this class is assigned to
+            if methods is None:
+                errors.append(
+                    f"{md_path}:{line_no}: class '{name}' not found in module '{module}'"
+                )
+                continue
+            # Find what variable this class is assigned to
                 try:
                     tree = ast.parse(code)
                     for node in ast.walk(tree):
