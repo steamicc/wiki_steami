@@ -1,0 +1,15 @@
+# Default owner
+* @nedseb
+
+# Hardware documentation
+docs/hardware/ @nedseb
+
+# Software documentation
+docs/software/ @nedseb
+
+# Design and components
+docs/design/ @nedseb
+src/components/ @nedseb
+
+# CI/CD
+.github/ @nedseb
