@@ -36,7 +36,7 @@ const features = [
 
 const specs = [
   { label: 'MCU', value: 'STM32WB55RG' },
-  { label: 'Coeur', value: 'Cortex-M4 @ 64 MHz' },
+  { label: 'Cœur', value: 'Cortex-M4 @ 64 MHz' },
   { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
   { label: 'Capteurs', value: '7 capteurs internes' },
   { label: 'Écran', value: 'OLED 128×128' },
@@ -150,7 +150,7 @@ export default function Home() {
   return (
     <Layout
       title="Accueil"
-      description="Wiki STeaMi — Documentation technique de la carte STeaMi. Hardware, drivers MicroPython, pin mapping, conception."
+      description="Documentation STeaMi — Documentation technique de la carte STeaMi : hardware, drivers MicroPython, guides logiciels et ressources de développement."
     >
       <Hero />
       <Specs />
