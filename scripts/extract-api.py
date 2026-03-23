@@ -24,13 +24,34 @@ def extract_methods(cls_node):
     methods = {}
     for item in cls_node.body:
         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if item.name.startswith("_"):
+            # Skip private/dunder methods except for __init__, whose signature
+            # is part of the public instantiation API.
+            if item.name.startswith("_") and item.name != "__init__":
                 continue
             args = []
+            # Positional-only arguments (Python 3.8+)
+            for arg in getattr(item.args, "posonlyargs", []):
+                if arg.arg == "self":
+                    continue
+                args.append(arg.arg)
+            # Positional-or-keyword arguments
             for arg in item.args.args:
                 if arg.arg == "self":
                     continue
                 args.append(arg.arg)
+            # *args (vararg)
+            if item.args.vararg is not None:
+                if item.args.vararg.arg != "self":
+                    args.append("*" + item.args.vararg.arg)
+            # Keyword-only arguments
+            for arg in item.args.kwonlyargs:
+                if arg.arg == "self":
+                    continue
+                args.append(arg.arg)
+            # **kwargs (kwarg)
+            if item.args.kwarg is not None:
+                if item.args.kwarg.arg != "self":
+                    args.append("**" + item.args.kwarg.arg)
             methods[item.name] = args
     return methods
 
@@ -40,7 +61,8 @@ def extract_classes(source_path):
     try:
         source = source_path.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=str(source_path))
-    except (SyntaxError, UnicodeDecodeError):
+    except (SyntaxError, UnicodeDecodeError, OSError) as exc:
+        print(f"Skipping {source_path}: {exc}", file=sys.stderr)
         return {}
 
     classes = {}

@@ -1,6 +1,7 @@
 {
   "apds9960": {
     "APDS9960": {
+      "__init__": ["i2c", "address", "valid_id"],
       "ambient_light": [],
       "blue_light": [],
       "clear_ambient_light_int": [],
@@ -69,10 +70,20 @@
       "set_proximity_int_enable": ["enable"],
       "set_proximity_int_high_threshold": ["threshold"],
       "set_proximity_int_low_threshold": ["threshold"]
+    },
+    "APDS9960InvalidDevId": {
+      "__init__": ["id", "valid_ids"]
+    },
+    "APDS9960InvalidMode": {
+      "__init__": ["mode"]
+    },
+    "GestureData": {
+      "__init__": []
     }
   },
   "bq27441": {
     "BQ27441": {
+      "__init__": ["i2c", "capacity_mAh", "address", "gpout_pin"],
       "block_data_checksum": [],
       "block_data_class": ["_id"],
       "block_data_control": [],
@@ -134,10 +145,29 @@
       "write_block_data": ["offset", "data"],
       "write_extended_data": ["class_id", "offset", "data", "length"],
       "write_op_config": ["value"]
+    },
+    "CapacityMeasureType": {
+      "__init__": ["value"]
+    },
+    "CurrentMeasureType": {
+      "__init__": ["value"]
+    },
+    "GpoutFunctionType": {
+      "__init__": ["value"]
+    },
+    "SocMeasureType": {
+      "__init__": ["value"]
+    },
+    "SohMeasureType": {
+      "__init__": ["value"]
+    },
+    "TempMeasureType": {
+      "__init__": ["value"]
     }
   },
   "daplink_flash": {
     "DaplinkFlash": {
+      "__init__": ["i2c", "address"],
       "busy": [],
       "clear_config": [],
       "clear_flash": [],
@@ -154,6 +184,7 @@
   },
   "hts221": {
     "HTS221": {
+      "__init__": ["i2c", "address"],
       "calibrate_temperature": ["ref_low", "measured_low", "ref_high", "measured_high"],
       "data_ready": [],
       "device_id": [],
@@ -177,6 +208,7 @@
   },
   "ism330dl": {
     "ISM330DL": {
+      "__init__": ["i2c", "address"],
       "accel_ready": [],
       "acceleration_g": [],
       "acceleration_ms2": [],
@@ -204,6 +236,7 @@
   },
   "lis2mdl": {
     "LIS2MDL": {
+      "__init__": ["i2c", "address", "odr_hz", "temp_comp", "low_power", "drdy_enable"],
       "calibrate_apply": ["x", "y", "z"],
       "calibrate_minmax_2d": ["samples", "delay_ms"],
       "calibrate_minmax_3d": ["samples", "delay_ms"],
@@ -256,6 +289,7 @@
   },
   "mcp23009e": {
     "MCP23009ActiveLowPin": {
+      "__init__": ["mcp", "pin_number", "mode", "pull", "value"],
       "init": ["mode", "pull", "value"],
       "irq": ["handler", "trigger", "hard"],
       "mode": ["mode"],
@@ -267,6 +301,7 @@
       "value": ["x"]
     },
     "MCP23009E": {
+      "__init__": ["i2c", "address", "reset_pin", "interrupt_pin"],
       "disable_interrupt": ["gpx"],
       "get_defval": [],
       "get_gpinten": [],
@@ -300,6 +335,7 @@
       "setup": ["gpx", "direction", "pullup", "polarity"]
     },
     "MCP23009Pin": {
+      "__init__": ["mcp", "pin_number", "mode", "pull", "value"],
       "init": ["mode", "pull", "value"],
       "irq": ["handler", "trigger", "hard"],
       "mode": ["mode"],
@@ -312,6 +348,7 @@
   },
   "ssd1327": {
     "SSD1327": {
+      "__init__": ["width", "height"],
       "contrast": ["contrast"],
       "fill": ["col"],
       "init_display": [],
@@ -329,17 +366,26 @@
       "write_data": []
     },
     "SSD1327_I2C": {
+      "__init__": ["width", "height", "i2c", "address"],
       "write_cmd": ["cmd"],
       "write_data": ["data_buf"]
     },
     "SSD1327_SPI": {
+      "__init__": ["width", "height", "spi", "dc", "res", "cs"],
       "reset": [],
       "write_cmd": ["cmd"],
       "write_data": ["buf"]
+    },
+    "WS_OLED_128X128_I2C": {
+      "__init__": ["i2c", "address"]
+    },
+    "WS_OLED_128X128_SPI": {
+      "__init__": ["spi", "dc", "res", "cs"]
     }
   },
   "steami_config": {
     "SteamiConfig": {
+      "__init__": ["flash"],
       "apply_temperature_calibration": ["sensor_instance"],
       "board_name": ["value"],
       "board_revision": ["value"],
@@ -351,6 +397,7 @@
   },
   "vl53l1x": {
     "VL53L1X": {
+      "__init__": ["i2c", "address"],
       "data_ready": [],
       "device_id": [],
       "distance_mm": [],
@@ -364,6 +411,7 @@
   },
   "wsen-hids": {
     "WSEN_HIDS": {
+      "__init__": ["i2c", "address", "check_device", "enable_bdu", "avg_t", "avg_h"],
       "calibrate_temperature": ["ref_low", "measured_low", "ref_high", "measured_high"],
       "check_device": [],
       "data_ready": [],
@@ -388,6 +436,7 @@
   },
   "wsen-pads": {
     "WSEN_PADS": {
+      "__init__": ["i2c", "address"],
       "calibrate_temperature": ["ref_low", "measured_low", "ref_high", "measured_high"],
       "data_ready": [],
       "device_id": [],

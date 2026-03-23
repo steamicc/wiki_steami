@@ -31,18 +31,19 @@ jobs:
         id: drift
         run: |
           set +e
-          REPORT=$(python scripts/check-api-drift.py micropython-steami-lib/lib scripts/api-snapshot.json)
+          python scripts/check-api-drift.py micropython-steami-lib/lib scripts/api-snapshot.json > /tmp/api-drift-report.md
           EXIT_CODE=$?
           set -e
 
           echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
 
-          if [ "$EXIT_CODE" -eq 1 ]; then
-            # Write multiline report to file for the next step
-            echo "$REPORT" > /tmp/api-drift-report.md
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EXIT_CODE" -eq 1 ]; then
             echo "changes=true" >> "$GITHUB_OUTPUT"
           else
-            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "API drift check failed with exit code $EXIT_CODE" >&2
+            exit "$EXIT_CODE"
           fi
 
       - name: Create issue if changes detected
@@ -68,15 +69,15 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existing.data[0].number,
-                body: `Mise a jour ${new Date().toISOString().split('T')[0]} :\n\n${report}`,
+                body: `Mise à jour ${new Date().toISOString().split('T')[0]} :\n\n${report}`,
               });
             } else {
               // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: 'docs: Changements API detectes dans micropython-steami-lib',
-                body: `${report}\n\n---\n*Detecte automatiquement par le workflow api-drift.*`,
+                title: 'docs: Changements API détectés dans micropython-steami-lib',
+                body: `${report}\n\n---\n*Détecté automatiquement par le workflow api-drift.*`,
                 labels: ['api-drift'],
               });
             }
