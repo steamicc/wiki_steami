@@ -16,15 +16,15 @@ La carte STeaMi intègre 7 capteurs couvrant distance, mouvement, environnement,
 
 ## Liste des capteurs
 
-| Capteur                                | Modèle    | Mesures                         | Page                    |
-| -------------------------------------- | --------- | ------------------------------- | ----------------------- |
-| [Accéléromètre/Gyroscope](./ism330dlc) | ISM330DLC | 6 axes + température            | [Détail →](./ism330dlc) |
-| [Magnétomètre](./lis2mdl)              | LIS2MDL   | 3 axes magnétiques              | [Détail →](./lis2mdl)   |
-| [Distance](./vl53l1x)                  | VL53L1X   | Time-of-Flight, 0-4 m           | [Détail →](./vl53l1x)   |
-| [Pression](./wsen-pads)                | WSEN-PADS | 26-126 kPa, 24 bits             | [Détail →](./wsen-pads) |
-| [Humidité/Température](./wsen-hids)    | WSEN-HIDS | RH + °C                         | [Détail →](./wsen-hids) |
-| [Lumière/Geste](./apds9960)            | APDS-9960 | ALS, couleur, proximité, geste  | [Détail →](./apds9960)  |
-| [Microphone](./imp34dt05)              | IMP34DT05 | PDM MEMS omnidirectionnel       | [Détail →](./imp34dt05) |
+| Capteur                                | Modèle    | Mesures                        | Page                    |
+| -------------------------------------- | --------- | ------------------------------ | ----------------------- |
+| [Accéléromètre/Gyroscope](./ism330dlc) | ISM330DLC | 6 axes + température           | [Détail →](./ism330dlc) |
+| [Magnétomètre](./lis2mdl)              | LIS2MDL   | 3 axes magnétiques             | [Détail →](./lis2mdl)   |
+| [Distance](./vl53l1x)                  | VL53L1X   | Time-of-Flight, 0-4 m          | [Détail →](./vl53l1x)   |
+| [Pression](./wsen-pads)                | WSEN-PADS | 26-126 kPa, 24 bits            | [Détail →](./wsen-pads) |
+| [Humidité/Température](./wsen-hids)    | WSEN-HIDS | RH + °C                        | [Détail →](./wsen-hids) |
+| [Lumière/Geste](./apds9960)            | APDS-9960 | ALS, couleur, proximité, geste | [Détail →](./apds9960)  |
+| [Microphone](./imp34dt05)              | IMP34DT05 | PDM MEMS omnidirectionnel      | [Détail →](./imp34dt05) |
 
 ## Schémas
 

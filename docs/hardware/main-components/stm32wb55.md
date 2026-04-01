@@ -61,11 +61,11 @@ Le bus I2C1 est partagé entre le STM32WB55 et le STM32F103 (DAPLink), permettan
 
 ## Interruptions capteurs
 
-| Signal   | Pin  | Capteur                      |
-| -------- | ---- | ---------------------------- |
-| INT_DIST | PB12 | VL53L1X (distance)           |
-| INT_ACC  | PC13 | ISM330DLC (accéléromètre)    |
-| INT_MAG  | PD1  | LIS2MDL (magnétomètre)       |
+| Signal   | Pin  | Capteur                   |
+| -------- | ---- | ------------------------- |
+| INT_DIST | PB12 | VL53L1X (distance)        |
+| INT_ACC  | PC13 | ISM330DLC (accéléromètre) |
+| INT_MAG  | PD1  | LIS2MDL (magnétomètre)    |
 
 ## Schémas
 
