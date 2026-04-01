@@ -147,6 +147,7 @@ Kingbright
 Longlife
 STMicroelectronics
 Wurth
+wurth
 Elektronik
 Winstar
 Molex
