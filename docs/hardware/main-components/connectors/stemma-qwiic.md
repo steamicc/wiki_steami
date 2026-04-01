@@ -5,11 +5,11 @@ title: 'STEMMA/Qwiic'
 
 # Connecteur STEMMA/Qwiic
 
-Deux connecteurs JST 4 broches (pas 2 mm) pour capteurs I2C externes, compatibles avec l'ecosysteme Adafruit STEMMA QT et SparkFun Qwiic.
+Deux connecteurs JST 4 broches (pas 2 mm) pour capteurs I2C externes, compatibles avec l'écosystème Adafruit STEMMA QT et SparkFun Qwiic.
 
-## Caracteristiques
+## Caractéristiques
 
-| Caracteristique | Detail                    |
+| Caractéristique | Détail                    |
 | --------------- | ------------------------- |
 | Type            | JST 4-pin, pas 2 mm       |
 | Nombre          | 2                         |

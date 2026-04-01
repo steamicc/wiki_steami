@@ -17,4 +17,4 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 - **32 MHz** : Horloge principale du [STM32WB55RG](../main-components/stm32wb55)
 - **32 kHz** : Horloge RTC (Real Time Clock) du [STM32WB55RG](../main-components/stm32wb55)
-- **8 MHz** : Horloge principale du [STM32F103CBT6](../main-components/stm32f103) (microcontroleur interface)
+- **8 MHz** : Horloge principale du [STM32F103CBT6](../main-components/stm32f103) (microcontrôleur interface)

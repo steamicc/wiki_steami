@@ -5,26 +5,26 @@ title: 'Signaux'
 
 # Table des signaux
 
-Liste complete de tous les signaux de la carte STeaMi avec leurs broches associees.
+Liste complète de tous les signaux de la carte STeaMi avec leurs broches associées.
 
 ## Signaux du connecteur Edge
 
-| Signal              | Broche associee | Description                         |
+| Signal              | Broche associée | Description                         |
 | ------------------- | --------------- | ----------------------------------- |
-| ANALOG01_EDGE       | P3              | Entree analogique 1                 |
-| ANALOG02_EDGE       | P0              | Entree analogique 2 (pad crocodile) |
-| ANALOG03_EDGE       | P4              | Entree analogique 3                 |
-| ANALOG04_EDGE       | P1              | Entree analogique 4 (pad crocodile) |
-| ANALOG05_EDGE       | P10             | Entree analogique 5 (PWM)           |
-| ANALOG06_EDGE       | P2              | Entree analogique 6 (pad crocodile) |
+| ANALOG01_EDGE       | P3              | Entrée analogique 1                 |
+| ANALOG02_EDGE       | P0              | Entrée analogique 2 (pad crocodile) |
+| ANALOG03_EDGE       | P4              | Entrée analogique 3                 |
+| ANALOG04_EDGE       | P1              | Entrée analogique 4 (pad crocodile) |
+| ANALOG05_EDGE       | P10             | Entrée analogique 5 (PWM)           |
+| ANALOG06_EDGE       | P2              | Entrée analogique 6 (pad crocodile) |
 | GPIO1_EDGE_BOUTON_A | P5              | GPIO / Bouton A                     |
-| GPIO2_EDGE          | P6              | GPIO numerique                      |
+| GPIO2_EDGE          | P6              | GPIO numérique                      |
 | GPIO3_EDGE          | P7              | GPIO / PWM                          |
-| GPIO4_EDGE          | P8              | GPIO numerique                      |
-| GPIO5_EDGE          | P9              | GPIO numerique                      |
+| GPIO4_EDGE          | P8              | GPIO numérique                      |
+| GPIO5_EDGE          | P9              | GPIO numérique                      |
 | GPIO6_EDGE_BOUTON_B | P11             | GPIO / Bouton B / PWM               |
-| GPIO7_EDGE          | P12             | GPIO numerique                      |
-| GPIO8_EDGE          | P16             | GPIO numerique                      |
+| GPIO7_EDGE          | P12             | GPIO numérique                      |
+| GPIO8_EDGE          | P16             | GPIO numérique                      |
 | SPI2_SCK_EDGE       | P13             | SPI2 Clock                          |
 | SPI2_MISO_EDGE      | P14             | SPI2 MISO                           |
 | SPI2_MOSI_EDGE      | P15             | SPI2 MOSI                           |
@@ -33,7 +33,7 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 
 ## Signaux des boutons
 
-| Signal      | Broche associee | Description                               |
+| Signal      | Broche associée | Description                               |
 | ----------- | --------------- | ----------------------------------------- |
 | UP          | UP_BUTTON       | Bouton directionnel haut (MCP23009 GP7)   |
 | DOWN        | DOWN_BUTTON     | Bouton directionnel bas (MCP23009 GP5)    |
@@ -43,7 +43,7 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 
 ## Signaux GPIO Expander
 
-| Signal       | Broche associee | Description                       |
+| Signal       | Broche associée | Description                       |
 | ------------ | --------------- | --------------------------------- |
 | GPIO1        | P28             | GPIO expander GP0 (pad crocodile) |
 | GPIO2        | P29             | GPIO expander GP1 (pad crocodile) |
@@ -54,7 +54,7 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 
 ## Signaux LEDs
 
-| Signal            | Broche associee | Description                        |
+| Signal            | Broche associée | Description                        |
 | ----------------- | --------------- | ---------------------------------- |
 | LED_USER_RED      | LED_RED         | LED utilisateur rouge (PC12)       |
 | LED_USER_GREEN    | LED_GREEN       | LED utilisateur verte (PC11)       |
@@ -65,24 +65,24 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 | LED_COM_GRN       | LED_FLASH       | LED communication flash (F103 PB1) |
 | LED_DAP_BLUE      | LED_DAPLINK     | LED DAPLink (F103 PA6)             |
 
-## Signaux internes - Ecran OLED
+## Signaux internes - Écran OLED
 
-| Signal              | Broche associee | Description             |
+| Signal              | Broche associée | Description             |
 | ------------------- | --------------- | ----------------------- |
-| SPI1_SCK_OLED       | SPI_INT_SCK     | SPI1 Clock ecran (PA1)  |
-| SPI1_MOSI_OLED      | SPI_INT_MOSI    | SPI1 MOSI ecran (PB5)   |
-| C_OLED_OR_SPI1_MISO | SPI_INT_MISO    | SPI1 MISO ecran (PB4)   |
-| CS_OLED             | CS_DISPLAY      | Chip Select ecran (PD0) |
-| RST_OLED            | RST_DISPLAY     | Reset ecran (PA12)      |
+| SPI1_SCK_OLED       | SPI_INT_SCK     | SPI1 Clock écran (PA1)  |
+| SPI1_MOSI_OLED      | SPI_INT_MOSI    | SPI1 MOSI écran (PB5)   |
+| C_OLED_OR_SPI1_MISO | SPI_INT_MISO    | SPI1 MISO écran (PB4)   |
+| CS_OLED             | CS_DISPLAY      | Chip Select écran (PD0) |
+| RST_OLED            | RST_DISPLAY     | Reset écran (PA12)      |
 
 ## Signaux internes - Capteurs
 
-| Signal     | Broche associee | Description                               |
+| Signal     | Broche associée | Description                               |
 | ---------- | --------------- | ----------------------------------------- |
 | I2C1_SCL   | I2C_INT_SCL     | I2C1 Clock interne (WB55: PB8, F103: PB6) |
 | I2C1_SDA   | I2C_INT_SDA     | I2C1 Data interne (WB55: PB9, F103: PB7)  |
-| INT_ACC    | INT_ACC         | Interruption accelerometre (PC13)         |
-| INT_MAG    | INT_MAG         | Interruption magnetometre (PD1)           |
+| INT_ACC    | INT_ACC         | Interruption accéléromètre (PC13)         |
+| INT_MAG    | INT_MAG         | Interruption magnétomètre (PD1)           |
 | INT_DIST   | INT_DIST        | Interruption distance (PB12)              |
 | MICRO_DATA | MIC_IN          | Donnees microphone (PA10)                 |
 | MICRO_CLK  | MIC_CLK         | Horloge microphone (PA3)                  |
@@ -90,7 +90,7 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 
 ## Signaux internes - Communication serie
 
-| Signal              | Broche associee     | Description                        |
+| Signal              | Broche associée     | Description                        |
 | ------------------- | ------------------- | ---------------------------------- |
 | T_UART2_TX          | SERIAL_TX           | TX vers F103 (PB11)                |
 | T_UART2_RX          | SERIAL_RX           | RX depuis F103 (PB10)              |
@@ -100,17 +100,17 @@ Liste complete de tous les signaux de la carte STeaMi avec leurs broches associe
 
 ## Signaux JTAG
 
-| Signal       | Broche associee | Description           |
+| Signal       | Broche associée | Description           |
 | ------------ | --------------- | --------------------- |
 | STLINK_SWDIO | JTAG_SWDIO      | SWD Data (F103 PA13)  |
 | STLINK_SWCLK | JTAG_SWCLK      | SWD Clock (F103 PA14) |
 | STLINK_NRST  | JTAG_NRST       | Reset (F103 NRST)     |
-| VREF         | JTAG_VREF       | Tension de reference  |
+| VREF         | JTAG_VREF       | Tension de référence  |
 | GND          | JTAG_GND        | Masse                 |
 
 ## Signaux d'alimentation
 
-| Signal    | Broche associee                                                         | Description            |
+| Signal    | Broche associée                                                         | Description            |
 | --------- | ----------------------------------------------------------------------- | ---------------------- |
 | 3V3       | 3V3_P17, 3V3_P18, 3V3, 3V3_P23, 3V3_P30, STEMMA_3V3                     | Alimentation 3.3V      |
 | GND       | GND_P21, GND_P22, GND, GND_P26, GND_P27, STEMMA_GND, JTAG_GND, JACDAC_D | Masse                  |
@@ -122,11 +122,11 @@ Ces signaux sont uniquement accessibles via les points de test du PCB.
 
 | Signal                        | Description                      | Test Points                            |
 | ----------------------------- | -------------------------------- | -------------------------------------- |
-| +5V_USB                       | 5V apres protection ESD          | TP50                                   |
+| +5V_USB                       | 5V après protection ESD          | TP50                                   |
 | VBUS                          | VBUS du connecteur USB           | TP53, TP54                             |
 | VBAT_ON_OFF                   | Signal SYSOFF BQ24075            | TP51                                   |
 | PACK_OUT                      | Sortie batterie                  | TP1                                    |
-| VDD                           | Tension apres jauge              | TP52                                   |
+| VDD                           | Tension après jauge              | TP52                                   |
 | POWER                         | Sortie BQ24075                   | TP49                                   |
 | +3V3@1200mA                   | Rail 3.3V principal              | TP2, TP4, TP55, TP60, TP62, TP13, TP14 |
 | SYST                          | Avant regulateur TPS63000        | TP3                                    |
@@ -136,8 +136,8 @@ Ces signaux sont uniquement accessibles via les points de test du PCB.
 | AT0@STM32WB55RG               | Pin AT0                          | TP8                                    |
 | AT1@STM32WB55RG               | Pin AT1                          | TP9                                    |
 | INT_PRESSURE                  | Interruption capteur pression    | TP30                                   |
-| INT_TEMPERATURE               | Interruption capteur temperature | TP31                                   |
-| INT_PROXIMITY                 | Interruption capteur proximite   | TP32                                   |
+| INT_TEMPERATURE               | Interruption capteur température | TP31                                   |
+| INT_PROXIMITY                 | Interruption capteur proximité   | TP32                                   |
 | INT_TEMPERATURE_HUMIDITY_BOSH | Interruption Bosch temp.         | TP45                                   |
 | UART1_RX                      | UART1 RX F103                    | TP71                                   |
 | UART1_TX                      | UART1 TX F103                    | TP72                                   |
@@ -147,7 +147,7 @@ Ces signaux sont uniquement accessibles via les points de test du PCB.
 | SPI1_MOSI                     | SPI1 MOSI (F103 -> flash)        | TP40                                   |
 | SPI1_MISO                     | SPI1 MISO (flash -> F103)        | TP41                                   |
 | SPI1_SCK                      | SPI1 SCK (F103 -> flash)         | TP42                                   |
-| AIN_1                         | Entree analogique F103           | TP56                                   |
+| AIN_1                         | Entrée analogique F103           | TP56                                   |
 | PWR_EXT                       | Alimentation externe F103        | TP75                                   |
 | PB15@STM32F103                | Broche PB15 F103                 | TP76                                   |
 | PA4@STM32F103                 | Broche PA4 F103                  | TP47                                   |

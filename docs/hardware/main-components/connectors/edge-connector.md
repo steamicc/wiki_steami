@@ -5,12 +5,12 @@ title: 'Edge connector'
 
 # Connecteur Edge (micro:bit compatible)
 
-Le connecteur edge fournit un acces aux broches P0-P20, compatible avec l'ecosysteme micro:bit.
+Le connecteur edge fournit un accès aux broches P0-P20, compatible avec l'écosystème micro:bit.
 
-## Fonctionnalites
+## Fonctionnalités
 
-- 6 entrees analogiques (P0-P4, P10)
-- GPIO numeriques
+- 6 entrées analogiques (P0-P4, P10)
+- GPIO numériques
 - SPI (P13-P15)
 - I2C (P19-P20)
 - PWM (P7, P10, P11)
@@ -23,7 +23,7 @@ Le connecteur edge fournit un acces aux broches P0-P20, compatible avec l'ecosys
 | SPI2_MISO_EDGE (P14) | PB14          |
 | SPI2_MOSI_EDGE (P15) | PB15          |
 
-## Bus UART serie
+## Bus UART série
 
 | Signal                 | Pin STM32WB55 |
 | ---------------------- | ------------- |

@@ -9,7 +9,7 @@ La carte STeaMi dispose de 7 boutons utilisateur plus un bouton reset.
 
 ## Boutons directionnels (via MCP23009)
 
-Les 4 boutons directionnels sont connectes via l'expandeur GPIO MCP23009 sur le bus I2C interne.
+Les 4 boutons directionnels sont connectés via l'expandeur GPIO MCP23009 sur le bus I2C interne.
 
 | Bouton       | Signal | Broche MCP23009 | PCB   |
 | ------------ | ------ | --------------- | ----- |
@@ -20,9 +20,9 @@ Les 4 boutons directionnels sont connectes via l'expandeur GPIO MCP23009 sur le 
 
 ## Boutons A et B (GPIO directs)
 
-Les boutons A et B sont connectes directement au STM32WB55 et sont partages avec les broches P5 et P11 du connecteur edge.
+Les boutons A et B sont connectés directement au STM32WB55 et sont partagés avec les broches P5 et P11 du connecteur edge.
 
-| Bouton   | Signal              | Pin STM32WB55 | PCB | Partage avec |
+| Bouton   | Signal              | Pin STM32WB55 | PCB | Partagé avec |
 | -------- | ------------------- | ------------- | --- | ------------ |
 | A_BUTTON | GPIO1_EDGE_BOUTON_A | PA7           | A   | P5           |
 | B_BUTTON | GPIO6_EDGE_BOUTON_B | PA8           | B   | P11          |
@@ -35,11 +35,11 @@ Les boutons A et B sont connectes directement au STM32WB55 et sont partages avec
 
 Le bouton Menu a plusieurs fonctions :
 
-- Acces au menu de la carte
-- Reveil depuis le mode basse consommation (sleep)
-- Appairage BLE (appui long a l'allumage)
+- Accès au menu de la carte
+- Réveil depuis le mode basse consommation (sleep)
+- Appairage BLE (appui long à l'allumage)
 
-## Points de test associes
+## Points de test associés
 
 | Bouton  | Test Point |
 | ------- | ---------- |

@@ -3,41 +3,41 @@ sidebar_position: 1
 title: 'STM32WB55RG'
 ---
 
-# STM32WB55RG — Microcontroleur applicatif
+# STM32WB55RG — Microcontrôleur applicatif
 
-Le STM32WB55RG est le processeur principal de la carte STeaMi. C'est sur ce microcontroleur que s'executent les programmes utilisateur (MicroPython, CODAL, Arduino). Il integre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee.
+Le STM32WB55RG est le processeur principal de la carte STeaMi. C'est sur ce microcontrôleur que s'exécutent les programmes utilisateur (MicroPython, CODAL, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee.
 
-## Caracteristiques
+## Caractéristiques
 
-| Caracteristique        | Detail                                                                                                                 |
+| Caractéristique        | Détail                                                                                                                 |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Modele                 | [STM32WB55RG](https://www.st.com/en/microcontrollers-microprocessors/stm32wb55rg.html)                                 |
+| Modèle                 | [STM32WB55RG](https://www.st.com/en/microcontrollers-microprocessors/stm32wb55rg.html)                                 |
 | Fabricant              | STMicroelectronics                                                                                                     |
-| Coeur                  | ARM Cortex-M4 @ 64 MHz                                                                                                 |
+| Cœur                   | ARM Cortex-M4 @ 64 MHz                                                                                                 |
 | Flash                  | 1 Mo                                                                                                                   |
 | RAM                    | 256 Ko SRAM                                                                                                            |
 | Communication sans fil | Bluetooth BLE 5.2, OpenThread, ZigBee                                                                                  |
-| Antenne                | Interne integree sur PCB                                                                                               |
+| Antenne                | Interne intégrée sur PCB                                                                                               |
 | Filtre RF              | [MLPF-WB55-01E3](https://www.st.com/en/emi-filtering-and-signal-conditioning/mlpf-wb55-01e3.html) (passe-bas 2.45 GHz) |
 | Horloge principale     | Quartz 32 MHz                                                                                                          |
 | Horloge RTC            | Quartz 32 KHz                                                                                                          |
-| Boitier                | VFQFPN68                                                                                                               |
+| Boîtier                | VFQFPN68                                                                                                               |
 | Datasheet              | [PDF](https://www.st.com/resource/en/datasheet/stm32wb55rg.pdf)                                                        |
 
-## Bus et peripheriques
+## Bus et périphériques
 
-Le MCU organise ses peripheriques sur plusieurs bus pour separer les usages internes et externes :
+Le MCU organise ses périphériques sur plusieurs bus pour séparer les usages internes et externes :
 
 | Bus            | Usage                                    | Signaux                           |
 | -------------- | ---------------------------------------- | --------------------------------- |
 | I2C1 (interne) | Capteurs, jauge batterie, expandeur GPIO | SCL: PB8, SDA: PB9                |
 | I2C3 (externe) | Connecteur edge, STEMMA/Qwiic            | SCL: PC0, SDA: PC1                |
-| SPI1 (interne) | Ecran OLED                               | SCK: PA1, MOSI: PB5, MISO: PB4    |
+| SPI1 (interne) | Écran OLED                               | SCK: PA1, MOSI: PB5, MISO: PB4    |
 | SPI2 (externe) | Connecteur edge                          | SCK: PB13, MISO: PB14, MOSI: PB15 |
 | UART           | Communication avec STM32F103             | TX: PB11, RX: PB10                |
 
 :::info
-Le bus I2C1 est partage entre le STM32WB55 et le STM32F103 (DAPLink), permettant au processeur d'interface d'acceder aux capteurs et a la jauge de batterie.
+Le bus I2C1 est partagé entre le STM32WB55 et le STM32F103 (DAPLink), permettant au processeur d'interface d'accéder aux capteurs et à la jauge de batterie.
 :::
 
 ## Broches GPIO directes
@@ -56,22 +56,22 @@ Le bus I2C1 est partage entre le STM32WB55 et le STM32F103 (DAPLink), permettant
 | MIC_CLK        | PA3       | Microphone PDM clock      |
 | RST_EXPANDER   | PB1       | Reset MCP23009            |
 | INT_EXPANDER   | PB0       | Interruption MCP23009     |
-| CS_OLED        | PD0       | Chip select ecran         |
-| RST_OLED       | PA12      | Reset ecran               |
+| CS_OLED        | PD0       | Chip select écran         |
+| RST_OLED       | PA12      | Reset écran               |
 
 ## Interruptions capteurs
 
-| Signal   | Pin  | Capteur                   |
-| -------- | ---- | ------------------------- |
-| INT_DIST | PB12 | VL53L1X (distance)        |
-| INT_ACC  | PC13 | ISM330DLC (accelerometre) |
-| INT_MAG  | PD1  | LIS2MDL (magnetometre)    |
+| Signal   | Pin  | Capteur                      |
+| -------- | ---- | ---------------------------- |
+| INT_DIST | PB12 | VL53L1X (distance)           |
+| INT_ACC  | PC13 | ISM330DLC (accéléromètre)    |
+| INT_MAG  | PD1  | LIS2MDL (magnétomètre)       |
 
-## Schemas
+## Schémas
 
-[![Schema FP6-Microcontroleur_applicatif](/img/schematics/FP6-Microcontroleur_applicatif.png)](/docs/schematics/FP6-Microcontroleur_applicatif.pdf)
+[![Schéma FP6-Microcontroleur_applicatif](/img/schematics/FP6-Microcontroleur_applicatif.png)](/docs/schematics/FP6-Microcontroleur_applicatif.pdf)
 
-- [Schema Altium — FP6](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP6-Microcontroleur.SchDoc)
+- [Schéma Altium — FP6](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP6-Microcontroleur.SchDoc)
 
 ## Voir aussi
 

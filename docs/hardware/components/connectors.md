@@ -11,7 +11,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- | --- | --------- |
 | USB3080-30-00-A       | Connecteur micro-USB B, Bottom-SMT                                    | [GCT](https://gct.co/)                                              | USB3080-30-00-A <br/><OctopartButton q="USB3080-30-00-A" />     | 1   | —         |
 | 10114830-10102LF      | Connecteur batterie SMD 2 positions, pas 1.25 mm                      | [Amphenol](https://www.amphenol-cs.com/)                            | 10114830-10102LF <br/><OctopartButton q="10114830-10102LF" />   | 1   | —         |
-| 52435-2471            | Connecteur FFC/FPC 24 positions, pas 0.50 mm (ecran OLED)             | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 52435-2471 <br/><OctopartButton q="52435-2471" />               | 1   | —         |
+| 52435-2471            | Connecteur FFC/FPC 24 positions, pas 0.50 mm (écran OLED)             | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 52435-2471 <br/><OctopartButton q="52435-2471" />               | 1   | —         |
 | S4B-PH-SM4-TB(LF)(SN) | Connecteur STEMMA/Qwiic JST 4 positions, pas 2.00 mm, angle droit SMD | [JST](https://www.jst.com/)                                         | S4B-PH-SM4-TB(LF)(SN) <br/><OctopartButton q="S4B-PH-SM4-TB" /> | 2   | —         |
 
 ## Details
@@ -24,16 +24,16 @@ Le connecteur micro-USB (GCT USB3080-30-00-A) assure :
 
 - Alimentation 5V de la carte
 - Communication USB (DAPLink, WebUSB, Mass Storage)
-- Programmation du microcontroleur applicatif
+- Programmation du microcontrôleur applicatif
 - Port serie virtuel (CDC)
 
 ### Connecteur batterie
 
 Connecteur 2 broches au pas de 1.25 mm pour batterie LiPo 3.7V.
 
-### Connecteur ecran OLED
+### Connecteur écran OLED
 
-Connecteur FFC/FPC 24 positions pour l'ecran OLED Winstar WEO128128BWPP3N00001.
+Connecteur FFC/FPC 24 positions pour l'écran OLED Winstar WEO128128BWPP3N00001.
 
 - Type : Slider, angle droit, contact superieur
 - Pas : 0.50 mm

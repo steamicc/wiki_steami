@@ -7,7 +7,7 @@ title: 'Boutons et buzzer'
 
 ## Boutons
 
-La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un bouton reset. Les boutons directionnels passent par l'expandeur GPIO MCP23009 pour economiser des broches MCU.
+La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un bouton reset. Les boutons directionnels passent par l'expandeur GPIO MCP23009 pour économiser des broches MCU.
 
 ### Boutons directionnels (via MCP23009)
 
@@ -35,20 +35,20 @@ La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un 
 | ------ | ----------- | ------------- |
 | Menu   | MENU_BOUTON | PA0           |
 
-- **Fonction secondaire** : reveil du mode basse consommation
-- **Fonction secondaire** : appairage BLE (appui long a l'allumage)
+- **Fonction secondaire** : réveil du mode basse consommation
+- **Fonction secondaire** : appairage BLE (appui long à l'allumage)
 
-### Configuration electrique
+### Configuration électrique
 
-Tous les boutons sont connectes avec des resistances de pull-up.
+Tous les boutons sont connectés avec des résistances de pull-up.
 
 ## Expandeur GPIO — MCP23009
 
-L'expandeur MCP23009 fournit 8 GPIO supplementaires sur le bus I2C1 interne. Il est utilise pour les boutons directionnels et les pads crocodile.
+L'expandeur MCP23009 fournit 8 GPIO supplémentaires sur le bus I2C1 interne. Il est utilisé pour les boutons directionnels et les pads crocodile.
 
-| Caracteristique    | Detail                                                                                  |
+| Caractéristique    | Détail                                                                                  |
 | ------------------ | --------------------------------------------------------------------------------------- |
-| Modele             | [MCP23009-E/MG](https://www.microchip.com/en-us/product/MCP23009)                       |
+| Modèle             | [MCP23009-E/MG](https://www.microchip.com/en-us/product/MCP23009)                       |
 | Fabricant          | Microchip                                                                               |
 | Interface          | I2C (bus I2C1 interne)                                                                  |
 | GPIO               | 8 (GP0-GP7)                                                                             |
@@ -69,26 +69,26 @@ L'expandeur MCP23009 fournit 8 GPIO supplementaires sur le bus I2C1 interne. Il 
 
 ## Buzzer
 
-| Caracteristique | Detail                           |
+| Caractéristique | Détail                           |
 | --------------- | -------------------------------- |
-| Modele          | SMT-0825-S-HT-R                  |
+| Modèle          | SMT-0825-S-HT-R                  |
 | Fabricant       | PUI Audio                        |
-| Type            | Transducteur piezo SMD           |
-| Tension         | 3.6V pic-a-pic                   |
+| Type            | Transducteur piézo SMD           |
+| Tension         | 3.6V pic-à-pic                   |
 | Signal          | BEEPER_OUT → PA11 (STM32WB55)    |
 | Alimentation    | Boost converter LMR62421 (14.5V) |
 | Sortie          | Mono, un seul canal              |
 
-## Schemas
+## Schémas
 
-[![Schema FP9-Boutons](/img/schematics/FP9-Boutons.png)](/docs/schematics/FP9-Boutons.pdf)
+[![Schéma FP9-Boutons](/img/schematics/FP9-Boutons.png)](/docs/schematics/FP9-Boutons.pdf)
 
-- [Schema Altium — FP9 Boutons](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP9-Bouton_de_controle.SchDoc)
-- [Schema Altium — FP10 Audio](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP10-Sortie_Audio.SchDoc)
-- [Schema Altium — FP7 Extension GPIO](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP7-Port_extention.SchDoc)
+- [Schéma Altium — FP9 Boutons](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP9-Bouton_de_controle.SchDoc)
+- [Schéma Altium — FP10 Audio](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP10-Sortie_Audio.SchDoc)
+- [Schéma Altium — FP7 Extension GPIO](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP7-Port_extention.SchDoc)
 
 ## Voir aussi
 
 - [Conception — Interface utilisateur](../../design/user-interface)
 - [Pin Mapping — Boutons](../pin-mapping/buttons)
-- [Vue d'ensemble du materiel](../)
+- [Vue d'ensemble du matériel](../)
