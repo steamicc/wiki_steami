@@ -69,14 +69,14 @@ Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur 
 | -------------------- | ------------- | ---------- |
 | BEEPER_OUT (SPEAKER) | PA11          | TP70       |
 
-## Communication serie (STM32WB55 - STM32F103)
+## Communication série (STM32WB55 - STM32F103)
 
 | Signal                 | Pin STM32WB55 | Test Point |
 | ---------------------- | ------------- | ---------- |
 | T_UART2_TX (SERIAL_TX) | PB11          | TP44       |
 | T_UART2_RX (SERIAL_RX) | PB10          | TP43       |
 
-## Controle alimentation STLink
+## Contrôle alimentation STLink
 
 | Signal              | Pin STM32WB55 | Pin STM32F103 |
 | ------------------- | ------------- | ------------- |

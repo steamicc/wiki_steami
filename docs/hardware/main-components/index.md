@@ -36,7 +36,7 @@ Pour la BOM complète (incluant passifs, connecteurs, etc.), voir la section [BO
 | --------------------------------- | --------------------------------------------------------------- | --------------------------- |
 | WEO128128BWPP3N00001              | [Écran OLED](./display) 128x128 blanc, SPI                      | [Détail →](./display)       |
 | Wurth 150505M173300 + LEDs status | [LEDs](./leds) RGB utilisateur + indicateurs système            | [Détail →](./leds)          |
-| ALPS SKRHABE010 + C&K PTS636      | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piezo | [Détail →](./buttons-audio) |
+| ALPS SKRHABE010 + C&K PTS636      | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piézo | [Détail →](./buttons-audio) |
 
 ## Alimentation
 

@@ -13,7 +13,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 | ------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------- | --- | --------- |
 | WE-TVS_824015 | Protection ESD haute vitesse 5 uA 5 VDC                     | [Wurth](https://www.we-online.com/en/components/products/WE-TVS) | WE-TVS_824015 <br/><OctopartButton q="824015" />        | 1   | —         |
 | D5V0H1B2LP-7B | Protection ESD bidirectionnelle TVS                         | [Diodes Inc.](https://www.diodes.com/)                           | D5V0H1B2LP-7B <br/><OctopartButton q="D5V0H1B2LP-7B" /> | 5   | —         |
-| ESD8351XV2T1G | Protection ESD unidirectionnelle, faible capacite, snapback | [onsemi](https://www.onsemi.com/)                                | ESD8351XV2T1G <br/><OctopartButton q="ESD8351XV2T1G" /> | 13  | —         |
+| ESD8351XV2T1G | Protection ESD unidirectionnelle, faible capacité, snapback | [onsemi](https://www.onsemi.com/)                                | ESD8351XV2T1G <br/><OctopartButton q="ESD8351XV2T1G" /> | 13  | —         |
 
 ## Diodes Schottky
 

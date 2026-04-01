@@ -37,7 +37,7 @@ Le bus I2C3 est partage entre le connecteur STEMMA/Qwiic et les broches P19/P20 
 
 ## Connecteur Jacdac
 
-Interface serie pour modules Jacdac.
+Interface série pour modules Jacdac.
 
 | Broche           | Signal    | Pin STM32WB55 | Test Point |
 | ---------------- | --------- | ------------- | ---------- |
@@ -48,7 +48,7 @@ Interface serie pour modules Jacdac.
 
 ## Port JTAG / SWD
 
-Connecteur de programmation et debogage (header 1 rangee, pas 1.27 mm).
+Connecteur de programmation et débogage (header 1 rangée, pas 1.27 mm).
 
 | Broche     | Signal       | Pin STM32F103 | Test Point |
 | ---------- | ------------ | ------------- | ---------- |
@@ -61,7 +61,7 @@ Connecteur de programmation et debogage (header 1 rangee, pas 1.27 mm).
 ## Connecteur micro-USB
 
 - **Composant** : GCT USB3080-30-00-A (Micro-B, Bottom-SMT)
-- **Fonctions** : Alimentation 5V, programmation DAPLink, communication serie, WebUSB, stockage de masse
+- **Fonctions** : Alimentation 5V, programmation DAPLink, communication série, WebUSB, stockage de masse
 
 ## Connecteur batterie
 

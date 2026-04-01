@@ -25,11 +25,11 @@ Les schémas Altium sont organisés par bloc fonctionnel :
 | FP6 — Microcontrôleur applicatif | [STeaMi-FP6-Microcontroleur.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP6-Microcontroleur.SchDoc)                       |
 | FP7 — Extension GPIO             | [STeaMi-FP7-Port_extention.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP7-Port_extention.SchDoc)                         |
 | FP8 — Display et LEDs            | [STeaMi-FP8-Display_et_LED_statuts.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP8-Display_et_LED_statuts.SchDoc)         |
-| FP9 — Boutons de controle        | [STeaMi-FP9-Bouton_de_controle.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP9-Bouton_de_controle.SchDoc)                 |
+| FP9 — Boutons de contrôle        | [STeaMi-FP9-Bouton_de_controle.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP9-Bouton_de_controle.SchDoc)                 |
 | FP10 — Sortie audio              | [STeaMi-FP10-Sortie_Audio.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP10-Sortie_Audio.SchDoc)                           |
 | FP11 — Port JTAG/SWD             | [STeaMi-FP11-Port_JTAG.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP11-Port_JTAG.SchDoc)                                 |
 | FP12 — Capteurs internes         | [STeaMi-FP12-Capteur_interne.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc)                     |
-| FP13 — Ports specifiques         | [STeaMi-FP13-Port_Specifique.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc)                     |
+| FP13 — Ports spécifiques         | [STeaMi-FP13-Port_Specifique.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP13-Port_Specifique.SchDoc)                     |
 | FP14 — Microcontrôleur interface | [STeaMi-FP14-Microcontroleur_interface.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP14-Microcontroleur_interface.SchDoc) |
 | FP15 — Mémoire flash             | [STeaMi-FP15-Memoire_flash.SchDoc](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP15-Memoire_flash.SchDoc)                         |
 

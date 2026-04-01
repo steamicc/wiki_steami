@@ -11,8 +11,8 @@ Ces composants sont prévus sur le PCB mais ne sont pas montés en production st
 | --------------------- | ----------------------------------------------------- | --------- | -------------- | --- |
 | Resistor 0 Ohm - 0603 | Strap non monté                                       | -         | -              | 17  |
 | Resistor 0 Ohm - 0402 | Strap non monté                                       | NC        | NC             | 2   |
-| FTS-103-01-F-S        | Header bas profil 3 positions 1 rangee, pas 1.27 mm   | SAMTEC    | FTS-103-01-F-S | 1   |
-| FTS-105-01-F-D        | Header bas profil 10 positions 2 rangees, pas 1.27 mm | SAMTEC    | FTS-105-01-F-D | 1   |
+| FTS-103-01-F-S        | Header bas profil 3 positions 1 rangée, pas 1.27 mm   | SAMTEC    | FTS-103-01-F-S | 1   |
+| FTS-105-01-F-D        | Header bas profil 10 positions 2 rangées, pas 1.27 mm | SAMTEC    | FTS-105-01-F-D | 1   |
 
 ## Notes
 

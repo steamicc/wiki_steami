@@ -72,7 +72,7 @@ L'entrée peut être 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET des
 | ------- | ----------- | ------------------------------------ |
 | 3.3V    | 1200 mA     | Microcontrôleur, capteurs, affichage |
 | 3.3V    | 150 mA      | Régulateur linéaire (STLink)         |
-| 14.5V   | 100 mA      | Buzzer piezo                         |
+| 14.5V   | 100 mA      | Buzzer piézo                         |
 | 5V      | -           | Alimentation Jacdac                  |
 
 ## Voir aussi
