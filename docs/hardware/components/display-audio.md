@@ -25,11 +25,11 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 | Composant                                           | Description                                           | Fabricant                                                         | Reference                                                   | Qte | Datasheet |
 | --------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
-| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/products/detail/SMT-0825-S-HT-R) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
+| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piézo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/products/detail/SMT-0825-S-HT-R) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
 
 ### Caractéristiques du buzzer
 
-- **Type** : Transducteur piezo SMD
+- **Type** : Transducteur piézo SMD
 - **Tension** : 3.6V pic-a-pic
 - **Alimentation** : Via convertisseur boost LMR62421 (14.5V)
 - **Signal** : BEEPER_OUT (PA11 sur STM32WB55)

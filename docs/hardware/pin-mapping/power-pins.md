@@ -44,7 +44,7 @@ title: 'Alimentation'
 | PACK_OUT    | Sortie batterie avant BQ27441      | TP1                                    |
 | VDD         | Tension après BQ27441              | TP52                                   |
 | +3V3@1200mA | 3.3V principal (TPS63000)          | TP2, TP4, TP55, TP60, TP62, TP13, TP14 |
-| SYST        | Tension avant regulateur TPS63000  | TP3                                    |
+| SYST        | Tension avant régulateur TPS63000  | TP3                                    |
 | +14V5@100mA | 14.5V boost (LMR62421) pour buzzer | TP5                                    |
 | +3V3_STLINK | 3.3V pour le STLink                | TP46                                   |
 | VBAT_ON_OFF | Signal SYSOFF du BQ24075           | TP51                                   |

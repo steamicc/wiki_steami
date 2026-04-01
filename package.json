@@ -21,6 +21,7 @@
     "lint:js:fix": "eslint --fix .",
     "lint:links": "docker run --rm -v $PWD:/input lycheeverse/lychee --config /input/.lychee.toml --root-dir /input/static '/input/docs/**/*.md' '/input/README.md'",
     "lint:examples": "npm run prebuild && python3 scripts/validate-code-examples.py",
+    "lint:spell": "cspell \"docs/**/*.md\" \"README.md\"",
     "prepare": "husky"
   },
   "dependencies": {
@@ -35,9 +36,11 @@
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
+    "@cspell/dict-fr-fr": "^2.3.2",
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/types": "3.9.2",
     "@eslint/js": "9.39.4",
+    "cspell": "^9.7.0",
     "eslint": "9.39.4",
     "eslint-plugin-react": "7.37.5",
     "git-precommit-checks": "3.1.0",
@@ -61,7 +64,10 @@
     ]
   },
   "lint-staged": {
-    "*.md": "markdownlint",
+    "*.md": [
+      "markdownlint",
+      "cspell --no-must-find-files"
+    ],
     "*.{js,jsx}": [
       "eslint",
       "prettier --check"

@@ -27,4 +27,4 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 | Composant | Description                           | Fabricant                                                         | Reference                                       | Qte |
 | --------- | ------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------- | --- |
-| 744230900 | Filtre de mode commun haute frequence | [Wurth](https://www.we-online.com/en/components/products/WE-CNSW) | 744230900 <br/><OctopartButton q="744230900" /> | 1   |
+| 744230900 | Filtre de mode commun haute fréquence | [Wurth](https://www.we-online.com/en/components/products/WE-CNSW) | 744230900 <br/><OctopartButton q="744230900" /> | 1   |
