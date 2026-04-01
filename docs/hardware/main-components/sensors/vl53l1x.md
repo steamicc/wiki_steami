@@ -7,23 +7,23 @@ title: 'VL53L1X'
 
 Capteur de distance Time-of-Flight (ToF) utilisant un laser infrarouge.
 
-## Caracteristiques
+## Caractéristiques
 
-| Caracteristique | Detail                                                                               |
+| Caractéristique | Détail                                                                               |
 | --------------- | ------------------------------------------------------------------------------------ |
-| Modele          | [VL53L1CXV0FY/1](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html) |
+| Modèle          | [VL53L1CXV0FY/1](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html) |
 | Fabricant       | STMicroelectronics                                                                   |
 | Type            | Time-of-Flight (ToF)                                                                 |
-| Portee          | Jusqu'a 4 m                                                                          |
+| Portée          | Jusqu'à 4 m                                                                          |
 | Interface       | I2C                                                                                  |
 | Interruption    | INT_DIST → PB12                                                                      |
 | Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)                          |
 
-## Schemas
+## Schémas
 
-[![Schema FP12-Capteurs](/img/schematics/FP12-Capteurs.png)](/docs/schematics/FP12-Capteurs.pdf)
+[![Schéma FP12-Capteurs](/img/schematics/FP12-Capteurs.png)](/docs/schematics/FP12-Capteurs.pdf)
 
-- [Schema Altium — FP12](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc)
+- [Schéma Altium — FP12](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc)
 
 ## Voir aussi
 

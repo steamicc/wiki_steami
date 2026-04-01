@@ -5,15 +5,15 @@ title: 'Port SWD'
 
 # Port SWD (debug)
 
-Port de service pour la programmation et le debogage du STM32F103.
+Port de service pour la programmation et le débogage du STM32F103.
 
-## Caracteristiques
+## Caractéristiques
 
-| Caracteristique | Detail                       |
+| Caractéristique | Détail                       |
 | --------------- | ---------------------------- |
 | Protocole       | SWD (Serial Wire Debug)      |
-| Connecteur      | Header 1 rangee, pas 1.27 mm |
-| Compatibilite   | Black Magic Probe, ST-Link   |
+| Connecteur      | Header 1 rangée, pas 1.27 mm |
+| Compatibilité   | Black Magic Probe, ST-Link   |
 
 ## Brochage
 
@@ -25,14 +25,14 @@ Port de service pour la programmation et le debogage du STM32F103.
 | 4      | SWDIO  | PA13          |
 
 :::caution
-Les broches 3V3 et GND ne sont pas adjacentes pour eviter tout risque de court-circuit.
+Les broches 3V3 et GND ne sont pas adjacentes pour éviter tout risque de court-circuit.
 :::
 
-## Schemas
+## Schémas
 
-[![Schema FP11-Port_JTAG](/img/schematics/FP11-Port_JTAG.png)](/docs/schematics/FP11-Port_JTAG.pdf)
+[![Schéma FP11-Port_JTAG](/img/schematics/FP11-Port_JTAG.png)](/docs/schematics/FP11-Port_JTAG.pdf)
 
-- [Schema Altium — FP11](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP11-Port_JTAG.SchDoc)
+- [Schéma Altium — FP11](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP11-Port_JTAG.SchDoc)
 
 ## Voir aussi
 

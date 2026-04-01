@@ -68,7 +68,7 @@ Connecteur de programmation et debogage (header 1 rangee, pas 1.27 mm).
 - **Composant** : Amphenol 10114830-10102LF (header SMD 2 positions, pas 1.25 mm)
 - **Type** : Batterie LiPo 3.7V
 
-## Connecteur ecran OLED
+## Connecteur écran OLED
 
 - **Composant** : Molex 52435-2471 (FFC/FPC 24 positions, pas 0.50 mm)
 - **Interface** : SPI1

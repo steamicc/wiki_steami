@@ -1,19 +1,19 @@
 ---
 sidebar_position: 10
-title: 'Ecran et audio'
+title: 'Écran et audio'
 ---
 
 import OctopartButton from '@site/src/components/OctopartButton';
 
-# Ecran et audio
+# Écran et audio
 
-## Ecran OLED
+## Écran OLED
 
 | Composant                                          | Description                                                        | Fabricant                              | Reference                                                             | Qte | Datasheet |
 | -------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------- | --------------------------------------------------------------------- | --- | --------- |
 | [WEO128128BWPP3N00001](../main-components/display) | Module OLED graphique blanc 128x128, COG (Chip on Glass), Longlife | [Winstar](https://www.winstar.com.tw/) | WEO128128BWPP3N00001 <br/><OctopartButton q="WEO128128BWPP3N00001" /> | 1   | —         |
 
-### Caracteristiques
+### Caractéristiques
 
 - **Technologie** : OLED (pixels blancs)
 - **Resolution** : 128 x 128 pixels
@@ -27,7 +27,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 | --------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
 | [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piezo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/products/detail/SMT-0825-S-HT-R) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
 
-### Caracteristiques du buzzer
+### Caractéristiques du buzzer
 
 - **Type** : Transducteur piezo SMD
 - **Tension** : 3.6V pic-a-pic

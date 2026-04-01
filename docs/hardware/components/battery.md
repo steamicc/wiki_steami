@@ -9,12 +9,12 @@ title: 'Batterie'
 | --------------------------- | --------------------------- | --- |
 | Polymer Lithium-Ion Battery | Batterie LiPo 3.7V 1600 mAh | 1   |
 
-## Caracteristiques
+## Caractéristiques
 
-- **Technologie** : Lithium-Polymere (LiPo)
+- **Technologie** : Lithium-Polymère (LiPo)
 - **Tension nominale** : 3.7V
-- **Capacite** : 1600 mAh
-- **Integration** : Peut etre fixee a l'arriere de la carte
+- **Capacité** : 1600 mAh
+- **Intégration** : Peut être fixée à l'arrière de la carte
 - **Connecteur** : Amphenol 10114830-10102LF (header SMD 2 positions, pas 1.25 mm)
 
 ## Autonomie
@@ -25,7 +25,7 @@ title: 'Batterie'
 ## Gestion
 
 - **Chargeur** : [BQ24075RGT](../main-components/power/bq24075) (via micro-USB, 500 mA minimum)
-- **Jauge** : [BQ27441DRZR-G1A](../main-components/power/bq27441) (mesure I2C de l'etat de charge)
+- **Jauge** : [BQ27441DRZR-G1A](../main-components/power/bq27441) (mesure I2C de l'état de charge)
 
 ## Voir aussi
 

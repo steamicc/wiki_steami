@@ -5,25 +5,25 @@ title: 'WSEN-PADS'
 
 # Capteur de pression — WSEN-PADS
 
-Capteur de pression absolue avec haute resolution 24 bits. Permet de mesurer la pression atmospherique et d'estimer l'altitude.
+Capteur de pression absolue avec haute résolution 24 bits. Permet de mesurer la pression atmosphérique et d'estimer l'altitude.
 
-## Caracteristiques
+## Caractéristiques
 
-| Caracteristique | Detail                                                                        |
+| Caractéristique | Détail                                                                        |
 | --------------- | ----------------------------------------------------------------------------- |
-| Modele          | [2511020213301](https://www.we-online.com/en/components/products/WSEN-PADS_1) |
+| Modèle          | [2511020213301](https://www.we-online.com/en/components/products/WSEN-PADS_1) |
 | Fabricant       | Wurth Elektronik                                                              |
-| Plage           | 26 kPa a 126 kPa (absolu)                                                     |
-| Resolution      | 24 bits                                                                       |
+| Plage           | 26 kPa à 126 kPa (absolu)                                                     |
+| Résolution      | 24 bits                                                                       |
 | Interface       | I2C / SPI                                                                     |
-| Boitier         | 10-WFLGA                                                                      |
+| Boîtier         | 10-WFLGA                                                                      |
 | Datasheet       | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)     |
 
-## Schemas
+## Schémas
 
-[![Schema FP12-Capteurs](/img/schematics/FP12-Capteurs.png)](/docs/schematics/FP12-Capteurs.pdf)
+[![Schéma FP12-Capteurs](/img/schematics/FP12-Capteurs.png)](/docs/schematics/FP12-Capteurs.pdf)
 
-- [Schema Altium — FP12](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc)
+- [Schéma Altium — FP12](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc)
 
 ## Voir aussi
 

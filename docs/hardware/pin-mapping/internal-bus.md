@@ -14,20 +14,20 @@ Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur 
 | I2C1_SCL | PB8           | PB6           |
 | I2C1_SDA | PB9           | PB7           |
 
-### Peripheriques sur I2C1
+### Périphériques sur I2C1
 
-| Peripherique    | Composant                    | Fonction                           |
+| Périphérique    | Composant                    | Fonction                           |
 | --------------- | ---------------------------- | ---------------------------------- |
-| ISM330DLCTR     | Accelerometre/Gyroscope      | 6 axes + temperature               |
-| LIS2MDLTR       | Magnetometre                 | 3 axes                             |
+| ISM330DLCTR     | Accéléromètre/Gyroscope      | 6 axes + température               |
+| LIS2MDLTR       | Magnétomètre                 | 3 axes                             |
 | VL53L1CXV0FY/1  | Capteur de distance          | Time-of-Flight                     |
-| APDS-9960       | Capteur optique              | Lumiere, couleur, geste, proximite |
-| 2511020213301   | Capteur de pression          | Barometre absolu                   |
-| 2525020210001   | Capteur humidite/temperature | Humidite + temperature             |
-| BQ27441DRZR-G1A | Jauge de batterie            | Etat de charge                     |
-| MCP23009-E/MG   | Expandeur GPIO               | 8 GPIO supplementaires             |
+| APDS-9960       | Capteur optique              | Lumière, couleur, geste, proximité |
+| 2511020213301   | Capteur de pression          | Baromètre absolu                   |
+| 2525020210001   | Capteur humidité/température | Humidité + température             |
+| BQ27441DRZR-G1A | Jauge de batterie            | État de charge                     |
+| MCP23009-E/MG   | Expandeur GPIO               | 8 GPIO supplémentaires             |
 
-## Bus SPI interne (SPI1) - Ecran OLED
+## Bus SPI interne (SPI1) - Écran OLED
 
 | Signal              | Pin STM32WB55 | Test Point |
 | ------------------- | ------------- | ---------- |
@@ -41,13 +41,13 @@ Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur 
 
 | Signal                        | Pin STM32WB55 | Capteur                     | Test Point |
 | ----------------------------- | ------------- | --------------------------- | ---------- |
-| INT_ACC                       | PC13          | ISM330DLCTR (Accelerometre) | TP28       |
-| INT_MAG                       | PD1           | LIS2MDLTR (Magnetometre)    | TP29       |
+| INT_ACC                       | PC13          | ISM330DLCTR (Accéléromètre) | TP28       |
+| INT_MAG                       | PD1           | LIS2MDLTR (Magnétomètre)    | TP29       |
 | INT_DIST                      | PB12          | VL53L1X (Distance)          | TP27       |
 | INT_PRESSURE                  | -             | WSEN-PADS (Pression)        | TP30       |
-| INT_TEMPERATURE               | -             | WSEN-HIDS (Temperature)     | TP31       |
-| INT_PROXIMITY                 | -             | APDS-9960 (Proximite)       | TP32       |
-| INT_TEMPERATURE_HUMIDITY_BOSH | -             | Bosch (Temperature)         | TP45       |
+| INT_TEMPERATURE               | -             | WSEN-HIDS (Température)     | TP31       |
+| INT_PROXIMITY                 | -             | APDS-9960 (Proximité)       | TP32       |
+| INT_TEMPERATURE_HUMIDITY_BOSH | -             | Bosch (Température)         | TP45       |
 
 ## Expandeur GPIO (MCP23009)
 
