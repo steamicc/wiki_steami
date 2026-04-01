@@ -5,9 +5,9 @@ title: 'Composants principaux'
 
 # Composants principaux
 
-Les composants actifs de la carte STeaMi, regroupés par fonction. Chaque composant dispose d'une page détaillée avec specifications complètes, pinout, liens datasheets et drivers.
+Les composants actifs de la carte STeaMi, regroupés par fonction. Chaque composant dispose d'une page détaillée avec spécifications complètes, pinout, liens datasheets et drivers.
 
-Pour la BOM complete (incluant passifs, connecteurs, etc.), voir la section [BOM](../components/).
+Pour la BOM complète (incluant passifs, connecteurs, etc.), voir la section [BOM](../components/).
 
 ## Microcontrôleurs
 
