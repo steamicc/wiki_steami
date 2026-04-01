@@ -5,9 +5,9 @@ title: 'Pinout'
 
 # Pinout de la carte STeaMi
 
-## Brochage general
+## Brochage général
 
-Le diagramme suivant presente l'ensemble des broches de la carte STeaMi, incluant le connecteur edge (compatible micro:bit), les pads crocodile, le connecteur STEMMA/Qwiic et le port JTAG.
+Le diagramme suivant présente l'ensemble des broches de la carte STeaMi, incluant le connecteur edge (compatible micro:bit), les pads crocodile, le connecteur STEMMA/Qwiic et le port JTAG.
 
 ![Pinout STeaMi](/img/pinout/pinout_steami.svg)
 

@@ -1,17 +1,17 @@
 ---
 sidebar_position: 4
-title: 'BOM complete'
+title: 'BOM complète'
 ---
 
 # Bill of Materials (BOM)
 
-Liste complete de tous les composants de la carte STeaMi, regroupes par categorie. La carte contient 101 references distinctes.
+Liste complète de tous les composants de la carte STeaMi, regroupés par catégorie. La carte contient 101 références distinctes.
 
 Pour les composants actifs principaux avec liens datasheets, voir [Composants principaux](../main-components).
 
-## Sommaire par categorie
+## Sommaire par catégorie
 
-| Categorie                                                          | Nombre de references |
+| Catégorie                                                          | Nombre de références |
 | ------------------------------------------------------------------ | -------------------- |
 | [Circuits integres](./integrated-circuits) (MCU, capteurs, PMIC)   | 21                   |
 | [Resistances](./resistors)                                         | 22                   |

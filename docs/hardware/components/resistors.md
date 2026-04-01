@@ -1,18 +1,18 @@
 ---
 sidebar_position: 3
-title: 'Resistances'
+title: 'Résistances'
 ---
 
 import OctopartButton from '@site/src/components/OctopartButton';
 
-# Resistances
+# Résistances
 
-Toutes les resistances de la carte STeaMi, principalement en boitier 0402.
+Toutes les résistances de la carte STeaMi, principalement en boîtier 0402.
 
-| Valeur                         | Description                | Fabricant                                                                                   | Reference                                                         | Qte |
+| Valeur                         | Description                | Fabricant                                                                                   | Référence                                                         | Qte |
 | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --- |
 | 0 Ohm - 0402                   | Strap 0R 5% 0.0625W        | [Yageo](https://www.yageo.com/)                                                             | RC0402JR-100RL <br/><OctopartButton q="RC0402JR-100RL" />         | 27  |
-| 0 Ohm - 0402                   | Strap NI 0% 0W (non monte) | NC                                                                                          | NC                                                                | 2   |
+| 0 Ohm - 0402                   | Strap NI 0% 0W (non monté) | NC                                                                                          | NC                                                                | 2   |
 | 0 Ohm - 0603                   | Strap 0R 1% 0.1W           | [Vishay](https://www.vishay.com/)                                                           | CRCW06030000Z0EAC <br/><OctopartButton q="CRCW06030000Z0EAC" />   | 1   |
 | 10 Ohm - 0402                  | 10R 1% 0.0625W             | [Yageo](https://www.yageo.com/)                                                             | RC0402FR-1010RL <br/><OctopartButton q="RC0402FR-1010RL" />       | 6   |
 | 15 Ohm - 0402                  | 15R 0.5% 1W 1206           | [Susumu](https://www.susumu.co.jp/en/)                                                      | HRG3216Q-15R0-D-T1 <br/><OctopartButton q="HRG3216Q-15R0-D-T1" /> | 1   |
