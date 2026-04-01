@@ -84,7 +84,7 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 | INT_ACC    | INT_ACC         | Interruption accéléromètre (PC13)         |
 | INT_MAG    | INT_MAG         | Interruption magnétomètre (PD1)           |
 | INT_DIST   | INT_DIST        | Interruption distance (PB12)              |
-| MICRO_DATA | MIC_IN          | Donnees microphone (PA10)                 |
+| MICRO_DATA | MIC_IN          | Données microphone (PA10)                 |
 | MICRO_CLK  | MIC_CLK         | Horloge microphone (PA3)                  |
 | BEEPER_OUT | SPEAKER         | Sortie buzzer (PA11)                      |
 

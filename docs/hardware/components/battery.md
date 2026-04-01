@@ -29,5 +29,5 @@ title: 'Batterie'
 
 ## Voir aussi
 
-- [Alimentation](../main-components/power/) — chaine d'alimentation complete
+- [Alimentation](../main-components/power/) — chaîne d'alimentation complète
 - [Conception — Alimentation](../../design/power)
