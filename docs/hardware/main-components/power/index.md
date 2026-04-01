@@ -75,12 +75,12 @@ L'entrée peut être 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET des
 
 ## Sorties disponibles
 
-| Tension | Courant max | Utilisation                                    |
-| ------- | ----------- | ---------------------------------------------- |
-| 3.3V    | 1200 mA     | MCU, capteurs, affichage                       |
-| 3.3V    | 150 mA      | Régulateur linéaire (MCU interface / DAPLink)  |
-| 14.5V   | 100 mA      | Buzzer piézo, écran OLED                       |
-| 5V      | —           | Alimentation Jacdac                            |
+| Tension | Courant max | Utilisation                                   |
+| ------- | ----------- | --------------------------------------------- |
+| 3.3V    | 1200 mA     | MCU, capteurs, affichage                      |
+| 3.3V    | 150 mA      | Régulateur linéaire (MCU interface / DAPLink) |
+| 14.5V   | 100 mA      | Buzzer piézo, écran OLED                      |
+| 5V      | —           | Alimentation Jacdac                           |
 
 ## Schémas
 

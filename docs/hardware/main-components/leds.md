@@ -41,12 +41,12 @@ LEDs gérées par le processeur d'interface pour indiquer l'état du système.
 
 ## Comportement des LEDs système
 
-| LED              | État                    | Signification           |
-| ---------------- | ----------------------- | ----------------------- |
-| LED alimentation | Verte fixe              | Alimentation connectée  |
-| LED alimentation | Verte clignotante (50%) | Batterie faible         |
-| LED BLE          | Bleue clignotante (50%) | Appairage en cours      |
-| LED charge       | Rouge                   | Batterie en charge      |
+| LED              | État                    | Signification          |
+| ---------------- | ----------------------- | ---------------------- |
+| LED alimentation | Verte fixe              | Alimentation connectée |
+| LED alimentation | Verte clignotante (50%) | Batterie faible        |
+| LED BLE          | Bleue clignotante (50%) | Appairage en cours     |
+| LED charge       | Rouge                   | Batterie en charge     |
 
 ## Schémas
 

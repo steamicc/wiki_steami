@@ -62,15 +62,15 @@ Le transceiver 2.4 GHz intégré au STM32WB55 prend en charge les communications
 
 La carte intègre 7 capteurs sur le bus I2C1 interne, couvrant distance, mouvement, environnement, lumière et son. Certains capteurs (VL53L1X, ISM330DLC, LIS2MDL) disposent de lignes d'interruption individuelles.
 
-| Capteur                      | Modèle                                                                                                                  | Mesures                         |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Accéléromètre/Gyroscope      | [ISM330DLC](https://www.st.com/en/mems-and-sensors/ism330dlc.html)                                                      | 6 axes + température            |
-| Magnétomètre                 | [LIS2MDL](https://www.st.com/en/mems-and-sensors/lis2mdl.html)                                                          | 3 axes magnétiques              |
-| Distance                     | [VL53L1X](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html)                                           | Time-of-Flight, 0-4 m           |
-| Pression                     | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)                                               | 26-126 kPa, 24 bits             |
-| Humidité/Température         | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)                                               | RH + °C                         |
-| Lumière/Geste                | [APDS-9960](https://www.broadcom.com/products/optical-sensors/integrated-ambient-light-and-proximity-sensors/apds-9960) | ALS, couleur, proximité, geste  |
-| Microphone                   | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)                                                      | PDM MEMS omnidirectionnel       |
+| Capteur                 | Modèle                                                                                                                  | Mesures                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Accéléromètre/Gyroscope | [ISM330DLC](https://www.st.com/en/mems-and-sensors/ism330dlc.html)                                                      | 6 axes + température           |
+| Magnétomètre            | [LIS2MDL](https://www.st.com/en/mems-and-sensors/lis2mdl.html)                                                          | 3 axes magnétiques             |
+| Distance                | [VL53L1X](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html)                                           | Time-of-Flight, 0-4 m          |
+| Pression                | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)                                               | 26-126 kPa, 24 bits            |
+| Humidité/Température    | [WSEN-HIDS](https://www.we-online.com/en/components/products/WSEN-HIDS_1)                                               | RH + °C                        |
+| Lumière/Geste           | [APDS-9960](https://www.broadcom.com/products/optical-sensors/integrated-ambient-light-and-proximity-sensors/apds-9960) | ALS, couleur, proximité, geste |
+| Microphone              | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)                                                      | PDM MEMS omnidirectionnel      |
 
 | Caractéristique | Détail                                                                                                                                                               |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
