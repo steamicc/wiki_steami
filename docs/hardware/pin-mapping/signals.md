@@ -88,7 +88,7 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 | MICRO_CLK  | MIC_CLK         | Horloge microphone (PA3)                  |
 | BEEPER_OUT | SPEAKER         | Sortie buzzer (PA11)                      |
 
-## Signaux internes - Communication serie
+## Signaux internes - Communication série
 
 | Signal              | Broche associée     | Description                        |
 | ------------------- | ------------------- | ---------------------------------- |
@@ -96,7 +96,7 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 | T_UART2_RX          | SERIAL_RX           | RX depuis F103 (PB10)              |
 | UART2_TX            | JACDAC_DATA         | Jacdac TX (PB6)                    |
 | UART2_RX            | JACDAC_DATA         | Jacdac RX (PB7)                    |
-| ON/OFF\_+3V3_STLINK | ACTIVATE_3V3_STLINK | Controle alimentation STLink (PB2) |
+| ON/OFF\_+3V3_STLINK | ACTIVATE_3V3_STLINK | Contrôle alimentation STLink (PB2) |
 
 ## Signaux JTAG
 
@@ -129,7 +129,7 @@ Ces signaux sont uniquement accessibles via les points de test du PCB.
 | VDD                           | Tension après jauge              | TP52                                   |
 | POWER                         | Sortie BQ24075                   | TP49                                   |
 | +3V3@1200mA                   | Rail 3.3V principal              | TP2, TP4, TP55, TP60, TP62, TP13, TP14 |
-| SYST                          | Avant regulateur TPS63000        | TP3                                    |
+| SYST                          | Avant régulateur TPS63000        | TP3                                    |
 | +14V5@100mA                   | Boost 14.5V pour buzzer          | TP5                                    |
 | +3V3_STLINK                   | 3.3V STLink                      | TP46                                   |
 | T_NRST                        | Reset STM32WB55                  | TP61                                   |

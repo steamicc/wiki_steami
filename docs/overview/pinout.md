@@ -13,7 +13,7 @@ Le diagramme suivant présente l'ensemble des broches de la carte STeaMi, inclua
 
 ## Connecteurs
 
-Vue detaillee des connecteurs disponibles sur la carte :
+Vue détaillée des connecteurs disponibles sur la carte :
 
 ![Connecteurs STeaMi](/img/pinout/connectors_steami.svg)
 
@@ -82,7 +82,7 @@ Deux connecteurs JST 4 broches au pas de 2 mm pour la connexion de capteurs exte
 | LED_BLUE    | LED_USER_BLUE     | PC10              | LED utilisateur bleue |
 | LED_CHG     | LED_CHG_RED       | -                 | Indicateur de charge  |
 | LED_STATUS  | LED_STLINK_STATUS | - (STM32F103 PA9) | Statut DAPLink        |
-| LED_FLASH   | LED_COM_GRN       | - (STM32F103 PB1) | Activite flash        |
+| LED_FLASH   | LED_COM_GRN       | - (STM32F103 PB1) | Activité flash        |
 | LED_DAPLINK | LED_DAP_BLUE      | - (STM32F103 PA6) | Indicateur DAPLink    |
 
 ## Port JTAG

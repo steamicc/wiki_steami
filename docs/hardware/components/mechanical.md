@@ -1,11 +1,11 @@
 ---
 sidebar_position: 9
-title: 'Composants mecaniques'
+title: 'Composants mécaniques'
 ---
 
 import OctopartButton from '@site/src/components/OctopartButton';
 
-# Composants mecaniques
+# Composants mécaniques
 
 ## Boutons et interrupteurs
 

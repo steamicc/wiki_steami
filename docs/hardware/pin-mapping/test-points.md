@@ -18,12 +18,12 @@ Liste complète des points de test disponibles sur le PCB de la carte STeaMi, or
 | TP49       | POWER       | Alimentation après le BQ24075RGT        |
 | TP1        | PACK_OUT    | Sortie batterie avant le BQ27441DRZR    |
 | TP52       | VDD         | Tension après le BQ27441DRZR            |
-| TP2        | +3V3@1200mA | 3.3V après regulateur TPS63000DRCT      |
-| TP3        | SYST        | Avant le regulateur TPS63000DRCT        |
-| TP4        | +3V3@1200mA | 3.3V après regulateur TPS63000DRCT      |
-| TP55       | +3V3@1200mA | 3.3V après regulateur TPS63000DRCT      |
-| TP5        | +14V5@100mA | 14.5V après regulateur LMR62421         |
-| TP46       | +3V3_STLINK | 3.3V après regulateur STLink            |
+| TP2        | +3V3@1200mA | 3.3V après régulateur TPS63000DRCT      |
+| TP3        | SYST        | Avant le régulateur TPS63000DRCT        |
+| TP4        | +3V3@1200mA | 3.3V après régulateur TPS63000DRCT      |
+| TP55       | +3V3@1200mA | 3.3V après régulateur TPS63000DRCT      |
+| TP5        | +14V5@100mA | 14.5V après régulateur LMR62421         |
+| TP46       | +3V3_STLINK | 3.3V après régulateur STLink            |
 
 ## Microcontrôleur applicatif (STM32WB55RG)
 
@@ -93,7 +93,7 @@ Liste complète des points de test disponibles sur le PCB de la carte STeaMi, or
 | ---------- | ---------- | ------------- |
 | TP70       | BEEPER_OUT | Sortie buzzer |
 
-## Communication serie et Jacdac
+## Communication série et Jacdac
 
 | Test Point | Signal     | Description                    |
 | ---------- | ---------- | ------------------------------ |

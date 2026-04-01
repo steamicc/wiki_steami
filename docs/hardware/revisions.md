@@ -7,7 +7,7 @@ title: 'Revisions'
 
 ## Identifier sa version
 
-La revision et le nom de la carte sont stockes dans la config zone du STM32F103 (DAPLink). Ils peuvent etre lus via le module `steami_config` en MicroPython :
+La revision et le nom de la carte sont stockes dans la config zone du STM32F103 (DAPLink). Ils peuvent être lus via le module `steami_config` en MicroPython :
 
 ```python
 from steami_config import SteamiConfig

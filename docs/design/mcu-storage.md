@@ -9,10 +9,10 @@ title: 'MCU et stockage'
 
 | ID     | Nom                     | Description                                                                                                                                      | Implémentation          |
 | ------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| FCT-35 | Microcontroller         | Le système doit intégrer un microcontrôleur ARM Cortex-M STM32WB55 de STMicroelectronics.                                                        | STM32WB55RG (Cortex-M4) |
-| FCT-36 | Microcontroller - RAM   | Le système doit intégrer un MCU avec suffisamment de RAM pour effectuer des opérations graphiques de base (minimum pour un framebuffer 128x128). | 256 Ko SRAM             |
-| FCT-37 | Microcontroller - Flash | Le système doit intégrer un MCU avec au moins 512 Ko de mémoire flash.                                                                           | 1 Mo Flash              |
-| FCT-38 | Microcontroller - Speed | Le système doit intégrer un MCU avec une vitesse de processeur d'au moins 64 MHz.                                                                | ARM Cortex-M4 @ 64 MHz  |
+| FCT-35 | Microcontrôleur         | Le système doit intégrer un microcontrôleur ARM Cortex-M STM32WB55 de STMicroelectronics.                                                        | STM32WB55RG (Cortex-M4) |
+| FCT-36 | Microcontrôleur - RAM   | Le système doit intégrer un MCU avec suffisamment de RAM pour effectuer des opérations graphiques de base (minimum pour un framebuffer 128x128). | 256 Ko SRAM             |
+| FCT-37 | Microcontrôleur - Flash | Le système doit intégrer un MCU avec au moins 512 Ko de mémoire flash.                                                                           | 1 Mo Flash              |
+| FCT-38 | Microcontrôleur - Speed | Le système doit intégrer un MCU avec une vitesse de processeur d'au moins 64 MHz.                                                                | ARM Cortex-M4 @ 64 MHz  |
 | FCT-39 | Internal sensors - Bus  | Tous les capteurs internes doivent être connectés sur le premier bus I2C.                                                                        | I2C1 (PB8/PB9)          |
 
 ## Choix de conception

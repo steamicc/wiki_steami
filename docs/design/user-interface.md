@@ -122,10 +122,10 @@ Le système nécessite 7 boutons utilisateur au total. Les boutons directionnels
 
 ### Sortie audio (FP10)
 
-Un buzzer piezo permet la génération de sons. Il est alimenté par un boost converter dédié (14.5V) car la tension 3.3V standard est insuffisante pour un transducteur piezo.
+Un buzzer piézo permet la génération de sons. Il est alimenté par un boost converter dédié (14.5V) car la tension 3.3V standard est insuffisante pour un transducteur piézo.
 
 - **Composant** : PUI Audio SMT-0825-S-HT-R
-- **Type** : Transducteur piezo montage en surface
+- **Type** : Transducteur piézo montage en surface
 - **Tension** : 3.6V pic-à-pic
 - **Signal** : BEEPER_OUT → PA11 (STM32WB55)
 - **Alimentation** : Boost converter LMR62421 (14.5V)
