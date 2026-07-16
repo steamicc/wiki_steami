@@ -102,6 +102,7 @@ Vittascience
 MakeCode
 CODAL
 Arduino
+arduino
 Altium
 KiCad
 Inkscape
@@ -114,6 +115,7 @@ husky
 Prettier
 ESLint
 lychee
+venv
 
 # STeaMi specific
 STeaMi
