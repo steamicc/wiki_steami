@@ -69,15 +69,15 @@ L'expandeur MCP23009 fournit 8 GPIO supplémentaires sur le bus I2C1 interne. Il
 
 ## Buzzer
 
-| Caractéristique | Détail                           |
-| --------------- | -------------------------------- |
-| Modèle          | SMT-0825-S-HT-R                  |
-| Fabricant       | PUI Audio                        |
-| Type            | Transducteur piézo SMD           |
-| Tension         | 3.6V pic-à-pic                   |
-| Signal          | BEEPER_OUT → PA11 (STM32WB55)    |
-| Alimentation    | Boost converter LMR62421 (14.5V) |
-| Sortie          | Mono, un seul canal              |
+| Caractéristique | Détail                              |
+| --------------- | ----------------------------------- |
+| Modèle          | SMT-0825-S-HT-R                     |
+| Fabricant       | PUI Audio                           |
+| Type            | Transducteur piézo SMD              |
+| Tension         | 3.6V pic-à-pic                      |
+| Signal          | BEEPER_OUT → PA11 (STM32WB55)       |
+| Alimentation    | +3V3, commandé par le transistor T2 |
+| Sortie          | Mono, un seul canal                 |
 
 ## Schémas
 

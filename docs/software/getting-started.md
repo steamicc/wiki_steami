@@ -9,7 +9,7 @@ Guide de démarrage rapide pour la carte STeaMi avec MicroPython.
 
 ## Connecter la carte
 
-1. Brancher la carte STeaMi à l'ordinateur via le câble **micro-USB**
+1. Brancher la carte STeaMi à l'ordinateur via un câble **USB** : micro-USB pour la V1a et la V1b, USB-C pour la V1c (voir [Révisions](../hardware/revisions#identifier-sa-version))
 2. La carte apparaît comme :
    - Un **disque USB** (STEAMI) — pour le drag-and-drop de firmware
    - Un **port série** (CDC) — pour la communication REPL
