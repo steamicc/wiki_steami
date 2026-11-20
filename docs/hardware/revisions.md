@@ -32,7 +32,7 @@ Quelques repères visuels permettent aussi de distinguer les releases :
 | Capteurs internes          | WSEN-PADS, WSEN-HIDS, APDS-9960                   | BME280 (pression, humidité, temp.) |
 | Couleur du circuit imprimé | Vert (V1a et prototypes V1b), noir (V1b de série) | Noir                               |
 
-Le circuit imprimé est noir depuis la V1b de série (circuit imprimé B2, voir plus bas). Les cartes V1a et les prototypes V1b ont un circuit imprimé vert.
+Le circuit imprimé est vert jusqu'à l'indice B1 du circuit imprimé (cartes V1a et prototypes V1b) et noir à partir de l'indice B2, utilisé pour les V1b de série (voir [Indices du circuit imprimé](#indices-du-circuit-imprimé)).
 
 ## Releases et indices du schéma
 
