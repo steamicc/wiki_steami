@@ -14,13 +14,13 @@ const features = [
     title: 'Hardware',
     description: 'MCU, capteurs, écran, alimentation, connecteurs et datasheets.',
     link: '/docs/hardware',
-    image: '/img/hardware/steami-front.png',
+    image: '/img/hardware/steami-v1c-front.png',
   },
   {
     title: 'Programmation',
     description: 'MicroPython, CODAL, Arduino : drivers, tutoriels et exemples.',
     link: '/docs/software',
-    image: '/img/hardware/steami-back.png',
+    image: '/img/hardware/steami-v1c-back.png',
   },
   {
     title: 'Conception',
@@ -107,10 +107,10 @@ const specs = [
   { label: 'Radio', value: 'BLE 5.2 / OpenThread / ZigBee' },
   {
     label: 'Capteurs',
-    value: '7 capteurs internes',
+    value: 'Mouvement, distance, environnement, son',
     link: '/docs/hardware/main-components/sensors',
   },
-  { label: 'Écran', value: 'OLED 128×128', link: '/docs/hardware/main-components/display' },
+  { label: 'Écran', value: 'TFT rond 240×240', link: '/docs/hardware/main-components/display' },
   { label: 'Batterie', value: 'LiPo 1600 mAh', link: '/docs/hardware/main-components/power' },
   {
     label: 'USB',
