@@ -27,6 +27,8 @@ Deux ressources clés pour comprendre les détails internes de la carte :
 </figure>
 </div>
 
+Ces photos montrent une carte au circuit imprimé vert, V1a ou prototype V1b, avec écran OLED, connecteur micro-USB et connecteurs I2C JST PH. Elles ne représentent pas la V1c (voir [Identifier sa version](./revisions#identifier-sa-version)).
+
 ## Schéma bloc
 
 ![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
