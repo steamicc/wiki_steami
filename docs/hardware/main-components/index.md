@@ -18,25 +18,26 @@ Pour la BOM complète (incluant passifs, connecteurs, etc.), voir la section [BO
 
 ## Capteurs
 
-7 capteurs internes sur le bus I2C1. [Détail de chaque capteur →](./sensors)
+Capteurs internes sur le bus I2C1 ; les capteurs d'environnement et de lumière dépendent de la release. [Détail de chaque capteur →](./sensors)
 
-| Composant      | Fonction                                     | Fabricant          |
-| -------------- | -------------------------------------------- | ------------------ |
-| ISM330DLCTR    | Accéléromètre/gyroscope 6 axes + température | STMicroelectronics |
-| VL53L1CXV0FY/1 | Distance Time-of-Flight, portée 4 m          | STMicroelectronics |
-| LIS2MDLTR      | Magnétomètre 3 axes                          | STMicroelectronics |
-| WSEN-PADS      | Pression absolu 26-126 kPa, 24 bits          | Wurth Elektronik   |
-| WSEN-HIDS      | Humidité + température                       | Wurth Elektronik   |
-| APDS-9960      | Lumière ambiante, couleur, geste, proximité  | Broadcom           |
-| IMP34DT05      | Microphone MEMS PDM omnidirectionnel         | STMicroelectronics |
+| Composant                  | Fonction                                               | Fabricant          |
+| -------------------------- | ------------------------------------------------------ | ------------------ |
+| ISM330DLCTR                | Accéléromètre/gyroscope 6 axes + température           | STMicroelectronics |
+| VL53L1CXV0FY/1             | Distance Time-of-Flight, portée 4 m                    | STMicroelectronics |
+| LIS2MDLTR                  | Magnétomètre 3 axes                                    | STMicroelectronics |
+| WSEN-PADS                  | Pression absolu 26-126 kPa, 24 bits (V1a, V1b)         | Wurth Elektronik   |
+| WSEN-HIDS                  | Humidité + température (V1a, V1b)                      | Wurth Elektronik   |
+| APDS-9960                  | Lumière ambiante, couleur, geste, proximité (V1a, V1b) | Broadcom           |
+| [BME280](./sensors/bme280) | Pression, humidité, température (V1c)                  | Bosch Sensortec    |
+| IMP34DT05                  | Microphone MEMS PDM omnidirectionnel                   | STMicroelectronics |
 
 ## Interface utilisateur
 
-| Composant                         | Fonction                                                        | Page détaillée              |
-| --------------------------------- | --------------------------------------------------------------- | --------------------------- |
-| WEO128128BWPP3N00001              | [Écran OLED](./display) 128x128 blanc, SPI                      | [Détail →](./display)       |
-| Wurth 150505M173300 + LEDs status | [LEDs](./leds) RGB utilisateur + indicateurs système            | [Détail →](./leds)          |
-| ALPS SKRHABE010 + C&K PTS636      | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piézo | [Détail →](./buttons-audio) |
+| Composant                                                | Fonction                                                                | Page détaillée              |
+| -------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------- |
+| WEO128128BWPP3N00001 (V1a, V1b) ; WF0128BTYAA4DNN0 (V1c) | [Écran](./display) rond, OLED 128x128 blanc ou TFT 240x240 couleur, SPI | [Détail →](./display)       |
+| Wurth 150505M173300 + LEDs status                        | [LEDs](./leds) RGB utilisateur + indicateurs système                    | [Détail →](./leds)          |
+| ALPS SKRHABE010 + C&K PTS636                             | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piézo         | [Détail →](./buttons-audio) |
 
 ## Alimentation
 
@@ -47,7 +48,7 @@ Pour la BOM complète (incluant passifs, connecteurs, etc.), voir la section [BO
 | BQ24075RGT      | Chargeur batterie Li-Ion 1.5A, PowerPath | Texas Instruments  |
 | BQ27441DRZR-G1A | Jauge de batterie Li-Ion, I2C            | Texas Instruments  |
 | TPS63000DRCT    | Convertisseur buck-boost 3.3V @ 1.2A     | Texas Instruments  |
-| LMR62421XMF     | Boost 14.5V (buzzer + écran)             | Texas Instruments  |
+| LMR62421XMF     | Boost 14.5V pour l'écran OLED (V1a, V1b) | Texas Instruments  |
 | LD3985M33R      | LDO 3.3V 150 mA                          | STMicroelectronics |
 
 ## Autres

@@ -34,12 +34,14 @@ Comportement :
 
 Ces LEDs sont gérées par le microcontrôleur d'interface et indiquent l'état du système.
 
-| LED         | Signal            | Pin STM32F103 | PCB  | Description                   |
-| ----------- | ----------------- | ------------- | ---- | ----------------------------- |
-| LED_CHG     | LED_CHG_RED       | -             | LED2 | Indicateur de charge batterie |
-| LED_DAPLINK | LED_DAP_BLUE      | PA6           | LED3 | Indicateur DAPLink actif      |
-| LED_FLASH   | LED_COM_GRN       | PB1           | LED4 | Activité communication/flash  |
-| LED_STATUS  | LED_STLINK_STATUS | PA9           | LED5 | Statut général STLink         |
+| LED         | Signal            | Pin STM32F103 | Repère V1a, V1b | Repère V1c | Description                   |
+| ----------- | ----------------- | ------------- | --------------- | ---------- | ----------------------------- |
+| LED_CHG     | LED_CHG_RED       | -             | LED2            | LED_CHG    | Indicateur de charge batterie |
+| LED_DAPLINK | LED_DAP_BLUE      | PA6           | LED3            | LED_DAP    | Indicateur DAPLink actif      |
+| LED_FLASH   | LED_COM_GRN       | PB1           | LED4            | LED_COM    | Activité communication/flash  |
+| LED_STATUS  | LED_STLINK_STATUS | PA9           | LED5            | LED_STATUS | Statut général STLink         |
+
+Les repères sérigraphiés changent avec la release, mais le câblage est identique (voir [Révisions](../revisions#leds)).
 
 ## LED d'alimentation
 

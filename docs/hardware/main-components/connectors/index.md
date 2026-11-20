@@ -7,13 +7,13 @@ title: 'Connecteurs'
 
 La carte STeaMi offre plusieurs options de connectivité pour les capteurs, actionneurs et accessoires externes.
 
-| Connecteur                         | Type                         | Page                         |
-| ---------------------------------- | ---------------------------- | ---------------------------- |
-| [Edge connector](./edge-connector) | Compatible micro:bit, P0-P20 | [Détail →](./edge-connector) |
-| [STEMMA/Qwiic](./stemma-qwiic)     | 2x JST 4-pin, I2C3           | [Détail →](./stemma-qwiic)   |
-| [Jacdac](./jacdac)                 | Interface série, 5V          | [Détail →](./jacdac)         |
-| [Pads crocodile](./crocodile-pads) | P0-P2, P24-P29, 3V3/GND      | [Détail →](./crocodile-pads) |
-| [Port SWD](./swd)                  | Debug JTAG/SWD               | [Détail →](./swd)            |
+| Connecteur                         | Type                                            | Page                         |
+| ---------------------------------- | ----------------------------------------------- | ---------------------------- |
+| [Edge connector](./edge-connector) | Compatible micro:bit, P0-P20                    | [Détail →](./edge-connector) |
+| [STEMMA/Qwiic](./stemma-qwiic)     | 2x JST 4-pin, I2C3 (PH sur V1a/V1b, SH sur V1c) | [Détail →](./stemma-qwiic)   |
+| [Jacdac](./jacdac)                 | Interface série, 5V                             | [Détail →](./jacdac)         |
+| [Pads crocodile](./crocodile-pads) | P0-P2, P24-P29, 3V3/GND                         | [Détail →](./crocodile-pads) |
+| [Port SWD](./swd)                  | Debug JTAG/SWD                                  | [Détail →](./swd)            |
 
 ## Schémas
 
