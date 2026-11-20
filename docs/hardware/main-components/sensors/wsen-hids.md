@@ -5,6 +5,10 @@ title: 'WSEN-HIDS'
 
 # Capteur d'humidité et température — WSEN-HIDS
 
+:::info Release
+Ce capteur équipe la **V1b** ; pour la V1a, il figure dans la nomenclature de l'indice A mais son montage reste à confirmer. Il est retiré sur la **V1c**, où le [BME280](./bme280) mesure la pression, l'humidité et la température (voir [Révisions](../../revisions#capteurs-internes)).
+:::
+
 Capteur double mesurant l'humidité relative et la température ambiante.
 
 ## Caractéristiques
