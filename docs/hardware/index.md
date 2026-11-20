@@ -16,18 +16,40 @@ Deux ressources clés pour comprendre les détails internes de la carte :
 - Les [schémas](./schematic), qui montrent les données de connectivité détaillées de chaque composant.
 - Le [reference design](https://github.com/steamicc/steami-reference-design), qui est un design complet de la carte au format Altium (indice B1, release V1b).
 
+<ReleaseTabs>
+<Release releases="v1c">
+
 <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
 <figure style={{textAlign: 'center', margin: 0}}>
-<img src="/img/hardware/steami-front.png" alt="STeaMi face avant" loading="lazy" width="350" style={{height: 'auto'}} />
+<img src="/img/hardware/steami-v1c-front.png" alt="STeaMi V1c face avant" loading="lazy" width="350" style={{height: 'auto'}} />
 <figcaption>Face avant</figcaption>
 </figure>
 <figure style={{textAlign: 'center', margin: 0}}>
-<img src="/img/hardware/steami-back.png" alt="STeaMi face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
+<img src="/img/hardware/steami-v1c-back.png" alt="STeaMi V1c face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
 <figcaption>Face arrière</figcaption>
 </figure>
 </div>
 
-Ces photos montrent une carte au circuit imprimé vert, V1a ou prototype V1b, avec écran OLED, connecteur micro-USB et connecteurs I2C JST PH. Elles ne représentent pas la V1c (voir [Identifier sa version](./revisions#identifier-sa-version)).
+Carte V1c (prototype) : écran TFT rond, connecteur USB-C et connecteurs I2C Qwiic/STEMMA QT.
+
+</Release>
+<Release releases="v1a v1b">
+
+<div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-front.png" alt="STeaMi V1a ou V1b face avant" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face avant</figcaption>
+</figure>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-back.png" alt="STeaMi V1a ou V1b face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face arrière</figcaption>
+</figure>
+</div>
+
+Carte au circuit imprimé vert, V1a ou prototype V1b : écran OLED, connecteur micro-USB et connecteurs I2C JST PH. Les V1b de série ont un circuit imprimé noir (voir [Identifier sa version](./revisions#identifier-sa-version)).
+
+</Release>
+</ReleaseTabs>
 
 ## Schéma bloc
 
