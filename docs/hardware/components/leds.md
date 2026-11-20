@@ -19,7 +19,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 Les repères des LEDs changent selon la release (LED2 à LED7 sur la V1a et la V1b, LED_CHG, LED_DAP, LED_COM, LED_STATUS, LED_BLE et LED_RBG sur la V1c), mais les composants sont les mêmes (voir [Révisions](../revisions#leds)).
 
-Une LED verte supplémentaire, LED1 (150060VS75000, avec R1 de 470 Ω), figure au schéma près du chargeur BQ24075 sur les trois releases. Elle est listée dans les nomenclatures des indices A et C, mais pas dans celle de l'indice B1 reprise ici. Elle n'est pas montée sur les prototypes V1c.
+Une LED verte supplémentaire, LED1 (150060VS75000, avec R1 de 470 Ω), figure au schéma près du chargeur BQ24075 sur les trois releases. Elle est listée dans les nomenclatures des indices A et C, mais pas dans celle de l'indice B1 reprise ici. Elle n'a été montée que sur les premiers prototypes de l'indice A.
 
 - **150060RS75000** (Rouge) : LED de charge batterie (LED_CHG)
 - **150060BS75000** (Bleu x2) : LED DAPLink + LED Bluetooth
