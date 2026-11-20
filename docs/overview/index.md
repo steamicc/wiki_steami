@@ -33,6 +33,8 @@ La carte STeaMi repose sur deux microcontrôleurs :
 
 ![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
 
+Ce schéma bloc représente la V1b ; les différences avec la V1a et la V1c sont détaillées dans [Révisions de la carte](../hardware/revisions).
+
 ## Blocs fonctionnels
 
 | Id   | Bloc fonctionnel                                    | Description                                                                  |

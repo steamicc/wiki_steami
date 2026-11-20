@@ -31,6 +31,8 @@ Deux ressources clés pour comprendre les détails internes de la carte :
 
 ![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
 
+Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Sur la V1c, l'écran est un TFT GC9A01 alimenté en +3V3 (sans rail 14,5 V), le BME280 remplace les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960, et le connecteur USB est un USB-C (voir [Révisions](./revisions)).
+
 ## Description du hardware
 
 ### Microcontrôleur applicatif
