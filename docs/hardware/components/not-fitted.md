@@ -16,5 +16,7 @@ Ces composants sont prévus sur le PCB mais ne sont pas montés en production st
 
 ## Notes
 
+- Cette liste est celle de la nomenclature B1. Dans la nomenclature de l'indice C, R57 et R62, qui relient le rétroéclairage de l'écran TFT à +3V3 et à GND, sont aussi marquées non montées ; leur état sur les cartes V1c de série reste à confirmer (voir [Écran](../main-components/display#connecteur-j7)).
+
 - Les straps 0 Ohm non montés sont des emplacements réservés pour des configurations alternatives du PCB
 - Les headers SAMTEC sont destinés au port de service JTAG/SWD (debug et programmation en usine). Ils ne sont pas soudés en production standard mais peuvent être ajoutés pour le développement
