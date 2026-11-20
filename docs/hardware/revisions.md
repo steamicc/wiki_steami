@@ -24,15 +24,15 @@ print(f"Revision: {config.board_revision}")
 
 Quelques repères visuels permettent aussi de distinguer les releases :
 
-| Repère                     | V1a et V1b                      | V1c                                |
-| -------------------------- | ------------------------------- | ---------------------------------- |
-| Connecteur USB             | Micro-USB                       | USB-C                              |
-| Écran                      | OLED rond 128 x 128, monochrome | TFT rond 240 x 240, couleur        |
-| Connecteurs I2C (J3/J4)    | JST PH, pas 2 mm                | JST SH, pas 1 mm (Qwiic/STEMMA QT) |
-| Capteurs internes          | WSEN-PADS, WSEN-HIDS, APDS-9960 | BME280 (pression, humidité, temp.) |
-| Couleur du circuit imprimé | Vert (V1a), noir (V1b de série) | Noir                               |
+| Repère                     | V1a et V1b                                        | V1c                                |
+| -------------------------- | ------------------------------------------------- | ---------------------------------- |
+| Connecteur USB             | Micro-USB                                         | USB-C                              |
+| Écran                      | OLED rond 128 x 128, monochrome                   | TFT rond 240 x 240, couleur        |
+| Connecteurs I2C (J3/J4)    | JST PH, pas 2 mm                                  | JST SH, pas 1 mm (Qwiic/STEMMA QT) |
+| Capteurs internes          | WSEN-PADS, WSEN-HIDS, APDS-9960                   | BME280 (pression, humidité, temp.) |
+| Couleur du circuit imprimé | Vert (V1a et prototypes V1b), noir (V1b de série) | Noir                               |
 
-Le circuit imprimé est noir depuis la V1b de série (circuit imprimé B2, voir plus bas). La couleur des prototypes V1b n'est pas documentée.
+Le circuit imprimé est noir depuis la V1b de série (circuit imprimé B2, voir plus bas). Les cartes V1a et les prototypes V1b ont un circuit imprimé vert.
 
 ## Releases et indices du schéma
 
