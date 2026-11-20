@@ -5,6 +5,10 @@ title: 'WSEN-PADS'
 
 # Capteur de pression — WSEN-PADS
 
+:::info Release
+Ce capteur équipe la **V1b** ; pour la V1a, il figure dans la nomenclature de l'indice A mais son montage reste à confirmer. Il est retiré sur la **V1c**, où le [BME280](./bme280) mesure la pression, l'humidité et la température (voir [Révisions](../../revisions#capteurs-internes)).
+:::
+
 Capteur de pression absolue avec haute résolution 24 bits. Permet de mesurer la pression atmosphérique et d'estimer l'altitude.
 
 ## Caractéristiques

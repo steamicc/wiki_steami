@@ -5,7 +5,7 @@ title: 'Capteurs'
 
 # Capteurs internes
 
-La carte STeaMi intègre 7 capteurs couvrant distance, mouvement, environnement, lumière et son. Les capteurs I2C sont regroupés sur le bus I2C1 interne ; certains disposent de lignes d'interruption individuelles.
+La carte STeaMi intègre des capteurs couvrant distance, mouvement, environnement et son, ainsi que la lumière sur la V1a et la V1b. Les capteurs d'environnement dépendent de la release (voir [Révisions](../../revisions#capteurs-internes)). Les capteurs I2C sont regroupés sur le bus I2C1 interne ; certains disposent de lignes d'interruption individuelles.
 
 ## Bus I2C interne
 
@@ -16,15 +16,16 @@ La carte STeaMi intègre 7 capteurs couvrant distance, mouvement, environnement,
 
 ## Liste des capteurs
 
-| Capteur                                | Modèle    | Mesures                        | Page                    |
-| -------------------------------------- | --------- | ------------------------------ | ----------------------- |
-| [Accéléromètre/Gyroscope](./ism330dlc) | ISM330DLC | 6 axes + température           | [Détail →](./ism330dlc) |
-| [Magnétomètre](./lis2mdl)              | LIS2MDL   | 3 axes magnétiques             | [Détail →](./lis2mdl)   |
-| [Distance](./vl53l1x)                  | VL53L1X   | Time-of-Flight, 0-4 m          | [Détail →](./vl53l1x)   |
-| [Pression](./wsen-pads)                | WSEN-PADS | 26-126 kPa, 24 bits            | [Détail →](./wsen-pads) |
-| [Humidité/Température](./wsen-hids)    | WSEN-HIDS | RH + °C                        | [Détail →](./wsen-hids) |
-| [Lumière/Geste](./apds9960)            | APDS-9960 | ALS, couleur, proximité, geste | [Détail →](./apds9960)  |
-| [Microphone](./imp34dt05)              | IMP34DT05 | PDM MEMS omnidirectionnel      | [Détail →](./imp34dt05) |
+| Capteur                                   | Modèle    | Mesures                        | Releases               | Page                    |
+| ----------------------------------------- | --------- | ------------------------------ | ---------------------- | ----------------------- |
+| [Accéléromètre/Gyroscope](./ism330dlc)    | ISM330DLC | 6 axes + température           | V1a, V1b, V1c          | [Détail →](./ism330dlc) |
+| [Magnétomètre](./lis2mdl)                 | LIS2MDL   | 3 axes magnétiques             | V1a, V1b, V1c          | [Détail →](./lis2mdl)   |
+| [Distance](./vl53l1x)                     | VL53L1X   | Time-of-Flight, 0-4 m          | V1a, V1b, V1c          | [Détail →](./vl53l1x)   |
+| [Pression](./wsen-pads)                   | WSEN-PADS | 26-126 kPa, 24 bits            | V1a (à confirmer), V1b | [Détail →](./wsen-pads) |
+| [Humidité/Température](./wsen-hids)       | WSEN-HIDS | RH + °C                        | V1a (à confirmer), V1b | [Détail →](./wsen-hids) |
+| [Lumière/Geste](./apds9960)               | APDS-9960 | ALS, couleur, proximité, geste | V1a (à confirmer), V1b | [Détail →](./apds9960)  |
+| [Pression/Humidité/Température](./bme280) | BME280    | Pression, RH + °C              | V1c                    | [Détail →](./bme280)    |
+| [Microphone](./imp34dt05)                 | IMP34DT05 | PDM MEMS omnidirectionnel      | V1a, V1b, V1c          | [Détail →](./imp34dt05) |
 
 ## Schémas
 

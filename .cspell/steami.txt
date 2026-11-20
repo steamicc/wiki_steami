@@ -184,3 +184,4 @@ Octopart
 favicon
 README
 CODEOWNERS
+Sensortec
