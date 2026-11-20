@@ -43,7 +43,7 @@ Pour la V1a, la référence de l'écran est celle du dossier de conception ; la 
 | Connecteur      | FFC/FPC 18 positions (F32R-1A7H1-11018)                    |
 | Alimentation    | +3V3 ; l'élévateur LMR62421 (U4) des V1a et V1b est retiré |
 
-Le contrôleur, la diagonale et la technologie du panneau proviennent des fiches distributeurs du WF0128BTYAA4DNN0 : ils ne figurent ni dans le schéma ni dans la nomenclature C.
+La référence de l'écran ne figure ni dans le schéma ni dans la nomenclature C : elle vient des échanges avec le bureau d'études lors de la conception de l'indice C. Le contrôleur, la diagonale et la technologie du panneau proviennent des fiches distributeurs du WF0128BTYAA4DNN0.
 
 </Release>
 </ReleaseTabs>
