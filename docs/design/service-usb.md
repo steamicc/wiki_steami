@@ -3,7 +3,13 @@ sidebar_position: 7
 title: 'Service et USB'
 ---
 
+import { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
+
 # Service et USB
+
+Les exigences sont communes aux trois releases de la carte. Quand l'implémentation diffère, la colonne « Implémentation » affiche la release choisie ci-dessous ; les écarts sont détaillés dans [Révisions](../hardware/revisions#écarts-aux-exigences).
+
+<ReleaseSelector />
 
 ## Exigences — Port de service
 
@@ -16,15 +22,15 @@ title: 'Service et USB'
 
 ## Exigences — USB
 
-| ID                 | Nom               | Description                                                                                                                                                            | Implémentation                      |
-| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| FCT-59             | USB               | Le système doit intégrer un connecteur micro-USB.                                                                                                                      | Connecteur micro-USB                |
-| FCT-60             | USB - Programming | Le système doit pouvoir charger son logiciel embarqué à travers un port USB.                                                                                           | DAPLink drag-and-drop               |
-| FCT-61             | USB - Connector   | Le système doit avoir une prise micro-USB pour l'alimentation et la programmation. Un connecteur de type prise murale est recommandé pour la robustesse.               | Connecteur micro-USB robuste        |
-| FCT-62 (DAPLink)   | USB - DAPLink     | Le système doit se présenter comme un disque USB lorsqu'il est connecté via USB, et le glisser-déposer d'un fichier .hex/.bin déclenche le flashage du MCU applicatif. | Firmware DAPLink sur STM32F103      |
-| FCT-62 (Endpoints) | USB - Endpoints   | Le firmware de la puce interface doit fournir quatre endpoints USB : HID (CMSIS-DAP), CDC (port série), MSC (stockage de masse) et WebUSB.                             | 4 endpoints DAPLink                 |
-| FCT-63             | USB - Bootloader  | Il est possible de mettre à jour la version de DAPLink. Cela se fait en utilisant le mode maintenance DFU (Device Firmware Update).                                    | Mode DFU du STM32F103               |
-| FCT-64             | USB - File System | Le système de fichiers flash présenté sur le lecteur de la carte est entièrement virtuel. Il n'est pas stocké dans la flash mais généré dynamiquement.                 | Système de fichiers virtuel DAPLink |
+| ID                 | Nom               | Description                                                                                                                                                            | Implémentation                                                                                                                                                                                    |
+| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FCT-59             | USB               | Le système doit intégrer un connecteur micro-USB.                                                                                                                      | <ReleaseValue><Release releases="v1a v1b">Connecteur micro-USB GCT USB3080-30-00-A</Release><Release releases="v1c">**Écart** : connecteur USB-C UJ20-C-H-G-SMT-4-P16-TR</Release></ReleaseValue> |
+| FCT-60             | USB - Programming | Le système doit pouvoir charger son logiciel embarqué à travers un port USB.                                                                                           | DAPLink drag-and-drop                                                                                                                                                                             |
+| FCT-61             | USB - Connector   | Le système doit avoir une prise micro-USB pour l'alimentation et la programmation. Un connecteur de type prise murale est recommandé pour la robustesse.               | <ReleaseValue><Release releases="v1a v1b">Connecteur micro-USB robuste</Release><Release releases="v1c">**Écart** : connecteur USB-C</Release></ReleaseValue>                                     |
+| FCT-62 (DAPLink)   | USB - DAPLink     | Le système doit se présenter comme un disque USB lorsqu'il est connecté via USB, et le glisser-déposer d'un fichier .hex/.bin déclenche le flashage du MCU applicatif. | Firmware DAPLink sur STM32F103                                                                                                                                                                    |
+| FCT-62 (Endpoints) | USB - Endpoints   | Le firmware de la puce interface doit fournir quatre endpoints USB : HID (CMSIS-DAP), CDC (port série), MSC (stockage de masse) et WebUSB.                             | 4 endpoints DAPLink                                                                                                                                                                               |
+| FCT-63             | USB - Bootloader  | Il est possible de mettre à jour la version de DAPLink. Cela se fait en utilisant le mode maintenance DFU (Device Firmware Update).                                    | Mode DFU du STM32F103                                                                                                                                                                             |
+| FCT-64             | USB - File System | Le système de fichiers flash présenté sur le lecteur de la carte est entièrement virtuel. Il n'est pas stocké dans la flash mais généré dynamiquement.                 | Système de fichiers virtuel DAPLink                                                                                                                                                               |
 
 ## Choix de conception
 
