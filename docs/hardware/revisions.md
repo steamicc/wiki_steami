@@ -153,7 +153,7 @@ Côté STM32WB55, le brochage est identique entre la V1b et la V1c. Entre la V1a
 
 Seuls les repères changent ; le câblage des LEDs est identique. `LED_RBG` est le repère tel qu'il est écrit dans le schéma C.
 
-Le schéma comporte aussi, sur les trois releases, une LED verte LED1 (150060VS75000, avec R1 de 470 Ω) sur la feuille du chargeur BQ24075. Elle est listée dans les nomenclatures des indices A et C, mais pas dans celle de l'indice B1 : son montage sur les cartes V1b reste à confirmer.
+Le schéma comporte aussi, sur les trois releases, une LED verte LED1 (150060VS75000, avec R1 de 470 Ω) sur la feuille du chargeur BQ24075. Elle est listée dans les nomenclatures des indices A et C, mais pas dans celle de l'indice B1. Elle n'est pourtant pas montée sur les prototypes V1c ; son montage sur les autres cartes reste à confirmer.
 
 ## Écarts aux exigences
 
