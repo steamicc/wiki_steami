@@ -18,7 +18,7 @@ Si vous pouvez installer des logiciels, l'[Arduino IDE](./arduino-ide) reste le 
 
 - Une carte STeaMi (V1a, V1b ou V1c) et un câble USB qui transporte les données.
 - Un compte [GitHub](https://github.com/signup) gratuit. GitHub exige **13 ans minimum**.
-- Le quota gratuit de GitHub Codespaces : **120 heures-cœur par mois**, soit 60 heures d'utilisation d'un Codespace à 2 cœurs. Voir [Limites](#limites).
+- Le quota gratuit de GitHub Codespaces : **120 heures-cœur par mois**, soit 60 heures d'utilisation d'un Codespace à 2 cœurs. Il passe à **180 heures-cœur** (90 heures sur 2 cœurs) avec le [GitHub Student Developer Pack](https://education.github.com/pack). Voir [Limites](#limites).
 - Pour la page Téléverser : le navigateur **Chrome** ou **Edge**. Sans lui, la [méthode du lecteur STEAMI](#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami) convient.
 
 ## 1. Créer son dépôt
@@ -243,6 +243,7 @@ Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que l
 - **Vérifier le réseau** : l'établissement doit autoriser l'accès à `*.github.dev` (le Codespace et la page Téléverser en dépendent), ainsi qu'à `github.com`. À tester avant le cours.
 - **Arrêter le Codespace** en fin de séance : indicateur **Codespaces** en bas à gauche, puis **Stop Current Codespace**. Un Codespace allumé consomme le quota.
 - **Sauvegarder** avec `steami-sauver` avant d'arrêter.
+- **Faire demander le Student Developer Pack** : les élèves inscrits dans un établissement peuvent faire vérifier leur statut auprès de [GitHub Education](https://education.github.com/pack). Le compte d'un élève vérifié dispose alors de **180 heures-cœur de Codespaces par mois** au lieu de 120, l'équivalent d'un compte GitHub Pro. La vérification demande un justificatif de scolarité et peut prendre quelques jours : la lancer bien avant la première séance.
 - **Préparer un TP avec Classroom 50** : partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) pour créer le dépôt modèle du TP, avec l'énoncé dans le `README.md` et le programme de départ dans `src/`. Classroom 50 crée ensuite le dépôt de chaque élève à partir de ce modèle. L'image du Codespace est publiée et commune à toutes les copies, donc le Codespace de chaque élève démarre aussi vite que celui du modèle, sans prebuild. Dans l'organisation de classe (**Settings → Codespaces**), régler **Codespace ownership** sur **User ownership** : chaque Codespace est alors décompté du quota personnel de l'élève, et un budget Codespaces de l'organisation à 0 $ ne bloque pas leur création.
 
 ## Aller plus loin
