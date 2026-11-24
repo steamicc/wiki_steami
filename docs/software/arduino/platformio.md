@@ -15,6 +15,8 @@ PlatformIO ne connaît pas encore la carte STeaMi : chaque projet contient sa d�
 2. Dans l'onglet **Extensions**, rechercher **PlatformIO IDE** et l'installer.
 3. Redémarrer Visual Studio Code. Une icône de tête de fourmi apparaît dans la barre latérale.
 
+![Vue Extensions de Visual Studio Code : la recherche « platformio » affiche l'extension PlatformIO IDE, éditée par PlatformIO](/img/software/arduino/platformio-01-extension.png)
+
 Au premier projet, PlatformIO télécharge tout seul le compilateur, le paquet STM32 et les bibliothèques : prévoir quelques minutes et un accès à Internet.
 
 ## Créer un projet STeaMi
@@ -45,6 +47,8 @@ lib_deps =
 - `board = steami` désigne le fichier `boards/steami.json` du projet.
 - `lib_deps` installe la bibliothèque STeaMi, qui contient les drivers de la carte, dans la version indiquée après `#` (voir les [versions publiées](https://github.com/steamicc/arduino-steami/releases)). PlatformIO installe aussi la bibliothèque STM32duinoBLE, dont elle dépend.
 - Les bibliothèques tierces de la V1c s'ajoutent sur des lignes suivantes de `lib_deps` : `adafruit/Adafruit BME280 Library` pour le BME280, `moononournation/GFX Library for Arduino` pour l'écran.
+
+![Projet STeaMi ouvert dans Visual Studio Code : l'explorateur montre boards/steami.json, src/main.cpp et platformio.ini, affiché dans l'éditeur](/img/software/arduino/platformio-02-projet.png)
 
 ### boards/steami.json
 
@@ -113,6 +117,8 @@ Autre différence avec l'Arduino IDE : une fonction doit être déclarée avant 
 
 Ouvrir le dossier du projet dans Visual Studio Code (**Fichier → Ouvrir le dossier**). La barre d'état, en bas de la fenêtre, propose alors :
 
+![Barre d'état de Visual Studio Code avec les boutons de PlatformIO : accueil, compiler (info-bulle « PlatformIO: Build »), téléverser, nettoyer, tester, moniteur série, terminal, environnement et port](/img/software/arduino/platformio-03-barre-etat.png)
+
 | Bouton          | Action                                  | Commande équivalente |
 | --------------- | --------------------------------------- | -------------------- |
 | ✓ (Build)       | compiler                                | `pio run`            |
@@ -120,6 +126,8 @@ Ouvrir le dossier du projet dans Visual Studio Code (**Fichier → Ouvrir le dos
 | prise (Monitor) | ouvrir le moniteur série à 115200 bauds | `pio device monitor` |
 
 Le téléversement passe par l'interface **CMSIS-DAP** du DAPLink de la carte. Le moniteur série se ferme avec `Ctrl+C`.
+
+![Terminal de Visual Studio Code après un téléversement : Programming Finished, Verified OK, puis SUCCESS](/img/software/arduino/platformio-04-televersement.png)
 
 ### Téléverser par le disque STEAMI
 
@@ -138,11 +146,16 @@ Choisir ensuite l'environnement `steami_disque` dans la barre d'état avant de t
 
 ## Déboguer pas à pas
 
-L'interface CMSIS-DAP du DAPLink sert aussi de sonde de débogage : pas besoin de matériel supplémentaire. Dans Visual Studio Code, ouvrir l'onglet **Exécuter et déboguer** et lancer **PIO Debug** (touche `F5`). PlatformIO compile une version de débogage, la téléverse et arrête le programme au début de `setup()`. On peut alors poser des points d'arrêt dans la marge, avancer ligne par ligne et inspecter les variables.
+L'interface CMSIS-DAP du DAPLink sert aussi de sonde de débogage : pas besoin de matériel supplémentaire.
 
-:::caution À confirmer
-La connexion de la sonde, l'arrêt du processeur et la pose de points d'arrêt ont été vérifiés sur une V1c (OpenOCD et GDB). L'arrêt sur un point d'arrêt et le pas à pas depuis Visual Studio Code restent à confirmer.
-:::
+1. Poser un point d'arrêt en cliquant dans la marge, à gauche du numéro de ligne : un point rouge apparaît.
+2. Ouvrir l'onglet **Exécuter et déboguer** et lancer la configuration **PIO Debug** (bouton vert, ou touche `F5`). PlatformIO compile une version de débogage et la téléverse.
+3. Le programme s'arrête une première fois tout au début, dans le fichier `main.cpp` du core STM32, avant `setup()`. Cliquer sur **Continuer** (premier bouton de la barre de débogage, en haut de l'éditeur).
+4. Le programme s'arrête sur le point d'arrêt. Les boutons de la barre de débogage avancent ligne par ligne, et le panneau de gauche affiche les variables et la pile des appels.
+
+![Session PIO Debug arrêtée sur un point d'arrêt à la ligne 10 de loop() : la ligne est surlignée, la barre de débogage est en haut, la pile des appels montre loop puis main](/img/software/arduino/platformio-05-debogage.png)
+
+Le bouton carré rouge de la barre de débogage arrête la session.
 
 ## Dépannage
 
