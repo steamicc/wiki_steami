@@ -27,7 +27,8 @@ Le support Arduino couvre la plupart des composants des V1a et V1b. Sur la V1c, 
 Pour aller plus loin :
 
 - [**Conventions de l'API**](./conventions) : ce que les drivers ont en commun.
-- [**PlatformIO (contributeurs)**](./platformio) : compiler et tester les drivers, en écrire de nouveaux.
+- [**Programmer avec PlatformIO**](./platformio) : Visual Studio Code et PlatformIO, pour des projets plus ambitieux.
+- [**Développer les drivers**](./contribuer) : compiler et tester la bibliothèque STeaMi, écrire de nouveaux drivers.
 
 ## État du support
 

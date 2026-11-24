@@ -1,114 +1,166 @@
 ---
-title: PlatformIO (contributeurs)
-sidebar_position: 7
+title: Programmer avec PlatformIO
+sidebar_position: 2.5
 ---
 
-# Développer les drivers avec PlatformIO
+# Programmer avec PlatformIO
 
-Cette page s'adresse aux personnes qui modifient les drivers ou en écrivent de nouveaux. Pour programmer la carte en classe, l'[Arduino IDE](./arduino-ide) suffit.
+[PlatformIO](https://platformio.org/) est une extension de Visual Studio Code pour programmer des microcontrôleurs. Elle utilise le même langage et les mêmes bibliothèques que l'Arduino IDE, avec les outils d'un éditeur de code professionnel : complétion, navigation dans le code, plusieurs fichiers par projet, gestion de versions. C'est une bonne suite pour des élèves qui ont pris en main l'[Arduino IDE](./arduino-ide).
 
-Le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) se compile avec **PlatformIO**. Les commandes courantes passent par un `Makefile`, qui installe tous les outils dans un environnement Python local (`.venv/`).
+PlatformIO ne connaît pas encore la carte STeaMi : chaque projet contient sa définition, dans un fichier `boards/steami.json`. Le reste se règle dans le fichier `platformio.ini` du projet.
 
-:::note Systèmes pris en charge
-Le `Makefile` est écrit pour Linux et macOS. Sous Windows, utiliser [WSL](https://learn.microsoft.com/fr-fr/windows/wsl/) ou appeler PlatformIO directement (extension PlatformIO de Visual Studio Code).
-:::
+## Installer PlatformIO
 
-## Prérequis
+1. Installer [Visual Studio Code](https://code.visualstudio.com/).
+2. Dans l'onglet **Extensions**, rechercher **PlatformIO IDE** et l'installer.
+3. Redémarrer Visual Studio Code. Une icône de tête de fourmi apparaît dans la barre latérale.
 
-- une carte **STeaMi** et un câble USB de données ;
-- **Python 3** avec le module `venv` (sous Debian ou Ubuntu : `sudo apt install python3-venv`) ;
-- **Node.js** et `npm`, pour les hooks Git du projet ;
-- `make` et Git.
+Au premier projet, PlatformIO télécharge tout seul le compilateur, le paquet STM32 et les bibliothèques : prévoir quelques minutes et un accès à Internet.
 
-## Installer l'environnement
+## Créer un projet STeaMi
 
-```bash
-git clone https://github.com/steamicc/arduino-steami-lib.git
-cd arduino-steami-lib
-make setup
-```
-
-`make setup` crée l'environnement Python `.venv/`, y installe PlatformIO, `clang-format` et `clang-tidy` (versions fixées dans `requirements.txt`), installe les dépendances Node.js et active les hooks Git.
-
-Si Python est mis à jour sur la machine, l'environnement `.venv/` peut cesser de fonctionner (`No module named 'platformio'`). Il suffit alors de le supprimer et de relancer `make setup`.
-
-## Compiler et téléverser le programme de test
-
-Le dossier `src/` contient un programme de test qui vérifie la définition de la carte et l'édition de liens des drivers.
-
-```bash
-make build    # compiler
-make upload   # compiler et téléverser
-```
-
-Le téléversement passe par l'interface CMSIS-DAP du DAPLink. La variable `PORT` vaut `/dev/ttyACM0` par défaut ; la changer si la carte apparaît sur un autre port :
-
-```bash
-make upload PORT=/dev/ttyACM1
-```
-
-## Téléverser un exemple
-
-```bash
-make list-examples                  # toutes les cibles disponibles
-make list-examples DRIVER=lis2mdl   # filtrer par driver
-```
-
-Chaque ligne affichée est une cible prête à l'emploi, par exemple :
+Créer un dossier pour le projet, avec cette arborescence :
 
 ```text
-flash-lis2mdl/DigitalCompass
-flash-wsen-pads/altitude
+mon-projet/
+├── platformio.ini
+├── boards/
+│   └── steami.json
+└── src/
+    └── main.cpp
 ```
 
-```bash
-make flash-lis2mdl/DigitalCompass
+### platformio.ini
+
+```ini
+[env:steami]
+platform = ststm32@^19
+board = steami
+framework = arduino
+monitor_speed = 115200
+lib_deps =
+  https://github.com/steamicc/arduino-steami.git#v0.25.1
 ```
 
-La commande compile l'exemple, le téléverse, puis ouvre le moniteur série à 115200 bauds (quitter avec `Ctrl+C`).
+- `board = steami` désigne le fichier `boards/steami.json` du projet.
+- `lib_deps` installe la bibliothèque STeaMi, qui contient les drivers de la carte, dans la version indiquée après `#` (voir les [versions publiées](https://github.com/steamicc/arduino-steami/releases)). PlatformIO installe aussi la bibliothèque STM32duinoBLE, dont elle dépend.
+- Les bibliothèques tierces de la V1c s'ajoutent sur des lignes suivantes de `lib_deps` : `adafruit/Adafruit BME280 Library` pour le BME280, `moononournation/GFX Library for Arduino` pour l'écran.
 
-Le moniteur interactif manque souvent les premières lignes affichées au démarrage. Pour les capturer, remplacer `flash-` par `capture-` : la sortie est lue pendant 10 secondes, ou pendant la durée fixée par `DURATION` (en secondes) :
+### boards/steami.json
 
-```bash
-make capture-lis2mdl/DigitalCompass DURATION=30
+Ce fichier décrit la carte : microcontrôleur, mémoire, variante du core STM32duino, outils de téléversement. Il est identique à celui du dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib/blob/main/boards/steami.json).
+
+```json
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m4",
+    "extra_flags": "-DSTM32WB -DSTM32WB55xx",
+    "f_cpu": "64000000L",
+    "mcu": "stm32wb55rg",
+    "product_line": "STM32WB55xx",
+    "variant": "STM32WBxx/WB55R(C-E-G)V",
+    "arduino": {
+      "board": "STEAM32_WB55RG",
+      "variant_h": "variant_STEAM32_WB55RG.h"
+    }
+  },
+  "debug": {
+    "default_tools": ["cmsis-dap"],
+    "onboard_tools": ["cmsis-dap"],
+    "jlink_device": "STM32WB55xx",
+    "openocd_target": "stm32wbx",
+    "svd_path": "STM32WB55_CM4.svd"
+  },
+  "frameworks": ["arduino"],
+  "name": "STeaMi",
+  "platform": "ststm32",
+  "url": "https://www.steami.cc/",
+  "vendor": "STeaMi",
+  "upload": {
+    "maximum_ram_size": 196608,
+    "maximum_size": 524288,
+    "protocol": "cmsis-dap",
+    "protocols": ["cmsis-dap", "blackmagic", "jlink", "stlink"]
+  }
+}
 ```
 
-Pour utiliser `pio` directement, activer d'abord l'environnement :
+### src/main.cpp
 
-```bash
-source .venv/bin/activate
-pio device monitor -b 115200
+Les programmes de la [page Capteurs et écran](./capteurs) fonctionnent tels quels, avec une différence : un fichier `.cpp` doit commencer par `#include <Arduino.h>`, que l'Arduino IDE ajoute en coulisses.
+
+```cpp
+#include <Arduino.h>
+
+void setup() {
+  pinMode(LED_GREEN, OUTPUT);
+  Serial.begin(115200);
+}
+
+void loop() {
+  digitalWrite(LED_GREEN, HIGH);
+  Serial.println("allumée");
+  delay(500);
+  digitalWrite(LED_GREEN, LOW);
+  delay(500);
+}
 ```
 
-## Tests
+Autre différence avec l'Arduino IDE : une fonction doit être déclarée avant d'être appelée. Placer ses fonctions au-dessus de `setup()`, ou déclarer leur prototype en haut du fichier.
 
-| Commande                | Rôle                                                      |
-| ----------------------- | --------------------------------------------------------- |
-| `make test-native`      | tests unitaires sur l'ordinateur, sans carte              |
-| `make test-hardware`    | tests sur une carte STeaMi connectée                      |
-| `make test-integration` | tests de comportement dans la durée, sur carte            |
-| `make test-examples`    | compilation de tous les exemples                          |
-| `make lint`             | formatage, en-têtes de licence et analyse statique        |
-| `make ci`               | ensemble des vérifications faites en intégration continue |
+## Compiler, téléverser, lire le port série
 
-`make help` liste toutes les commandes.
+Ouvrir le dossier du projet dans Visual Studio Code (**Fichier → Ouvrir le dossier**). La barre d'état, en bas de la fenêtre, propose alors :
+
+| Bouton          | Action                                  | Commande équivalente |
+| --------------- | --------------------------------------- | -------------------- |
+| ✓ (Build)       | compiler                                | `pio run`            |
+| → (Upload)      | compiler et téléverser                  | `pio run -t upload`  |
+| prise (Monitor) | ouvrir le moniteur série à 115200 bauds | `pio device monitor` |
+
+Le téléversement passe par l'interface **CMSIS-DAP** du DAPLink de la carte. Le moniteur série se ferme avec `Ctrl+C`.
+
+### Téléverser par le disque STEAMI
+
+Si le téléversement CMSIS-DAP échoue (pilote ou droits manquants), PlatformIO peut copier le programme sur le disque **STEAMI**, comme un glisser-déposer. Ajouter à `platformio.ini` :
+
+```ini
+[env:steami_disque]
+extends = env:steami
+upload_protocol = mbed
+upload_port = E:
+```
+
+`upload_port` est l'emplacement du disque STEAMI : une lettre de lecteur sous Windows (`E:`), `/Volumes/STeaMi` sous macOS, `/run/media/<utilisateur>/STeaMi` ou `/media/<utilisateur>/STeaMi` sous Linux. PlatformIO ne détecte pas ce disque tout seul : le chemin doit être indiqué.
+
+Choisir ensuite l'environnement `steami_disque` dans la barre d'état avant de téléverser, ou lancer `pio run -e steami_disque -t upload`.
+
+## Déboguer pas à pas
+
+L'interface CMSIS-DAP du DAPLink sert aussi de sonde de débogage : pas besoin de matériel supplémentaire. Dans Visual Studio Code, ouvrir l'onglet **Exécuter et déboguer** et lancer **PIO Debug** (touche `F5`). PlatformIO compile une version de débogage, la téléverse et arrête le programme au début de `setup()`. On peut alors poser des points d'arrêt dans la marge, avancer ligne par ligne et inspecter les variables.
+
+:::caution À confirmer
+La connexion de la sonde, l'arrêt du processeur et la pose de points d'arrêt ont été vérifiés sur une V1c (OpenOCD et GDB). L'arrêt sur un point d'arrêt et le pas à pas depuis Visual Studio Code restent à confirmer.
+:::
 
 ## Dépannage
 
 ### `Error: unable to find CMSIS-DAP device` sous Linux
 
-Les règles `udev` installées par défaut ne donnent pas accès à l'interface utilisée par OpenOCD. La procédure (règles à installer, repli sur pyOCD) est décrite dans la section [Troubleshooting uploads](https://github.com/steamicc/arduino-steami-lib#troubleshooting-uploads) du README du dépôt.
+Il manque les règles `udev` qui donnent accès à l'interface du DAPLink. La procédure est décrite dans la section [Troubleshooting uploads](https://github.com/steamicc/arduino-steami-lib#troubleshooting-uploads) du dépôt arduino-steami-lib. En attendant, le [téléversement par le disque STEAMI](#téléverser-par-le-disque-steami) fonctionne sans réglage.
 
-### La carte n'est pas détectée
+### `Unknown board ID 'steami'`
 
-```bash
-source .venv/bin/activate
-pio device list
-```
+Le fichier `boards/steami.json` est absent ou mal placé : il doit se trouver dans un dossier `boards` à côté de `platformio.ini`.
 
-Si la carte n'apparaît pas, changer de câble : beaucoup de câbles USB ne transportent que la charge.
+### Le moniteur série n'affiche rien
+
+Vérifier `monitor_speed = 115200` dans `platformio.ini`. Les messages écrits dans `setup()` partent avant l'ouverture du moniteur : appuyer sur le bouton reset de la carte une fois le moniteur ouvert.
 
 ## Voir aussi
 
-- [Conventions de l'API](./conventions)
-- [CONTRIBUTING.md](https://github.com/steamicc/arduino-steami-lib/blob/main/CONTRIBUTING.md) : règles de contribution du dépôt
+- [Bibliothèques STeaMi](./bibliotheques) : les drivers de chaque composant et le bus I²C interne.
+- [Capteurs et écran](./capteurs) : un programme minimal pour chaque composant.
+- [Développer les drivers](./contribuer) : pour modifier la bibliothèque STeaMi elle-même.
+- [Documentation PlatformIO](https://docs.platformio.org/) : référence de `platformio.ini` et des commandes.
