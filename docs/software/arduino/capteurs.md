@@ -369,7 +369,7 @@ Les fonctions de dessin (`fillScreen`, `drawLine`, `fillCircle`, `setCursor`, `p
 
 ## Bluetooth
 
-Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, à installer depuis le gestionnaire de bibliothèques. Le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib/tree/main/lib/ble/examples) contient des exemples propres à la STeaMi : balise (**BleBeacon**), jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)…
+Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, à installer depuis le gestionnaire de bibliothèques. Le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib/tree/main/lib/ble/examples) contient des exemples propres à la STeaMi : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
 
 ## Composants non pris en charge
 
