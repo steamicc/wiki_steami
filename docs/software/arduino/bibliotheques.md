@@ -40,7 +40,7 @@ Seuls les drivers du tableau suivant sont utilisables. Les dossiers `bme280`, `g
 | `apds9960`       | `<APDS9960.h>`  | lumière, couleur, proximité et gestes | V1a, V1b      |
 | `ssd1327`        | `<SSD1327.h>`   | écran OLED 128 × 128                  | V1a, V1b      |
 
-Le dossier `hts221` contient le driver d'un capteur d'humidité utilisé sur les premiers prototypes : il n'est monté sur aucune carte de série.
+Le dossier `hts221` est un driver historique : le capteur HTS221 n'est monté sur aucune carte STeaMi. Le WSEN-HIDS de la carte est compatible avec lui, mais il faut utiliser son propre driver, `wsen-hids`, qui corrige le démarrage et la mesure ponctuelle.
 
 ## Bibliothèques tierces
 
