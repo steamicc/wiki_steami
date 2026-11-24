@@ -18,7 +18,7 @@ TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
 Les capteurs I²C se construisent avec le bus, puis l'adresse, qui est optionnelle : la valeur par défaut correspond au câblage de la carte.
 
 ```cpp
-HTS221 sensor(internalI2C);
+WsenHids sensor(internalI2C);
 ```
 
 Exceptions :
@@ -78,10 +78,10 @@ Le nom de la méthode est celui de la grandeur. Quand l'unité n'est pas l'unit�
 
 Selon le driver, une mesure est **renvoyée** par la méthode, ou **écrite dans une variable** passée en paramètre ; la méthode renvoie alors `true` si la lecture a réussi.
 
-| Style                        | Exemple                                                | Drivers                                                            |
-| ---------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------ |
-| valeur renvoyée              | `float t = sensor.temperature();`                      | `HTS221`, `WsenHids`, `WSEN_PADS`, `VL53L1X`, `BQ27441`, `LIS2MDL` |
-| variable passée en paramètre | `ISM330DL::Vector3 a; if (imu.accelerationG(a)) { … }` | `ISM330DL`, `APDS9960`                                             |
+| Style                        | Exemple                                                | Drivers                                                  |
+| ---------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
+| valeur renvoyée              | `float t = sensor.temperature();`                      | `WsenHids`, `WSEN_PADS`, `VL53L1X`, `BQ27441`, `LIS2MDL` |
+| variable passée en paramètre | `ISM330DL::Vector3 a; if (imu.accelerationG(a)) { … }` | `ISM330DL`, `APDS9960`                                   |
 
 ### Lecture complète
 
@@ -93,7 +93,7 @@ Serial.println(data.temperature);
 Serial.println(data.humidity);
 ```
 
-Disponible sur `HTS221`, `WsenHids` (`temperature`, `humidity`) et `WSEN_PADS` (`pressure`, `temperature`). Sur `VL53L1X`, `read()` renvoie simplement la distance en millimètres.
+Disponible sur `WsenHids` (`temperature`, `humidity`) et `WSEN_PADS` (`pressure`, `temperature`). Sur `VL53L1X`, `read()` renvoie simplement la distance en millimètres.
 
 ## Disponibilité des données
 
@@ -115,7 +115,7 @@ Les capteurs d'environnement et le magnétomètre ont deux modes :
 | `triggerOneShot()` | lance une mesure unique sans attendre le résultat      |
 | `readOneShot()`    | lance une mesure unique, attend et renvoie le résultat |
 
-Drivers concernés : `HTS221`, `WsenHids`, `WSEN_PADS` et `LIS2MDL`. Le paramètre de `setContinuous()` est une constante de fréquence propre au driver (par exemple `HTS221_ODR_1_HZ`), sauf pour `LIS2MDL` qui attend une fréquence en hertz.
+Drivers concernés : `WsenHids`, `WSEN_PADS` et `LIS2MDL`. Le paramètre de `setContinuous()` est une constante de fréquence propre au driver (par exemple `WSEN_HIDS_ODR_1_HZ`), sauf pour `LIS2MDL` qui attend une fréquence en hertz.
 
 Le capteur de distance utilise ses propres méthodes : `startRanging()` et `stopRanging()`.
 
@@ -129,7 +129,7 @@ sensor.calibrateTemperature(20.0f, 20.8f,        // référence, mesure (point b
                             40.0f, 41.3f);       // référence, mesure (point haut)
 ```
 
-Drivers concernés : `HTS221`, `WsenHids`, `WSEN_PADS`, `ISM330DL` et `LIS2MDL` (où le décalage s'appelle `setTempOffset()`). La correction s'applique après la calibration d'usine.
+Drivers concernés : `WsenHids`, `WSEN_PADS`, `ISM330DL` et `LIS2MDL` (où le décalage s'appelle `setTempOffset()`). La correction s'applique après la calibration d'usine.
 
 ## Récapitulatif
 
