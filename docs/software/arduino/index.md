@@ -62,11 +62,11 @@ Pour aller plus loin :
 </Release>
 <Release releases="v1c">
 
-| Fonction                          | Composant | Comment                                                                   | Exemples du driver |
-| --------------------------------- | --------- | ------------------------------------------------------------------------- | :----------------: |
-| Pression, humidité et température | BME280    | bibliothèque Adafruit BME280 (driver STeaMi à venir)                      |         —          |
-| Écran TFT couleur 240 × 240       | GC9A01    | bibliothèque GFX Library for Arduino, à confirmer (driver STeaMi à venir) |         —          |
-| Lumière, couleur et gestes        | —         | absent de la V1c                                                          |         —          |
+| Fonction                          | Composant | Comment                                                      | Exemples du driver |
+| --------------------------------- | --------- | ------------------------------------------------------------ | :----------------: |
+| Pression, humidité et température | BME280    | bibliothèque Adafruit BME280 (driver STeaMi à venir)         |         —          |
+| Écran TFT couleur 240 × 240       | GC9A01    | bibliothèque GFX Library for Arduino (driver STeaMi à venir) |         —          |
+| Lumière, couleur et gestes        | —         | absent de la V1c                                             |         —          |
 
 </Release>
 </ReleaseTabs>

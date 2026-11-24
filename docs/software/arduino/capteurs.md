@@ -186,6 +186,8 @@ void loop() {
 }
 ```
 
+Sans batterie branchée (carte alimentée par l'USB seul), la jauge répond mais renvoie 0 % et 0 mV.
+
 ## Pression, humidité et température
 
 <ReleaseTabs>
@@ -331,10 +333,6 @@ Le dessin se fait en mémoire (`fill`, `pixel`, `line`, `fillRect`, `text`) ; ri
 <Release releases="v1c">
 
 Écran TFT rond 240 × 240 en couleur (contrôleur GC9A01). Il n'a pas encore de driver STeaMi : on utilise la bibliothèque **GFX Library for Arduino**, à installer depuis le gestionnaire de bibliothèques.
-
-:::caution À confirmer
-Ce programme compile, mais n'a pas encore été vérifié sur une carte V1c.
-:::
 
 ```cpp
 #include <SPI.h>
