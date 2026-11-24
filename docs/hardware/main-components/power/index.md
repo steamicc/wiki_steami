@@ -9,15 +9,15 @@ Le système de gestion de l'alimentation fournit les différentes tensions à pa
 
 ## Sous-systèmes
 
-| Composant                     | Fonction                      | Page                  |
-| ----------------------------- | ----------------------------- | --------------------- |
-| Batterie LiPo                 | 3.7V 1600 mAh                 | Ci-dessous            |
-| [Chargeur BQ24075](./bq24075) | Charge via USB, PowerPath     | [Détail →](./bq24075) |
-| [Jauge BQ27441](./bq27441)    | Mesure état de charge, I2C    | [Détail →](./bq27441) |
-| TPS63000                      | Convertisseur buck-boost 3.3V | Ci-dessous            |
-| LD3985                        | Régulateur linéaire 3.3V      | Ci-dessous            |
-| LMR62421                      | Boost 14.5V (buzzer + écran)  | Ci-dessous            |
-| DIO7003                       | Switch basse perte            | Ci-dessous            |
+| Composant                     | Fonction                             | Page                  |
+| ----------------------------- | ------------------------------------ | --------------------- |
+| Batterie LiPo                 | 3.7V 1600 mAh                        | Ci-dessous            |
+| [Chargeur BQ24075](./bq24075) | Charge via USB, PowerPath            | [Détail →](./bq24075) |
+| [Jauge BQ27441](./bq27441)    | Mesure état de charge, I2C           | [Détail →](./bq27441) |
+| TPS63000                      | Convertisseur buck-boost 3.3V        | Ci-dessous            |
+| LD3985                        | Régulateur linéaire 3.3V             | Ci-dessous            |
+| LMR62421                      | Boost 14.5V (écran OLED, V1a et V1b) | Ci-dessous            |
+| DIO7003                       | Switch basse perte                   | Ci-dessous            |
 
 ## Batterie — LiPo
 
@@ -55,14 +55,18 @@ L'entrée peut être 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET des
 | Sortie          | 3.3V @ 150 mA                                                     |
 | Usage           | Alimentation MCU interface (STM32F103) / DAPLink, rails sensibles |
 
-## Boost buzzer — LMR62421
+## Boost écran OLED — LMR62421
+
+:::info Release
+L'élévateur LMR62421 (U4) n'équipe que la V1a et la V1b : il fournit le +14V5 de l'écran OLED. Il est retiré sur la V1c, dont l'écran TFT est alimenté en +3V3. Le buzzer est alimenté en +3V3 sur les trois releases.
+:::
 
 | Caractéristique | Détail                                             |
 | --------------- | -------------------------------------------------- |
 | Modèle          | [LMR62421XMF](https://www.ti.com/product/LMR62421) |
 | Fabricant       | Texas Instruments                                  |
 | Sortie          | 14.5V @ 100 mA                                     |
-| Usage           | Alimentation du buzzer piézo et de l'écran OLED    |
+| Usage           | Alimentation de l'écran OLED (connecteur J7)       |
 
 ## Switch d'alimentation — DIO7003
 
@@ -79,7 +83,7 @@ L'entrée peut être 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET des
 | ------- | ----------- | --------------------------------------------- |
 | 3.3V    | 1200 mA     | MCU, capteurs, affichage                      |
 | 3.3V    | 150 mA      | Régulateur linéaire (MCU interface / DAPLink) |
-| 14.5V   | 100 mA      | Buzzer piézo, écran OLED                      |
+| 14.5V   | 100 mA      | Écran OLED (V1a, V1b)                         |
 | 5V      | —           | Alimentation Jacdac                           |
 
 ## Schémas

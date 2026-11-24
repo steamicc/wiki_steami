@@ -47,7 +47,7 @@ Le connecteur edge expose les broches P0 a P20 ainsi que l'alimentation (3V3, GN
 
 ### Connecteur STEMMA/Qwiic (I2C)
 
-Deux connecteurs JST 4 broches au pas de 2 mm pour la connexion de capteurs externes via I2C.
+Deux connecteurs JST 4 broches pour la connexion de capteurs externes via I2C : JST PH au pas de 2 mm sur la V1a et la V1b, JST SH au pas de 1 mm (compatibles Qwiic/STEMMA QT) sur la V1c. Le brochage est le même pour les trois releases.
 
 | Broche     | Signal        |
 | ---------- | ------------- |

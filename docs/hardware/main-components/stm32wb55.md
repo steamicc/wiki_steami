@@ -7,6 +7,8 @@ title: 'STM32WB55RG'
 
 Le STM32WB55RG est le processeur principal de la carte STeaMi. C'est sur ce microcontrôleur que s'exécutent les programmes utilisateur (MicroPython, CODAL, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee.
 
+Toutes les cartes diffusées (V1a, V1b et V1c) utilisent un STM32WB55RG ; seuls les prototypes des indices A et C étaient équipés d'un STM32WB55RC (256 Ko de flash). Le brochage est identique sur les trois releases, à l'exception de la broche PB2 : `I2C_INT` sur la V1a, `ON/OFF_+3V3_STLINK` à partir de la V1b (voir [Révisions](../revisions#alimentation-et-microcontrôleurs)).
+
 ## Caractéristiques
 
 | Caractéristique        | Détail                                                                                                                 |
@@ -32,7 +34,7 @@ Le MCU organise ses périphériques sur plusieurs bus pour séparer les usages i
 | -------------- | ---------------------------------------- | --------------------------------- |
 | I2C1 (interne) | Capteurs, jauge batterie, expandeur GPIO | SCL: PB8, SDA: PB9                |
 | I2C3 (externe) | Connecteur edge, STEMMA/Qwiic            | SCL: PC0, SDA: PC1                |
-| SPI1 (interne) | Écran OLED                               | SCK: PA1, MOSI: PB5, MISO: PB4    |
+| SPI1 (interne) | Écran (OLED ou TFT selon la release)     | SCK: PA1, MOSI: PB5, MISO: PB4    |
 | SPI2 (externe) | Connecteur edge                          | SCK: PB13, MISO: PB14, MOSI: PB15 |
 | UART           | Communication avec STM32F103             | TX: PB11, RX: PB10                |
 

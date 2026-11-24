@@ -7,6 +7,10 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Semi-conducteurs
 
+:::info Release
+Cette liste reprend la nomenclature de l'indice B1 (V1b). Les composants retirés ou modifiés sur la V1c sont listés dans [BOM complète](./#différences-selon-la-release).
+:::
+
 ## Diodes de protection ESD
 
 | Composant     | Description                                                 | Fabricant                                                        | Reference                                               | Qte | Datasheet |

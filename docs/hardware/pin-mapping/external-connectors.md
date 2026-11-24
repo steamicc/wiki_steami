@@ -3,11 +3,28 @@ sidebar_position: 6
 title: 'Connecteurs externes'
 ---
 
+import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+
 # Connecteurs externes
+
+Les connecteurs I2C (J3, J4), USB (J2) et écran (J7) dépendent de la release ; ils sont présentés en onglets. Les autres connecteurs sont communs aux trois releases.
 
 ## Connecteur STEMMA/Qwiic (I2C3)
 
-Deux connecteurs JST S4B-PH-SM4-TB 4 broches (pas 2 mm) pour la connexion de capteurs I2C externes.
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+Deux connecteurs JST S4B-PH-SM4-TB 4 broches (J3, J4, pas 2 mm) pour la connexion de capteurs I2C externes. Leur pas n'est pas celui des câbles Qwiic/STEMMA QT, qui utilisent des connecteurs JST SH au pas de 1 mm : un adaptateur est nécessaire.
+
+</Release>
+<Release releases="v1c">
+
+Deux connecteurs JST SM04B-SRSS-TB 4 broches (J3, J4, JST SH, pas 1 mm), compatibles avec les câbles Qwiic/STEMMA QT, pour la connexion de capteurs I2C externes.
+
+</Release>
+</ReleaseTabs>
+
+Le brochage est le même pour les trois releases :
 
 | Broche     | Signal        | Pin STM32WB55 |
 | ---------- | ------------- | ------------- |
@@ -58,9 +75,24 @@ Connecteur de programmation et débogage (header 1 rangée, pas 1.27 mm).
 | JTAG_NRST  | STLINK_NRST  | NRST          | -          |
 | JTAG_SWCLK | STLINK_SWCLK | PA14          | -          |
 
-## Connecteur micro-USB
+## Connecteur USB
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
 - **Composant** : GCT USB3080-30-00-A (Micro-B, Bottom-SMT)
+- **Protection** : diode TVS Wurth WE-TVS 824015 (D1)
+
+</Release>
+<Release releases="v1c">
+
+- **Composant** : Same Sky UJ20-C-H-G-SMT-4-P16-TR (USB-C 2.0, 16 broches)
+- **Résistances CC** : R5 et R25, 5,1 kΩ (la carte se présente comme un périphérique)
+- **Protection** : diode TVS Wurth 82400274 (D1)
+
+</Release>
+</ReleaseTabs>
+
 - **Fonctions** : Alimentation 5V, programmation DAPLink, communication série, WebUSB, stockage de masse
 
 ## Connecteur batterie
@@ -68,7 +100,20 @@ Connecteur de programmation et débogage (header 1 rangée, pas 1.27 mm).
 - **Composant** : Amphenol 10114830-10102LF (header SMD 2 positions, pas 1.25 mm)
 - **Type** : Batterie LiPo 3.7V
 
-## Connecteur écran OLED
+## Connecteur écran
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
 - **Composant** : Molex 52435-2471 (FFC/FPC 24 positions, pas 0.50 mm)
+
+</Release>
+<Release releases="v1c">
+
+- **Composant** : F32R-1A7H1-11018 (FFC/FPC 18 positions)
+
+</Release>
+</ReleaseTabs>
+
 - **Interface** : SPI1
+- **Brochage** : voir la page [Écran](../main-components/display#connecteur-j7)

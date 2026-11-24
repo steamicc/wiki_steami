@@ -3,17 +3,23 @@ sidebar_position: 8
 title: 'Contraintes'
 ---
 
+import { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
+
 # Contraintes environnementales et physiques
+
+Les exigences sont communes aux trois releases de la carte. Quand l'implémentation diffère, la colonne « Implémentation » affiche la release choisie ci-dessous ; les écarts sont détaillés dans [Révisions](../hardware/revisions#écarts-aux-exigences).
+
+<ReleaseSelector />
 
 ## Exigences environnementales
 
-| ID     | Nom                        | Description                                                                               | Implémentation                       |
-| ------ | -------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------ |
-| ENV-01 | Temperature                | Le système doit pouvoir fonctionner dans la plage de -20°C à 85°C.                        | Composants grade industriel          |
-| ENV-02 | Lifetime                   | Le système doit pouvoir fonctionner pendant 70 000 heures (environ 8 ans).                | Sélection composants haute fiabilité |
-| ENV-03 | ESD Protection             | Les connecteurs d'entrée et de sortie doivent être équipés de protections ESD.            | Protections ESD sur connecteurs      |
-| ENV-04 | User Interface Position    | Le système doit intégrer les éléments d'affichage sur la face avant de la carte.          | Écran OLED et LEDs en face avant     |
-| ENV-05 | Command Interface Position | Le système doit intégrer l'interface de contrôle (boutons) sur la face avant de la carte. | Boutons en face avant                |
+| ID     | Nom                        | Description                                                                               | Implémentation                                                                                                                                                                                                                              |
+| ------ | -------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ENV-01 | Temperature                | Le système doit pouvoir fonctionner dans la plage de -20°C à 85°C.                        | <ReleaseValue><Release releases="v1a v1b">Composants grade industriel</Release><Release releases="v1c">Composants grade industriel ; écran TFT annoncé de -20 °C à 70 °C par les distributeurs (écart à confirmer)</Release></ReleaseValue> |
+| ENV-02 | Lifetime                   | Le système doit pouvoir fonctionner pendant 70 000 heures (environ 8 ans).                | Sélection composants haute fiabilité                                                                                                                                                                                                        |
+| ENV-03 | ESD Protection             | Les connecteurs d'entrée et de sortie doivent être équipés de protections ESD.            | Protections ESD sur connecteurs                                                                                                                                                                                                             |
+| ENV-04 | User Interface Position    | Le système doit intégrer les éléments d'affichage sur la face avant de la carte.          | Écran et LEDs en face avant                                                                                                                                                                                                                 |
+| ENV-05 | Command Interface Position | Le système doit intégrer l'interface de contrôle (boutons) sur la face avant de la carte. | Boutons en face avant                                                                                                                                                                                                                       |
 
 ## Exigences physiques
 
@@ -35,11 +41,11 @@ La cible de 70 000 heures (~8 ans) est assurée par la sélection de composants 
 
 ### Protection ESD (ENV-03)
 
-Les connecteurs externes (micro-USB, edge connector, STEMMA/Qwiic, Jacdac) sont équipés de diodes de protection ESD pour protéger les circuits internes contre les décharges électrostatiques.
+Les connecteurs externes (USB, edge connector, STEMMA/Qwiic, Jacdac) sont équipés de diodes de protection ESD pour protéger les circuits internes contre les décharges électrostatiques.
 
 ### Ergonomie (ENV-04, ENV-05)
 
-L'écran OLED, les LEDs et les boutons sont tous placés en face avant pour une utilisation intuitive. La batterie est en face arrière (PHY-03) pour ne pas interférer avec l'interface utilisateur.
+L'écran, les LEDs et les boutons sont tous placés en face avant pour une utilisation intuitive. La batterie est en face arrière (PHY-03) pour ne pas interférer avec l'interface utilisateur.
 
 ### Dimensions et poids (PHY-01, PHY-02)
 

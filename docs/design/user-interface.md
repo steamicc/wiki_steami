@@ -3,7 +3,13 @@ sidebar_position: 3
 title: 'Interface utilisateur'
 ---
 
+import ReleaseTabs, { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
+
 # Interface utilisateur
+
+Les exigences sont communes aux trois releases de la carte. Quand l'implémentation diffère, la colonne « Implémentation » affiche la release choisie ci-dessous ; les écarts sont détaillés dans [Révisions](../hardware/revisions#écarts-aux-exigences).
+
+<ReleaseSelector />
 
 ## Exigences — LEDs indicatrices
 
@@ -17,13 +23,13 @@ title: 'Interface utilisateur'
 
 ## Exigences — Écran
 
-| ID     | Nom                  | Description                                                                                               | Implémentation                                        |
-| ------ | -------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| FCT-15 | Display              | Le système doit pouvoir afficher des informations graphiques ou textuelles sur un écran haute résolution. | OLED Winstar WEO128128BWPP3N00001                     |
-| FCT-16 | Display - Controller | Le contrôleur d'écran doit être SSD1327, ST7735, ILI9341 ou ILI9163C.                                     | SSD1327 (OLED)                                        |
-| FCT-17 | Display - SPI        | Le contrôleur doit être connecté sur le bus SPI.                                                          | SPI1 interne                                          |
-| FCT-18 | Display - Resolution | La résolution de l'écran doit être d'au moins 128x128.                                                    | 128 x 128 pixels                                      |
-| FCT-19 | Display - Backlight  | L'écran pourrait intégrer un rétro-éclairage LED pour améliorer la lisibilité en extérieur.               | OLED auto-émissif (pas de rétro-éclairage nécessaire) |
+| ID     | Nom                  | Description                                                                                               | Implémentation                                                                                                                                                                                                                    |
+| ------ | -------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FCT-15 | Display              | Le système doit pouvoir afficher des informations graphiques ou textuelles sur un écran haute résolution. | <ReleaseValue><Release releases="v1a v1b">OLED rond Winstar WEO128128BWPP3N00001</Release><Release releases="v1c">TFT rond Winstar WF0128BTYAA4DNN0</Release></ReleaseValue>                                                      |
+| FCT-16 | Display - Controller | Le contrôleur d'écran doit être SSD1327, ST7735, ILI9341 ou ILI9163C.                                     | <ReleaseValue><Release releases="v1a v1b">SSD1327 (OLED)</Release><Release releases="v1c">**Écart** : GC9A01 (TFT)</Release></ReleaseValue>                                                                                       |
+| FCT-17 | Display - SPI        | Le contrôleur doit être connecté sur le bus SPI.                                                          | SPI1 interne                                                                                                                                                                                                                      |
+| FCT-18 | Display - Resolution | La résolution de l'écran doit être d'au moins 128x128.                                                    | <ReleaseValue><Release releases="v1a v1b">128 x 128 pixels</Release><Release releases="v1c">240 x 240 pixels</Release></ReleaseValue>                                                                                             |
+| FCT-19 | Display - Backlight  | L'écran pourrait intégrer un rétro-éclairage LED pour améliorer la lisibilité en extérieur.               | <ReleaseValue><Release releases="v1a v1b">OLED auto-émissif (pas de rétro-éclairage nécessaire)</Release><Release releases="v1c">Rétro-éclairage LED (VLED+ / VLED- par R57 et R62, montage à confirmer)</Release></ReleaseValue> |
 
 ## Exigences — Boutons
 
@@ -47,9 +53,12 @@ title: 'Interface utilisateur'
 
 ### Interface visuelle (FP8)
 
-#### Écran OLED
+#### Écran
 
-L'écran OLED blanc 128x128 pixels offre un affichage haute qualité sans rétro-éclairage.
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+L'écran OLED rond blanc 128x128 pixels offre un affichage auto-émissif, sans rétro-éclairage.
 
 - **Composant** : Winstar WEO128128BWPP3N00001
 - **Technologie** : OLED (blanc)
@@ -57,15 +66,33 @@ L'écran OLED blanc 128x128 pixels offre un affichage haute qualité sans rétro
 - **Interface** : SPI1 (bus interne)
 - **Connecteur** : FFC/FPC 24 positions, pas 0.50 mm (Molex 52435-2471)
 
-**Signaux SPI de l'écran :**
+</Release>
+<Release releases="v1c">
 
-| Signal              | Pin STM32WB55 |
-| ------------------- | ------------- |
-| SPI1_SCK_OLED       | PA1           |
-| SPI1_MOSI_OLED      | PB5           |
-| C_OLED_OR_SPI1_MISO | PB4           |
-| CS_OLED             | PD0           |
-| RST_OLED            | PA12          |
+L'écran TFT rond 240x240 pixels affiche en couleur, avec un rétro-éclairage LED.
+
+- **Composant** : Winstar WF0128BTYAA4DNN0
+- **Contrôleur** : GC9A01
+- **Résolution** : 240 x 240 pixels
+- **Interface** : SPI1 (bus interne)
+- **Connecteur** : FFC/FPC 18 positions (F32R-1A7H1-11018)
+
+Le GC9A01 ne fait pas partie des contrôleurs listés par l'exigence FCT-16 : c'est un écart documenté dans [Révisions](../hardware/revisions#écarts-aux-exigences).
+
+</Release>
+</ReleaseTabs>
+
+Le détail par release est donné dans la page [Écran](../hardware/main-components/display).
+
+**Signaux SPI de l'écran (identiques pour les trois releases) :**
+
+| Signal                | Pin STM32WB55 |
+| --------------------- | ------------- |
+| SPI1_SCK_OLED         | PA1           |
+| SPI1_MOSI_OLED        | PB5           |
+| D/C_OLED_OR_SPI1_MISO | PB4           |
+| CS_OLED               | PD0           |
+| RST_OLED              | PA12          |
 
 #### LED RGB utilisateur
 
@@ -86,6 +113,8 @@ L'écran OLED blanc 128x128 pixels offre un affichage haute qualité sans rétro
 | LED_STATUS  | LED_STLINK_STATUS | PA9           |
 | LED_FLASH   | LED_COM_GRN       | PB1           |
 | LED_DAPLINK | LED_DAP_BLUE      | PA6           |
+
+Seuls les repères sérigraphiés des LEDs changent entre les releases (LED2 à LED7 sur les premières cartes) ; leur câblage est identique (voir [Révisions](../hardware/revisions#leds)).
 
 ### Boutons de contrôle (FP9)
 
@@ -122,18 +151,20 @@ Le système nécessite 7 boutons utilisateur au total. Les boutons directionnels
 
 ### Sortie audio (FP10)
 
-Un buzzer piézo permet la génération de sons. Il est alimenté par un boost converter dédié (14.5V) car la tension 3.3V standard est insuffisante pour un transducteur piézo.
+Un buzzer piézo permet la génération de sons. Il est alimenté en +3V3 par R68 (0 Ω) et commandé par le transistor MOSFET T2, avec une diode de roue libre D15. Ce montage est identique sur les trois releases.
 
 - **Composant** : PUI Audio SMT-0825-S-HT-R
 - **Type** : Transducteur piézo montage en surface
 - **Tension** : 3.6V pic-à-pic
-- **Signal** : BEEPER_OUT → PA11 (STM32WB55)
-- **Alimentation** : Boost converter LMR62421 (14.5V)
+- **Signal** : BEEPER_OUT → PA11 (STM32WB55), sur la grille de T2 (BSS119N)
+- **Alimentation** : +3V3
 - **Sortie** : Mono, un seul canal
 
 ## Voir aussi
 
 - [Hardware](../hardware/)
+- [Révisions de la carte](../hardware/revisions)
+- [Écran](../hardware/main-components/display)
 - [Composants — Circuits intégrés](../hardware/components/integrated-circuits)
 - [Pin Mapping — LEDs](../hardware/pin-mapping/leds)
 - [Pin Mapping — Boutons](../hardware/pin-mapping/buttons)

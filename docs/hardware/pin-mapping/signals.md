@@ -65,15 +65,15 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 | LED_COM_GRN       | LED_FLASH       | LED communication flash (F103 PB1) |
 | LED_DAP_BLUE      | LED_DAPLINK     | LED DAPLink (F103 PA6)             |
 
-## Signaux internes - Écran OLED
+## Signaux internes - Écran
 
-| Signal              | Broche associée | Description             |
-| ------------------- | --------------- | ----------------------- |
-| SPI1_SCK_OLED       | SPI_INT_SCK     | SPI1 Clock écran (PA1)  |
-| SPI1_MOSI_OLED      | SPI_INT_MOSI    | SPI1 MOSI écran (PB5)   |
-| C_OLED_OR_SPI1_MISO | SPI_INT_MISO    | SPI1 MISO écran (PB4)   |
-| CS_OLED             | CS_DISPLAY      | Chip Select écran (PD0) |
-| RST_OLED            | RST_DISPLAY     | Reset écran (PA12)      |
+| Signal                | Broche associée | Description             |
+| --------------------- | --------------- | ----------------------- |
+| SPI1_SCK_OLED         | SPI_INT_SCK     | SPI1 Clock écran (PA1)  |
+| SPI1_MOSI_OLED        | SPI_INT_MOSI    | SPI1 MOSI écran (PB5)   |
+| D/C_OLED_OR_SPI1_MISO | SPI_INT_MISO    | SPI1 MISO écran (PB4)   |
+| CS_OLED               | CS_DISPLAY      | Chip Select écran (PD0) |
+| RST_OLED              | RST_DISPLAY     | Reset écran (PA12)      |
 
 ## Signaux internes - Capteurs
 
@@ -120,35 +120,35 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 
 Ces signaux sont uniquement accessibles via les points de test du PCB.
 
-| Signal                        | Description                      | Test Points                            |
-| ----------------------------- | -------------------------------- | -------------------------------------- |
-| +5V_USB                       | 5V après protection ESD          | TP50                                   |
-| VBUS                          | VBUS du connecteur USB           | TP53, TP54                             |
-| VBAT_ON_OFF                   | Signal SYSOFF BQ24075            | TP51                                   |
-| PACK_OUT                      | Sortie batterie                  | TP1                                    |
-| VDD                           | Tension après jauge              | TP52                                   |
-| POWER                         | Sortie BQ24075                   | TP49                                   |
-| +3V3@1200mA                   | Rail 3.3V principal              | TP2, TP4, TP55, TP60, TP62, TP13, TP14 |
-| SYST                          | Avant régulateur TPS63000        | TP3                                    |
-| +14V5@100mA                   | Boost 14.5V pour buzzer          | TP5                                    |
-| +3V3_STLINK                   | 3.3V STLink                      | TP46                                   |
-| T_NRST                        | Reset STM32WB55                  | TP61                                   |
-| AT0@STM32WB55RG               | Pin AT0                          | TP8                                    |
-| AT1@STM32WB55RG               | Pin AT1                          | TP9                                    |
-| INT_PRESSURE                  | Interruption capteur pression    | TP30                                   |
-| INT_TEMPERATURE               | Interruption capteur température | TP31                                   |
-| INT_PROXIMITY                 | Interruption capteur proximité   | TP32                                   |
-| INT_TEMPERATURE_HUMIDITY_BOSH | Interruption Bosch temp.         | TP45                                   |
-| UART1_RX                      | UART1 RX F103                    | TP71                                   |
-| UART1_TX                      | UART1 TX F103                    | TP72                                   |
-| FLASH_RST                     | Reset flash                      | TP37                                   |
-| FLASH_WP                      | Write Protect flash              | TP38                                   |
-| FLASH_CS                      | Chip Select flash                | TP39                                   |
-| SPI1_MOSI                     | SPI1 MOSI (F103 -> flash)        | TP40                                   |
-| SPI1_MISO                     | SPI1 MISO (flash -> F103)        | TP41                                   |
-| SPI1_SCK                      | SPI1 SCK (F103 -> flash)         | TP42                                   |
-| AIN_1                         | Entrée analogique F103           | TP56                                   |
-| PWR_EXT                       | Alimentation externe F103        | TP75                                   |
-| PB15@STM32F103                | Broche PB15 F103                 | TP76                                   |
-| PA4@STM32F103                 | Broche PA4 F103                  | TP47                                   |
-| PA1@STM32F103                 | Broche PA1 F103                  | TP48                                   |
+| Signal                        | Description                              | Test Points                            |
+| ----------------------------- | ---------------------------------------- | -------------------------------------- |
+| +5V_USB                       | 5V après protection ESD                  | TP50                                   |
+| VBUS                          | VBUS du connecteur USB                   | TP53, TP54                             |
+| VBAT_ON_OFF                   | Signal SYSOFF BQ24075                    | TP51                                   |
+| PACK_OUT                      | Sortie batterie                          | TP1                                    |
+| VDD                           | Tension après jauge                      | TP52                                   |
+| POWER                         | Sortie BQ24075                           | TP49                                   |
+| +3V3@1200mA                   | Rail 3.3V principal                      | TP2, TP4, TP55, TP60, TP62, TP13, TP14 |
+| SYST                          | Avant régulateur TPS63000                | TP3                                    |
+| +14V5@100mA                   | Boost 14.5V pour l'écran OLED (V1a, V1b) | TP5                                    |
+| +3V3_STLINK                   | 3.3V STLink                              | TP46                                   |
+| T_NRST                        | Reset STM32WB55                          | TP61                                   |
+| AT0@STM32WB55RG               | Pin AT0                                  | TP8                                    |
+| AT1@STM32WB55RG               | Pin AT1                                  | TP9                                    |
+| INT_PRESSURE                  | Interruption capteur pression            | TP30                                   |
+| INT_TEMPERATURE               | Interruption capteur température         | TP31                                   |
+| INT_PROXIMITY                 | Interruption capteur proximité           | TP32                                   |
+| INT_TEMPERATURE_HUMIDITY_BOSH | Interruption Bosch temp.                 | TP45                                   |
+| UART1_RX                      | UART1 RX F103                            | TP71                                   |
+| UART1_TX                      | UART1 TX F103                            | TP72                                   |
+| FLASH_RST                     | Reset flash                              | TP37                                   |
+| FLASH_WP                      | Write Protect flash                      | TP38                                   |
+| FLASH_CS                      | Chip Select flash                        | TP39                                   |
+| SPI1_MOSI                     | SPI1 MOSI (F103 -> flash)                | TP40                                   |
+| SPI1_MISO                     | SPI1 MISO (flash -> F103)                | TP41                                   |
+| SPI1_SCK                      | SPI1 SCK (F103 -> flash)                 | TP42                                   |
+| AIN_1                         | Entrée analogique F103                   | TP56                                   |
+| PWR_EXT                       | Alimentation externe F103                | TP75                                   |
+| PB15@STM32F103                | Broche PB15 F103                         | TP76                                   |
+| PA4@STM32F103                 | Broche PA4 F103                          | TP47                                   |
+| PA1@STM32F103                 | Broche PA1 F103                          | TP48                                   |

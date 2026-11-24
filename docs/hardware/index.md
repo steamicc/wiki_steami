@@ -3,29 +3,75 @@ sidebar_position: 1
 title: "Vue d'ensemble du matériel"
 ---
 
+import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+
 # Vue d'ensemble du matériel
 
 La carte STeaMi est un ordinateur monocarte (SBC) éducatif basé sur deux processeurs : un processeur applicatif (STM32WB55RG) sur lequel s'exécutent les programmes utilisateur, et un processeur d'interface (STM32F103) qui gère les communications USB et la programmation drag-and-drop via DAPLink.
 
+La carte existe en trois releases, **V1a**, **V1b** et **V1c**, qui ne diffèrent que sur quelques fonctions (écran, capteurs d'environnement, connecteurs USB et I2C). Les sections concernées sont présentées en onglets ; la page [Révisions](./revisions) détaille toutes les différences.
+
 Deux ressources clés pour comprendre les détails internes de la carte :
 
 - Les [schémas](./schematic), qui montrent les données de connectivité détaillées de chaque composant.
-- Le [reference design](https://github.com/steamicc/steami-reference-design), qui est un design complet de la carte au format Altium.
+- Le [reference design](https://github.com/steamicc/steami-reference-design), qui est un design complet de la carte au format Altium (indice B1, release V1b).
+
+<ReleaseTabs>
+<Release releases="v1c">
 
 <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
 <figure style={{textAlign: 'center', margin: 0}}>
-<img src="/img/hardware/steami-front.png" alt="STeaMi face avant" loading="lazy" width="350" style={{height: 'auto'}} />
+<img src="/img/hardware/steami-v1c-front.png" alt="STeaMi V1c face avant" loading="lazy" width="350" style={{height: 'auto'}} />
 <figcaption>Face avant</figcaption>
 </figure>
 <figure style={{textAlign: 'center', margin: 0}}>
-<img src="/img/hardware/steami-back.png" alt="STeaMi face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
+<img src="/img/hardware/steami-v1c-back.png" alt="STeaMi V1c face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
 <figcaption>Face arrière</figcaption>
 </figure>
 </div>
 
+Carte V1c (prototype) : écran TFT rond, connecteur USB-C et connecteurs I2C Qwiic/STEMMA QT.
+
+</Release>
+<Release releases="v1b">
+
+<div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-v1b-front.png" alt="STeaMi V1b face avant" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face avant</figcaption>
+</figure>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-v1b-back.png" alt="STeaMi V1b face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face arrière</figcaption>
+</figure>
+</div>
+
+Carte V1b de série (circuit imprimé noir, indice B2) : écran OLED rond, connecteur micro-USB et connecteurs I2C JST PH. Les prototypes V1b avaient un circuit imprimé vert, comme la V1a (voir [Identifier sa version](./revisions#identifier-sa-version)).
+
+</Release>
+<Release releases="v1a">
+
+<div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center'}}>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-front.png" alt="STeaMi au circuit imprimé vert, face avant" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face avant</figcaption>
+</figure>
+<figure style={{textAlign: 'center', margin: 0}}>
+<img src="/img/hardware/steami-back.png" alt="STeaMi au circuit imprimé vert, face arrière" loading="lazy" width="350" style={{height: 'auto'}} />
+<figcaption>Face arrière</figcaption>
+</figure>
+</div>
+
+Carte au circuit imprimé vert : écran OLED rond, connecteur micro-USB et connecteurs I2C JST PH. Il s'agit d'une V1a ou d'un prototype V1b, qui ont le même aspect ; aucune photo d'une V1a identifiée avec certitude n'est encore disponible.
+
+</Release>
+</ReleaseTabs>
+
 ## Schéma bloc
 
 ![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
+
+Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Sur la V1c, l'écran est un TFT GC9A01 alimenté en +3V3 (sans rail 14,5 V), le BME280 remplace les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960, et le connecteur USB est un USB-C (voir [Révisions](./revisions)).
 
 ## Description du hardware
 
@@ -60,7 +106,10 @@ Le transceiver 2.4 GHz intégré au STM32WB55 prend en charge les communications
 
 ### Capteurs internes
 
-La carte intègre 7 capteurs sur le bus I2C1 interne, couvrant distance, mouvement, environnement, lumière et son. Certains capteurs (VL53L1X, ISM330DLC, LIS2MDL) disposent de lignes d'interruption individuelles.
+Les capteurs I2C sont reliés au bus I2C1 interne ; certains (VL53L1X, ISM330DLC, LIS2MDL) disposent de lignes d'interruption individuelles. Les capteurs d'environnement et de lumière dépendent de la release.
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
 | Capteur                 | Modèle                                                                                                                  | Mesures                        |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
@@ -72,24 +121,61 @@ La carte intègre 7 capteurs sur le bus I2C1 interne, couvrant distance, mouveme
 | Lumière/Geste           | [APDS-9960](https://www.broadcom.com/products/optical-sensors/integrated-ambient-light-and-proximity-sensors/apds-9960) | ALS, couleur, proximité, geste |
 | Microphone              | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)                                                      | PDM MEMS omnidirectionnel      |
 
+Pour la V1a, les capteurs d'environnement et de lumière réellement montés restent à confirmer (voir [Révisions](./revisions#capteurs-internes)).
+
+</Release>
+<Release releases="v1c">
+
+| Capteur                       | Modèle                                                                        | Mesures                         |
+| ----------------------------- | ----------------------------------------------------------------------------- | ------------------------------- |
+| Accéléromètre/Gyroscope       | [ISM330DLC](https://www.st.com/en/mems-and-sensors/ism330dlc.html)            | 6 axes + température            |
+| Magnétomètre                  | [LIS2MDL](https://www.st.com/en/mems-and-sensors/lis2mdl.html)                | 3 axes magnétiques              |
+| Distance                      | [VL53L1X](https://www.st.com/en/imaging-and-photonics-solutions/vl53l1x.html) | Time-of-Flight, 0-4 m           |
+| Pression/Humidité/Température | [BME280](./main-components/sensors/bme280)                                    | Pression, RH, °C (adresse 0x76) |
+| Microphone                    | [IMP34DT05](https://www.st.com/en/mems-and-sensors/imp34dt05.html)            | PDM MEMS omnidirectionnel       |
+
+La V1c n'a pas de capteur de lumière, de couleur ni de geste.
+
+</Release>
+</ReleaseTabs>
+
 | Caractéristique | Détail                                                                                                                                                               |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Bus I2C         | I2C1 — SCL: PB8, SDA: PB9 (STM32WB55)                                                                                                                                |
 | Plus d'infos    | [Conception — Capteurs](../design/sensors), [Schéma — FP12](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP12-Capteur_interne.SchDoc) |
 
-### Écran OLED
+### Écran
 
-L'écran OLED 128x128 pixels blanc est connecté au processeur applicatif via SPI1.
+L'écran rond est connecté au processeur applicatif via SPI1 ; son modèle dépend de la release (voir [Écran](./main-components/display)).
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
 | Caractéristique | Détail                                                                                                                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Modèle          | Winstar WEO128128BWPP3N00001                                                                                                                                                                  |
 | Contrôleur      | SSD1327                                                                                                                                                                                       |
-| Technologie     | OLED (blanc)                                                                                                                                                                                  |
+| Technologie     | OLED rond (blanc)                                                                                                                                                                             |
 | Résolution      | 128 x 128 pixels                                                                                                                                                                              |
 | Interface       | SPI1 (interne)                                                                                                                                                                                |
 | Connecteur      | FFC/FPC 24 positions, pas 0.50 mm                                                                                                                                                             |
 | Plus d'infos    | [Conception — Interface utilisateur](../design/user-interface), [Schéma — FP8](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP8-Display_et_LED_statuts.SchDoc) |
+
+</Release>
+<Release releases="v1c">
+
+| Caractéristique | Détail                                                         |
+| --------------- | -------------------------------------------------------------- |
+| Modèle          | Winstar WF0128BTYAA4DNN0                                       |
+| Contrôleur      | GC9A01                                                         |
+| Technologie     | TFT IPS rond, rétroéclairage LED                               |
+| Résolution      | 240 x 240 pixels, couleur                                      |
+| Interface       | SPI1 (interne)                                                 |
+| Connecteur      | FFC/FPC 18 positions                                           |
+| Plus d'infos    | [Conception — Interface utilisateur](../design/user-interface) |
+
+</Release>
+</ReleaseTabs>
 
 ### LEDs
 
@@ -134,20 +220,20 @@ La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un 
 | Type            | Transducteur piézo SMD                                                                                                                                                                |
 | Tension         | 3.6V pic-à-pic                                                                                                                                                                        |
 | Signal          | BEEPER_OUT → PA11 (STM32WB55)                                                                                                                                                         |
-| Alimentation    | Boost converter LMR62421 (14.5V)                                                                                                                                                      |
+| Alimentation    | +3V3, commandé par le transistor T2                                                                                                                                                   |
 | Plus d'infos    | [Conception — Interface utilisateur](../design/user-interface), [Schéma — FP10](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP10-Sortie_Audio.SchDoc) |
 
 ### Connecteurs
 
 La carte offre plusieurs options de connectivité externe pour les capteurs, actionneurs et accessoires.
 
-| Connecteur     | Type                           | Signaux                          |
-| -------------- | ------------------------------ | -------------------------------- |
-| Edge connector | Compatible micro:bit, P0-P20   | GPIO, analogique, SPI, I2C, PWM  |
-| STEMMA/Qwiic   | 2x JST 4-pin (pas 2 mm)        | I2C3 (SCL: PC0, SDA: PC1)        |
-| Jacdac         | Interface série                | UART2 (PB6/PB7), 5V              |
-| Pads crocodile | P0, P1, P2 + P24-P29 + 3V3/GND | Analogique + GPIO (via MCP23009) |
-| SWD            | Header 1 rangée, pas 1.27 mm   | GND, SWCLK, 3V3, SWDIO           |
+| Connecteur     | Type                                                        | Signaux                          |
+| -------------- | ----------------------------------------------------------- | -------------------------------- |
+| Edge connector | Compatible micro:bit, P0-P20                                | GPIO, analogique, SPI, I2C, PWM  |
+| STEMMA/Qwiic   | 2x JST 4-pin : PH, pas 2 mm (V1a, V1b) ; SH, pas 1 mm (V1c) | I2C3 (SCL: PC0, SDA: PC1)        |
+| Jacdac         | Interface série                                             | UART2 (PB6/PB7), 5V              |
+| Pads crocodile | P0, P1, P2 + P24-P29 + 3V3/GND                              | Analogique + GPIO (via MCP23009) |
+| SWD            | Header 1 rangée, pas 1.27 mm                                | GND, SWCLK, 3V3, SWDIO           |
 
 | Caractéristique | Détail                                                                                                                                                                                                                             |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -163,7 +249,7 @@ Le système de gestion de l'alimentation fournit les différentes tensions à pa
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Convertisseur principal | [TPS63000DRCT](https://www.ti.com/product/TPS63000) (buck-boost) — 3.3V @ 1200 mA                                                                                 |
 | Régulateur linéaire     | LD3985M33R — 3.3V @ 150 mA                                                                                                                                        |
-| Boost buzzer            | [LMR62421](https://www.ti.com/product/LMR62421) — 14.5V @ 100 mA                                                                                                  |
+| Boost écran OLED        | [LMR62421](https://www.ti.com/product/LMR62421) — 14.5V @ 100 mA (V1a et V1b ; retiré sur la V1c)                                                                 |
 | Switch alimentation     | DIO7003LEST5 — basse perte                                                                                                                                        |
 | Chargeur batterie       | [BQ24075RGT](https://www.ti.com/product/BQ24075) — 500 mA, PowerPath                                                                                              |
 | Jauge batterie          | [BQ27441](https://www.ti.com/product/BQ27441-G1) — I2C, SON-12                                                                                                    |
@@ -179,6 +265,7 @@ Le processeur d'interface (STM32F103) gère les communications USB. Il exécute 
 | Caractéristique | Détail                                                                                                                                                                                                                                                          |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Modèle          | [STM32F103CBT6](https://www.st.com/en/microcontrollers-microprocessors/stm32f103cb.html)                                                                                                                                                                        |
+| Connecteur USB  | Micro-USB (V1a, V1b) ; USB-C (V1c)                                                                                                                                                                                                                              |
 | Cœur            | ARM Cortex-M3 @ 72 MHz                                                                                                                                                                                                                                          |
 | Flash           | 128 Ko                                                                                                                                                                                                                                                          |
 | Firmware        | DAPLink                                                                                                                                                                                                                                                         |

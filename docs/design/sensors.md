@@ -3,39 +3,47 @@ sidebar_position: 6
 title: 'Capteurs'
 ---
 
+import ReleaseTabs, { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
+
 # Capteurs
+
+Les exigences sont communes aux trois releases de la carte. Quand l'implémentation diffère, la colonne « Implémentation » affiche la release choisie ci-dessous ; les écarts sont détaillés dans [Révisions](../hardware/revisions#écarts-aux-exigences).
+
+<ReleaseSelector />
 
 ## Exigences — Capteurs internes
 
-| ID     | Nom                                  | Description                                                                            | Implémentation                         |
-| ------ | ------------------------------------ | -------------------------------------------------------------------------------------- | -------------------------------------- |
-| FCT-40 | Magnetometer (LIS2MDL)               | Le système doit intégrer un magnétomètre (LIS2MDL).                                    | LIS2MDLTR (I2C, INT_MAG → PD1)         |
-| FCT-41 | Distance (VL53L1X)                   | Le système doit intégrer un capteur de distance (VL53L1X).                             | VL53L1CXV0FY/1 (I2C, INT_DIST → PB12)  |
-| FCT-42 | PDM MEMS Microphone                  | Le système doit intégrer un microphone MEMS PDM (MP34DT01 / IMP34DT05).                | IMP34DT05 (PDM, PA10/PA3)              |
-| FCT-43 | Light, Color, Gesture (APDS9960)     | Le système doit intégrer un capteur de lumière, couleur et geste (APDS9960).           | APDS-9960 (I2C)                        |
-| FCT-44 | Barometer (LPS22HH)                  | Le système doit intégrer un baromètre (LPS22HH / WSEN-PADS).                           | WSEN-PADS 2511020213301 (I2C)          |
-| FCT-45 | Humidity and temperature (HTS221)    | Le système doit intégrer un capteur d'humidité et de température (HTS221 / WSEN-HIDS). | WSEN-HIDS 2525020210001 (I2C)          |
-| FCT-46 | Humidity and temperature - Isolation | Le capteur de température doit être thermiquement éloigné de tout composant chauffant. | Placement PCB isolé                    |
-| FCT-47 | Accel/Gyro (LSM6DS33)                | Le système doit intégrer un accéléromètre/gyroscope (LSM6DS33 / ISM330DLC).            | ISM330DLCTR (I2C, INT_ACC → PC13)      |
-| FCT-48 | IMU alignment                        | L'orientation des deux capteurs de l'IMU doit être alignée.                            | Alignement ISM330DLC + LIS2MDL sur PCB |
+| ID     | Nom                                  | Description                                                                            | Implémentation                                                                                                                                                                                                                           |
+| ------ | ------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FCT-40 | Magnetometer (LIS2MDL)               | Le système doit intégrer un magnétomètre (LIS2MDL).                                    | LIS2MDLTR (I2C, INT_MAG → PD1)                                                                                                                                                                                                           |
+| FCT-41 | Distance (VL53L1X)                   | Le système doit intégrer un capteur de distance (VL53L1X).                             | VL53L1CXV0FY/1 (I2C, INT_DIST → PB12)                                                                                                                                                                                                    |
+| FCT-42 | PDM MEMS Microphone                  | Le système doit intégrer un microphone MEMS PDM (MP34DT01 / IMP34DT05).                | IMP34DT05 (PDM, PA10/PA3)                                                                                                                                                                                                                |
+| FCT-43 | Light, Color, Gesture (APDS9960)     | Le système doit intégrer un capteur de lumière, couleur et geste (APDS9960).           | <ReleaseValue><Release releases="v1a">APDS-9960 (I2C), à confirmer</Release><Release releases="v1b">APDS-9960 (I2C)</Release><Release releases="v1c">**Écart** : aucun capteur de lumière, couleur ou geste</Release></ReleaseValue>     |
+| FCT-44 | Barometer (LPS22HH)                  | Le système doit intégrer un baromètre (LPS22HH / WSEN-PADS).                           | <ReleaseValue><Release releases="v1a">WSEN-PADS 2511020213301 (I2C), à confirmer</Release><Release releases="v1b">WSEN-PADS 2511020213301 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue> |
+| FCT-45 | Humidity and temperature (HTS221)    | Le système doit intégrer un capteur d'humidité et de température (HTS221 / WSEN-HIDS). | <ReleaseValue><Release releases="v1a">WSEN-HIDS 2525020210001 (I2C), à confirmer</Release><Release releases="v1b">WSEN-HIDS 2525020210001 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue> |
+| FCT-46 | Humidity and temperature - Isolation | Le capteur de température doit être thermiquement éloigné de tout composant chauffant. | Placement PCB isolé                                                                                                                                                                                                                      |
+| FCT-47 | Accel/Gyro (LSM6DS33)                | Le système doit intégrer un accéléromètre/gyroscope (LSM6DS33 / ISM330DLC).            | ISM330DLCTR (I2C, INT_ACC → PC13)                                                                                                                                                                                                        |
+| FCT-48 | IMU alignment                        | L'orientation des deux capteurs de l'IMU doit être alignée.                            | Alignement ISM330DLC + LIS2MDL sur PCB                                                                                                                                                                                                   |
 
 ## Exigences — Capteurs et connecteurs externes
 
-| ID        | Nom                                 | Description                                                                                | Implémentation                                |
-| --------- | ----------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| FCT-49    | GPIO - Micro:bit edge connector     | Le système doit fournir un connecteur externe similaire au connecteur edge du micro:bit.   | Connecteur edge P0-P20                        |
-| FCT-50    | GPIO - Alligator-clip friendly pins | Le système doit fournir des broches d'entrée/sortie compatibles avec les pinces crocodile. | Pads P0, P1, P2, P24, P25, P28, P29, 3V3, GND |
-| FCT-50bis | GPIO                                | Les broches du MCU non utilisées doivent être routées vers des pads du PCB.                | Pads PCB + MCP23009                           |
-| FCT-51    | UART                                | Le système doit intégrer des pads sur le PCB pour les signaux UART.                        | SERIAL_TX (PB11), SERIAL_RX (PB10)            |
-| FCT-52    | I2C - Qwiic/STEMMA QT               | Le système doit intégrer un connecteur Qwiic/STEMMA QT pour les signaux I2C.               | 2x JST 4-pin sur I2C3 (PC0/PC1)               |
-| FCT-53    | SPI                                 | Le système doit intégrer des pads sur le PCB pour les signaux SPI.                         | SPI2 sur edge connector (PB13/PB14/PB15)      |
-| FCT-54    | RTC                                 | Le système doit intégrer une horloge temps réel (RTC).                                     | RTC intégré au STM32WB55 (quartz 32 KHz)      |
+| ID        | Nom                                 | Description                                                                                | Implémentation                                                                                                                                                                                                      |
+| --------- | ----------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FCT-49    | GPIO - Micro:bit edge connector     | Le système doit fournir un connecteur externe similaire au connecteur edge du micro:bit.   | Connecteur edge P0-P20                                                                                                                                                                                              |
+| FCT-50    | GPIO - Alligator-clip friendly pins | Le système doit fournir des broches d'entrée/sortie compatibles avec les pinces crocodile. | Pads P0, P1, P2, P24, P25, P28, P29, 3V3, GND                                                                                                                                                                       |
+| FCT-50bis | GPIO                                | Les broches du MCU non utilisées doivent être routées vers des pads du PCB.                | Pads PCB + MCP23009                                                                                                                                                                                                 |
+| FCT-51    | UART                                | Le système doit intégrer des pads sur le PCB pour les signaux UART.                        | SERIAL_TX (PB11), SERIAL_RX (PB10)                                                                                                                                                                                  |
+| FCT-52    | I2C - Qwiic/STEMMA QT               | Le système doit intégrer un connecteur Qwiic/STEMMA QT pour les signaux I2C.               | <ReleaseValue><Release releases="v1a v1b">**Écart** : 2x JST PH 4 broches, pas 2 mm, sur I2C3 (PC0/PC1)</Release><Release releases="v1c">2x JST SH 4 broches, pas 1 mm, sur I2C3 (PC0/PC1)</Release></ReleaseValue> |
+| FCT-53    | SPI                                 | Le système doit intégrer des pads sur le PCB pour les signaux SPI.                         | SPI2 sur edge connector (PB13/PB14/PB15)                                                                                                                                                                            |
+| FCT-54    | RTC                                 | Le système doit intégrer une horloge temps réel (RTC).                                     | RTC intégré au STM32WB55 (quartz 32 KHz)                                                                                                                                                                            |
 
 ## Choix de conception
 
 ### Capteurs internes (FP12)
 
-La carte intègre 7 capteurs embarqués couvrant distance, mouvement, environnement et lumière. Les capteurs I2C sont regroupés sur un bus interne commun ; certains disposent de lignes d'interruption individuelles (VL53L1X, ISM330DLC, LIS2MDL).
+La carte intègre des capteurs embarqués couvrant distance, mouvement et environnement, ainsi que la lumière sur la V1a et la V1b. Les capteurs I2C sont regroupés sur un bus interne commun ; certains disposent de lignes d'interruption individuelles (VL53L1X, ISM330DLC, LIS2MDL).
+
+Les capteurs de distance et de mouvement sont les mêmes sur les trois releases. Les capteurs d'environnement et de lumière diffèrent (voir [Capteurs d'environnement](#capteurs-denvironnement)).
 
 #### Capteur de distance — VL53L1X
 
@@ -65,7 +73,12 @@ La carte intègre 7 capteurs embarqués couvrant distance, mouvement, environnem
 L'orientation des deux capteurs de l'IMU (ISM330DLC et LIS2MDL) doit être alignée pour permettre la fusion de données et le calcul de cap.
 :::
 
-#### Capteur de pression — WSEN-PADS
+#### Capteurs d'environnement
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+##### Capteur de pression — WSEN-PADS
 
 - **Composant** : Wurth Elektronik 2511020213301
 - **Plage** : 26 kPa à 126 kPa (absolu)
@@ -73,22 +86,39 @@ L'orientation des deux capteurs de l'IMU (ISM330DLC et LIS2MDL) doit être align
 - **Interface** : I2C, SPI
 - **Boîtier** : 10-WFLGA
 
-#### Capteur d'humidité et température — WSEN-HIDS
+##### Capteur d'humidité et température — WSEN-HIDS
 
 - **Composant** : Wurth Elektronik 2525020210001
 - **Mesures** : Humidité + Température
 - **Interface** : I2C, SPI
 
-:::tip
-Le capteur de température doit être thermiquement éloigné de tout composant chauffant pour garantir la précision des mesures.
-:::
-
-#### Capteur de luminosité, couleur et geste — APDS-9960
+##### Capteur de luminosité, couleur et geste — APDS-9960
 
 - **Composant** : Broadcom APDS-9960
 - **Fonctions** : Lumière ambiante (560 nm), couleur, détection de geste, proximité
 - **Interface** : I2C
 - **Boîtier** : 8-SMD
+
+Pour la V1a, ces capteurs figurent dans la nomenclature de l'indice A, qui liste aussi le BME280 et le BNO055 : les capteurs réellement montés restent à confirmer (voir [Révisions](../hardware/revisions#capteurs-internes)).
+
+</Release>
+<Release releases="v1c">
+
+##### Capteur de pression, humidité et température — BME280
+
+- **Composant** : Bosch BME280 (U14) ; le schéma indique « BME280 ou BME680 »
+- **Mesures** : Pression + Humidité + Température
+- **Interface** : I2C (bus interne I2C1), CSB relié à +3V3 par R80
+- **Adresse** : 0x76 (SDO relié à GND)
+
+Le BME280 remplace le WSEN-PADS, le WSEN-HIDS et l'APDS-9960 des releases précédentes. La V1c n'a pas de capteur de lumière, de couleur ni de geste : c'est un écart à l'exigence FCT-43.
+
+</Release>
+</ReleaseTabs>
+
+:::tip
+Le capteur de température doit être thermiquement éloigné de tout composant chauffant pour garantir la précision des mesures.
+:::
 
 ### Microphone (FP5)
 
@@ -144,7 +174,18 @@ Le connecteur edge fournit un accès aux broches P0-P20 avec support pour :
 
 #### Connecteur STEMMA/Qwiic
 
-Deux connecteurs JST 4 broches (pas 2 mm) pour capteurs I2C externes.
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+Deux connecteurs JST PH 4 broches (S4B-PH-SM4-TB, pas 2 mm) pour capteurs I2C externes. Leur pas n'est pas celui des câbles Qwiic/STEMMA QT : c'est un écart à l'exigence FCT-52.
+
+</Release>
+<Release releases="v1c">
+
+Deux connecteurs JST SH 4 broches (SM04B-SRSS-TB, pas 1 mm), compatibles Qwiic/STEMMA QT, pour capteurs I2C externes.
+
+</Release>
+</ReleaseTabs>
 
 - Bus I2C3 (SCL: PC0, SDA: PC1)
 
@@ -181,6 +222,7 @@ Pads accessibles avec des pinces crocodile autour de la carte :
 ## Voir aussi
 
 - [Hardware](../hardware/)
+- [Révisions de la carte](../hardware/revisions)
 - [Composants — Circuits intégrés](../hardware/components/integrated-circuits)
 - [Pin Mapping — Bus internes](../hardware/pin-mapping/internal-bus)
 - [Pin Mapping — Edge connector](../hardware/pin-mapping/edge-connector)

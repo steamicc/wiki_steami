@@ -15,6 +15,8 @@ title: 'MCU et stockage'
 | FCT-38 | Microcontrôleur - Speed | Le système doit intégrer un MCU avec une vitesse de processeur d'au moins 64 MHz.                                                                | ARM Cortex-M4 @ 64 MHz  |
 | FCT-39 | Internal sensors - Bus  | Tous les capteurs internes doivent être connectés sur le premier bus I2C.                                                                        | I2C1 (PB8/PB9)          |
 
+Toutes les cartes diffusées (V1a, V1b et V1c de série) utilisent un STM32WB55RG. Les prototypes des indices A et C étaient équipés d'un STM32WB55RC (256 Ko de flash), qui ne respecte pas l'exigence FCT-37 (voir [Révisions](../hardware/revisions#alimentation-et-microcontrôleurs)).
+
 ## Choix de conception
 
 ### Microcontrôleur applicatif (FP6)
@@ -37,7 +39,7 @@ Le MCU organise ses périphériques sur plusieurs bus pour séparer les usages i
 
 - **I2C1** (interne) : capteurs, jauge batterie — partagé avec le STM32F103
 - **I2C3** (externe) : connecteur edge, STEMMA/Qwiic
-- **SPI1** (interne) : écran OLED
+- **SPI1** (interne) : écran (OLED sur la V1a et la V1b, TFT sur la V1c)
 - **SPI2** (externe) : connecteur edge
 - **UART** : communication série avec le microcontrôleur interface
 
