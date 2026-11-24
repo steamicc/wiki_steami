@@ -7,6 +7,10 @@ sidebar_position: 1
 
 La carte STeaMi est reconnue par l'Arduino IDE grâce au paquet **STM32 MCU based boards** (core [STM32duino](https://github.com/stm32duino/Arduino_Core_STM32)), maintenu par STMicroelectronics. Ce paquet contient une définition officielle de la carte, nommée **STeaMi Board**. Aucune autre installation n'est nécessaire pour faire clignoter une LED, lire un bouton ou jouer un son.
 
+:::tip Rien à installer ?
+Si l'ordinateur ne permet pas d'installer l'Arduino IDE (poste de classe verrouillé, Chromebook), il existe une alternative qui fonctionne dans un navigateur : [Programmer sans installation (Codespace)](./codespace).
+:::
+
 ## Prérequis
 
 - une carte STeaMi (V1a, V1b ou V1c) ;

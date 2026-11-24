@@ -195,3 +195,9 @@ favicon
 README
 CODEOWNERS
 Sensortec
+
+# Arduino Codespace
+Codespace
+Codespaces
+codespace
+codespaces
