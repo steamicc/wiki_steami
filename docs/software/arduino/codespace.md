@@ -243,6 +243,7 @@ Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que l
 - **Vérifier le réseau** : l'établissement doit autoriser l'accès à `*.github.dev` (le Codespace et la page Téléverser en dépendent), ainsi qu'à `github.com`. À tester avant le cours.
 - **Arrêter le Codespace** en fin de séance : indicateur **Codespaces** en bas à gauche, puis **Stop Current Codespace**. Un Codespace allumé consomme le quota.
 - **Sauvegarder** avec `steami-sauver` avant d'arrêter.
+- **Préparer un TP avec Classroom 50** : partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) pour créer le dépôt modèle du TP, avec l'énoncé dans le `README.md` et le programme de départ dans `src/`. Classroom 50 crée ensuite le dépôt de chaque élève à partir de ce modèle. L'image du Codespace est publiée et commune à toutes les copies, donc le Codespace de chaque élève démarre aussi vite que celui du modèle, sans prebuild. Dans l'organisation de classe (**Settings → Codespaces**), régler **Codespace ownership** sur **User ownership** : chaque Codespace est alors décompté du quota personnel de l'élève, et un budget Codespaces de l'organisation à 0 $ ne bloque pas leur création.
 
 ## Aller plus loin
 
