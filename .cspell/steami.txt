@@ -118,6 +118,8 @@ ESLint
 lychee
 venv
 usbmodem
+adafruit
+moononournation
 dialout
 wsen
 hids
