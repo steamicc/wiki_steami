@@ -28,16 +28,24 @@ Si l'ordinateur ne permet pas d'installer l'Arduino IDE (poste de classe verroui
 
 3. Valider avec **OK**.
 
+![Fenêtre Préférences de l'Arduino IDE en français : le champ « URL de gestionnaire de cartes supplémentaires » contient l'adresse du paquet STMicroelectronics](/img/software/arduino/arduino-ide-01-url-gestionnaire.png)
+
 ## 2. Installer le paquet STM32
 
-1. Ouvrir le **gestionnaire de cartes** (icône de carte dans la barre latérale, ou **Outils → Carte → Gestionnaire de carte**).
+1. Ouvrir le **gestionnaire de cartes** (icône de carte dans la barre latérale, ou **Outils → Carte → Gestionnaire de cartes…**).
 2. Rechercher **STM32 MCU based boards** et cliquer sur **Installer**.
+
+![Gestionnaire de cartes : la recherche « STM32 MCU » affiche le paquet « STM32 MCU based boards » en version 3.1.0 avec le bouton INSTALLER](/img/software/arduino/arduino-ide-02-paquet-stm32.png)
 
 Le téléchargement est volumineux (compilateur ARM compris) : prévoir quelques minutes.
 
 ## 3. Choisir la carte et le mode de téléversement
 
-Dans le menu **Outils** :
+Carte branchée, l'IDE la reconnaît : il suffit de cliquer sur le sélecteur de carte de la barre d'outils et de choisir **STeaMi Board**, avec son port.
+
+![Sélecteur de carte de la barre d'outils, déplié : il propose « STeaMi Board » sur le port /dev/ttyACM0](/img/software/arduino/arduino-ide-03-choix-carte.png)
+
+La carte peut aussi se choisir dans le menu **Outils**, qui affiche ensuite les réglages suivants :
 
 | Réglage           | Valeur à choisir                            |
 | ----------------- | ------------------------------------------- |
@@ -45,6 +53,8 @@ Dans le menu **Outils** :
 | Board part number | **STeaMi** (valeur par défaut)              |
 | Upload method     | **Mass Storage** (valeur par défaut)        |
 | Port              | le port série de la carte (voir ci-dessous) |
+
+![Menu Outils avec la STeaMi sélectionnée : Carte « STeaMi Board », Port « /dev/ttyACM0 », Board part number « STeaMi », Upload method « Mass Storage »](/img/software/arduino/arduino-ide-04-menu-outils.png)
 
 Les autres réglages du menu peuvent rester à leur valeur par défaut. Le mode **Mass Storage** copie le programme compilé sur le disque USB **STEAMI** que la carte présente à l'ordinateur, exactement comme un glisser-déposer. Il ne demande aucun pilote ni outil supplémentaire.
 
@@ -70,9 +80,13 @@ Le port série apparaît sous la forme `COM3` (Windows), `/dev/cu.usbmodem…` (
 2. Cliquer sur **Téléverser** (flèche vers la droite).
 3. Une fois la copie terminée, la carte redémarre et la LED RGB clignote en vert.
 
+![Arduino IDE après le téléversement : le programme de clignotement dans l'éditeur, et dans la sortie la taille du croquis puis la copie du fichier .bin sur le disque STeaMi](/img/software/arduino/arduino-ide-05-televersement.png)
+
 ## 5. Ouvrir le moniteur série
 
-Les programmes affichent leurs messages avec `Serial.print()`. Pour les lire, ouvrir **Outils → Moniteur série** et choisir **115200 bauds**, la vitesse utilisée par tous les exemples STeaMi.
+Les programmes affichent leurs messages avec `Serial.print()`. Pour les lire, ouvrir **Outils → Moniteur série** et choisir **115200 baud** dans la liste en bas à droite : le moniteur s'ouvre à 9600 baud, alors que tous les exemples STeaMi utilisent 115200.
+
+![Moniteur série réglé sur 115200 baud, qui affiche Rouge, Vert et Bleu envoyés par le programme de la LED RGB](/img/software/arduino/arduino-ide-06-moniteur-serie.png)
 
 Le port série passe par le microcontrôleur d'interface (DAPLink), qui le relie à `Serial` côté programme.
 
