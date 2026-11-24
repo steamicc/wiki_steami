@@ -19,13 +19,14 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 | --------------------------------- | --------- | -------------------------------------------------- |
 | [**MicroPython**](./micropython/) | Complète  | 15 drivers, 52 exemples, framework de test         |
 | [**CODAL**](./codal/)             | Partielle | Runtime C++ avec support des principaux composants |
-| [**Arduino**](./arduino/)         | Minimale  | Support STM32duino de base, à développer           |
+| [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 9 drivers STeaMi         |
 
 ## Outils et éditeurs
 
 - [**mpremote**](./micropython/mpremote) — Outil en ligne de commande officiel MicroPython
 - [**Thonny**](./micropython/thonny) — Éditeur graphique avec REPL intégré
 - [**Vittascience**](./micropython/vittascience) — IDE en ligne avec programmation par blocs
+- [**Arduino IDE**](./arduino/arduino-ide) — Programmation en C++ avec l'environnement Arduino
 
 ## Firmware et infrastructure
 
@@ -35,6 +36,7 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 ## Ressources
 
 - [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython (15 drivers, 52 exemples)
+- [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) — Drivers Arduino
 - [DAPLink](https://github.com/steamicc/DAPLink) — Firmware du STM32F103 (branche `release_letssteam`)
 - [MicroPython](https://docs.micropython.org/en/latest/) — Documentation officielle MicroPython
 - [stm32python.gitlab.io](https://stm32python.gitlab.io/fr/) — Tutoriels STM32 + MicroPython
