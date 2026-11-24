@@ -11,16 +11,16 @@ Cette page donne un programme minimal pour chaque composant de la carte. Chaque 
 
 Avant de commencer :
 
-- installer les bibliothèques indiquées dans chaque section (voir [Bibliothèques STeaMi](./bibliotheques)) ;
+- installer la bibliothèque **STeaMi** depuis le gestionnaire de bibliothèques, et les bibliothèques tierces indiquées pour la V1c (voir [Bibliothèques STeaMi](./bibliotheques)) ;
 - garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : tous les programmes créent l'objet `internalI2C` et le passent au driver.
 
-Pour aller plus loin, chaque driver STeaMi fournit des exemples plus complets dans **Fichier → Exemples**.
+Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**.
 
 Les composants de la carte dépendent de sa release (voir [Révisions](/docs/hardware/revisions)). Les sections qui diffèrent sont présentées en onglets **V1a / V1b / V1c**.
 
 ## Mouvement : accéléromètre et gyroscope
 
-Composant ISM330DL, présent sur toutes les releases. Bibliothèque : dossier `ism330dl`.
+Composant ISM330DL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -59,7 +59,7 @@ Les méthodes de lecture de ce driver remplissent une variable passée en param�
 
 ## Boussole : magnétomètre
 
-Composant LIS2MDL, présent sur toutes les releases. Bibliothèque : dossier `lis2mdl`.
+Composant LIS2MDL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -88,11 +88,11 @@ void loop() {
 }
 ```
 
-Le cap n'est fiable qu'après une calibration et loin des objets métalliques. L'exemple **MagneticCalibration** du driver montre comment calibrer la boussole.
+Le cap n'est fiable qu'après une calibration et loin des objets métalliques. L'exemple **STeaMi → LIS2MDL → MagneticCalibration** montre comment calibrer la boussole.
 
 ## Distance : capteur de temps de vol
 
-Composant VL53L1X, présent sur toutes les releases. Bibliothèque : dossier `vl53l1x`.
+Composant VL53L1X, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -123,7 +123,7 @@ void loop() {
 
 ## D-PAD
 
-Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, présent sur toutes les releases. Bibliothèque : dossier `mcp23009e`.
+Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -154,11 +154,11 @@ void loop() {
 }
 ```
 
-Le driver fournit aussi des jeux prêts à téléverser : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
+La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
 
 ## Batterie
 
-Composant BQ27441, présent sur toutes les releases. Bibliothèque : dossier `bq27441`.
+Composant BQ27441, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -193,7 +193,7 @@ Sans batterie branchée (carte alimentée par l'USB seul), la jauge répond mais
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-Deux capteurs Würth : WSEN-PADS (pression) et WSEN-HIDS (humidité). Bibliothèques : dossiers `wsen-pads` et `wsen-hids`.
+Deux capteurs Würth : WSEN-PADS (pression) et WSEN-HIDS (humidité). Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -266,7 +266,7 @@ void loop() {
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-Composant APDS-9960. Bibliothèque : dossier `apds9960`.
+Composant APDS-9960. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
@@ -295,7 +295,7 @@ void loop() {
 }
 ```
 
-Les exemples du driver montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**).
+Les exemples **STeaMi → APDS9960** montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**).
 
 </Release>
 <Release releases="v1c">
@@ -310,7 +310,7 @@ La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a �
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-Écran OLED rond 128 × 128, 16 niveaux de gris (contrôleur SSD1327). Bibliothèque : dossier `ssd1327`.
+Écran OLED rond 128 × 128, 16 niveaux de gris (contrôleur SSD1327). Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <SSD1327.h>
@@ -367,7 +367,7 @@ Les fonctions de dessin (`fillScreen`, `drawLine`, `fillCircle`, `setCursor`, `p
 
 ## Bluetooth
 
-Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, à installer depuis le gestionnaire de bibliothèques. Le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib/tree/main/lib/ble/examples) contient des exemples propres à la STeaMi : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
+Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, proposée automatiquement à l'installation de STeaMi. Les exemples propres à la STeaMi sont dans **Fichier → Exemples → STeaMi → BLE** : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
 
 ## Composants non pris en charge
 

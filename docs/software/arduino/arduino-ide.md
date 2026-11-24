@@ -100,4 +100,4 @@ sudo usermod -aG dialout $USER
 ## Étapes suivantes
 
 - [Premiers programmes](./premiers-programmes) : LEDs, boutons et buzzer, sans bibliothèque.
-- [Bibliothèques STeaMi](./bibliotheques) : installer les drivers des capteurs.
+- [Bibliothèques STeaMi](./bibliotheques) : installer la bibliothèque STeaMi, qui contient les drivers des capteurs.
