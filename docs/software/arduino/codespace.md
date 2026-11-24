@@ -57,13 +57,13 @@ Le Codespace affiche VS Code dans le navigateur : l'explorateur de fichiers à g
 
 Toutes les actions de ce tutoriel se font avec ces commandes, tapées dans le terminal :
 
-| Commande                           | Rôle                                                           |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `steami-exemples [filtre]`         | liste les exemples des drivers, sous la forme `driver/Exemple` |
-| `steami-compiler [driver/Exemple]` | compile le programme du dossier `src/`, ou un exemple tel quel |
-| `steami-copier driver/Exemple`     | copie un exemple dans `src/` pour le modifier                  |
-| `steami-televerser`                | prépare l'envoi du programme compilé vers la carte             |
-| `steami-sauver ["message"]`        | sauvegarde le travail sur GitHub                               |
+| Commande                              | Rôle                                                              |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `steami-exemples [filtre]`            | liste les exemples des drivers, sous la forme `COMPOSANT/Exemple` |
+| `steami-compiler [COMPOSANT/Exemple]` | compile le programme du dossier `src/`, ou un exemple tel quel    |
+| `steami-copier COMPOSANT/Exemple`     | copie un exemple dans `src/` pour le modifier                     |
+| `steami-televerser`                   | prépare l'envoi du programme compilé vers la carte                |
+| `steami-sauver ["message"]`           | sauvegarde le travail sur GitHub                                  |
 
 Le terminal est un shell **zsh** (avec oh-my-zsh). L'historique des commandes est conservé : la flèche vers le haut rappelle les commandes précédentes, même après l'arrêt et la reprise du Codespace.
 
@@ -100,9 +100,11 @@ Une vingtaine de secondes plus tard, la compilation se termine par :
 ✅ LIS2MDL/BasicReader compilé : firmware.bin prêt (steami-televerser pour l'envoyer sur la carte)
 ```
 
-Sans argument, `steami-compiler` compile le programme de votre dossier `src/`. Au départ, c'est le programme du modèle : il fait clignoter la LED verte et écrit `Bonjour STeaMi !`, puis un compteur, sur la liaison série. La capture suivante montre cette compilation du programme du modèle : les lignes `Compiling`, la taille occupée, `[SUCCESS]`, puis le message final. Le dossier `.steami/` apparaît alors dans l'explorateur ; il contient `firmware.bin`, le programme prêt à être envoyé.
+La capture montre les deux commandes : la liste des exemples du magnétomètre, puis la compilation, avec la bibliothèque `STeaMi @ 0.25.1` dans le graphe des dépendances, la taille occupée, `[SUCCESS]` et le message final. Le dossier `.steami/` apparaît alors dans l'explorateur ; il contient `firmware.bin`, le programme prêt à être envoyé.
 
-![Terminal après steami-compiler : lignes Compiling et Linking, utilisation de la mémoire RAM et Flash, ligne [SUCCESS] et message « src compilé : firmware.bin prêt »](/img/software/arduino/codespace-07-compilation.png)
+![Terminal zsh : steami-exemples lis2mdl liste LIS2MDL/BasicReader, DigitalCompass, MagneticCalibration et MetalDetector, puis steami-compiler LIS2MDL/BasicReader affiche la dépendance STeaMi @ 0.25.1, la ligne [SUCCESS] et le message « LIS2MDL/BasicReader compilé : firmware.bin prêt »](/img/software/arduino/codespace-07-compilation.png)
+
+Sans argument, `steami-compiler` compile le programme de votre dossier `src/`. Au départ, c'est le programme du modèle : il fait clignoter la LED verte et écrit `Bonjour STeaMi !`, puis un compteur, sur la liaison série.
 
 ## 5. Envoyer le programme sur la carte
 
@@ -143,7 +145,10 @@ Cette méthode envoie le programme directement depuis le navigateur par USB (Web
 
    ![Onglet Ports de VS Code : la ligne du port 8080 avec le processus steami_serveur.py et l'icône « Ouvrir dans un navigateur »](/img/software/arduino/codespace-06-onglet-ports.png)
 
-2. La page Téléverser doit s'ouvrir **dans un onglet de Chrome ou d'Edge**.
+2. La page Téléverser doit s'ouvrir **dans un onglet de Chrome ou d'Edge**. Son bandeau indique le dernier programme compilé, sa taille et l'heure de compilation.
+
+   ![Page Téléverser avant la connexion : bandeau « Programme prêt : LIS2MDL/BasicReader, 31 Ko », boutons Connecter la carte, Téléverser (grisé) et Effacer la console, état « Carte non connectée » et console série vide](/img/software/arduino/codespace-14-page-prete.png)
+
 3. Brancher la carte en USB, puis cliquer sur **Connecter la carte**. Chrome ouvre une fenêtre : choisir **STeaMi CMSIS-DAP** et cliquer sur **Connexion**.
 
    ![Fenêtre de Chrome « souhaite se connecter » avec le périphérique STeaMi CMSIS-DAP sélectionné et le bouton Connexion, devant la page « Téléverser sur la STeaMi »](/img/software/arduino/codespace-08-connecter-carte.png)
@@ -152,7 +157,7 @@ Cette méthode envoie le programme directement depuis le navigateur par USB (Web
 
    ![Page Téléverser pendant l'envoi : état « Carte connectée », barre de progression à environ 15 % et message « Téléversement en cours… »](/img/software/arduino/codespace-09-televersement-en-cours.png)
 
-5. Quand le message « Programme téléversé. » apparaît, la carte redémarre toute seule et exécute le nouveau programme. La **console série** affiche ce que le programme écrit avec `Serial.print()` : ici `Bonjour STeaMi !`, puis un compteur.
+5. Quand le message « Programme téléversé. » apparaît, la carte redémarre toute seule et exécute le nouveau programme. La **console série** affiche ce que le programme écrit avec `Serial.print()`. Avec `LIS2MDL/BasicReader`, ce sont les mesures du magnétomètre ; sur la capture ci-dessous, c'est le programme du modèle (`steami-compiler` sans argument), qui écrit `Bonjour STeaMi !`, puis un compteur.
 
    ![Page Téléverser terminée : barre de progression pleine, message « Programme téléversé. » et console série affichant « Bonjour STeaMi ! » puis 0 et 1](/img/software/arduino/codespace-10-programme-televerse.png)
 
