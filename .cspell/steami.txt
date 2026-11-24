@@ -116,6 +116,14 @@ Prettier
 ESLint
 lychee
 venv
+usbmodem
+dialout
+wsen
+hids
+apds
+dpad
+Rssi
+oled
 
 # STeaMi specific
 STeaMi
