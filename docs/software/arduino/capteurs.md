@@ -1,6 +1,6 @@
 ---
 title: Capteurs et écran
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';

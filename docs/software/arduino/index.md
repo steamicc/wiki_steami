@@ -19,6 +19,7 @@ Le support Arduino couvre la plupart des composants des V1a et V1b. Sur la V1c, 
 ## Par où commencer
 
 1. [**Installer l'Arduino IDE**](./arduino-ide) : ajouter la carte STeaMi et téléverser un premier programme.
+   - Sans pouvoir installer de logiciel : [**Programmer sans installation**](./codespace), depuis un navigateur, avec un GitHub Codespace.
 2. [**Premiers programmes**](./premiers-programmes) : LED RGB, boutons et buzzer, sans bibliothèque.
 3. [**Bibliothèques STeaMi**](./bibliotheques) : installer les drivers et comprendre le bus I²C interne.
 4. [**Capteurs et écran**](./capteurs) : un programme minimal pour chaque composant.
