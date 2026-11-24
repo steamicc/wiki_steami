@@ -212,6 +212,42 @@ Entre ces lignes, `git` affiche ses propres messages. Sans message, la sauvegard
 - Avec la **page Téléverser**, la console série est intégrée : elle affiche tout ce que le programme écrit avec `Serial.print()` (la vitesse est de 115200 bauds, comme dans tous les exemples STeaMi).
 - Avec la méthode du **lecteur**, la copie du fichier n'ouvre aucune console : pour lire la sortie série, il faut la page Téléverser (Chrome ou Edge).
 
+## Tuteur IA
+
+Le Codespace contient un tuteur IA : **GitHub Copilot Chat**, dans le panneau de discussion de VS Code. Il est configuré pour aider à comprendre, pas pour faire le travail à la place de l'élève.
+
+### Ce que fait le tuteur
+
+- **Il explique** une notion avec une image concrète, pose des questions pour faire réfléchir, et donne l'aide par étapes : un indice avant un exemple, et jamais le programme complet.
+- **Il aide à lire une erreur** : il demande la **première** erreur affichée par `steami-compiler` (les suivantes viennent souvent de la première), l'explique en français simple, puis laisse l'élève corriger. Pour un programme qui compile mais se comporte mal, il propose d'ajouter des `Serial.println` et de lire la console série.
+- **Il propose des quiz** : deux skills sont fournis, « approfondir une notion » (explication détaillée) et « quiz thématique » (questions corrigées une à une, avec un score).
+- **Il ne modifie aucun fichier** et ne lance pas `steami-sauver` ni `steami-copier` : une garde (`.agents/garde-tuteur.py`) refuse ces actions. Il peut lire les fichiers et lancer `steami-compiler`, `steami-exemples` et `steami-televerser`. C'est l'élève qui écrit son code dans `src/` et qui sauvegarde.
+- **La complétion automatique est désactivée exprès** : seul le chat est disponible, pour que l'élève écrive lui-même son code.
+
+Exemples de questions à poser :
+
+- « C'est quoi `loop()` ? »
+- « Voici ma première erreur de compilation : peux-tu m'expliquer ce qu'elle veut dire ? »
+- « Fais-moi un quiz sur les boucles. »
+
+### Pour les enseignants
+
+Le tuteur se règle avec des fichiers du dépôt modèle, créé à partir de [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) et distribué avec Classroom 50 (voir [Conseils pour la classe](#conseils-pour-la-classe)).
+
+- **L'énoncé du TP** se met dans le `README.md` du dépôt modèle.
+- **Le contexte du TP** (thème, notions déjà vues, exercices dans l'ordre, ce que le tuteur ne doit pas donner) se complète dans la section « Contexte du TP » de `AGENTS.md`. Il ne faut **pas** y écrire les solutions : élèves et tuteur lisent ce fichier.
+- **Les instructions du tuteur** sont dans `AGENTS.md` et `.github/copilot-instructions.md`. Le bloc de tutorat est commun aux deux fichiers et doit rester **identique** (un test du modèle le vérifie).
+
+### Accéder à Copilot
+
+**Copilot Free** suffit pour commencer, avec un nombre de requêtes limité par mois. Avec le [Student Developer Pack](#conseils-pour-la-classe) validé, l'élève peut en général obtenir **Copilot Pro** gratuitement, mais l'avantage **ne s'active pas tout seul** :
+
+1. Attendre l'e-mail de GitHub Education, qui peut arriver quelques jours après la validation du Pack.
+2. Réclamer l'avantage Copilot depuis la page des avantages GitHub Education du compte.
+3. Vérifier dans **Settings → Copilot** que l'offre affichée n'est plus « Free ».
+
+Si l'offre reste « Free » après environ 72 heures, se déconnecter puis se reconnecter à GitHub. Si cela ne change rien, [contacter le support GitHub Education](https://support.github.com/contact/education). Ces étapes changent parfois : en cas de doute, suivre les indications affichées par GitHub.
+
 ## Limites
 
 - **Pas de débogage** pas à pas : le Codespace compile et téléverse, il ne pilote pas de sonde. Pour déboguer, voir la page [PlatformIO](./platformio) sur un poste installé.
@@ -243,7 +279,7 @@ Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que l
 - **Vérifier le réseau** : l'établissement doit autoriser l'accès à `*.github.dev` (le Codespace et la page Téléverser en dépendent), ainsi qu'à `github.com`. À tester avant le cours.
 - **Arrêter le Codespace** en fin de séance : indicateur **Codespaces** en bas à gauche, puis **Stop Current Codespace**. Un Codespace allumé consomme le quota.
 - **Sauvegarder** avec `steami-sauver` avant d'arrêter.
-- **Faire demander le Student Developer Pack** : les élèves inscrits dans un établissement peuvent faire vérifier leur statut auprès de [GitHub Education](https://education.github.com/pack). Le compte d'un élève vérifié dispose alors de **180 heures-cœur de Codespaces par mois** au lieu de 120, l'équivalent d'un compte GitHub Pro. La vérification demande un justificatif de scolarité et peut prendre quelques jours : la lancer bien avant la première séance.
+- **Faire demander le Student Developer Pack** : les élèves inscrits dans un établissement peuvent faire vérifier leur statut auprès de [GitHub Education](https://education.github.com/pack). Le compte d'un élève vérifié dispose alors de **180 heures-cœur de Codespaces par mois** au lieu de 120, l'équivalent d'un compte GitHub Pro. La vérification demande un justificatif de scolarité et peut prendre quelques jours : la lancer bien avant la première séance. Une fois le Pack validé, l'élève peut aussi activer Copilot Pro : voir [Accéder à Copilot](#accéder-à-copilot).
 - **Préparer un TP avec Classroom 50** : partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) pour créer le dépôt modèle du TP, avec l'énoncé dans le `README.md` et le programme de départ dans `src/`. Classroom 50 crée ensuite le dépôt de chaque élève à partir de ce modèle. L'image du Codespace est publiée et commune à toutes les copies, donc le Codespace de chaque élève démarre aussi vite que celui du modèle, sans prebuild. Dans l'organisation de classe (**Settings → Codespaces**), régler **Codespace ownership** sur **User ownership** : chaque Codespace est alors décompté du quota personnel de l'élève, et un budget Codespaces de l'organisation à 0 $ ne bloque pas leur création.
 
 ## Aller plus loin
