@@ -69,27 +69,35 @@ Le terminal est un shell **zsh** (avec oh-my-zsh). L'historique des commandes es
 
 ## 4. Lister et compiler un exemple
 
-Les exemples viennent des drivers de la bibliothèque [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib). Pour ne voir que ceux du magnétomètre :
+:::tip Même bibliothèque que l'Arduino IDE
+Le Codespace utilise **la même bibliothèque STeaMi et les mêmes exemples que l'Arduino IDE** (voir [Bibliothèques STeaMi](./bibliotheques)). Un programme écrit dans le Codespace se compile donc tel quel dans l'IDE, et inversement.
+:::
+
+Les exemples viennent des drivers du paquet Arduino `steamicc/arduino-steami` ([arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)). Ce sont les mêmes que dans le menu **Fichier → Exemples → STeaMi** de l'Arduino IDE, avec les mêmes noms `COMPOSANT/Exemple`. Pour ne voir que ceux du magnétomètre :
 
 ```bash
 steami-exemples lis2mdl
 ```
 
 ```text
-lis2mdl/BasicReader
-…
+LIS2MDL/BasicReader
+LIS2MDL/DigitalCompass
+LIS2MDL/MagneticCalibration
+LIS2MDL/MetalDetector
 ```
 
-Pour compiler l'exemple `lis2mdl/BasicReader` tel quel, sans toucher à vos fichiers :
+Le filtre ignore la casse : `lis2mdl` et `LIS2MDL` donnent le même résultat. Tous ces exemples compilent, y compris `LIS2MDL/DigitalCompass`, la boussole numérique.
+
+Pour compiler l'exemple `LIS2MDL/BasicReader` tel quel, sans toucher à vos fichiers :
 
 ```bash
-steami-compiler lis2mdl/BasicReader
+steami-compiler LIS2MDL/BasicReader
 ```
 
 Une vingtaine de secondes plus tard, la compilation se termine par :
 
 ```text
-✅ lis2mdl/BasicReader compilé : firmware.bin prêt (steami-televerser pour l'envoyer sur la carte)
+✅ LIS2MDL/BasicReader compilé : firmware.bin prêt (steami-televerser pour l'envoyer sur la carte)
 ```
 
 Sans argument, `steami-compiler` compile le programme de votre dossier `src/`. Au départ, c'est le programme du modèle : il fait clignoter la LED verte et écrit `Bonjour STeaMi !`, puis un compteur, sur la liaison série. La capture suivante montre cette compilation du programme du modèle : les lignes `Compiling`, la taille occupée, `[SUCCESS]`, puis le message final. Le dossier `.steami/` apparaît alors dans l'explorateur ; il contient `firmware.bin`, le programme prêt à être envoyé.
@@ -171,12 +179,12 @@ Cette méthode n'affiche pas de console série (voir [Lire la sortie série](#li
 Pour partir d'un exemple et le changer, le copier d'abord dans `src/` :
 
 ```bash
-steami-copier lis2mdl/BasicReader
+steami-copier LIS2MDL/BasicReader
 ```
 
 ```text
 → git status --porcelain -- src
-✅ lis2mdl/BasicReader copié dans src/
+✅ LIS2MDL/BasicReader copié dans src/
 ```
 
 Ouvrir ensuite les fichiers de `src/` dans l'explorateur, les modifier, puis compiler le dossier `src/` (sans argument) et téléverser comme précédemment :
@@ -281,6 +289,7 @@ Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que l
 - **Sauvegarder** avec `steami-sauver` avant d'arrêter.
 - **Faire demander le Student Developer Pack** : les élèves inscrits dans un établissement peuvent faire vérifier leur statut auprès de [GitHub Education](https://education.github.com/pack). Le compte d'un élève vérifié dispose alors de **180 heures-cœur de Codespaces par mois** au lieu de 120, l'équivalent d'un compte GitHub Pro. La vérification demande un justificatif de scolarité et peut prendre quelques jours : la lancer bien avant la première séance. Une fois le Pack validé, l'élève peut aussi activer Copilot Pro : voir [Accéder à Copilot](#accéder-à-copilot).
 - **Préparer un TP avec Classroom 50** : partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) pour créer le dépôt modèle du TP, avec l'énoncé dans le `README.md` et le programme de départ dans `src/`. Classroom 50 crée ensuite le dépôt de chaque élève à partir de ce modèle. L'image du Codespace est publiée et commune à toutes les copies, donc le Codespace de chaque élève démarre aussi vite que celui du modèle, sans prebuild. Dans l'organisation de classe (**Settings → Codespaces**), régler **Codespace ownership** sur **User ownership** : chaque Codespace est alors décompté du quota personnel de l'élève, et un budget Codespaces de l'organisation à 0 $ ne bloque pas leur création.
+- **Mises à jour des drivers** : quand une nouvelle version des drivers STeaMi sort, l'image du Codespace et le modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) sont mis à jour par des pull requests automatiques. Les dépôts d'élèves déjà créés gardent la version de leur création : les drivers ne changent pas en cours de TP.
 
 ## Aller plus loin
 
