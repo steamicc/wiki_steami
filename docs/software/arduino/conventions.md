@@ -9,10 +9,10 @@ Les drivers de [arduino-steami-lib](https://github.com/steamicc/arduino-steami-l
 
 Chaque driver est une classe `Steami<Composant>` déclarée dans l'en-tête du même nom : `SteamiWsenHids` dans `<SteamiWsenHids.h>`, `SteamiBME280` dans `<SteamiBME280.h>`… Le préfixe `Steami` évite les conflits avec les bibliothèques du gestionnaire qui portent le nom du composant (BME280, VL53L1X…).
 
-Les exemples supposent un bus I²C interne déjà créé (voir [Le bus I²C interne](./bibliotheques#le-bus-ic-interne)) :
+Les exemples passent aux drivers le bus I²C interne de la carte, `Steami.wire()` (voir [Le bus I²C interne](./bibliotheques#le-bus-ic-interne)) :
 
 ```cpp
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
+#include <SteamiBoard.h>  // déclare Steami.wire()
 ```
 
 ## Construction et initialisation
@@ -20,24 +20,23 @@ TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
 Les capteurs I²C se construisent avec le bus, puis l'adresse, qui est optionnelle : la valeur par défaut correspond au câblage de la carte.
 
 ```cpp
-SteamiWsenHids sensor(internalI2C);
+SteamiWsenHids sensor(Steami.wire());
 ```
 
 Exceptions :
 
-| Driver            | Construction                                                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `SteamiMCP23009E` | `SteamiMCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);` (broches de reset et d'interruption) |
-| `SteamiBQ27441`   | `SteamiBQ27441 batterie(internalI2C);` accepte en plus la capacité de la batterie en mAh                                 |
-| `SteamiSSD1327`   | `SteamiSSD1327 oled;` : écran SPI des V1a et V1b, aucun paramètre                                                        |
-| `SteamiGC9A01`    | `SteamiGC9A01 affichage;` : écran SPI de la V1c, aucun paramètre                                                         |
+| Driver            | Construction                                                                                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `SteamiMCP23009E` | `SteamiMCP23009E dpad(Steami.wire(), RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);` (broches de reset et d'interruption) |
+| `SteamiBQ27441`   | `SteamiBQ27441 batterie(Steami.wire());` accepte en plus la capacité de la batterie en mAh                                 |
+| `SteamiSSD1327`   | `SteamiSSD1327 oled;` : écran SPI des V1a et V1b, aucun paramètre                                                          |
+| `SteamiGC9A01`    | `SteamiGC9A01 affichage;` : écran SPI de la V1c, aucun paramètre                                                           |
 
-`begin()` initialise le composant et renvoie `false` s'il ne répond pas (pour l'écran de la V1c, si la mémoire manque pour l'image). Le bus doit être démarré avant :
+`begin()` initialise le composant et renvoie `false` s'il ne répond pas (pour l'écran de la V1c, si la mémoire manque pour l'image). `Steami.wire()` démarre le bus à son premier appel : `setup()` n'appelle que le `begin()` du driver.
 
 ```cpp
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!sensor.begin()) {
     Serial.println("Capteur non détecté");
     while (true) {}
