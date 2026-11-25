@@ -43,7 +43,7 @@ Pour aller plus loin :
 | Port série USB               | DAPLink   | Arduino standard (`Serial`)       |         —          |
 | Accéléromètre et gyroscope   | ISM330DL  | bibliothèque STeaMi               |         3          |
 | Magnétomètre                 | LIS2MDL   | bibliothèque STeaMi               |         4          |
-| Distance                     | VL53L1X   | bibliothèque STeaMi               |    0 (à venir)     |
+| Distance                     | VL53L1X   | bibliothèque STeaMi               |         5          |
 | D-PAD                        | MCP23009E | bibliothèque STeaMi               |         5          |
 | Jauge de batterie            | BQ27441   | bibliothèque STeaMi               |         2          |
 | Bluetooth Low Energy         | STM32WB55 | bibliothèque STM32duinoBLE        |         6          |

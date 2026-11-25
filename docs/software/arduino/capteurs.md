@@ -51,9 +51,11 @@ void loop() {
 }
 ```
 
-Carte posée à plat, l'axe z mesure environ ±1 g (la pesanteur) et les axes x et y environ 0 g. `imu.gyroscopeDps(v)` donne de la même façon la vitesse de rotation en degrés par seconde.
+Carte posée à plat, écran vers le haut, l'axe z mesure environ −1 g (la pesanteur) et les axes x et y environ 0 g. `imu.gyroscopeDps(v)` donne de la même façon la vitesse de rotation en degrés par seconde.
 
 Les méthodes de lecture de ce driver remplissent une variable passée en paramètre et renvoient `true` si la lecture a réussi.
+
+Les classes `SteamiAccelerometer` et `SteamiGyroscope`, qui demandent la version 0.34.0 de la bibliothèque, lisent les mêmes mesures sans qu'il faille créer le driver. `SteamiAccelerometer` applique en plus la calibration `ca` de la zone de configuration et sait détecter une secousse (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
 
 ## Boussole : magnétomètre
 
@@ -76,7 +78,7 @@ void setup() {
 void loop() {
   float cap = mag.headingFlatOnly();  // carte posée à plat
   Serial.print("Cap : ");
-  Serial.print(cap);
+  Serial.print(lroundf(cap) % 360);  // arrondi au degré, jamais 360
   Serial.print(" deg (");
   Serial.print(mag.directionLabel(cap));
   Serial.println(")");
@@ -84,7 +86,11 @@ void loop() {
 }
 ```
 
-Le cap n'est fiable qu'après une calibration et loin des objets métalliques. L'exemple **STeaMi → LIS2MDL → MagneticCalibration** montre comment calibrer la boussole.
+Depuis la version 0.34.0 de la bibliothèque, le cap vaut 0° quand le haut de l'écran (le côté opposé au connecteur USB) pointe vers le nord, et augmente dans le sens des aiguilles d'une montre : 90° à l'est, 180° au sud, 270° à l'ouest, jamais 360°. `directionLabel()` renvoie l'une des huit directions (`N`, `NE`, `E`…), chacune centrée sur sa valeur : `N` va de 337,5° à 22,5°. Avec une version plus ancienne, le cap et les directions étaient comptés autrement : un programme qui comparait le cap à des valeurs fixes doit être revérifié.
+
+Le cap n'est fiable qu'après une calibration et loin des objets métalliques : sans calibration, le capteur mesure aussi le champ magnétique de la carte elle-même. L'exemple **STeaMi → LIS2MDL → MagneticCalibration** montre comment calibrer la boussole. `headingWithTiltCompensation()`, qui corrige l'inclinaison avec l'accéléromètre, ne suit pas encore cette convention : même carte à plat, son 0° et son sens de rotation peuvent différer de ceux de `headingFlatOnly()`. Cette fonction n'a pas été vérifiée sur une carte. Utiliser `headingFlatOnly()` et tenir la carte à plat.
+
+La classe `SteamiCompass` (version 0.34.0 de la bibliothèque) calcule le même cap et applique d'elle-même une calibration `cm` enregistrée dans la zone de configuration du DAPLink. L'exemple **STeaMi → STEAMI_BOARD → Compass** lance aussi une calibration de 12 secondes par un appui sur MENU, avec `calibrate(12)` ; cette calibration reste en mémoire vive, n'est pas enregistrée et se perd au redémarrage. `SteamiMagnetometer` donne le champ en µT (voir [Boussole](./carte#boussole)).
 
 ## Distance : capteur de temps de vol
 
@@ -114,6 +120,8 @@ void loop() {
   delay(50);
 }
 ```
+
+Les exemples **STeaMi → VL53L1X** montrent aussi un radar de recul (**ParkingSensor**), une alarme de proximité (**ProximityAlarm**), un compteur de passages (**ObjectCounter**) et un geste de la main devant le capteur qui allume ou éteint la LED (**GestureDetection**).
 
 ## D-PAD
 
@@ -147,6 +155,8 @@ void loop() {
 ```
 
 La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
+
+La classe `SteamiButtons` (version 0.34.0 de la bibliothèque) lit les quatre flèches et les boutons A, B et MENU, avec un anti-rebond (les rebonds du contact sont ignorés), et compte chaque appui une seule fois (voir [Boutons](./carte#boutons)).
 
 ## Batterie
 
@@ -275,21 +285,23 @@ void setup() {
 }
 
 void loop() {
-  uint16_t lux;
-  if (lumiere.ambientLight(lux)) {
-    Serial.print("Lumière ambiante : ");
-    Serial.println(lux);
+  uint16_t clair;
+  if (lumiere.ambientLight(clair)) {
+    Serial.print("Lumière ambiante (nombre brut) : ");
+    Serial.println(clair);
   }
   delay(500);
 }
 ```
 
-Les exemples **STeaMi → APDS9960** montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**).
+La valeur est un nombre brut du capteur, sans unité, qui augmente avec la lumière (pas des lux).
+
+Les exemples **STeaMi → APDS9960** montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**). Les classes `SteamiLight`, `SteamiColor` et `SteamiGesture`, qui demandent la version 0.34.0 de la bibliothèque, lisent la lumière, la couleur et les gestes sans qu'il faille créer le driver (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
 
 </Release>
 <Release releases="v1c">
 
-La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a été retiré.
+La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a été retiré. Sur une V1c, `SteamiLight`, `SteamiColor` et `SteamiGesture` affichent le message `E20` (voir [Les messages](./carte#les-messages)).
 
 </Release>
 </ReleaseTabs>
