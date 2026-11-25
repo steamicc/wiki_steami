@@ -147,7 +147,7 @@ Cette méthode envoie le programme directement depuis le navigateur par USB (Web
 
 2. La page Téléverser doit s'ouvrir **dans un onglet de Chrome ou d'Edge**. Son bandeau indique le dernier programme compilé, sa taille et l'heure de compilation.
 
-   ![Page Téléverser avant la connexion : bandeau « Programme prêt : LIS2MDL/BasicReader, 31 Ko », boutons Connecter la carte, Téléverser (grisé) et Effacer la console, état « Carte non connectée » et console série vide](/img/software/arduino/codespace-14-page-prete.png)
+   ![Page Téléverser avant la connexion : bandeau « Programme prêt : LIS2MDL/BasicReader, 31 Ko », boutons Connecter la carte, Téléverser et Redémarrer la carte (grisés) et Effacer la console, état « Carte non connectée » et console série vide](/img/software/arduino/codespace-14-page-prete.png)
 
 3. Brancher la carte en USB, puis cliquer sur **Connecter la carte**. Chrome ouvre une fenêtre : choisir **STeaMi CMSIS-DAP** et cliquer sur **Connexion**.
 
@@ -160,6 +160,8 @@ Cette méthode envoie le programme directement depuis le navigateur par USB (Web
 5. Quand le message « Programme téléversé. » apparaît, la carte redémarre toute seule et exécute le nouveau programme. La **console série** affiche ce que le programme écrit avec `Serial.print()`. Avec `LIS2MDL/BasicReader`, ce sont les mesures du magnétomètre ; sur la capture ci-dessous, c'est le programme du modèle (`steami-compiler` sans argument), qui écrit `Bonjour STeaMi !`, puis un compteur.
 
    ![Page Téléverser terminée : barre de progression pleine, message « Programme téléversé. » et console série affichant « Bonjour STeaMi ! » puis 0 et 1](/img/software/arduino/codespace-10-programme-televerse.png)
+
+6. Pour relancer le programme depuis le début sans débrancher la carte, par exemple pour revoir ses premières lignes dans la console, cliquer sur **Redémarrer la carte**. Ce bouton est apparu avec la version 2026.11.7 de l'image : il ne figure pas encore sur les captures de la carte connectée ci-dessus. Si la page répond que le DAPLink est trop ancien, voir [le dépannage](#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
 ### Autre méthode : glisser le fichier sur le lecteur STEAMI
 
@@ -284,7 +286,15 @@ Le Codespace est probablement ouvert sur le modèle `steamicc/arduino-steami-sta
 
 ### La carte n'est pas proposée dans la fenêtre de Chrome
 
-Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que la carte est bien branchée. Si le problème persiste, utiliser la méthode du lecteur. Pour un redémarrage de la carte qui ne se fait pas, voir [le problème connu du DAPLink](https://github.com/steamicc/DAPLink/issues/10).
+Vérifier le câble (beaucoup de câbles ne transportent que la charge) et que la carte est bien branchée. Si le problème persiste, utiliser la méthode du lecteur.
+
+### Le bouton Redémarrer la carte ne fonctionne pas
+
+La page affiche « Cette carte ne sait pas redémarrer depuis la page : son DAPLink est trop ancien. » Le redémarrage depuis la page demande un DAPLink de la [release 2026-11-25](https://github.com/steamicc/DAPLink/releases/tag/2026-11-25) ou plus récent. En attendant, débrancher puis rebrancher la carte relance le programme. Pour mettre à jour le DAPLink :
+
+1. Télécharger [stm32f103xb_steami32_if_crc.bin](https://github.com/steamicc/DAPLink/releases/download/2026-11-25/stm32f103xb_steami32_if_crc.bin).
+2. Brancher la carte, puis créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**). La carte redémarre et un lecteur **MAINTENANCE** apparaît à la place.
+3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 
 ## Conseils pour la classe
 
