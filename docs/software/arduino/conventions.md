@@ -7,6 +7,8 @@ sidebar_position: 6
 
 Les drivers de [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) partagent des conventions de nommage, reprises de la [bibliothèque MicroPython](../micropython/conventions) pour faciliter le passage d'un langage à l'autre. Elles ne sont pas encore appliquées de façon uniforme : cette page indique, pour chaque convention, les drivers qui la suivent.
 
+Chaque driver est une classe `Steami<Composant>` déclarée dans l'en-tête du même nom : `SteamiWsenHids` dans `<SteamiWsenHids.h>`, `SteamiBME280` dans `<SteamiBME280.h>`… Le préfixe `Steami` évite les conflits avec les bibliothèques du gestionnaire qui portent le nom du composant (BME280, VL53L1X…).
+
 Les exemples supposent un bus I²C interne déjà créé (voir [Le bus I²C interne](./bibliotheques#le-bus-ic-interne)) :
 
 ```cpp
@@ -18,18 +20,19 @@ TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
 Les capteurs I²C se construisent avec le bus, puis l'adresse, qui est optionnelle : la valeur par défaut correspond au câblage de la carte.
 
 ```cpp
-WsenHids sensor(internalI2C);
+SteamiWsenHids sensor(internalI2C);
 ```
 
 Exceptions :
 
-| Driver                   | Construction                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `MCP23009E`              | `MCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);` (broches de reset et d'interruption) |
-| `BQ27441`                | `BQ27441 batterie(internalI2C);` accepte en plus la capacité de la batterie en mAh                                 |
-| `WS_OLED_128X128_STEAMI` | `WS_OLED_128X128_STEAMI oled;` : écran SPI, aucun paramètre                                                        |
+| Driver            | Construction                                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `SteamiMCP23009E` | `SteamiMCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);` (broches de reset et d'interruption) |
+| `SteamiBQ27441`   | `SteamiBQ27441 batterie(internalI2C);` accepte en plus la capacité de la batterie en mAh                                 |
+| `SteamiSSD1327`   | `SteamiSSD1327 oled;` : écran SPI des V1a et V1b, aucun paramètre                                                        |
+| `SteamiGC9A01`    | `SteamiGC9A01 affichage;` : écran SPI de la V1c, aucun paramètre                                                         |
 
-`begin()` initialise le composant et renvoie `false` s'il ne répond pas. Le bus doit être démarré avant :
+`begin()` initialise le composant et renvoie `false` s'il ne répond pas (pour l'écran de la V1c, si la mémoire manque pour l'image). Le bus doit être démarré avant :
 
 ```cpp
 void setup() {
@@ -44,7 +47,7 @@ void setup() {
 
 ## Identification
 
-`deviceId()` lit l'identifiant matériel du composant, utile pour le diagnostic. Sa taille dépend du composant : `uint8_t` pour la plupart, `uint16_t` pour `BQ27441` et `VL53L1X`. Avec `auto`, le type n'a pas à être connu :
+`deviceId()` lit l'identifiant matériel du composant, utile pour le diagnostic. Sa taille dépend du composant : `uint8_t` pour la plupart, `uint16_t` pour `SteamiBQ27441` et `SteamiVL53L1X`. Avec `auto`, le type n'a pas à être connu :
 
 ```cpp
 auto id = sensor.deviceId();
@@ -52,7 +55,7 @@ Serial.print("Identifiant : 0x");
 Serial.println(id, HEX);
 ```
 
-`MCP23009E` et l'écran SSD1327 n'ont pas de `deviceId()`.
+`SteamiMCP23009E` et les écrans (`SteamiSSD1327`, `SteamiGC9A01`) n'ont pas de `deviceId()`.
 
 ## Alimentation
 
@@ -78,10 +81,10 @@ Le nom de la méthode est celui de la grandeur. Quand l'unité n'est pas l'unit�
 
 Selon le driver, une mesure est **renvoyée** par la méthode, ou **écrite dans une variable** passée en paramètre ; la méthode renvoie alors `true` si la lecture a réussi.
 
-| Style                        | Exemple                                                | Drivers                                                  |
-| ---------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
-| valeur renvoyée              | `float t = sensor.temperature();`                      | `WsenHids`, `WSEN_PADS`, `VL53L1X`, `BQ27441`, `LIS2MDL` |
-| variable passée en paramètre | `ISM330DL::Vector3 a; if (imu.accelerationG(a)) { … }` | `ISM330DL`, `APDS9960`                                   |
+| Style                        | Exemple                                                      | Drivers                                                                                               |
+| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| valeur renvoyée              | `float t = sensor.temperature();`                            | `SteamiWsenHids`, `SteamiWsenPads`, `SteamiBME280`, `SteamiVL53L1X`, `SteamiBQ27441`, `SteamiLIS2MDL` |
+| variable passée en paramètre | `SteamiISM330DL::Vector3 a; if (imu.accelerationG(a)) { … }` | `SteamiISM330DL`, `SteamiAPDS9960`                                                                    |
 
 ### Lecture complète
 
@@ -93,11 +96,13 @@ Serial.println(data.temperature);
 Serial.println(data.humidity);
 ```
 
-Disponible sur `WsenHids` (`temperature`, `humidity`) et `WSEN_PADS` (`pressure`, `temperature`). Sur `VL53L1X`, `read()` renvoie simplement la distance en millimètres.
+Disponible sur `SteamiWsenHids` (`temperature`, `humidity`), `SteamiWsenPads` (`pressure`, `temperature`) et `SteamiBME280` (`temperature`, `humidity`, `pressure`). Sur `SteamiVL53L1X`, `read()` renvoie simplement la distance en millimètres.
 
 ## Disponibilité des données
 
 `dataReady()` indique qu'une nouvelle mesure est prête. Tous les capteurs le fournissent. Certains précisent la grandeur : `temperatureReady()`, `humidityReady()`, `pressureReady()`, `accelReady()`, `gyroReady()`.
+
+Le BME280 fait exception : il ne signale pas les nouvelles mesures. Sur `SteamiBME280`, `dataReady()` indique seulement qu'aucune mesure n'est en cours (après `triggerOneShot()`, que cette mesure est terminée), et `read()` n'en a pas besoin : capteur en veille, il lance une mesure et en attend le résultat ; en mesure continue, il renvoie la dernière mesure.
 
 ```cpp
 if (sensor.dataReady()) {
@@ -115,7 +120,7 @@ Les capteurs d'environnement et le magnétomètre ont deux modes :
 | `triggerOneShot()` | lance une mesure unique sans attendre le résultat      |
 | `readOneShot()`    | lance une mesure unique, attend et renvoie le résultat |
 
-Drivers concernés : `WsenHids`, `WSEN_PADS` et `LIS2MDL`. Le paramètre de `setContinuous()` est une constante de fréquence propre au driver (par exemple `WSEN_HIDS_ODR_1_HZ`), sauf pour `LIS2MDL` qui attend une fréquence en hertz.
+Drivers concernés : `SteamiWsenHids`, `SteamiWsenPads`, `SteamiBME280` et `SteamiLIS2MDL`. Le paramètre de `setContinuous()` est une constante propre au driver (par exemple `WSEN_HIDS_ODR_1_HZ`, ou pour le BME280 l'attente entre deux mesures, comme `BME280_STANDBY_1000_MS`), sauf pour `SteamiLIS2MDL` qui attend une fréquence en hertz.
 
 Le capteur de distance utilise ses propres méthodes : `startRanging()` et `stopRanging()`.
 
@@ -129,18 +134,20 @@ sensor.calibrateTemperature(20.0f, 20.8f,        // référence, mesure (point b
                             40.0f, 41.3f);       // référence, mesure (point haut)
 ```
 
-Drivers concernés : `WsenHids`, `WSEN_PADS`, `ISM330DL` et `LIS2MDL` (où le décalage s'appelle `setTempOffset()`). La correction s'applique après la calibration d'usine.
+Drivers concernés : `SteamiWsenHids`, `SteamiWsenPads`, `SteamiBME280`, `SteamiISM330DL` et `SteamiLIS2MDL` (où le décalage s'appelle `setTempOffset()`). La correction s'applique après la calibration d'usine.
 
 ## Récapitulatif
 
-| Méthode                      | APDS9960 | BQ27441 | ISM330DL | LIS2MDL | MCP23009E | SSD1327 | VL53L1X | WsenHids | WSEN_PADS |
-| ---------------------------- | :------: | :-----: | :------: | :-----: | :-------: | :-----: | :-----: | :------: | :-------: |
-| `begin()`                    |    ✅    |   ✅    |    ✅    |   ✅    |    ✅     |   ✅    |   ✅    |    ✅    |    ✅     |
-| `deviceId()`                 |    ✅    |   ✅    |    ✅    |   ✅    |           |         |   ✅    |    ✅    |    ✅     |
-| `powerOn()` / `powerOff()`   |    ✅    |   ✅    |    ✅    |   ✅    |    ✅     |   ✅    |   ✅    |    ✅    |    ✅     |
-| `dataReady()`                |    ✅    |   ✅    |    ✅    |   ✅    |           |         |   ✅    |    ✅    |    ✅     |
-| `read()`                     |          |         |          |         |           |         |   ✅    |    ✅    |    ✅     |
-| `setContinuous()` / one-shot |          |         |          |   ✅    |           |         |         |    ✅    |    ✅     |
-| calibration de température   |          |         |    ✅    |   ✅    |           |         |         |    ✅    |    ✅     |
+Les noms de colonnes omettent le préfixe `Steami`.
+
+| Méthode                      | APDS9960 | BME280 | BQ27441 | GC9A01 | ISM330DL | LIS2MDL | MCP23009E | SSD1327 | VL53L1X | WsenHids | WsenPads |
+| ---------------------------- | :------: | :----: | :-----: | :----: | :------: | :-----: | :-------: | :-----: | :-----: | :------: | :------: |
+| `begin()`                    |    ✅    |   ✅   |   ✅    |   ✅   |    ✅    |   ✅    |    ✅     |   ✅    |   ✅    |    ✅    |    ✅    |
+| `deviceId()`                 |    ✅    |   ✅   |   ✅    |        |    ✅    |   ✅    |           |         |   ✅    |    ✅    |    ✅    |
+| `powerOn()` / `powerOff()`   |    ✅    |   ✅   |   ✅    |   ✅   |    ✅    |   ✅    |    ✅     |   ✅    |   ✅    |    ✅    |    ✅    |
+| `dataReady()`                |    ✅    |   ✅   |   ✅    |        |    ✅    |   ✅    |           |         |   ✅    |    ✅    |    ✅    |
+| `read()`                     |          |   ✅   |         |        |          |         |           |         |   ✅    |    ✅    |    ✅    |
+| `setContinuous()` / one-shot |          |   ✅   |         |        |          |   ✅    |           |         |         |    ✅    |    ✅    |
+| calibration de température   |          |   ✅   |         |        |    ✅    |   ✅    |           |         |         |    ✅    |    ✅    |
 
 La documentation complète de chaque driver se trouve dans son README, dans le dossier `lib/<driver>/` du [dépôt](https://github.com/steamicc/arduino-steami-lib).

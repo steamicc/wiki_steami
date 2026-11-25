@@ -27,7 +27,7 @@ La définition de la carte fournit des noms prêts à l'emploi. Il est inutile d
 
 `LED_BUILTIN` désigne le canal bleu de la LED RGB.
 
-Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au microcontrôleur : ils passent par un circuit d'extension d'entrées-sorties. Ils demandent la bibliothèque `MCP23009E` (voir [Capteurs et écran](./capteurs#d-pad)).
+Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au microcontrôleur : ils passent par un circuit d'extension d'entrées-sorties. Ils se lisent avec le driver `SteamiMCP23009E` de la bibliothèque STeaMi (voir [Capteurs et écran](./capteurs#d-pad)).
 
 ## Faire clignoter la LED RGB
 

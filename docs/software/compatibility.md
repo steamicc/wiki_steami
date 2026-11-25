@@ -19,13 +19,13 @@ Matrice détaillée du support de chaque composant de la carte STeaMi selon le l
 | Écran OLED (SSD1327, V1a et V1b)      |     ✅      |  ✅   |   ✅    |
 | Boutons (MCP23009)                    |     ✅      |  ✅   |   ✅    |
 | Jauge batterie (BQ27441)              |     ✅      |  ❌   |   ✅    |
-| Flash externe (DAPLink)               |     ✅      |  ❌   |   ❌    |
-| Config persistante                    |     ✅      |  ❌   |   ❌    |
+| Flash externe (DAPLink)               |     ✅      |  ❌   |   ✅    |
+| Config persistante                    |     ✅      |  ❌   |   ✅    |
 | GPIO de base                          |     ✅      |  ✅   |   ✅    |
 | I2C / SPI / UART                      |     ✅      |  ✅   |   ✅    |
 | Bluetooth BLE                         |     🔶      |  ✅   |   🔶    |
 
-Les composants propres à la V1c, le capteur BME280 et l'écran TFT GC9A01, ne figurent pas encore dans ce tableau. En MicroPython, le driver [bme280](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bme280) est disponible et le driver gc9a01 est en cours de développement ([issue #10](https://github.com/steamicc/micropython-steami-lib/issues/10)). En Arduino, ils s'utilisent avec les bibliothèques Adafruit BME280 et GFX Library for Arduino, en attendant des drivers STeaMi (voir [Capteurs et écran](./arduino/capteurs)). Voir [Révisions](/docs/hardware/revisions).
+Les composants propres à la V1c, le capteur BME280 et l'écran TFT GC9A01, ne figurent pas encore dans ce tableau. En MicroPython, le driver [bme280](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bme280) est disponible et le driver gc9a01 est en cours de développement ([issue #10](https://github.com/steamicc/micropython-steami-lib/issues/10)). En Arduino, la bibliothèque STeaMi fournit les drivers `SteamiBME280` et `SteamiGC9A01` (voir [Capteurs et écran](./arduino/capteurs)). Voir [Révisions](/docs/hardware/revisions).
 
 ✅ Complet · 🔶 Partiel · ❌ Non supporté
 
