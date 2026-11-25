@@ -73,10 +73,6 @@ Le terminal est un shell **zsh** (avec oh-my-zsh). L'historique des commandes es
 Le Codespace utilise **la même bibliothèque STeaMi et les mêmes exemples que l'Arduino IDE** (voir [Bibliothèques STeaMi](./bibliotheques)). Un programme écrit dans le Codespace se compile donc tel quel dans l'IDE, et inversement.
 :::
 
-:::caution Version des drivers
-L'image actuelle du Codespace contient la version 0.25.1 de la bibliothèque STeaMi, antérieure au préfixe `Steami` des drivers et aux drivers de la V1c. Les programmes de la page [Capteurs et écran](./capteurs) utilisent les noms de la version 0.30.0 : dans le Codespace, remplacer les noms en suivant le [tableau de correspondance](./bibliotheques#programmes-écrits-avant-la-version-0300) jusqu'à la mise à jour de l'image.
-:::
-
 Les exemples viennent des drivers du paquet Arduino `steamicc/arduino-steami` ([arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)). Ce sont les mêmes que dans le menu **Fichier → Exemples → STeaMi** de l'Arduino IDE, avec les mêmes noms `COMPOSANT/Exemple`. Pour ne voir que ceux du magnétomètre :
 
 ```bash
@@ -104,9 +100,9 @@ Une vingtaine de secondes plus tard, la compilation se termine par :
 ✅ LIS2MDL/BasicReader compilé : firmware.bin prêt (steami-televerser pour l'envoyer sur la carte)
 ```
 
-La capture montre les deux commandes : la liste des exemples du magnétomètre, puis la compilation, avec la bibliothèque `STeaMi @ 0.25.1` dans le graphe des dépendances, la taille occupée, `[SUCCESS]` et le message final. Le dossier `.steami/` apparaît alors dans l'explorateur ; il contient `firmware.bin`, le programme prêt à être envoyé.
+La capture montre les deux commandes : la liste des exemples du magnétomètre, puis la compilation, avec la bibliothèque `STeaMi @ 0.30.0` dans le graphe des dépendances, la taille occupée, `[SUCCESS]` et le message final. Le dossier `.steami/` apparaît alors dans l'explorateur ; il contient `firmware.bin`, le programme prêt à être envoyé.
 
-![Terminal zsh : steami-exemples lis2mdl liste LIS2MDL/BasicReader, DigitalCompass, MagneticCalibration et MetalDetector, puis steami-compiler LIS2MDL/BasicReader affiche la dépendance STeaMi @ 0.25.1, la ligne [SUCCESS] et le message « LIS2MDL/BasicReader compilé : firmware.bin prêt »](/img/software/arduino/codespace-07-compilation.png)
+![Terminal zsh : steami-exemples lis2mdl liste LIS2MDL/BasicReader, DigitalCompass, MagneticCalibration et MetalDetector, puis steami-compiler LIS2MDL/BasicReader affiche la dépendance STeaMi @ 0.30.0, la ligne [SUCCESS] et le message « LIS2MDL/BasicReader compilé : firmware.bin prêt »](/img/software/arduino/codespace-07-compilation.png)
 
 Sans argument, `steami-compiler` compile le programme de votre dossier `src/`. Au départ, c'est le programme du modèle : il fait clignoter la LED verte et écrit `Bonjour STeaMi !`, puis un compteur, sur la liaison série.
 
