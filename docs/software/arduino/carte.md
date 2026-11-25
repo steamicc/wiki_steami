@@ -8,17 +8,17 @@ sidebar_position: 4.5
 Les releases V1a, V1b et V1c de la STeaMi n'ont pas les mêmes capteurs d'environnement ni le même écran (voir [Révisions de la carte](/docs/hardware/revisions)). Depuis sa version 0.31.0, la bibliothèque STeaMi fournit l'objet `Steami`, qui :
 
 - reconnaît la release de la carte sur laquelle tourne le programme ;
-- crée une seule fois le driver de chaque composant I²C de la carte, sur le bus I²C interne, et le partage avec tout le programme ;
+- crée une seule fois, à la première demande, le driver des capteurs de la carte, de la jauge de batterie et de l'extenseur du D-PAD (voir [les drivers partagés](#aller-plus-loin--les-drivers-partagés)), sur le bus I²C interne, et le partage avec tout le programme ;
 - signale les problèmes par de courts messages codés, comme `E01`.
 
 Depuis la version 0.32.0, des classes par fonction s'appuient sur cet objet : `SteamiTemperature`, par exemple, lit la température avec le capteur de la carte, quelle que soit sa release. Un même programme peut ainsi tourner sur toutes les cartes.
 
 :::note Version de la bibliothèque
-L'objet `Steami` demande la version 0.31.0 de la bibliothèque STeaMi, et les classes par fonction (`SteamiTemperature`, `SteamiDistance`…) la version 0.32.0. Si la compilation s'arrête sur `SteamiBoard.h: No such file or directory` ou sur `SteamiTemperature.h: No such file or directory`, la bibliothèque STeaMi installée est trop ancienne :
+L'objet `Steami` demande la version 0.31.0 de la bibliothèque STeaMi. Ses méthodes `calibrate()` et `calibrated()`, ainsi que les classes par fonction (`SteamiTemperature`, `SteamiDistance`…), demandent la version 0.32.0. Si la compilation s'arrête sur `SteamiBoard.h: No such file or directory`, sur `SteamiTemperature.h: No such file or directory` ou sur `has no member named 'calibrate'`, la bibliothèque STeaMi installée est trop ancienne :
 
 - **Arduino IDE** : mettre à jour STeaMi dans le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)).
 - **PlatformIO** : indiquer `#v0.32.0`, ou une version plus récente, à la fin de la ligne `lib_deps` de `platformio.ini` (voir [Programmer avec PlatformIO](./platformio)).
-- **Codespace** : la version vient de l'image du Codespace et s'affiche dans la sortie de `steami-compiler` (`STeaMi @ x.y.z`). Un dépôt d'élève garde la version de sa création : pour passer à une version plus récente, créer un nouveau dépôt à partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) une fois celui-ci mis à jour (voir [Programmer sans installation](./codespace)).
+- **Codespace** : la version vient de l'image du Codespace et s'affiche dans la sortie de `steami-compiler` (`STeaMi @ x.y.z`). En dessous de la version demandée, les programmes de cette page ne compilent pas dans ce dépôt. Un dépôt garde la version de sa création. Pour en changer, [sauvegarder son travail](./codespace#7-sauvegarder-son-travail), créer un nouveau dépôt à partir du modèle [arduino-steami-starter](https://github.com/steamicc/arduino-steami-starter) et y recopier son dossier `src/`.
   :::
 
 ## Afficher la carte détectée
@@ -126,13 +126,13 @@ Le programme n'appelle pas `Steami.begin()` : la première classe démarrée rec
 
 Les cinq classes ont les mêmes méthodes :
 
-| Méthode         | Rôle                                                                                                                                          |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `begin()`       | cherche le composant de la fonction et le démarre ; renvoie `false`, avec un message, s'il ne répond pas. Les appels suivants ne refont rien. |
-| `isAvailable()` | `true` si `begin()` a réussi                                                                                                                  |
-| `status()`      | l'état de la fonction : `SteamiStatus::OK`, `NOT_STARTED`, `NOT_RESPONDING`, `NOT_ON_THIS_BOARD`, `NO_MEMORY` ou `UNKNOWN_BOARD`              |
-| `error()`       | un court texte en anglais qui explique l'état : `"no answer"`, `"not on this board"`… ; `""` (texte vide) quand tout va bien                  |
-| `chip()`        | le composant utilisé : `"BME280"`, `"WSEN-HIDS"`… ; `""` si aucun                                                                             |
+| Méthode         | Rôle                                                                                                                                                                                                                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `begin()`       | cherche le composant de la fonction et le démarre ; renvoie `false`, avec un message, s'il ne répond pas. Les appels suivants ne refont rien.                                                                                                                                                   |
+| `isAvailable()` | `true` si `begin()` a réussi                                                                                                                                                                                                                                                                    |
+| `status()`      | l'état de la fonction : `SteamiStatus::NOT_STARTED` avant `begin()`, puis `OK` ou `NOT_RESPONDING`. Le type `SteamiStatus` a d'autres valeurs (`NOT_ON_THIS_BOARD`, `UNKNOWN_BOARD`, `NO_MEMORY`), mais les cinq classes actuelles ne les renvoient jamais, même quand la release est inconnue. |
+| `error()`       | un court texte en anglais qui explique l'état : `"not started"` ou `"no answer"` ; `""` (texte vide) quand tout va bien                                                                                                                                                                         |
+| `chip()`        | le composant utilisé : `"BME280"`, `"WSEN-HIDS"`… ; `""` si aucun                                                                                                                                                                                                                               |
 
 Une classe se déclare en variable globale : sa déclaration ne touche pas au matériel. Une lecture faite avant `begin()` appelle `begin()`.
 
@@ -162,14 +162,14 @@ Si le composant ne répond pas, `begin()` renvoie `false`, un message s'affiche 
 
 `NAN` (« not a number », pas de valeur) s'affiche `nan` sur le moniteur série ; `isnan(valeur)` le teste dans le programme.
 
-Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset.
+Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset. Si une lecture renvoie sa valeur d'absence sans message visible, ouvrir le moniteur série puis appuyer sur Reset (voir [Les messages](#les-messages)).
 
 Quelques précisions :
 
 - `SteamiTemperature` : `setOffset(-0.5)` ajoute un décalage, en °C, à chaque `read()` de cet objet.
 - `SteamiPressure` : `altitude()` utilise la pression standard au niveau de la mer, 1013,25 hPa. Pour une meilleure estimation, lui passer la pression du jour, ramenée au niveau de la mer : `pression.altitude(1020.0)`. La formule est la même sur toutes les releases.
 - `SteamiDistance` : `read()` renvoie aussi `-1` quand le capteur ne donne pas de résultat à temps. Une cible hors de portée n'est pas distinguée, et une distance de 0 mm se lit aussi `-1`.
-- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV.
+- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV. Sans batterie (carte alimentée par l'USB seul), la jauge répond souvent quand même : `begin()` renvoie `true`, sans message, mais `percent()` donne 0 et `voltage()` donne `nan`, comme si la fonction manquait. Brancher une batterie pour avoir de vraies mesures.
 
 ### Aller plus loin : les drivers partagés
 
@@ -223,7 +223,7 @@ Si le capteur ne répond pas, ou si une lecture échoue, la ligne affiche `nan` 
 
 Un accesseur renvoie `nullptr`, un pointeur vide, si le composant ne répond pas ; ce résultat est gardé jusqu'au redémarrage. Il faut le tester avant d'utiliser `->`, sinon le programme plante : `SteamiBME280* capteur = Steami.bme280(); if (capteur != nullptr) { … }`. Tester `Steami.claim()` d'abord, comme dans l'exemple ci-dessus, revient au même. Les écrans ne sont pas partagés par `Steami` : ils se pilotent avec leur driver, `SteamiSSD1327` ou `SteamiGC9A01` (voir [Capteurs et écran](./capteurs)).
 
-Les classes par fonction utilisent ces mêmes drivers. Une fois une classe démarrée, le driver partagé renvoie donc des températures calibrées (voir [Calibrations](#calibrations)), et un `calibrateTemperature()` que le programme avait fait plus tôt sur ce driver est remplacé.
+Les classes par fonction utilisent ces mêmes drivers. Au démarrage d'une classe de température, d'humidité ou de pression, si la zone de configuration contient une calibration pour son composant (voir [Calibrations](#calibrations)), elle est appliquée au driver partagé. Ce driver renvoie alors des températures calibrées, et un `calibrateTemperature()` que le programme avait fait plus tôt sur ce driver est remplacé.
 
 ## Calibrations
 
@@ -238,6 +238,8 @@ La zone de configuration du DAPLink peut contenir une calibration de la tempéra
 Les classes par fonction appliquent cette calibration automatiquement, dans `begin()`, une fois par composant, même quand la release est forcée : le programme n'a rien à faire. `Steami.printInfo()` ajoute alors `, calibrated` à la ligne du composant, par exemple `BME280 0x76 OK, calibrated`. Sans zone de configuration, ou sans calibration pour ce composant, les mesures ne changent pas.
 
 `Steami.calibrate(SteamiChip::BME280)` applique la calibration d'un composant sans passer par une classe, et `Steami.calibrated(SteamiChip::BME280)` indique si elle a été appliquée.
+
+Un driver créé dans le programme, comme `SteamiBME280 bme(Steami.wire());` dans [Capteurs et écran](./capteurs), ne reçoit pas cette calibration : pour des températures calibrées, utiliser une classe par fonction, ou le driver partagé (`Steami.bme280()`) après `Steami.calibrate(SteamiChip::BME280)`.
 
 Une calibration s'écrit dans la zone de configuration comme le code de révision (voir [Corriger le code de révision](#corriger-le-code-de-révision)), avec `config->setTemperatureCalibration(STEAMI_CONFIG_SENSOR_BME280, gain, offset)` avant `config->save()` : la température corrigée vaut `mesure × gain + offset`.
 
@@ -298,7 +300,7 @@ Deux objets `TwoWire` sur le bus interne ne fonctionnent pas ensemble : seul le 
 
 ## Les messages
 
-Les messages s'affichent sur le moniteur série, en anglais, sous la forme `[STeaMi] <classe>: <détail> (Exx)`. Après `[STeaMi]` vient le nom de la classe qui signale le problème : `SteamiBoard` pour la reconnaissance de la carte, ou une classe par fonction, comme `SteamiTemperature`. Chaque message ne s'affiche qu'une fois par classe. `Steami.lastError()` renvoie le dernier, et `Steami.printInfo()` le répète s'il n'a pas pu s'afficher, par exemple parce que `Serial.begin()` n'avait pas encore été appelé.
+Les messages s'affichent sur le moniteur série, en anglais, sous la forme `[STeaMi] <classe>: <détail> (Exx)`. Après `[STeaMi]` vient le nom de la classe qui signale le problème : `SteamiBoard` pour la reconnaissance de la carte, ou une classe par fonction, comme `SteamiTemperature`. Chaque message ne s'affiche qu'une fois par classe, au démarrage du programme, souvent avant l'ouverture du moniteur série : ouvrir le moniteur à 115200 bauds, puis appuyer sur le bouton Reset de la carte pour le voir. `Steami.lastError()` renvoie le dernier, et `Steami.printInfo()` le répète s'il n'a pas pu s'afficher, par exemple parce que `Serial.begin()` n'avait pas encore été appelé.
 
 | Code  | Début du message                                                                                       | Cause                                                                                                                                                                                                                                              | Que faire                                                                                                                                                                                     |
 | ----- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -324,6 +326,10 @@ Dans `E11`, la source vaut `forced by Steami.begin()`, `forced by #define` ou `r
 
 ### Corriger le code de révision
 
+:::warning
+`save()` réécrit toute la zone de configuration. Si la carte a des calibrations, téléverser d'abord l'exemple **STeaMi → STEAMI_CONFIG → show_config** et vérifier qu'elles s'affichent : une lecture ratée ressemble à une zone vide, et `save()` effacerait alors les calibrations.
+:::
+
 Le code de révision s'écrit une seule fois, par exemple par l'enseignant. Choisir le code de la carte dans le tableau [Identifier sa version](/docs/hardware/revisions#identifier-sa-version) (`111`, `121` ou `131` pour une carte de série), puis téléverser une fois ce programme :
 
 ```cpp
@@ -346,7 +352,7 @@ void setup() {
 void loop() {}
 ```
 
-`Steami.config()` renvoie `nullptr` si le firmware DAPLink n'a pas de zone de configuration (le [mettre à jour](../daplink#mise-à-jour-du-firmware)), si la release est forcée (sauf si une classe par fonction a déjà lu la zone pour sa calibration) ou si la zone est illisible. `save()` réécrit toute la zone avec les champs que la bibliothèque a lus : révision, nom de la carte, calibrations et compteur de démarrages. Si la carte a des calibrations, vérifier d'abord avec l'exemple **STeaMi → STEAMI_CONFIG → show_config** qu'elles sont bien lues : une lecture ratée ressemble à une zone vide, et `save()` effacerait alors les calibrations. Au démarrage suivant, la première ligne affiche `(read from the board config, revision 131)`.
+`Steami.config()` renvoie `nullptr` si le firmware DAPLink n'a pas de zone de configuration (le [mettre à jour](../daplink#mise-à-jour-du-firmware)), si la release est forcée (sauf si une calibration de température a déjà lu la zone, par `SteamiTemperature`, `SteamiHumidity`, `SteamiPressure` ou `Steami.calibrate()`) ou si la zone est illisible. `save()` réécrit toute la zone avec les champs que la bibliothèque a lus : révision, nom de la carte, calibrations et compteur de démarrages. Au démarrage suivant, la première ligne affiche `(read from the board config, revision 131)`.
 
 ## Étapes suivantes
 

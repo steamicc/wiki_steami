@@ -11,7 +11,7 @@ Cette page donne un programme minimal pour chaque composant de la carte. Chaque 
 
 Avant de commencer :
 
-- installer la bibliothèque **STeaMi** depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)) ;
+- installer la bibliothèque **STeaMi**, version 0.31.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Avec une version plus ancienne, la compilation s'arrête sur `SteamiBoard.h: No such file or directory` (voir l'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte)) ;
 - garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : tous les programmes passent au driver le bus de la carte, `Steami.wire()`, déclaré dans `<SteamiBoard.h>`.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**.
@@ -249,6 +249,8 @@ Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le 
 
 </Release>
 </ReleaseTabs>
+
+Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans la calibration de la zone de configuration du DAPLink. Pour une température calibrée, utiliser `SteamiTemperature` (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
 
 ## Lumière, couleur et gestes
 
