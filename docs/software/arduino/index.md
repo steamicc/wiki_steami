@@ -22,7 +22,7 @@ Le support Arduino couvre les composants des trois releases, V1a, V1b et V1c, sa
    - Sans pouvoir installer de logiciel : [**Programmer sans installation**](./codespace), depuis un navigateur, avec un GitHub Codespace.
 2. [**Premiers programmes**](./premiers-programmes) : LED RGB, boutons et buzzer, sans bibliothèque.
 3. [**Bibliothèques STeaMi**](./bibliotheques) : installer la bibliothèque STeaMi depuis le gestionnaire de bibliothèques et comprendre le bus I²C interne.
-4. [**Capteurs et écran**](./capteurs) : un programme minimal pour chaque fonction, valable sur toutes les releases, puis avec le driver du composant.
+4. [**Capteurs et écran**](./capteurs) : pour chaque capteur, un programme minimal avec sa classe par fonction, le même sur V1a, V1b et V1c (la V1c n'a ni lumière, ni couleur, ni gestes), puis avec le driver du composant ; l'écran, le disque USB et le Bluetooth avec leur driver.
 
 Pour aller plus loin :
 

@@ -11,12 +11,14 @@ Cette page donne un programme minimal pour chaque fonction de la carte. Chaque p
 
 Avant de commencer :
 
-- installer la bibliothèque **STeaMi**, version 0.34.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Les classes de la température, de l'humidité, de la pression, de la distance et de la batterie demandent la version 0.32.0, les autres classes la version 0.34.0, et les programmes avec le driver du composant la version 0.31.0. Avec une version trop ancienne, la compilation s'arrête sur `SteamiBoard.h: No such file or directory` ou sur l'en-tête de la classe, comme `SteamiCompass.h: No such file or directory` (voir l'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte)) ;
-- garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : les classes par fonction s'en chargent, et les programmes avec un driver passent au driver le bus de la carte, `Steami.wire()`, déclaré dans `<SteamiBoard.h>`.
+- installer la bibliothèque **STeaMi**, version 0.34.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Avec une version plus ancienne, la compilation s'arrête sur l'en-tête d'une classe, comme `SteamiAccelerometer.h: No such file or directory`. L'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte) donne la version demandée par chaque classe et la façon de mettre à jour ;
+- garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : les classes par fonction s'en chargent ; les programmes avec le driver passent au driver le bus `Steami.wire()` de `<SteamiBoard.h>`.
 
-Chaque section commence par la **classe par fonction**, comme `SteamiTemperature` ou `SteamiCompass`. Son programme marche tel quel sur une V1a, une V1b ou une V1c : la classe choisit le composant présent sur la carte. Si ce composant ne répond pas, `begin()` renvoie `false`, un message s'affiche sur le moniteur série et les lectures renvoient une valeur qui signale l'absence de mesure, donnée dans chaque section. La partie **Avec le driver du composant** qui suit donne l'accès direct au composant, pour aller plus loin. La forme commune des classes, leurs messages et les calibrations sont décrits dans [Reconnaître la carte](./carte#un-programme-pour-toutes-les-cartes).
+Chaque section de capteur commence par la **classe par fonction**, comme `SteamiTemperature` ou `SteamiCompass`. Son programme marche tel quel sur une V1a, une V1b ou une V1c : la classe choisit le composant présent sur la carte. Si la carte n'a pas ce composant (lumière, couleur et gestes sur une V1c) ou s'il ne répond pas, `begin()` renvoie `false`, un message s'affiche une fois sur le moniteur série et les lectures renvoient une valeur qui signale l'absence de mesure, donnée dans chaque section. Ce message part au démarrage, souvent avant l'ouverture du moniteur : ouvrir le moniteur série à 115200 bauds, puis appuyer sur le bouton Reset de la carte pour le lire (voir [Les messages](./carte#les-messages)).
 
-Les composants de la carte dépendent de sa release (voir [Révisions](/docs/hardware/revisions)). Les programmes avec le driver qui diffèrent sont présentés en onglets **V1a / V1b / V1c**. L'écran, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
+Une seconde partie, nommée d'après le composant (par exemple **Avec le driver ISM330DL**), sert à ce que la classe n'offre pas, comme la proximité de l'APDS-9960 ou un réglage du composant. Les composants dépendent de la release de la carte (voir [Révisions](/docs/hardware/revisions)) : quand ils diffèrent, ces programmes sont présentés en onglets **V1a / V1b / V1c**. Un driver créé dans le programme ne reçoit pas les calibrations de la zone de configuration du DAPLink : pour une mesure calibrée, garder la classe (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)). La [forme commune des classes](./carte#la-forme-commune), leurs [messages](./carte#les-messages) et les [calibrations](./carte#calibrations) sont décrits dans [Reconnaître la carte](./carte).
+
+L'écran, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD**.
 
@@ -58,7 +60,7 @@ void loop() {
 
 `begin()` règle l'accéléromètre sur ±8 g, sinon une secousse de plus de 2 g ne serait jamais vue. `strength()` est la norme des trois axes, environ 1 g au repos ; `isShaken()` vaut `true` quand elle dépasse 2 g, et `isShaken(3.0)` change ce seuil. `SteamiAccelerometer` applique aussi la calibration `ca` de la zone de configuration du DAPLink, si elle existe (voir [Calibrations](./carte#calibrations)). Si le capteur ne répond pas, les lectures renvoient `NAN` (affiché `nan`), et `isShaken()` renvoie `false`.
 
-### Avec le driver du composant
+### Avec le driver ISM330DL
 
 Composant ISM330DL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
@@ -139,7 +141,7 @@ void loop() {
 }
 ```
 
-Au démarrage, la boussole n'est pas calibrée et le cap affiché est faux : appuyer sur MENU, tourner lentement la carte dans tous les sens pendant les 12 secondes, puis la reposer à plat. Le programme ne s'endort pas une demi-seconde entre deux affichages : il lit les boutons toutes les 5 ms environ, sinon une tape brève sur MENU serait manquée (voir [Boutons et D-PAD](#boutons-et-d-pad)).
+Au démarrage, sauf si une calibration `cm` est enregistrée sur la carte (voir [Calibrations](./carte#calibrations)), la boussole n'est pas calibrée et le cap affiché est faux : appuyer sur MENU, tourner lentement la carte dans tous les sens pendant les 12 secondes, puis la reposer à plat. Le programme ne s'endort pas une demi-seconde entre deux affichages : il lit les boutons toutes les 5 ms environ, sinon une tape brève sur MENU serait manquée (voir [Boutons et D-PAD](#boutons-et-d-pad)).
 
 `SteamiCompass` donne le cap de la carte tenue à plat, écran vers le haut :
 
@@ -157,9 +159,9 @@ Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proc
 
 **Nord géographique.** Le cap est mesuré par rapport au nord magnétique. `boussole.setDeclination(2.0)` ajoute la déclinaison magnétique du lieu, en degrés, positive vers l'est, pour viser le nord géographique ; elle ne dépasse pas quelques degrés en France métropolitaine. Cet appel peut se faire avant `begin()`.
 
-**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple **STeaMi → STEAMI_BOARD → Magnetometer** affiche le champ et se calibre, lui aussi, par un appui sur MENU.
+**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple **STeaMi → STEAMI_BOARD → Magnetometer** affiche le champ et se calibre, lui aussi, par un appui sur MENU. Si le capteur ne répond pas, `read()`, `x()`, `y()`, `z()` et `strength()` renvoient `NAN` (affiché `nan`), et `calibrate()` ne fait rien.
 
-### Avec le driver du composant
+### Avec le driver LIS2MDL
 
 Composant LIS2MDL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
@@ -214,9 +216,9 @@ void loop() {
 }
 ```
 
-`read()` donne la distance en millimètres, et `cm()` en centimètres. `read()` renvoie `-1`, et `cm()` renvoie `NAN`, quand le capteur ne répond pas ou ne donne pas de résultat à temps. Une cible hors de portée n'est pas distinguée, et une distance de 0 mm se lit aussi `-1`.
+`read()` donne la distance en millimètres, et `cm()` en centimètres. `read()` renvoie `-1`, et `cm()` renvoie `NAN`, quand le capteur ne répond pas ou ne donne pas de résultat à temps. Le capteur ne signale pas une cible hors de portée : `read()` renvoie quand même un nombre de millimètres, qui n'est pas une mesure fiable. Une vraie distance de 0 mm se lit aussi `-1`.
 
-### Avec le driver du composant
+### Avec le driver VL53L1X
 
 Composant VL53L1X, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
@@ -285,11 +287,13 @@ void loop() {
 
 Si l'extenseur du D-PAD ne répond pas, `begin()` renvoie `false` avec le message `E10`, mais A, B et MENU fonctionnent quand même ; les flèches restent alors relâchées.
 
-Chaque appel de ces méthodes lit l'état des boutons. Un appui est pris en compte dès qu'un appel voit le bouton enfoncé. Un contact mécanique ne s'ouvre ni ne se ferme net : pendant quelques millisecondes, il rebondit (s'ouvre et se ferme plusieurs fois). Après chaque appui ou relâchement, les rebonds des 20 ms suivantes sont donc ignorés, si bien qu'un appui ne compte qu'une fois. Une tape brève dure environ 100 ms : il faut donc appeler les boutons au moins toutes les 50 ms. Avec un `delay(500)` dans `loop()`, une tape tombée entre deux lectures est perdue ; le programme de la [boussole](#boussole--magnétomètre) mesure le temps avec `millis()` pour afficher sans attendre. Un bouton déjà enfoncé au démarrage du programme ne compte pas comme un appui.
+Chaque appel de `isPressed()`, `wasPressed()` ou `wasReleased()` lit l'état des boutons, et un appui est pris en compte dès qu'un appel voit le bouton enfoncé. Une tape brève dure environ 100 ms : appeler ces méthodes au moins toutes les 50 ms. Avec un `delay(500)` dans `loop()`, une tape tombée entre deux lectures est perdue ; le programme de la [boussole](#boussole--magnétomètre) mesure le temps avec `millis()` pour afficher sans attendre. Un bouton déjà enfoncé au démarrage du programme ne compte pas comme un appui.
+
+Un contact mécanique rebondit : pendant quelques millisecondes, il s'ouvre et se ferme plusieurs fois. La bibliothèque ignore les rebonds des 20 ms qui suivent chaque appui ou relâchement, si bien qu'un appui ne compte qu'une fois.
 
 L'exemple **STeaMi → STEAMI_BOARD → Buttons** affiche chaque appui et chaque relâchement des sept boutons.
 
-### Avec le driver du composant
+### Avec le driver MCP23009E
 
 Les boutons A, B et MENU se lisent aussi avec `digitalRead()`, sans bibliothèque (voir [Premiers programmes](./premiers-programmes)). Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
@@ -320,9 +324,9 @@ void loop() {
 }
 ```
 
-La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
-
 Ce programme lit le niveau des broches : il affiche le nom d'un bouton tant qu'il reste enfoncé, sans anti-rebond. Pour compter chaque appui une seule fois, utiliser `SteamiButtons`.
+
+La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
 
 ## Batterie
 
@@ -352,7 +356,7 @@ void loop() {
 
 La jauge est alimentée par la batterie : sans batterie (carte alimentée par l'USB seul), elle ne répond pas, `begin()` renvoie `false` et le message `E10` demande de brancher une batterie puis d'appuyer sur Reset. Les lectures renvoient alors `0`, `NAN`, `0` et `false` : une fonction qui a échoué n'est réessayée qu'au redémarrage de la carte. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV.
 
-### Avec le driver du composant
+### Avec le driver BQ27441
 
 Composant BQ27441, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
@@ -420,7 +424,7 @@ La calibration de la température enregistrée dans la zone de configuration du 
 
 `altitude()` donne l'altitude en mètres avec la pression standard au niveau de la mer, 1013,25 hPa. Pour une meilleure estimation, lui passer la pression du jour, ramenée au niveau de la mer : `pression.altitude(1020.0)`. La formule est la même sur toutes les releases.
 
-### Avec le driver du composant
+### Avec les drivers WSEN-PADS, WSEN-HIDS et BME280
 
 <ReleaseTabs>
 <Release releases="v1a v1b">
@@ -496,6 +500,8 @@ Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans
 
 ## Lumière, couleur et gestes
 
+Ces mesures demandent le capteur APDS-9960, présent sur la V1a et la V1b seulement : la V1c n'a pas de capteur de lumière, de couleur ni de gestes. Sur une V1c, les programmes ci-dessous se téléversent mais n'affichent que le message `E20` (voir plus bas).
+
 ```cpp
 #include <SteamiLight.h>
 #include <SteamiColor.h>
@@ -528,7 +534,7 @@ void loop() {
 
 `SteamiLight` et `SteamiColor` donnent des nombres bruts du capteur, sans unité, qui augmentent avec la lumière ; pas de lux ni de couleur prête à afficher. `couleur.read(rouge, vert, bleu)` remplit les trois composantes et renvoie `false` si la mesure manque ; `red()`, `green()` et `blue()` en lisent une seule.
 
-Les gestes de la main se lisent avec `SteamiGesture` :
+Les gestes de la main se lisent avec `SteamiGesture`. Leur décodage n'a pas encore été vérifié sur une carte.
 
 ```cpp
 #include <SteamiGesture.h>
@@ -548,13 +554,13 @@ void loop() {
 }
 ```
 
-`read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(geste)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme ce programme et l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours. Le décodage des gestes n'a pas encore été vérifié sur une carte.
+`read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(direction)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme ce programme et l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours.
 
 `SteamiGesture` met le capteur en détection de gestes : pendant qu'une main passe au-dessus, la lumière et la couleur ne sont plus mesurées, puis reprennent.
 
-Sur une V1c, qui n'a pas d'APDS-9960, les trois classes affichent le message `E20` (voir [Les messages](./carte#les-messages)) et leur `begin()` renvoie `false`, sans échange sur le bus I²C. `SteamiLight` renvoie alors `0`, `SteamiColor` `false` (et trois `0`) et `SteamiGesture` `NONE`. `Steami.has(SteamiFunction::LIGHT)` indique à l'avance si la carte possède la fonction (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)).
+Sur une V1c, les trois classes affichent le message `E20` (voir [Les messages](./carte#les-messages)) et leur `begin()` renvoie `false`, sans échange sur le bus I²C. `SteamiLight` renvoie alors `0`, `SteamiColor` `false` (et trois `0`) et `SteamiGesture` `NONE`. `Steami.has(SteamiFunction::LIGHT)` indique à l'avance si la carte possède la fonction (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)).
 
-### Avec le driver du composant
+### Avec le driver APDS-9960
 
 <ReleaseTabs>
 <Release releases="v1a v1b">

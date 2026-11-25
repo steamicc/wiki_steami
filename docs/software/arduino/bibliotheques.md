@@ -81,7 +81,7 @@ Un programme inclut seulement les drivers dont il a besoin. **Croquis → Inclur
 Les exemples des drivers STeaMi sont rangés par composant dans **Fichier → Exemples → STeaMi** : par exemple **STeaMi → LIS2MDL → DigitalCompass**, ou **STeaMi → BLE → BleHotCold** pour le Bluetooth. Dans le menu, STeaMi apparaît dans la section « Exemples des librairies personnalisées ».
 
 ![Menu Fichier → Exemples de l'Arduino IDE : sous « Exemples des librairies personnalisées », le sous-menu STeaMi liste les composants, et LIS2MDL ses exemples BasicReader, DigitalCompass, MagneticCalibration et MetalDetector](/img/software/arduino/bibliotheques-03-exemples.png)
-La page [Capteurs et écran](./capteurs) donne un programme minimal pour chaque composant.
+La page [Capteurs et écran](./capteurs) donne un programme minimal pour chaque fonction de la carte, avec sa classe par fonction puis avec le driver du composant.
 
 ## Le bus I²C interne
 
@@ -121,5 +121,5 @@ Un programme ne doit pas créer son propre objet `TwoWire` sur le bus interne : 
 ## Étapes suivantes
 
 - [Reconnaître la carte](./carte) : savoir sur quelle release tourne le programme et partager les drivers.
-- [Capteurs et écran](./capteurs) : un programme minimal pour chaque composant.
+- [Capteurs et écran](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
 - [Conventions de l'API](./conventions) : ce que les drivers ont en commun.

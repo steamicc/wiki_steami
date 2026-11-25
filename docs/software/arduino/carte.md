@@ -188,25 +188,7 @@ Si le composant ne répond pas, ou si la release n'a pas la fonction, `begin()` 
 
 Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset. Si `begin()` a renvoyé `false` sans message visible, ouvrir le moniteur série puis appuyer sur Reset pour lire le message (voir [Les messages](#les-messages)).
 
-Quelques précisions :
-
-- `SteamiTemperature` : `setOffset(-0.5)` ajoute un décalage, en °C, à chaque `read()` de cet objet.
-- `SteamiPressure` : `altitude()` utilise la pression standard au niveau de la mer, 1013,25 hPa. Pour une meilleure estimation, lui passer la pression du jour, ramenée au niveau de la mer : `pression.altitude(1020.0)`. La formule est la même sur toutes les releases.
-- `SteamiDistance` : `read()` renvoie aussi `-1` quand le capteur ne donne pas de résultat à temps. Une cible hors de portée n'est pas distinguée, et une distance de 0 mm se lit aussi `-1`.
-- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV. La jauge est alimentée par la batterie : sans batterie (carte alimentée par l'USB seul), elle ne répond pas, `begin()` renvoie `false` et le message `E10` demande de brancher une batterie puis d'appuyer sur Reset.
-- `SteamiAccelerometer` : `begin()` règle l'accéléromètre partagé sur ±8 g, sinon une secousse de plus de 2 g ne serait jamais vue. `strength()` est la norme des trois axes, environ 1 g au repos ; `isShaken()` vaut `true` quand elle dépasse 2 g, et `isShaken(3.0)` change ce seuil.
-- `SteamiGyroscope` : la vitesse de rotation autour de chaque axe, en degrés par seconde, environ 0 au repos.
-- `SteamiLight` et `SteamiColor` : des nombres bruts du capteur, sans unité, qui augmentent avec la lumière ; pas de lux ni de couleur prête à afficher. `SteamiGesture` met le capteur en détection de gestes : pendant qu'une main passe au-dessus, la lumière et la couleur ne sont plus mesurées, puis reprennent.
-- `SteamiGesture` : `read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(geste)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours. Le décodage des gestes n'a pas encore été vérifié sur une carte.
-- Sur une V1c, `SteamiLight`, `SteamiColor` et `SteamiGesture` affichent le message `E20` et leur `begin()` renvoie `false`, sans échange sur le bus I²C.
-
-### Boussole
-
-Le cap de `SteamiCompass` (sens, 0° et huit directions), la calibration de la boussole, la déclinaison et `SteamiMagnetometer` sont décrits dans la section [Boussole](./capteurs#boussole--magnétomètre) de Capteurs et écran.
-
-### Boutons
-
-Les méthodes de `SteamiButtons`, l'anti-rebond et la fréquence de lecture des boutons sont décrits dans la section [Boutons et D-PAD](./capteurs#boutons-et-d-pad) de Capteurs et écran.
+Le détail de chaque classe (décalage de `setOffset()`, altitude avec la pression du jour, ±8 g et `isShaken()`, nombres bruts de la lumière et de la couleur, gestes, `E20` sur une V1c, cap et calibration de la boussole, anti-rebond des boutons) est donné dans sa section de Capteurs et écran : [mouvement](./capteurs#mouvement--accéléromètre-et-gyroscope), [boussole](./capteurs#boussole--magnétomètre), [distance](./capteurs#distance--capteur-de-temps-de-vol), [boutons et D-PAD](./capteurs#boutons-et-d-pad), [batterie](./capteurs#batterie), [pression, humidité et température](./capteurs#pression-humidité-et-température), [lumière, couleur et gestes](./capteurs#lumière-couleur-et-gestes).
 
 ### Aller plus loin : les drivers partagés
 
