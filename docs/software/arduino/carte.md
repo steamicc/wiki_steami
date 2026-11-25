@@ -122,7 +122,7 @@ void loop() {
 
 Le programme n'appelle pas `Steami.begin()` : la première classe démarrée reconnaît la carte.
 
-Les classes du mouvement, de la boussole et des boutons s'utilisent de la même façon. Ce programme affiche deux fois par seconde le cap et l'accélération sur l'axe z ; un appui sur MENU lance une calibration de la boussole (voir [Boussole](#boussole)) :
+Les classes du mouvement, de la boussole et des boutons s'utilisent de la même façon. Ce programme affiche deux fois par seconde le cap et l'accélération sur l'axe z ; le cap n'est juste qu'après une calibration de la boussole, lancée par un appui sur MENU (voir [Boussole](#boussole)) :
 
 ```cpp
 #include <SteamiAccelerometer.h>
@@ -152,8 +152,13 @@ void loop() {
 
   if (millis() - dernierAffichage >= 500) {  // affichage deux fois par seconde
     dernierAffichage = millis();
+    float cap = boussole.heading();
     Serial.print("Cap : ");
-    Serial.print(boussole.heading());
+    if (isnan(cap)) {
+      Serial.print("nan");
+    } else {
+      Serial.print(lroundf(cap) % 360);  // arrondi au degré : 359,6 s'affiche 0, jamais 360
+    }
     Serial.print(" deg (");
     Serial.print(boussole.direction());
     Serial.print(")  z : ");
@@ -163,6 +168,8 @@ void loop() {
   delay(5);
 }
 ```
+
+Au démarrage, la boussole n'est pas calibrée et le cap affiché est faux : appuyer sur MENU, tourner lentement la carte dans tous les sens pendant les 12 secondes, puis la reposer à plat. La calibration se perd à chaque Reset et à chaque téléversement, sauf si une calibration `cm` est enregistrée sur la carte (voir [Boussole](#boussole)).
 
 Carte posée à plat, écran vers le haut, z vaut environ −1 g. Le programme ne s'endort pas une demi-seconde entre deux affichages : il lit les boutons toutes les 5 ms environ, sinon une tape brève sur MENU serait manquée (voir [Boutons](#boutons)).
 
@@ -239,7 +246,7 @@ Quelques précisions :
 - `SteamiAccelerometer` : `begin()` règle l'accéléromètre partagé sur ±8 g, sinon une secousse de plus de 2 g ne serait jamais vue. `strength()` est la norme des trois axes, environ 1 g au repos ; `isShaken()` vaut `true` quand elle dépasse 2 g, et `isShaken(3.0)` change ce seuil.
 - `SteamiGyroscope` : la vitesse de rotation autour de chaque axe, en degrés par seconde, environ 0 au repos.
 - `SteamiLight` et `SteamiColor` : des nombres bruts du capteur, sans unité, qui augmentent avec la lumière ; pas de lux ni de couleur prête à afficher. `SteamiGesture` met le capteur en détection de gestes : pendant qu'une main passe au-dessus, la lumière et la couleur ne sont plus mesurées, puis reprennent.
-- `SteamiGesture` : `read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(geste)` son nom en texte. `read()` regarde seulement si le capteur a vu un geste ; `read(2000)` attend un geste jusqu'à 2 secondes.
+- `SteamiGesture` : `read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(geste)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours. Le décodage des gestes n'a pas encore été vérifié sur une carte.
 - Sur une V1c, `SteamiLight`, `SteamiColor` et `SteamiGesture` affichent le message `E20` et leur `begin()` renvoie `false`, sans échange sur le bus I²C.
 
 ### Boussole
@@ -247,11 +254,11 @@ Quelques précisions :
 `SteamiCompass` donne le cap de la carte tenue à plat, écran vers le haut :
 
 - `heading()` renvoie un angle en degrés, compté dans le sens des aiguilles d'une montre à partir du nord, de 0 à moins de 360 (jamais 360). Il vaut 0 quand le haut de l'écran, le côté opposé au connecteur USB, pointe vers le nord, 90 vers l'est, 180 vers le sud et 270 vers l'ouest.
-- `direction()` renvoie la direction la plus proche parmi huit : `"N"`, `"NE"`, `"E"`, `"SE"`, `"S"`, `"SW"`, `"W"` ou `"NW"`. Chacune couvre 45° centrés sur elle : `"N"` va de 337,5° à 22,5°, `"NE"` de 22,5° à 67,5°, etc.
+- `direction()` renvoie la direction la plus proche parmi huit : `"N"`, `"NE"`, `"E"`, `"SE"`, `"S"`, `"SW"`, `"W"` ou `"NW"`. Chacune couvre 45° centrés sur elle : `"N"` va de 337,5° à 22,5°, `"NE"` de 22,5° à 67,5°, etc. `heading()` et `direction()` font chacune leur propre mesure : près de la limite entre deux secteurs, la direction affichée peut ne pas correspondre au cap affiché juste avant (par exemple 22° avec `NE`).
 
 Le cap ne tient pas compte de l'inclinaison : une carte penchée donne un cap faux.
 
-**Calibrer.** Le magnétomètre mesure aussi le champ magnétique de la carte elle-même, plus fort que celui de la Terre (176 µT mesurés sur une V1c, contre 25 à 65 µT pour le champ terrestre). Sans calibration, le cap est donc faux. Deux façons de calibrer :
+**Calibrer.** Le magnétomètre mesure aussi le champ magnétique de la carte elle-même, plus fort que celui de la Terre : sans calibration, une V1c a lu 176 µT au total, champ terrestre compris, alors que le champ terrestre seul vaut 25 à 65 µT. Sans calibration, le cap est donc faux. Deux façons de calibrer :
 
 - `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive et se perd au redémarrage. L'exemple **STeaMi → STEAMI_BOARD → Compass** la lance par un appui sur MENU.
 - une calibration `cm` enregistrée dans la zone de configuration du DAPLink est appliquée automatiquement au démarrage (voir [Calibrations](#calibrations)).
@@ -275,7 +282,7 @@ Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proc
 
 Si l'extenseur du D-PAD ne répond pas, `begin()` renvoie `false` avec le message `E10`, mais A, B et MENU fonctionnent quand même ; les flèches restent alors relâchées.
 
-Chaque appel de ces méthodes lit l'état des boutons. Un appui est pris en compte dès qu'un appel voit le bouton enfoncé ; les rebonds des 20 ms suivantes sont ignorés, si bien qu'un appui ne compte qu'une fois. Une tape brève dure environ 100 ms : il faut donc appeler les boutons au moins toutes les 50 ms. Avec un `delay(500)` dans `loop()`, une tape tombée entre deux lectures est perdue ; le deuxième programme de [Un programme pour toutes les cartes](#un-programme-pour-toutes-les-cartes) mesure le temps avec `millis()` pour afficher sans attendre. Un bouton déjà enfoncé au démarrage du programme ne compte pas comme un appui.
+Chaque appel de ces méthodes lit l'état des boutons. Un appui est pris en compte dès qu'un appel voit le bouton enfoncé. Un contact mécanique ne s'ouvre ni ne se ferme net : pendant quelques millisecondes, il rebondit (s'ouvre et se ferme plusieurs fois). Après chaque appui ou relâchement, les rebonds des 20 ms suivantes sont donc ignorés, si bien qu'un appui ne compte qu'une fois. Une tape brève dure environ 100 ms : il faut donc appeler les boutons au moins toutes les 50 ms. Avec un `delay(500)` dans `loop()`, une tape tombée entre deux lectures est perdue ; le deuxième programme de [Un programme pour toutes les cartes](#un-programme-pour-toutes-les-cartes) mesure le temps avec `millis()` pour afficher sans attendre. Un bouton déjà enfoncé au démarrage du programme ne compte pas comme un appui.
 
 L'exemple **STeaMi → STEAMI_BOARD → Buttons** affiche chaque appui et chaque relâchement des sept boutons.
 
@@ -331,7 +338,7 @@ Si le capteur ne répond pas, ou si une lecture échoue, la ligne affiche `nan` 
 
 Un accesseur renvoie `nullptr`, un pointeur vide, si le composant ne répond pas ; ce résultat est gardé jusqu'au redémarrage. Il faut le tester avant d'utiliser `->`, sinon le programme plante : `SteamiBME280* capteur = Steami.bme280(); if (capteur != nullptr) { … }`. Tester `Steami.claim()` d'abord, comme dans l'exemple ci-dessus, revient au même. Les écrans ne sont pas partagés par `Steami` : ils se pilotent avec leur driver, `SteamiSSD1327` ou `SteamiGC9A01` (voir [Capteurs et écran](./capteurs)).
 
-Les classes par fonction utilisent ces mêmes drivers. Au démarrage d'une classe de température, d'humidité, de pression, du mouvement, du magnétomètre ou de la boussole, si la zone de configuration contient une calibration pour son composant (voir [Calibrations](#calibrations)), elle est appliquée au driver partagé. Ce driver renvoie alors des mesures calibrées, et une calibration que le programme avait faite plus tôt sur ce driver, comme un `calibrateTemperature()`, est remplacée. De même, une fois la classe `SteamiAccelerometer` démarrée, `Steami.ism330dl()` mesure l'accélération sur la plage de ±8 g.
+Les classes par fonction utilisent ces mêmes drivers. Au démarrage d'une classe de température, d'humidité, de pression, du mouvement, du magnétomètre ou de la boussole, si la zone de configuration contient une calibration pour son composant (voir [Calibrations](#calibrations)), elle est appliquée au driver partagé. Ce driver renvoie alors des mesures calibrées, et une calibration que le programme avait faite plus tôt sur ce driver, comme un `calibrateTemperature()`, est remplacée. Pour le magnétomètre, seuls le cap (`headingFlatOnly()`) et `calibratedField()` profitent de la calibration : `magneticFieldUt()` et `magnitudeUt()` de `Steami.lis2mdl()` restent non corrigés, et `SteamiMagnetometer` donne le champ calibré en µT. De même, une fois la classe `SteamiAccelerometer` démarrée, `Steami.ism330dl()` mesure l'accélération sur la plage de ±8 g.
 
 ## Calibrations
 
@@ -354,7 +361,7 @@ Elle peut aussi contenir une calibration de l'accéléromètre et une du magnét
 
 Les classes par fonction appliquent ces calibrations automatiquement, dans `begin()`, une fois par composant, même quand la release est forcée : le programme n'a rien à faire. `Steami.printInfo()` ajoute alors `, calibrated` à la ligne du composant, par exemple `BME280 0x76 OK, calibrated`. Sans zone de configuration, ou sans calibration pour ce composant, les mesures ne changent pas.
 
-`Steami.calibrate(SteamiChip::BME280)` applique la calibration d'un composant sans passer par une classe (`SteamiChip::ISM330DL` pour `ca`, `SteamiChip::LIS2MDL` pour `cm`), et `Steami.calibrated(SteamiChip::BME280)` indique si elle a été appliquée.
+`Steami.calibrate(SteamiChip::BME280)` applique la calibration d'un composant sans passer par une classe (`SteamiChip::ISM330DL` pour `ca`, `SteamiChip::LIS2MDL` pour `cm`, depuis la version 0.34.0 : avec une version plus ancienne, l'appel compile mais renvoie `false` sans rien appliquer), et `Steami.calibrated(SteamiChip::BME280)` indique si elle a été appliquée.
 
 Un driver créé dans le programme, comme `SteamiBME280 bme(Steami.wire());` dans [Capteurs et écran](./capteurs), ne reçoit pas cette calibration : pour des températures calibrées, utiliser une classe par fonction, ou le driver partagé (`Steami.bme280()`) après `Steami.calibrate(SteamiChip::BME280)`.
 
