@@ -22,6 +22,27 @@ print(f"Board: {config.board_name}")
 print(f"Revision: {config.board_revision}")
 ```
 
+La révision est un code décimal de trois chiffres, écrit en usine :
+
+| Chiffre   | Signification    | Valeurs                                                         |
+| --------- | ---------------- | --------------------------------------------------------------- |
+| centaines | génération       | 1 = V1                                                          |
+| dizaines  | release          | 1 = a, 2 = b, 3 = c                                             |
+| unités    | indice du schéma | 0 = prototype (indices A, B, C), 1 = série (indices A1, B1, C1) |
+
+| Code | Indice | Release | Rôle      |
+| ---- | ------ | ------- | --------- |
+| 110  | A      | V1a     | prototype |
+| 111  | A1     | V1a     | série     |
+| 120  | B      | V1b     | prototype |
+| 121  | B1     | V1b     | série     |
+| 130  | C      | V1c     | prototype |
+| 131  | C1     | V1c     | série     |
+
+Les indices sont ceux du tableau [Releases et indices du schéma](#releases-et-indices-du-schéma). Une autre valeur, comme le `3` écrit par d'anciens exemples, n'est pas un code valide.
+
+Les cartes déjà distribuées n'ont pas encore de code de révision : un programme doit alors reconnaître la release à ses capteurs (BME280 sur la V1c, WSEN-HIDS, WSEN-PADS et APDS-9960 sur les V1a et V1b).
+
 Quelques repères visuels permettent aussi de distinguer les releases :
 
 | Repère                     | V1a et V1b                                        | V1c                                |
