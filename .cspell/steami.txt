@@ -207,3 +207,4 @@ codespaces
 println
 televerser
 nullptr
+isnan

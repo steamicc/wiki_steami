@@ -11,8 +11,8 @@ Cette page donne un programme minimal pour chaque composant de la carte. Chaque 
 
 Avant de commencer :
 
-- installer la bibliothèque **STeaMi** depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)) ;
-- garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : tous les programmes créent l'objet `internalI2C` et le passent au driver.
+- installer la bibliothèque **STeaMi**, version 0.31.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Avec une version plus ancienne, la compilation s'arrête sur `SteamiBoard.h: No such file or directory` (voir l'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte)) ;
+- garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : tous les programmes passent au driver le bus de la carte, `Steami.wire()`, déclaré dans `<SteamiBoard.h>`.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**.
 
@@ -23,15 +23,13 @@ Les composants de la carte dépendent de sa release (voir [Révisions](/docs/har
 Composant ISM330DL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiISM330DL.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiISM330DL imu(internalI2C);
+SteamiISM330DL imu(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!imu.begin()) {
     Serial.println("ISM330DL non détecté");
     while (true) {}
@@ -62,15 +60,13 @@ Les méthodes de lecture de ce driver remplissent une variable passée en param�
 Composant LIS2MDL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiLIS2MDL.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiLIS2MDL mag(internalI2C);
+SteamiLIS2MDL mag(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!mag.begin()) {
     Serial.println("LIS2MDL non détecté");
     while (true) {}
@@ -95,15 +91,13 @@ Le cap n'est fiable qu'après une calibration et loin des objets métalliques. L
 Composant VL53L1X, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiVL53L1X.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiVL53L1X tof(internalI2C);
+SteamiVL53L1X tof(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!tof.begin()) {
     Serial.println("VL53L1X non détecté");
     while (true) {}
@@ -126,18 +120,16 @@ void loop() {
 Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiMCP23009E.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiMCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);
+SteamiMCP23009E dpad(Steami.wire(), RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);
 
 const uint8_t boutons[] = {MCP23009_BTN_UP, MCP23009_BTN_DOWN, MCP23009_BTN_LEFT, MCP23009_BTN_RIGHT};
 const char* noms[] = {"HAUT", "BAS", "GAUCHE", "DROITE"};
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   dpad.begin();
   for (uint8_t i = 0; i < 4; i++) {
     dpad.setup(boutons[i], MCP23009_DIR_INPUT, MCP23009_PULLUP);
@@ -161,15 +153,13 @@ La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi �
 Composant BQ27441, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiBQ27441.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiBQ27441 batterie(internalI2C);
+SteamiBQ27441 batterie(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!batterie.begin()) {
     Serial.println("BQ27441 non détecté");
     while (true) {}
@@ -196,17 +186,15 @@ Sans batterie branchée (carte alimentée par l'USB seul), la jauge répond mais
 Deux capteurs Würth : WSEN-PADS (pression) et WSEN-HIDS (humidité). Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiWsenPads.h>
 #include <SteamiWsenHids.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiWsenPads pression(internalI2C);
-SteamiWsenHids humidite(internalI2C);
+SteamiWsenPads pression(Steami.wire());
+SteamiWsenHids humidite(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!pression.begin() || !humidite.begin()) {
     Serial.println("Capteur non détecté");
     while (true) {}
@@ -231,15 +219,13 @@ void loop() {
 Un seul capteur, le BME280, à l'adresse `0x76`. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiBME280.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiBME280 bme(internalI2C);
+SteamiBME280 bme(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!bme.begin()) {
     Serial.println("BME280 non détecté");
     while (true) {}
@@ -264,6 +250,8 @@ Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le 
 </Release>
 </ReleaseTabs>
 
+Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans la calibration de la zone de configuration du DAPLink. Pour une température calibrée, utiliser `SteamiTemperature`, qui demande la version 0.32.0 de la bibliothèque (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
+
 ## Lumière, couleur et gestes
 
 <ReleaseTabs>
@@ -272,15 +260,13 @@ Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le 
 Composant APDS-9960. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiAPDS9960.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiAPDS9960 lumiere(internalI2C);
+SteamiAPDS9960 lumiere(Steami.wire());
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!lumiere.begin()) {
     Serial.println("APDS-9960 non détecté");
     while (true) {}
@@ -375,17 +361,15 @@ Les exemples **STeaMi → GC9A01** reprennent ceux de l'écran des V1a et V1b, e
 Le DAPLink, le second microcontrôleur de la carte qui fait apparaître le disque USB **STeaMi**, garde un seul fichier dans la mémoire flash externe de 8 Mo. Un programme peut y ajouter des lignes de texte, par exemple un relevé de mesures au format CSV, que l'ordinateur ouvre ensuite comme un fichier ordinaire. Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiDaplinkBridge.h>
 #include <SteamiDaplinkFlash.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-SteamiDaplinkBridge pont(internalI2C);
+SteamiDaplinkBridge pont(Steami.wire());
 SteamiDaplinkFlash fichier(pont);
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();
   if (!fichier.begin()) {
     Serial.println("DAPLink non détecté");
     while (true) {}

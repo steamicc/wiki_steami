@@ -89,23 +89,21 @@ C'est le point le plus important pour utiliser les capteurs de la STeaMi.
 
 La carte possède **deux bus I²C** :
 
-| Bus     | Objet Arduino                                              | Broches                      | Usage                                                           |
-| ------- | ---------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------- |
-| externe | `Wire` (créé automatiquement)                              | `I2C_EXT_SDA`, `I2C_EXT_SCL` | connecteurs I²C externes et connecteur de bord                  |
-| interne | à créer : `TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);` | `I2C_INT_SDA`, `I2C_INT_SCL` | tous les capteurs, le D-PAD et la jauge de batterie de la carte |
+| Bus     | Objet Arduino                 | Broches                      | Usage                                                           |
+| ------- | ----------------------------- | ---------------------------- | --------------------------------------------------------------- |
+| externe | `Wire` (créé automatiquement) | `I2C_EXT_SDA`, `I2C_EXT_SCL` | connecteurs I²C externes et connecteur de bord                  |
+| interne | `Steami.wire()` (dans STeaMi) | `I2C_INT_SDA`, `I2C_INT_SCL` | tous les capteurs, le D-PAD et la jauge de batterie de la carte |
 
-L'objet `Wire` des exemples Arduino classiques ne voit **pas** les capteurs de la carte. Chaque programme qui utilise un capteur interne commence donc ainsi :
+L'objet `Wire` des exemples Arduino classiques ne voit **pas** les capteurs de la carte. Le bus interne est fourni par la bibliothèque STeaMi : `Steami.wire()`, déclaré dans `<SteamiBoard.h>`. Chaque programme qui utilise un capteur interne commence donc ainsi :
 
 ```cpp
-#include <Wire.h>
+#include <SteamiBoard.h>
 #include <SteamiISM330DL.h>
 
-TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);  // bus I²C interne
-SteamiISM330DL imu(internalI2C);                // le driver reçoit ce bus
+SteamiISM330DL imu(Steami.wire());  // le driver reçoit le bus interne
 
 void setup() {
   Serial.begin(115200);
-  internalI2C.begin();                          // démarrer le bus avant les capteurs
   if (!imu.begin()) {
     Serial.println("ISM330DL non détecté");
   }
@@ -114,11 +112,11 @@ void setup() {
 void loop() {}
 ```
 
-Un seul objet `internalI2C` suffit pour tous les capteurs : il se passe à chaque driver.
+`Steami.wire()` crée et démarre le bus à son premier appel : le driver peut donc être une variable globale, et `setup()` n'a pas de bus à démarrer. Le même `Steami.wire()` se passe à chaque driver. `Steami.wire()` demande la version 0.31.0 de la bibliothèque STeaMi ou une version plus récente (voir [Reconnaître la carte](./carte)).
 
-La même règle vaut pour les bibliothèques tierces : elles reçoivent elles aussi `internalI2C` à la place de `Wire`.
+La même règle vaut pour les bibliothèques tierces : elles reçoivent elles aussi `Steami.wire()` à la place de `Wire` (`&Steami.wire()` pour celles qui attendent un pointeur).
 
-Un programme qui utilise l'objet `Steami` de la bibliothèque ne crée pas `internalI2C` : il passe `Steami.wire()` aux drivers qu'il crée dans `setup()` (voir [Reconnaître la carte](./carte#utiliser-ses-propres-drivers)). Deux objets `TwoWire` sur le bus interne ne fonctionnent pas ensemble : seul le dernier démarré répond, et les échanges de l'autre échouent sans message d'erreur.
+Un programme ne doit pas créer son propre objet `TwoWire` sur le bus interne : deux objets `TwoWire` sur ce bus ne fonctionnent pas ensemble, seul le dernier démarré répond, et les échanges de l'autre échouent sans message d'erreur. Les programmes écrits pour une version antérieure de la bibliothèque créaient leur propre objet, `TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);` : le remplacer par `Steami.wire()` (voir [Reconnaître la carte](./carte#utiliser-ses-propres-drivers)).
 
 ## Étapes suivantes
 
