@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # Bibliothèques STeaMi
 
-La LED RGB, les boutons A, B et MENU et le buzzer s'utilisent sans bibliothèque. Tous les autres composants de la carte se pilotent avec un driver : accéléromètre et gyroscope, magnétomètre, capteur de distance, capteurs de pression, d'humidité et de lumière, D-PAD, jauge de batterie, écran et Bluetooth. La plupart de ces drivers sont réunis dans une seule bibliothèque Arduino, **STeaMi**, disponible dans le gestionnaire de bibliothèques de l'Arduino IDE ; le [tableau des drivers](#les-drivers-des-composants) donne la bibliothèque de chaque composant. Elle est développée dans le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) et publiée à chaque version dans [arduino-steami](https://github.com/steamicc/arduino-steami).
+La LED RGB, les boutons A, B et MENU et le buzzer s'utilisent sans bibliothèque. Tous les autres composants de la carte se pilotent avec un driver : accéléromètre et gyroscope, magnétomètre, capteur de distance, capteurs de pression, d'humidité et de lumière, D-PAD, jauge de batterie, écran et Bluetooth. Ces drivers sont réunis dans une seule bibliothèque Arduino, **STeaMi**, disponible dans le gestionnaire de bibliothèques de l'Arduino IDE, à l'exception du Bluetooth ; le [tableau des drivers](#les-drivers-des-composants) donne l'en-tête de chaque composant. Elle est développée dans le dépôt [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) et publiée à chaque version dans [arduino-steami](https://github.com/steamicc/arduino-steami).
 
 ## Installer la bibliothèque STeaMi
 
@@ -29,34 +29,59 @@ Une version précédente de cette page faisait copier des dossiers de drivers (`
 
 De même, ne pas installer en plus l'ancienne bibliothèque **MCP23009E** du gestionnaire : le driver du D-PAD est déjà inclus dans STeaMi.
 
+### Programmes écrits avant la version 0.30.0
+
+Depuis la version 0.30.0 de STeaMi, chaque driver porte le préfixe `Steami`, dans son en-tête comme dans le nom de sa classe. Un programme écrit avec une version antérieure ne compile plus : il suffit de remplacer les noms.
+
+| Avant                                                  | Depuis la version 0.30.0                                          |
+| ------------------------------------------------------ | ----------------------------------------------------------------- |
+| `#include <ISM330DL.h>`, `ISM330DL imu(…)`             | `#include <SteamiISM330DL.h>`, `SteamiISM330DL imu(…)`            |
+| `#include <LIS2MDL.h>`, `LIS2MDL mag(…)`               | `#include <SteamiLIS2MDL.h>`, `SteamiLIS2MDL mag(…)`              |
+| `#include <VL53L1X.h>`, `VL53L1X tof(…)`               | `#include <SteamiVL53L1X.h>`, `SteamiVL53L1X tof(…)`              |
+| `#include <MCP23009E.h>`, `MCP23009E dpad(…)`          | `#include <SteamiMCP23009E.h>`, `SteamiMCP23009E dpad(…)`         |
+| `#include <BQ27441.h>`, `BQ27441 batterie(…)`          | `#include <SteamiBQ27441.h>`, `SteamiBQ27441 batterie(…)`         |
+| `#include <WSEN_PADS.h>`, `WSEN_PADS pression(…)`      | `#include <SteamiWsenPads.h>`, `SteamiWsenPads pression(…)`       |
+| `#include <WsenHids.h>`, `WsenHids humidite(…)`        | `#include <SteamiWsenHids.h>`, `SteamiWsenHids humidite(…)`       |
+| `#include <APDS9960.h>`, `APDS9960 lumiere(…)`         | `#include <SteamiAPDS9960.h>`, `SteamiAPDS9960 lumiere(…)`        |
+| `#include <SSD1327.h>`, `WS_OLED_128X128_STEAMI oled;` | `#include <SteamiSSD1327.h>`, `SteamiSSD1327 oled;`               |
+| `#include <DaplinkBridge.h>`, `DaplinkBridge pont(…)`  | `#include <SteamiDaplinkBridge.h>`, `SteamiDaplinkBridge pont(…)` |
+
+Les types définis dans une classe suivent son nom (`ISM330DL::Vector3` devient `SteamiISM330DL::Vector3`). Les constantes (`MCP23009_BTN_UP`, `WSEN_HIDS_ODR_1_HZ`…) ne changent pas.
+
+Les programmes de la V1c qui utilisaient les bibliothèques **Adafruit BME280 Library** ou **GFX Library for Arduino** fonctionnent toujours. Les drivers de la bibliothèque STeaMi sont plus simples : rien à installer en plus, et `SteamiGC9A01` laisse libre la broche P10, sur laquelle l'ancien programme de l'écran déplaçait le MISO du SPI (voir [Capteurs et écran](./capteurs)).
+
+Les dépôts d'élèves créés dans un [Codespace](./codespace) gardent la version des drivers de leur création : ceux créés avant le passage à la version 0.30.0 utilisent encore les anciens noms.
+
 ## Les drivers des composants
 
-Le tableau suivant donne, pour chaque composant de la carte, la bibliothèque qui le pilote et l'en-tête à inclure. La plupart des drivers font partie de la bibliothèque STeaMi. Le BME280 et l'écran couleur de la V1c n'ont pas encore de driver STeaMi : ils s'utilisent avec des bibliothèques existantes, à installer elles aussi depuis le gestionnaire de bibliothèques.
+Le tableau suivant donne, pour chaque composant de la carte, la bibliothèque qui le pilote et l'en-tête à inclure.
 
-| Composant                                         | Bibliothèque à installer    | `#include`                | Releases      |
-| ------------------------------------------------- | --------------------------- | ------------------------- | ------------- |
-| Accéléromètre et gyroscope (ISM330DL)             | STeaMi                      | `<ISM330DL.h>`            | V1a, V1b, V1c |
-| Magnétomètre, boussole (LIS2MDL)                  | STeaMi                      | `<LIS2MDL.h>`             | V1a, V1b, V1c |
-| Distance (VL53L1X)                                | STeaMi                      | `<VL53L1X.h>`             | V1a, V1b, V1c |
-| D-PAD (MCP23009E)                                 | STeaMi                      | `<MCP23009E.h>`           | V1a, V1b, V1c |
-| Jauge de batterie (BQ27441)                       | STeaMi                      | `<BQ27441.h>`             | V1a, V1b, V1c |
-| Pression et température (WSEN-PADS)               | STeaMi                      | `<WSEN_PADS.h>`           | V1a, V1b      |
-| Humidité et température (WSEN-HIDS)               | STeaMi                      | `<WsenHids.h>`            | V1a, V1b      |
-| Lumière, couleur, proximité et gestes (APDS-9960) | STeaMi                      | `<APDS9960.h>`            | V1a, V1b      |
-| Pression, humidité et température (BME280)        | **Adafruit BME280 Library** | `<Adafruit_BME280.h>`     | V1c           |
-| Écran OLED 128 × 128 (SSD1327)                    | STeaMi                      | `<SSD1327.h>`             | V1a, V1b      |
-| Écran TFT couleur 240 × 240 (GC9A01)              | **GFX Library for Arduino** | `<Arduino_GFX_Library.h>` | V1c           |
-| Bluetooth Low Energy (STM32WB55)                  | STM32duinoBLE               | `<STM32duinoBLE.h>`       | V1a, V1b, V1c |
-| Microphone (IM34DT05)                             | pas encore de driver        | —                         | V1a, V1b, V1c |
+| Composant                                         | Bibliothèque à installer | `#include`               | Releases      |
+| ------------------------------------------------- | ------------------------ | ------------------------ | ------------- |
+| Accéléromètre et gyroscope (ISM330DL)             | STeaMi                   | `<SteamiISM330DL.h>`     | V1a, V1b, V1c |
+| Magnétomètre, boussole (LIS2MDL)                  | STeaMi                   | `<SteamiLIS2MDL.h>`      | V1a, V1b, V1c |
+| Distance (VL53L1X)                                | STeaMi                   | `<SteamiVL53L1X.h>`      | V1a, V1b, V1c |
+| D-PAD (MCP23009E)                                 | STeaMi                   | `<SteamiMCP23009E.h>`    | V1a, V1b, V1c |
+| Jauge de batterie (BQ27441)                       | STeaMi                   | `<SteamiBQ27441.h>`      | V1a, V1b, V1c |
+| Pression et température (WSEN-PADS)               | STeaMi                   | `<SteamiWsenPads.h>`     | V1a, V1b      |
+| Humidité et température (WSEN-HIDS)               | STeaMi                   | `<SteamiWsenHids.h>`     | V1a, V1b      |
+| Lumière, couleur, proximité et gestes (APDS-9960) | STeaMi                   | `<SteamiAPDS9960.h>`     | V1a, V1b      |
+| Pression, humidité et température (BME280)        | STeaMi                   | `<SteamiBME280.h>`       | V1c           |
+| Écran OLED 128 × 128 (SSD1327)                    | STeaMi                   | `<SteamiSSD1327.h>`      | V1a, V1b      |
+| Écran TFT couleur 240 × 240 (GC9A01)              | STeaMi                   | `<SteamiGC9A01.h>`       | V1c           |
+| Fichier sur le disque USB (DAPLink)               | STeaMi                   | `<SteamiDaplinkFlash.h>` | V1a, V1b, V1c |
+| Configuration persistante (DAPLink)               | STeaMi                   | `<SteamiConfig.h>`       | V1a, V1b, V1c |
+| Bluetooth Low Energy (STM32WB55)                  | STM32duinoBLE            | `<STM32duinoBLE.h>`      | V1a, V1b, V1c |
+| Microphone (IM34DT05)                             | pas encore de driver     | —                        | V1a, V1b, V1c |
 
-STM32duinoBLE est proposée automatiquement à l'installation de STeaMi. Pour les bibliothèques tierces, accepter l'installation des dépendances proposée par l'IDE.
+STM32duinoBLE est proposée automatiquement à l'installation de STeaMi.
 
 Un programme inclut seulement les drivers dont il a besoin. **Croquis → Inclure une bibliothèque → STeaMi** ajoute `#include <STeaMi.h>`, qui inclut tous les drivers STeaMi d'un coup.
 
 Les exemples des drivers STeaMi sont rangés par composant dans **Fichier → Exemples → STeaMi** : par exemple **STeaMi → LIS2MDL → DigitalCompass**, ou **STeaMi → BLE → BleHotCold** pour le Bluetooth. Dans le menu, STeaMi apparaît dans la section « Exemples des librairies personnalisées ».
 
 ![Menu Fichier → Exemples de l'Arduino IDE : sous « Exemples des librairies personnalisées », le sous-menu STeaMi liste les composants, et LIS2MDL ses exemples BasicReader, DigitalCompass, MagneticCalibration et MetalDetector](/img/software/arduino/bibliotheques-03-exemples.png)
-La page [Capteurs et écran](./capteurs) donne un programme minimal pour chaque composant, BME280 et écran V1c compris.
+La page [Capteurs et écran](./capteurs) donne un programme minimal pour chaque composant.
 
 ## Le bus I²C interne
 
@@ -73,10 +98,10 @@ L'objet `Wire` des exemples Arduino classiques ne voit **pas** les capteurs de l
 
 ```cpp
 #include <Wire.h>
-#include <ISM330DL.h>
+#include <SteamiISM330DL.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);  // bus I²C interne
-ISM330DL imu(internalI2C);                      // le driver reçoit ce bus
+SteamiISM330DL imu(internalI2C);                // le driver reçoit ce bus
 
 void setup() {
   Serial.begin(115200);
@@ -91,7 +116,7 @@ void loop() {}
 
 Un seul objet `internalI2C` suffit pour tous les capteurs : il se passe à chaque driver.
 
-La même règle vaut pour les bibliothèques tierces. Par exemple, le BME280 de la V1c se démarre avec `bme.begin(0x76, &internalI2C)`.
+La même règle vaut pour les bibliothèques tierces : elles reçoivent elles aussi `internalI2C` à la place de `Wire`.
 
 ## Étapes suivantes
 

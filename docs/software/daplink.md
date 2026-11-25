@@ -208,6 +208,7 @@ L'installation de la stack radio nécessite un navigateur Chromium (Chrome, Edge
 
 ## Voir aussi
 
+- [Arduino — Fichier sur le disque USB](./arduino/capteurs#fichier-sur-le-disque-usb) — Drivers `SteamiDaplinkFlash` et `SteamiConfig`
 - [Hardware — STM32F103](../hardware/main-components/stm32f103) — Détails du MCU interface
 - [Hardware — Flash W25Q64](../hardware/main-components/w25q64) — Mémoire flash externe
 - [Conception — Service et USB](../design/service-usb) — Exigences et justifications

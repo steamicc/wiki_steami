@@ -36,17 +36,20 @@ mon-projet/
 
 ```ini
 [env:steami]
-platform = ststm32@^19
+platform = ststm32@^20
+platform_packages =
+  platformio/framework-arduinoststm32@~4.30100.0
 board = steami
 framework = arduino
 monitor_speed = 115200
 lib_deps =
-  https://github.com/steamicc/arduino-steami.git#v0.25.1
+  https://github.com/steamicc/arduino-steami.git#v0.30.0
 ```
 
+- `platform_packages` choisit la version 3.1.0 du core STM32duino, celle qu'installe l'Arduino IDE : un programme se compile de la même façon dans les deux outils.
 - `board = steami` désigne le fichier `boards/steami.json` du projet.
 - `lib_deps` installe la bibliothèque STeaMi, qui contient les drivers de la carte, dans la version indiquée après `#` (voir les [versions publiées](https://github.com/steamicc/arduino-steami/releases)). PlatformIO installe aussi la bibliothèque STM32duinoBLE, dont elle dépend.
-- Les bibliothèques tierces de la V1c s'ajoutent sur des lignes suivantes de `lib_deps` : `adafruit/Adafruit BME280 Library` pour le BME280, `moononournation/GFX Library for Arduino` pour l'écran.
+- D'autres bibliothèques s'ajoutent sur des lignes suivantes de `lib_deps`, avec leur nom dans le [registre PlatformIO](https://registry.platformio.org/) (par exemple `adafruit/Adafruit NeoPixel`).
 
 ![Projet STeaMi ouvert dans Visual Studio Code : l'explorateur montre boards/steami.json, src/main.cpp et platformio.ini, affiché dans l'éditeur](/img/software/arduino/platformio-02-projet.png)
 

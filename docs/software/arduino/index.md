@@ -10,10 +10,10 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 La carte STeaMi se programme en C++ avec l'Arduino IDE. Elle fait partie des cartes officiellement prises en charge par le paquet **STM32 MCU based boards** de STMicroelectronics ([STM32duino](https://github.com/stm32duino/Arduino_Core_STM32)), sous le nom **STeaMi Board**.
 
 - La LED RGB, les boutons A, B et MENU, le buzzer et le port série s'utilisent avec les fonctions Arduino standard, sans bibliothèque.
-- Les autres composants (accéléromètre, magnétomètre, capteurs de distance, de pression, d'humidité et de lumière, D-PAD, jauge de batterie, écran) se pilotent avec des drivers. La plupart sont réunis dans la bibliothèque **STeaMi** du gestionnaire de bibliothèques (développée dans [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)).
+- Les autres composants (accéléromètre, magnétomètre, capteurs de distance, de pression, d'humidité et de lumière, D-PAD, jauge de batterie, écran) se pilotent avec des drivers. Ils sont réunis dans la bibliothèque **STeaMi** du gestionnaire de bibliothèques (développée dans [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)).
 
 :::info Support en cours de développement
-Le support Arduino couvre la plupart des composants des V1a et V1b. Sur la V1c, le capteur BME280 et l'écran couleur n'ont pas encore de driver STeaMi : ils s'utilisent avec des bibliothèques existantes (Adafruit BME280, GFX Library for Arduino). Le microphone, la mémoire flash externe et la configuration persistante ne sont pas encore pris en charge. Pour un support complet, voir [MicroPython](../micropython/).
+Le support Arduino couvre les composants des trois releases, V1a, V1b et V1c, sauf le microphone, qui n'est pas encore pris en charge. Pour le microphone, voir [MicroPython](../micropython/).
 :::
 
 ## Par où commencer
@@ -44,10 +44,10 @@ Pour aller plus loin :
 | Magnétomètre                 | LIS2MDL   | bibliothèque STeaMi               |         4          |
 | Distance                     | VL53L1X   | bibliothèque STeaMi               |    0 (à venir)     |
 | D-PAD                        | MCP23009E | bibliothèque STeaMi               |         5          |
-| Jauge de batterie            | BQ27441   | bibliothèque STeaMi               |    0 (à venir)     |
+| Jauge de batterie            | BQ27441   | bibliothèque STeaMi               |         2          |
 | Bluetooth Low Energy         | STM32WB55 | bibliothèque STM32duinoBLE        |         6          |
 | Microphone                   | IM34DT05  | non pris en charge                |         —          |
-| Flash externe, configuration | DAPLink   | non pris en charge (en cours)     |         —          |
+| Flash externe, configuration | DAPLink   | bibliothèque STeaMi               |         2          |
 
 ### Selon la release
 
@@ -64,11 +64,11 @@ Pour aller plus loin :
 </Release>
 <Release releases="v1c">
 
-| Fonction                          | Composant | Comment                                                      | Exemples du driver |
-| --------------------------------- | --------- | ------------------------------------------------------------ | :----------------: |
-| Pression, humidité et température | BME280    | bibliothèque Adafruit BME280 (driver STeaMi à venir)         |         —          |
-| Écran TFT couleur 240 × 240       | GC9A01    | bibliothèque GFX Library for Arduino (driver STeaMi à venir) |         —          |
-| Lumière, couleur et gestes        | —         | absent de la V1c                                             |         —          |
+| Fonction                          | Composant | Comment             | Exemples du driver |
+| --------------------------------- | --------- | ------------------- | :----------------: |
+| Pression, humidité et température | BME280    | bibliothèque STeaMi |         5          |
+| Écran TFT couleur 240 × 240       | GC9A01    | bibliothèque STeaMi |         10         |
+| Lumière, couleur et gestes        | —         | absent de la V1c    |         —          |
 
 </Release>
 </ReleaseTabs>

@@ -73,6 +73,10 @@ Le terminal est un shell **zsh** (avec oh-my-zsh). L'historique des commandes es
 Le Codespace utilise **la même bibliothèque STeaMi et les mêmes exemples que l'Arduino IDE** (voir [Bibliothèques STeaMi](./bibliotheques)). Un programme écrit dans le Codespace se compile donc tel quel dans l'IDE, et inversement.
 :::
 
+:::caution Version des drivers
+L'image actuelle du Codespace contient la version 0.25.1 de la bibliothèque STeaMi, antérieure au préfixe `Steami` des drivers et aux drivers de la V1c. Les programmes de la page [Capteurs et écran](./capteurs) utilisent les noms de la version 0.30.0 : dans le Codespace, remplacer les noms en suivant le [tableau de correspondance](./bibliotheques#programmes-écrits-avant-la-version-0300) jusqu'à la mise à jour de l'image.
+:::
+
 Les exemples viennent des drivers du paquet Arduino `steamicc/arduino-steami` ([arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)). Ce sont les mêmes que dans le menu **Fichier → Exemples → STeaMi** de l'Arduino IDE, avec les mêmes noms `COMPOSANT/Exemple`. Pour ne voir que ceux du magnétomètre :
 
 ```bash

@@ -11,7 +11,7 @@ Cette page donne un programme minimal pour chaque composant de la carte. Chaque 
 
 Avant de commencer :
 
-- installer la bibliothèque **STeaMi** depuis le gestionnaire de bibliothèques, et les bibliothèques tierces indiquées pour la V1c (voir [Bibliothèques STeaMi](./bibliotheques)) ;
+- installer la bibliothèque **STeaMi** depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)) ;
 - garder en tête que les capteurs sont sur le [bus I²C interne](./bibliotheques#le-bus-ic-interne) : tous les programmes créent l'objet `internalI2C` et le passent au driver.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**.
@@ -24,10 +24,10 @@ Composant ISM330DL, présent sur toutes les releases. Driver : bibliothèque STe
 
 ```cpp
 #include <Wire.h>
-#include <ISM330DL.h>
+#include <SteamiISM330DL.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-ISM330DL imu(internalI2C);
+SteamiISM330DL imu(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -39,7 +39,7 @@ void setup() {
 }
 
 void loop() {
-  ISM330DL::Vector3 a;
+  SteamiISM330DL::Vector3 a;
   if (imu.accelerationG(a)) {
     Serial.print("x=");
     Serial.print(a.x);
@@ -63,10 +63,10 @@ Composant LIS2MDL, présent sur toutes les releases. Driver : bibliothèque STea
 
 ```cpp
 #include <Wire.h>
-#include <LIS2MDL.h>
+#include <SteamiLIS2MDL.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-LIS2MDL mag(internalI2C);
+SteamiLIS2MDL mag(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -96,10 +96,10 @@ Composant VL53L1X, présent sur toutes les releases. Driver : bibliothèque STea
 
 ```cpp
 #include <Wire.h>
-#include <VL53L1X.h>
+#include <SteamiVL53L1X.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-VL53L1X tof(internalI2C);
+SteamiVL53L1X tof(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -127,10 +127,10 @@ Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, p
 
 ```cpp
 #include <Wire.h>
-#include <MCP23009E.h>
+#include <SteamiMCP23009E.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-MCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);
+SteamiMCP23009E dpad(internalI2C, RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);
 
 const uint8_t boutons[] = {MCP23009_BTN_UP, MCP23009_BTN_DOWN, MCP23009_BTN_LEFT, MCP23009_BTN_RIGHT};
 const char* noms[] = {"HAUT", "BAS", "GAUCHE", "DROITE"};
@@ -162,10 +162,10 @@ Composant BQ27441, présent sur toutes les releases. Driver : bibliothèque STea
 
 ```cpp
 #include <Wire.h>
-#include <BQ27441.h>
+#include <SteamiBQ27441.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-BQ27441 batterie(internalI2C);
+SteamiBQ27441 batterie(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -197,12 +197,12 @@ Deux capteurs Würth : WSEN-PADS (pression) et WSEN-HIDS (humidité). Driver : b
 
 ```cpp
 #include <Wire.h>
-#include <WSEN_PADS.h>
-#include <WsenHids.h>
+#include <SteamiWsenPads.h>
+#include <SteamiWsenHids.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-WSEN_PADS pression(internalI2C);
-WsenHids humidite(internalI2C);
+SteamiWsenPads pression(internalI2C);
+SteamiWsenHids humidite(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -228,35 +228,38 @@ void loop() {
 </Release>
 <Release releases="v1c">
 
-Un seul capteur, le BME280, à l'adresse `0x76`. Il n'a pas encore de driver STeaMi : on utilise la bibliothèque **Adafruit BME280 Library**, à installer depuis le gestionnaire de bibliothèques.
+Un seul capteur, le BME280, à l'adresse `0x76`. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
-#include <Adafruit_BME280.h>
+#include <SteamiBME280.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-Adafruit_BME280 bme;
+SteamiBME280 bme(internalI2C);
 
 void setup() {
   Serial.begin(115200);
   internalI2C.begin();
-  if (!bme.begin(0x76, &internalI2C)) {
+  if (!bme.begin()) {
     Serial.println("BME280 non détecté");
     while (true) {}
   }
 }
 
 void loop() {
+  auto mesure = bme.read();  // les trois grandeurs d'une même mesure
   Serial.print("Température : ");
-  Serial.print(bme.readTemperature());
+  Serial.print(mesure.temperature);
   Serial.print(" °C  Humidité : ");
-  Serial.print(bme.readHumidity());
+  Serial.print(mesure.humidity);
   Serial.print(" %  Pression : ");
-  Serial.print(bme.readPressure() / 100.0);
+  Serial.print(mesure.pressure);
   Serial.println(" hPa");
   delay(1000);
 }
 ```
+
+Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le point de rosée (**DewPointMonitor**) et le confort d'une pièce (**ComfortZone**).
 
 </Release>
 </ReleaseTabs>
@@ -270,10 +273,10 @@ Composant APDS-9960. Driver : bibliothèque STeaMi.
 
 ```cpp
 #include <Wire.h>
-#include <APDS9960.h>
+#include <SteamiAPDS9960.h>
 
 TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
-APDS9960 lumiere(internalI2C);
+SteamiAPDS9960 lumiere(internalI2C);
 
 void setup() {
   Serial.begin(115200);
@@ -313,9 +316,9 @@ La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a �
 Écran OLED rond 128 × 128, 16 niveaux de gris (contrôleur SSD1327). Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <SSD1327.h>
+#include <SteamiSSD1327.h>
 
-WS_OLED_128X128_STEAMI oled;
+SteamiSSD1327 oled;
 
 void setup() {
   oled.begin();
@@ -332,38 +335,86 @@ Le dessin se fait en mémoire (`fill`, `pixel`, `line`, `fillRect`, `text`) ; ri
 </Release>
 <Release releases="v1c">
 
-Écran TFT rond 240 × 240 en couleur (contrôleur GC9A01). Il n'a pas encore de driver STeaMi : on utilise la bibliothèque **GFX Library for Arduino**, à installer depuis le gestionnaire de bibliothèques.
+Écran TFT rond 240 × 240 en couleur (contrôleur GC9A01). Driver : bibliothèque STeaMi.
 
 ```cpp
-#include <SPI.h>
-#include <Arduino_GFX_Library.h>
+#include <SteamiGC9A01.h>
 
-// L'écran partage la broche D/C (PB4) avec le MISO du SPI interne.
-// On déclare donc un SPI dont le MISO est déplacé sur PA6 (broche P10
-// du connecteur de bord), et on garde PB4 pour D/C.
-SPIClass spiTft(SPI_INT_MOSI, PA6, SPI_INT_SCK);
-Arduino_DataBus *bus = new Arduino_HWSPI(SPI_INT_MISO, CS_DISPLAY, &spiTft);
-Arduino_GFX *tft = new Arduino_GC9A01(bus, RST_DISPLAY, 0, true);
+SteamiGC9A01 affichage;
 
 void setup() {
-  tft->begin();
-  tft->fillScreen(RGB565_BLACK);
-  tft->setTextColor(RGB565_WHITE);
-  tft->setTextSize(3);
-  tft->setCursor(40, 105);
-  tft->print("Bonjour !");
-  tft->fillCircle(120, 180, 20, RGB565_RED);
+  Serial.begin(115200);
+  if (!affichage.begin()) {               // false si la mémoire manque
+    Serial.println("Mémoire insuffisante pour l'écran");
+    while (true) {}
+  }
+  affichage.fill(GC9A01_BLACK);
+  affichage.text("Bonjour !", 93, 100, GC9A01_WHITE);
+  affichage.fillRect(100, 130, 40, 40, GC9A01_RED);
+  affichage.show();                       // envoie l'image à l'écran
 }
 
 void loop() {}
 ```
 
-Sur la STeaMi, la broche de commande D/C de l'écran est la broche MISO du bus SPI interne. Le programme crée donc un bus SPI dont le MISO est déplacé sur la broche P10 du connecteur de bord, qui ne peut plus servir à autre chose tant que l'écran est utilisé.
+Le dessin se fait en mémoire, avec les mêmes fonctions que l'écran des V1a et V1b (`fill`, `pixel`, `line`, `fillRect`, `text`) ; rien n'apparaît avant l'appel à `show()`. Les couleurs sont au format RGB565 : constantes `GC9A01_RED`, `GC9A01_BLUE`, `GC9A01_YELLOW`…, ou `SteamiGC9A01::color565(r, g, b)` à partir de valeurs de 0 à 255.
 
-Les fonctions de dessin (`fillScreen`, `drawLine`, `fillCircle`, `setCursor`, `print`…) sont décrites dans le [wiki de la bibliothèque](https://github.com/moononournation/Arduino_GFX/wiki). Les couleurs sont au format RGB565 (`RGB565_RED`, `RGB565_BLUE`…).
+`text(texte, x, y, couleur)` écrit avec une petite police de 5 × 7 pixels, 6 pixels par caractère, sans option de taille ; `(x, y)` est le coin en haut à gauche de la première lettre. Les lettres accentuées ne s'affichent pas.
+
+L'écran est rond : les coins de l'image ne s'affichent pas. Le plus grand carré entièrement visible va de `(36, 36)` à `(203, 203)`.
+
+L'image occupe 115 200 octets de mémoire vive, plus de la moitié de celle disponible pour un programme. Cette mémoire est réservée par `begin()` pendant l'exécution : le rapport de compilation de l'IDE ne la compte pas. Si l'écran reste noir dans un programme plus gros, c'est que la mémoire manque.
+
+Les exemples **STeaMi → GC9A01** reprennent ceux de l'écran des V1a et V1b, en couleur (**color_palette**, **rotating_3d_cube**…).
 
 </Release>
 </ReleaseTabs>
+
+## Fichier sur le disque USB
+
+Le DAPLink, le second microcontrôleur de la carte qui fait apparaître le disque USB **STeaMi**, garde un seul fichier dans la mémoire flash externe de 8 Mo. Un programme peut y ajouter des lignes de texte, par exemple un relevé de mesures au format CSV, que l'ordinateur ouvre ensuite comme un fichier ordinaire. Driver : bibliothèque STeaMi.
+
+```cpp
+#include <Wire.h>
+#include <SteamiDaplinkBridge.h>
+#include <SteamiDaplinkFlash.h>
+
+TwoWire internalI2C(I2C_INT_SDA, I2C_INT_SCL);
+SteamiDaplinkBridge pont(internalI2C);
+SteamiDaplinkFlash fichier(pont);
+
+void setup() {
+  Serial.begin(115200);
+  internalI2C.begin();
+  if (!fichier.begin()) {
+    Serial.println("DAPLink non détecté");
+    while (true) {}
+  }
+  if (!fichier.setFilename("MESURES", "CSV")) {
+    Serial.println("Nom refusé");
+  }
+  fichier.writeLine("secondes");          // en-tête : repère chaque démarrage
+}
+
+void loop() {
+  char ligne[16];
+  snprintf(ligne, sizeof(ligne), "%lu", millis() / 1000);
+  fichier.writeLine(ligne);               // ajoute une ligne à la fin du fichier
+  Serial.println(ligne);
+  delay(10000);
+}
+```
+
+Ce qu'il faut savoir sur ce fichier :
+
+- **Un seul fichier.** `setFilename()` le renomme sans effacer son contenu : un autre programme (comme l'exemple **data_logger**) écrit dans ce même fichier. Le nom compte 8 caractères au plus et l'extension 3, sans espace ni point ; les minuscules deviennent des majuscules.
+- **Les lignes s'ajoutent.** Chaque démarrage du programme (téléversement, bouton Reset, rebranchement) ajoute ses lignes après les précédentes, et le compteur repart à 0 : l'en-tête `secondes` sépare les séries.
+- **Voir le fichier à jour.** Le disque USB montre le fichier tel qu'il était au démarrage du DAPLink. Pour voir les nouvelles lignes, débrancher le câble USB, et aussi la batterie si elle est branchée (elle garde le DAPLink alimenté), puis rebrancher. Le bouton Reset ne suffit pas.
+- **Vider le fichier.** `fichier.clearFlash()` efface le contenu et garde le nom. L'appeler volontairement, par exemple à l'appui sur un bouton, et pas dans `setup()` : le relevé serait effacé à chaque démarrage. L'effacement prend de moins d'une seconde à une vingtaine de secondes selon la taille du fichier.
+
+L'exemple **STeaMi → DAPLINK_FLASH → data_logger** relit aussi le fichier depuis le programme. La lecture demande un firmware DAPLink de mars 2026 ou plus récent : avec un firmware plus ancien, le fichier paraît vide au programme. Le [mettre à jour](../daplink#mise-à-jour-du-firmware) corrige le problème.
+
+La zone de configuration du DAPLink (nom de la carte, calibrations des capteurs) se lit avec le driver `SteamiConfig` : voir l'exemple **STeaMi → STEAMI_CONFIG → show_config**. Sur une carte dont le firmware DAPLink n'a pas de zone de configuration, `SteamiConfig::begin()` renvoie `false` ; là aussi, mettre à jour le firmware.
 
 ## Bluetooth
 
@@ -371,4 +422,4 @@ Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, propo
 
 ## Composants non pris en charge
 
-Le microphone (IM34DT05), la mémoire flash externe et la configuration persistante (gérées par le DAPLink) n'ont pas encore de driver Arduino. Ils sont utilisables en [MicroPython](../micropython/).
+Le microphone (IM34DT05) n'a pas encore de driver Arduino. Il est utilisable en [MicroPython](../micropython/).
