@@ -134,7 +134,7 @@ VL53L1X/GestureDetection.bin
 ```
 
 Un exemple qui ne compile pas fait échouer le job : pas d'archive partielle.
-Le job compile le paquet **tel que publié au tag** (dépôt de distribution),
+Le job compile le paquet **tel que publié au tag** (sources de la bibliothèque au tag, construites avec le script de paquet du tag),
 avec le même cœur et les mêmes dépendances que le job de vérification
 existant, et s'authentifie avec le jeton d'application déjà utilisé par le
 workflow (`RELEASE_APP_ID`/`RELEASE_APP_SECRET`). Il peut être relancé à la
@@ -184,8 +184,8 @@ npm `dapjs@2.3.0`.
 
 - `docs/software/arduino/exemples/index.md` : présentation, comment essayer,
   liste des composants.
-- Une page par composant, `docs/software/arduino/exemples/<composant>.mdx`
-  (nom en minuscules : `vl53l1x.mdx`, `wsen-hids.mdx`, `steami-board.mdx`…),
+- Une page par composant, `docs/software/arduino/exemples/<composant>.md`
+  (nom en minuscules : `vl53l1x.md`, `wsen-hids.md`, `steami-board.md`…),
   qui présente brièvement le composant, **indique les versions de carte qui
   l'ont** (V1c ; V1a et V1b), puis, pour chaque exemple, une section
   `## <Nom> {#<nom-en-minuscules>}` (ancre explicite, `_` gardés, ex.
