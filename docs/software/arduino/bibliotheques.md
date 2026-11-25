@@ -118,7 +118,10 @@ Un seul objet `internalI2C` suffit pour tous les capteurs : il se passe à chaqu
 
 La même règle vaut pour les bibliothèques tierces : elles reçoivent elles aussi `internalI2C` à la place de `Wire`.
 
+Un programme qui utilise l'objet `Steami` de la bibliothèque ne crée pas `internalI2C` : il passe `Steami.wire()` aux drivers qu'il crée dans `setup()` (voir [Reconnaître la carte](./carte#utiliser-ses-propres-drivers)). Deux objets `TwoWire` sur le bus interne ne fonctionnent pas ensemble : seul le dernier démarré répond, et les échanges de l'autre échouent sans message d'erreur.
+
 ## Étapes suivantes
 
+- [Reconnaître la carte](./carte) : savoir sur quelle release tourne le programme et partager les drivers.
 - [Capteurs et écran](./capteurs) : un programme minimal pour chaque composant.
 - [Conventions de l'API](./conventions) : ce que les drivers ont en commun.
