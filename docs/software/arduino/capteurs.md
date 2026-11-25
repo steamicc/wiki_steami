@@ -176,7 +176,7 @@ void loop() {
 }
 ```
 
-Sans batterie branchée (carte alimentée par l'USB seul), la jauge répond mais renvoie 0 % et 0 mV.
+La jauge est alimentée par la batterie : sans batterie branchée (carte alimentée par l'USB seul), elle ne répond pas et le programme affiche « BQ27441 non détecté ». Brancher la batterie, puis appuyer sur le bouton Reset de la carte.
 
 ## Pression, humidité et température
 

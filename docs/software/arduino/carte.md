@@ -169,7 +169,7 @@ Quelques précisions :
 - `SteamiTemperature` : `setOffset(-0.5)` ajoute un décalage, en °C, à chaque `read()` de cet objet.
 - `SteamiPressure` : `altitude()` utilise la pression standard au niveau de la mer, 1013,25 hPa. Pour une meilleure estimation, lui passer la pression du jour, ramenée au niveau de la mer : `pression.altitude(1020.0)`. La formule est la même sur toutes les releases.
 - `SteamiDistance` : `read()` renvoie aussi `-1` quand le capteur ne donne pas de résultat à temps. Une cible hors de portée n'est pas distinguée, et une distance de 0 mm se lit aussi `-1`.
-- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV. Sans batterie (carte alimentée par l'USB seul), la jauge répond souvent quand même : `begin()` renvoie `true`, sans message, mais `percent()` donne 0 et `voltage()` donne `nan`, comme si la fonction manquait. Brancher une batterie pour avoir de vraies mesures.
+- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV. La jauge est alimentée par la batterie : sans batterie (carte alimentée par l'USB seul), elle ne répond pas, `begin()` renvoie `false` et le message `E10` demande de brancher une batterie puis d'appuyer sur Reset.
 
 ### Aller plus loin : les drivers partagés
 
