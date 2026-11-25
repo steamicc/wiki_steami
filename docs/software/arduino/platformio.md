@@ -43,7 +43,7 @@ board = steami
 framework = arduino
 monitor_speed = 115200
 lib_deps =
-  https://github.com/steamicc/arduino-steami.git#v0.30.0
+  https://github.com/steamicc/arduino-steami.git#v0.31.0
 ```
 
 - `platform_packages` choisit la version 3.1.0 du core STM32duino, celle qu'installe l'Arduino IDE : un programme se compile de la même façon dans les deux outils.
