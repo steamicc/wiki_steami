@@ -57,7 +57,7 @@ La première ligne donne la release et la façon dont elle a été trouvée. Si 
 | `not responding` | le composant ne répond pas : absent, mal soudé ou non alimenté                                                                                                                                            |
 | `not tried`      | ni `Steami.claim()` ni l'accesseur de ce composant n'a encore été appelé (voir [Un programme pour toutes les cartes](#un-programme-pour-toutes-les-cartes)) ; la reconnaissance de la carte ne compte pas |
 
-L'exemple BoardInfo utilise d'abord le composant de chaque fonction : ses lignes affichent donc `OK` ou `not responding`. Seule exception, une release inconnue (message `E01`) : la liste compte alors les neuf composants, mais l'exemple n'essaie que le BME280 pour la température, l'humidité et la pression, et les lignes du WSEN-HIDS et du WSEN-PADS restent `not tried`.
+L'exemple BoardInfo essaie d'abord chaque composant possible de chaque fonction : ses lignes affichent donc `OK` ou `not responding`, même quand la release est inconnue (message `E01`).
 
 ## Comment la carte est reconnue
 
