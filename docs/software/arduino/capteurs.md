@@ -500,7 +500,7 @@ Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans
 
 ## Lumière, couleur et gestes
 
-Ces mesures demandent le capteur APDS-9960, présent sur la V1a et la V1b seulement : la V1c n'a pas de capteur de lumière, de couleur ni de gestes. Sur une V1c, les programmes ci-dessous se téléversent mais n'affichent que le message `E20` (voir plus bas).
+Ces mesures demandent le capteur APDS-9960, présent sur la V1a et la V1b seulement : la V1c n'a pas de capteur de lumière, de couleur ni de gestes. Sur une V1c, les programmes ci-dessous se téléversent, puis affichent le message `E20` et des mesures à 0 (voir plus bas).
 
 ```cpp
 #include <SteamiLight.h>
