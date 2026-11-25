@@ -177,6 +177,6 @@ Vérifier `monitor_speed = 115200` dans `platformio.ini`. Les messages écrits d
 ## Voir aussi
 
 - [Bibliothèques STeaMi](./bibliotheques) : les drivers de chaque composant et le bus I²C interne.
-- [Capteurs et écran](./capteurs) : un programme minimal pour chaque composant.
+- [Capteurs et écran](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
 - [Développer les drivers](./contribuer) : pour modifier la bibliothèque STeaMi elle-même.
 - [Documentation PlatformIO](https://docs.platformio.org/) : référence de `platformio.ini` et des commandes.

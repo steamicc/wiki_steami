@@ -11,7 +11,7 @@ Les releases V1a, V1b et V1c de la STeaMi n'ont pas les mêmes capteurs d'enviro
 - crée une seule fois, à la première demande, le driver des capteurs de la carte, de la jauge de batterie et de l'extenseur du D-PAD (voir [les drivers partagés](#aller-plus-loin--les-drivers-partagés)), sur le bus I²C interne, et le partage avec tout le programme ;
 - signale les problèmes par de courts messages codés, comme `E01`.
 
-Depuis la version 0.32.0, des classes par fonction s'appuient sur cet objet : `SteamiTemperature`, par exemple, lit la température avec le capteur de la carte, quelle que soit sa release. La version 0.34.0 ajoute les classes du mouvement, de la boussole, de la lumière et des boutons. Un même programme peut ainsi tourner sur toutes les cartes.
+Depuis la version 0.32.0, des classes par fonction s'appuient sur cet objet : `SteamiTemperature`, par exemple, lit la température avec le capteur de la carte, quelle que soit sa release. La version 0.34.0 ajoute les classes du mouvement, de la boussole, de la lumière et des boutons. Un même programme peut ainsi tourner sur toutes les cartes. La page [Capteurs et écran](./capteurs) donne le programme de chaque classe ; cette page-ci décrit ce qu'elles ont en commun, la reconnaissance de la carte, les calibrations et les messages.
 
 :::note Version de la bibliothèque
 L'objet `Steami` demande la version 0.31.0 de la bibliothèque STeaMi. Ses méthodes `calibrate()` et `calibrated()`, ainsi que les cinq premières classes par fonction (`SteamiTemperature`, `SteamiHumidity`, `SteamiPressure`, `SteamiDistance` et `SteamiBattery`), demandent la version 0.32.0. Les classes du mouvement, de la boussole, de la lumière et des boutons (`SteamiAccelerometer`, `SteamiCompass`, `SteamiButtons`…) demandent la version 0.34.0. Si la compilation s'arrête sur `SteamiBoard.h: No such file or directory`, sur `SteamiTemperature.h: No such file or directory`, sur `SteamiCompass.h: No such file or directory` (ou l'en-tête d'une autre classe) ou sur `has no member named 'calibrate'`, la bibliothèque STeaMi installée est trop ancienne :
@@ -122,56 +122,7 @@ void loop() {
 
 Le programme n'appelle pas `Steami.begin()` : la première classe démarrée reconnaît la carte.
 
-Les classes du mouvement, de la boussole et des boutons s'utilisent de la même façon. Ce programme affiche deux fois par seconde le cap et l'accélération sur l'axe z ; le cap n'est juste qu'après une calibration de la boussole, lancée par un appui sur MENU (voir [Boussole](#boussole)) :
-
-```cpp
-#include <SteamiAccelerometer.h>
-#include <SteamiCompass.h>
-#include <SteamiButtons.h>
-
-SteamiAccelerometer acceleration;
-SteamiCompass boussole;
-SteamiButtons boutons;
-
-unsigned long dernierAffichage = 0;
-
-void setup() {
-  Serial.begin(115200);
-  acceleration.begin();
-  boussole.begin();
-  boutons.begin();
-}
-
-void loop() {
-  // lire les boutons souvent : une tape brève dure environ 100 ms
-  if (boutons.wasPressed(SteamiButton::MENU)) {
-    Serial.println("Calibration : tourner la carte dans tous les sens pendant 12 s");
-    boussole.calibrate(12);
-    Serial.println("Calibration terminée");
-  }
-
-  if (millis() - dernierAffichage >= 500) {  // affichage deux fois par seconde
-    dernierAffichage = millis();
-    float cap = boussole.heading();
-    Serial.print("Cap : ");
-    if (isnan(cap)) {
-      Serial.print("nan");
-    } else {
-      Serial.print(lroundf(cap) % 360);  // arrondi au degré : 359,6 s'affiche 0, jamais 360
-    }
-    Serial.print(" deg (");
-    Serial.print(boussole.direction());
-    Serial.print(")  z : ");
-    Serial.print(acceleration.z());
-    Serial.println(" g");
-  }
-  delay(5);
-}
-```
-
-Au démarrage, la boussole n'est pas calibrée et le cap affiché est faux : appuyer sur MENU, tourner lentement la carte dans tous les sens pendant les 12 secondes, puis la reposer à plat. La calibration se perd à chaque Reset et à chaque téléversement, sauf si une calibration `cm` est enregistrée sur la carte (voir [Boussole](#boussole)).
-
-Carte posée à plat, écran vers le haut, z vaut environ −1 g. Le programme ne s'endort pas une demi-seconde entre deux affichages : il lit les boutons toutes les 5 ms environ, sinon une tape brève sur MENU serait manquée (voir [Boutons](#boutons)).
+Les autres classes s'utilisent de la même façon. Chaque section de [Capteurs et écran](./capteurs) commence par le programme de sa classe : [mouvement](./capteurs#mouvement--accéléromètre-et-gyroscope), [boussole](./capteurs#boussole--magnétomètre), [distance](./capteurs#distance--capteur-de-temps-de-vol), [boutons](./capteurs#boutons-et-d-pad), [batterie](./capteurs#batterie), [pression, humidité et température](./capteurs#pression-humidité-et-température), [lumière, couleur et gestes](./capteurs#lumière-couleur-et-gestes).
 
 Chaque classe a aussi un exemple prêt à téléverser, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** : **Temperature**, **Humidity**, **Pressure**, **Distance**, **Battery**, **Accelerometer**, **Gyroscope**, **Magnetometer**, **Compass**, **Light**, **Color**, **Gesture** et **Buttons**.
 
@@ -237,54 +188,7 @@ Si le composant ne répond pas, ou si la release n'a pas la fonction, `begin()` 
 
 Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset. Si `begin()` a renvoyé `false` sans message visible, ouvrir le moniteur série puis appuyer sur Reset pour lire le message (voir [Les messages](#les-messages)).
 
-Quelques précisions :
-
-- `SteamiTemperature` : `setOffset(-0.5)` ajoute un décalage, en °C, à chaque `read()` de cet objet.
-- `SteamiPressure` : `altitude()` utilise la pression standard au niveau de la mer, 1013,25 hPa. Pour une meilleure estimation, lui passer la pression du jour, ramenée au niveau de la mer : `pression.altitude(1020.0)`. La formule est la même sur toutes les releases.
-- `SteamiDistance` : `read()` renvoie aussi `-1` quand le capteur ne donne pas de résultat à temps. Une cible hors de portée n'est pas distinguée, et une distance de 0 mm se lit aussi `-1`.
-- `SteamiBattery` : `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge. `voltage()` renvoie aussi `NAN` quand la jauge mesure 0 mV. La jauge est alimentée par la batterie : sans batterie (carte alimentée par l'USB seul), elle ne répond pas, `begin()` renvoie `false` et le message `E10` demande de brancher une batterie puis d'appuyer sur Reset.
-- `SteamiAccelerometer` : `begin()` règle l'accéléromètre partagé sur ±8 g, sinon une secousse de plus de 2 g ne serait jamais vue. `strength()` est la norme des trois axes, environ 1 g au repos ; `isShaken()` vaut `true` quand elle dépasse 2 g, et `isShaken(3.0)` change ce seuil.
-- `SteamiGyroscope` : la vitesse de rotation autour de chaque axe, en degrés par seconde, environ 0 au repos.
-- `SteamiLight` et `SteamiColor` : des nombres bruts du capteur, sans unité, qui augmentent avec la lumière ; pas de lux ni de couleur prête à afficher. `SteamiGesture` met le capteur en détection de gestes : pendant qu'une main passe au-dessus, la lumière et la couleur ne sont plus mesurées, puis reprennent.
-- `SteamiGesture` : `read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(geste)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours. Le décodage des gestes n'a pas encore été vérifié sur une carte.
-- Sur une V1c, `SteamiLight`, `SteamiColor` et `SteamiGesture` affichent le message `E20` et leur `begin()` renvoie `false`, sans échange sur le bus I²C.
-
-### Boussole
-
-`SteamiCompass` donne le cap de la carte tenue à plat, écran vers le haut :
-
-- `heading()` renvoie un angle en degrés, compté dans le sens des aiguilles d'une montre à partir du nord, de 0 à moins de 360 (jamais 360). Il vaut 0 quand le haut de l'écran, le côté opposé au connecteur USB, pointe vers le nord, 90 vers l'est, 180 vers le sud et 270 vers l'ouest.
-- `direction()` renvoie la direction la plus proche parmi huit : `"N"`, `"NE"`, `"E"`, `"SE"`, `"S"`, `"SW"`, `"W"` ou `"NW"`. Chacune couvre 45° centrés sur elle : `"N"` va de 337,5° à 22,5°, `"NE"` de 22,5° à 67,5°, etc. `heading()` et `direction()` font chacune leur propre mesure : près de la limite entre deux secteurs, la direction affichée peut ne pas correspondre au cap affiché juste avant (par exemple 22° avec `NE`).
-
-Le cap ne tient pas compte de l'inclinaison : une carte penchée donne un cap faux.
-
-**Calibrer.** Le magnétomètre mesure aussi le champ magnétique de la carte elle-même, plus fort que celui de la Terre : sans calibration, une V1c a lu 176 µT au total, champ terrestre compris, alors que le champ terrestre seul vaut 25 à 65 µT. Sans calibration, le cap est donc faux. Deux façons de calibrer :
-
-- `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive et se perd au redémarrage. L'exemple **STeaMi → STEAMI_BOARD → Compass** la lance par un appui sur MENU.
-- une calibration `cm` enregistrée dans la zone de configuration du DAPLink est appliquée automatiquement au démarrage (voir [Calibrations](#calibrations)).
-
-Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proche de 359° (`N`) et face à l'est d'environ 70° (`E`) : la boussole indique une direction, pas un cap précis au degré. Les objets métalliques, les aimants et les câbles proches faussent aussi la mesure.
-
-**Nord géographique.** Le cap est mesuré par rapport au nord magnétique. `boussole.setDeclination(2.0)` ajoute la déclinaison magnétique du lieu, en degrés, positive vers l'est, pour viser le nord géographique ; elle ne dépasse pas quelques degrés en France métropolitaine. Cet appel peut se faire avant `begin()`.
-
-**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre.
-
-### Boutons
-
-`SteamiButtons` lit les sept boutons de la carte : `SteamiButton::A`, `B` et `MENU`, reliés au microcontrôleur, et les quatre flèches du D-PAD, `UP`, `DOWN`, `LEFT` et `RIGHT`, reliées à l'extenseur MCP23009E.
-
-| Méthode               | Rôle                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `isPressed(bouton)`   | `true` tant que le bouton est enfoncé                                                                                                                                                      |
-| `wasPressed(bouton)`  | `true` une fois par appui : l'appui est consommé, l'appel suivant renvoie `false` jusqu'au prochain appui                                                                                  |
-| `wasReleased(bouton)` | de même, `true` une fois par relâchement                                                                                                                                                   |
-| `waitForPress()`      | attend, sans limite, un nouvel appui et renvoie le bouton ; `waitForPress(3000)` renvoie `SteamiButton::NONE` après 3 secondes sans appui. Les appuis faits avant l'appel ne comptent pas. |
-
-Si l'extenseur du D-PAD ne répond pas, `begin()` renvoie `false` avec le message `E10`, mais A, B et MENU fonctionnent quand même ; les flèches restent alors relâchées.
-
-Chaque appel de ces méthodes lit l'état des boutons. Un appui est pris en compte dès qu'un appel voit le bouton enfoncé. Un contact mécanique ne s'ouvre ni ne se ferme net : pendant quelques millisecondes, il rebondit (s'ouvre et se ferme plusieurs fois). Après chaque appui ou relâchement, les rebonds des 20 ms suivantes sont donc ignorés, si bien qu'un appui ne compte qu'une fois. Une tape brève dure environ 100 ms : il faut donc appeler les boutons au moins toutes les 50 ms. Avec un `delay(500)` dans `loop()`, une tape tombée entre deux lectures est perdue ; le deuxième programme de [Un programme pour toutes les cartes](#un-programme-pour-toutes-les-cartes) mesure le temps avec `millis()` pour afficher sans attendre. Un bouton déjà enfoncé au démarrage du programme ne compte pas comme un appui.
-
-L'exemple **STeaMi → STEAMI_BOARD → Buttons** affiche chaque appui et chaque relâchement des sept boutons.
+Le détail de chaque classe (décalage de `setOffset()`, altitude avec la pression du jour, ±8 g et `isShaken()`, nombres bruts de la lumière et de la couleur, gestes, `E20` sur une V1c, cap et calibration de la boussole, anti-rebond des boutons) est donné dans sa section de Capteurs et écran : [mouvement](./capteurs#mouvement--accéléromètre-et-gyroscope), [boussole](./capteurs#boussole--magnétomètre), [distance](./capteurs#distance--capteur-de-temps-de-vol), [boutons et D-PAD](./capteurs#boutons-et-d-pad), [batterie](./capteurs#batterie), [pression, humidité et température](./capteurs#pression-humidité-et-température), [lumière, couleur et gestes](./capteurs#lumière-couleur-et-gestes).
 
 ### Aller plus loin : les drivers partagés
 
@@ -486,6 +390,6 @@ void loop() {}
 
 ## Étapes suivantes
 
-- [Capteurs et écran](./capteurs) : un programme minimal pour chaque composant.
+- [Capteurs et écran](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
 - [Conventions de l'API](./conventions) : ce que les drivers ont en commun.
 - Le [README de SteamiBoard](https://github.com/steamicc/arduino-steami-lib/blob/main/lib/steami_board/README.md), dans le dépôt arduino-steami-lib, liste toutes les méthodes de `Steami` et des classes par fonction.
