@@ -162,7 +162,7 @@ Si le composant ne répond pas, `begin()` renvoie `false`, un message s'affiche 
 
 `NAN` (« not a number », pas de valeur) s'affiche `nan` sur le moniteur série ; `isnan(valeur)` le teste dans le programme.
 
-Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset. Si une lecture renvoie sa valeur d'absence sans message visible, ouvrir le moniteur série puis appuyer sur Reset (voir [Les messages](#les-messages)).
+Une fonction qui a échoué n'est pas réessayée avant un redémarrage de la carte : ses lectures renvoient aussitôt leur valeur d'absence, sans nouveau message. Après avoir branché une batterie, par exemple, appuyer sur le bouton Reset. Si `begin()` a renvoyé `false` sans message visible, ouvrir le moniteur série puis appuyer sur Reset pour lire le message (voir [Les messages](#les-messages)).
 
 Quelques précisions :
 

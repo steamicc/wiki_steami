@@ -250,7 +250,7 @@ Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le 
 </Release>
 </ReleaseTabs>
 
-Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans la calibration de la zone de configuration du DAPLink. Pour une température calibrée, utiliser `SteamiTemperature` (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
+Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans la calibration de la zone de configuration du DAPLink. Pour une température calibrée, utiliser `SteamiTemperature`, qui demande la version 0.32.0 de la bibliothèque (voir [Un programme pour toutes les cartes](./carte#un-programme-pour-toutes-les-cartes)).
 
 ## Lumière, couleur et gestes
 
