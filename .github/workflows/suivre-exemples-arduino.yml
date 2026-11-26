@@ -1,0 +1,152 @@
+# =====================================================================
+# suivre-exemples-arduino.yml : suit les releases du paquet Arduino
+# « STeaMi » (steamicc/arduino-steami), dont l'archive des exemples
+# précompilés est épinglée dans exemples-arduino.json (version + sha256).
+#
+# Une fois par jour (et à la demande), le workflow lit la dernière release
+# publiée du paquet (ni brouillon ni prerelease : c'est ce que renvoie
+# /releases/latest). Si elle est plus récente que la version épinglée, si
+# elle contient l'archive steami-exemples-<tag>.zip et qu'aucune branche ni
+# PR `chore/exemples-arduino-<tag>` n'existe, il télécharge l'archive,
+# calcule son sha256, met à jour exemples-arduino.json et ouvre la PR.
+#
+# Le dépôt n'a pas de secret d'application GitHub : tout passe par
+# GITHUB_TOKEN. Une PR créée avec GITHUB_TOKEN ne déclenche pas les
+# workflows `pull_request` : après l'ouverture, on lance build.yml à la
+# main sur la branche (workflow_dispatch). Son résultat s'affiche sur le
+# dernier commit de la PR.
+#
+# Prérequis : l'organisation doit autoriser « Allow GitHub Actions to create
+# and approve pull requests » (Settings > Actions > General), sinon
+# l'ouverture de la PR échoue.
+#
+# Neutralisé dans les forks.
+# =====================================================================
+name: suivre-exemples-arduino
+
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+# Une seule exécution à la fois : deux lancements simultanés créeraient la même branche.
+concurrency:
+  group: suivre-exemples-arduino
+  cancel-in-progress: false
+
+jobs:
+  suivre:
+    name: nouvelle release des exemples Arduino ?
+    # Ne pas tourner dans les forks.
+    if: github.repository == 'steamicc/wiki_steami'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Compare la dernière release à la version épinglée
+        id: comparaison
+        run: |
+          set -euo pipefail
+          actuel=$(jq -r .version exemples-arduino.json)
+          release=$(gh api repos/steamicc/arduino-steami/releases/latest)
+          derniere=$(jq -r .tag_name <<<"$release")
+          for t in "$actuel" "$derniere"; do
+            if ! printf '%s' "$t" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::Tag « $t » invalide : le format attendu est vX.Y.Z"
+              exit 1
+            fi
+          done
+          echo "Version épinglée : $actuel ; dernière release du paquet : $derniere"
+          # Comparaison de versions (sort -V), pas de chaînes : v0.10.0 > v0.9.0.
+          plus_recente=$(printf '%s\n%s\n' "${actuel#v}" "${derniere#v}" | sort -V | tail -n1)
+          if [ "$actuel" = "$derniere" ] || [ "v$plus_recente" != "$derniere" ]; then
+            echo "Les exemples sont à jour."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          archive="steami-exemples-$derniere.zip"
+          if ! jq -e --arg a "$archive" 'any(.assets[]; .name == $a)' <<<"$release" >/dev/null; then
+            echo "::warning::La release $derniere n'a pas (encore) l'archive $archive : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Empreinte publiée par GitHub pour l'archive (« sha256:<hex> »), vide si absente.
+          empreinte=$(jq -r --arg a "$archive" \
+            'first(.assets[] | select(.name == $a)) | .digest // ""' <<<"$release")
+          # Branche ou PR (ouverte ou fermée) déjà là : on ne recommence pas.
+          branche="chore/exemples-arduino-$derniere"
+          if git ls-remote --exit-code --heads origin "$branche" >/dev/null 2>&1 \
+             || [ -n "$(gh pr list --state all --head "$branche" --json number --jq '.[].number')" ]; then
+            echo "$branche existe déjà : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          {
+            echo "nouvelle=true"
+            echo "actuel=$actuel"
+            echo "derniere=$derniere"
+            echo "archive=$archive"
+            echo "empreinte=$empreinte"
+            echo "branche=$branche"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Crée la branche et épingle la nouvelle archive
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          ARCHIVE: ${{ steps.comparaison.outputs.archive }}
+          EMPREINTE: ${{ steps.comparaison.outputs.empreinte }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          # L'archive n'est pas décompressée ici : seul son sha256 est utile.
+          dl="$RUNNER_TEMP/exemples-arduino"
+          mkdir -p "$dl"
+          curl -fL --retry 3 --silent --show-error -o "$dl/$ARCHIVE" \
+            "https://github.com/steamicc/arduino-steami/releases/download/$DERNIERE/$ARCHIVE"
+          sha=$(sha256sum "$dl/$ARCHIVE" | cut -d' ' -f1)
+          echo "sha256 de $ARCHIVE : $sha"
+          # Si GitHub publie une empreinte pour l'archive, elle doit correspondre au fichier reçu.
+          if [ -n "$EMPREINTE" ] && [ "$EMPREINTE" != "sha256:$sha" ]; then
+            echo "::error::sha256 différent de l'empreinte publiée par GitHub ($EMPREINTE)"
+            exit 1
+          fi
+          # Même forme que le fichier actuel (indentation 2, saut de ligne final) : Prettier l'accepte.
+          jq -n --arg v "$DERNIERE" --arg s "$sha" '{version: $v, sha256: $s}' > exemples-arduino.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCHE"
+          git add exemples-arduino.json
+          git commit -m "chore(configs): exemples Arduino $DERNIERE"
+          git push origin "$BRANCHE"
+
+      - name: Ouvre la PR et lance les vérifications
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          ACTUEL: ${{ steps.comparaison.outputs.actuel }}
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          ARCHIVE: ${{ steps.comparaison.outputs.archive }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          corps="$RUNNER_TEMP/corps.md"
+          cat > "$corps" <<EOT
+          Le paquet Arduino STeaMi a une nouvelle release : \`$DERNIERE\` (le wiki épingle \`$ACTUEL\`).
+          https://github.com/steamicc/arduino-steami/releases/tag/$DERNIERE
+
+          Cette PR change seulement \`exemples-arduino.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
+
+          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouvel exemple qui n'est pas encore expliqué. Pour chacun, il faut soit une section sur sa page dans \`docs/software/arduino/exemples/\`, soit une ligne dans \`scripts/exemples-arduino-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner.
+          EOT
+          gh pr create --base main --head "$BRANCHE" \
+            --title "chore(configs): exemples Arduino $DERNIERE" \
+            --body-file "$corps"
+          # La PR créée avec GITHUB_TOKEN ne déclenche pas pull_request.
+          gh workflow run build.yml --ref "$BRANCHE"
