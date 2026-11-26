@@ -13,7 +13,9 @@
 # sha256, met à jour exemples-arduino.json et ouvre la PR. Si la branche
 # existe déjà sans PR (ouverture de la PR échouée lors d'une exécution
 # précédente), il ouvre seulement la PR sur cette branche. Si la PR est
-# déjà ouverte, il vérifie seulement sa fusion automatique.
+# déjà ouverte, il vérifie seulement sa fusion automatique. Seules comptent
+# les PR dont la branche est dans ce dépôt (les PR de forks sont ignorées),
+# et la fusion automatique n'est activée que pour une PR ouverte par l'App.
 #
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
@@ -103,6 +105,7 @@ jobs:
         id: comparaison
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
         run: |
           set -euo pipefail
           actuel=$(jq -r .version exemples-arduino.json)
@@ -134,9 +137,23 @@ jobs:
           # Points remplacés par des tirets : .validate-branch-namerc.js refuse les points
           # après chore/, et le hook pre-commit bloquerait les commits faits sur la branche.
           branche="chore/exemples-arduino-${derniere//./-}"
-          # PR déjà ouverte : on vérifie seulement sa fusion automatique.
-          pr=$(gh pr list --state open --head "$branche" --json number --jq '.[0].number // empty')
-          if [ -n "$pr" ]; then
+          # --head filtre sur le seul nom de branche : il trouve aussi les PR venues
+          # d'un fork avec une branche du même nom. On ne garde que les PR dont la
+          # branche est dans ce dépôt (isCrossRepository faux).
+          prs=$(gh pr list --state all --head "$branche" --limit 100 \
+            --json number,state,isCrossRepository,author \
+            --jq '[.[] | select(.isCrossRepository | not)]')
+          # PR déjà ouverte : on vérifie seulement sa fusion automatique, et
+          # seulement si c'est le robot qui l'a ouverte (gh écrit app/<slug>).
+          ouverte=$(jq -c 'first(.[] | select(.state == "OPEN")) // empty' <<<"$prs")
+          if [ -n "$ouverte" ]; then
+            pr=$(jq -r .number <<<"$ouverte")
+            auteur=$(jq -r .author.login <<<"$ouverte")
+            if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+              echo "::warning::La PR #$pr ($branche) a été ouverte par $auteur, pas par le robot : fusion automatique non activée."
+              echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "La PR #$pr est déjà ouverte pour $branche : vérification de sa fusion automatique."
             {
               echo "nouvelle=true"
@@ -147,7 +164,7 @@ jobs:
             exit 0
           fi
           # PR fermée ou fusionnée : on ne recommence pas.
-          if [ -n "$(gh pr list --state all --head "$branche" --json number --jq '.[].number')" ]; then
+          if [ "$(jq length <<<"$prs")" -gt 0 ]; then
             echo "Une PR fermée ou fusionnée existe déjà pour $branche : rien à faire."
             echo "nouvelle=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -236,11 +253,24 @@ jobs:
         if: steps.comparaison.outputs.nouvelle == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
           PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
         run: |
           set -euo pipefail
           if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
             echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
+          # ou ouverte par quelqu'un d'autre que le robot.
+          etat=$(gh pr view "$PR" --json isCrossRepository,author,isDraft,autoMergeRequest)
+          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
+            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
+            exit 1
+          fi
+          auteur=$(jq -r .author.login <<<"$etat")
+          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
             exit 1
           fi
           # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
@@ -252,7 +282,6 @@ jobs:
             echo "::warning::Fusion automatique non activée pour la PR #$PR : main n'exige pas la vérification « build ». Créer d'abord un ruleset « CI verte avant fusion » sur main qui exige la vérification « build » (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
             exit 0
           fi
-          etat=$(gh pr view "$PR" --json isDraft,autoMergeRequest)
           if jq -e .isDraft <<<"$etat" >/dev/null; then
             echo "La PR #$PR est en brouillon : fusion automatique non activée."
             exit 0

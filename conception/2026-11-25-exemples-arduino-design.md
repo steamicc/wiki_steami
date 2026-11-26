@@ -251,7 +251,10 @@ tourne, celle de l'App déclenche `pull_request` normalement (#227). Il faut :
   donc les règles de `main` et, si `build` n'y est pas exigé, laisse la PR à
   fusionner à la main avec un avertissement.
 
-Une PR en brouillon n'est pas fusionnée automatiquement.
+Une PR en brouillon n'est pas fusionnée automatiquement. Le robot ignore les PR
+venues d'un fork (même nom de branche) et n'active la fusion automatique que sur
+une PR ouverte par l'App : sinon, n'importe qui pourrait faire fusionner sa PR
+sans relecture une fois le CI vert.
 
 ### 7. Liens vers les pages
 
