@@ -42,7 +42,23 @@ Le composant peut aussi signaler ses mesures sur une ligne d'interruption relié
 
 ## BasicReader {#basicreader}
 
-**Ce qu'on observe** : la console écrit `ISM330DL ready.`, puis, environ trois fois par seconde, un bloc en trois parties : l'accélération sur les trois axes, sous `Acceleration (g)`, la vitesse de rotation, sous `Gyroscope (dps)`, et la température, par exemple `Temperature: 27.4 °C`. Carte posée à plat, écran vers le haut, Z vaut environ −1 g, X et Y environ 0, et les trois vitesses de rotation restent proches de 0. Posée sur un de ses bords, c'est X ou Y qui s'approche de +1 g ou de −1 g : c'est ainsi qu'on repère les axes. Quand on fait tourner la carte, les vitesses de rotation s'écartent de 0 le temps du mouvement, puis y reviennent.
+**Ce qu'on observe** : la console écrit `ISM330DL ready.`, puis, environ trois fois par seconde, un bloc en trois parties : l'accélération sur les trois axes, sous `Acceleration (g)`, la vitesse de rotation, sous `Gyroscope (dps)`, et la température. Carte posée à plat, écran vers le haut, immobile, un bloc ressemble par exemple à ceci :
+
+```text
+Acceleration (g)
+X: -0.029
+Y: -0.014
+Z: -1.004
+
+Gyroscope (dps)
+X: 1.01
+Y: -1.85
+Z: 0.20
+
+Temperature: 22.1 °C
+```
+
+Z vaut environ −1 g, X et Y environ 0, et les trois vitesses de rotation restent proches de 0, à 1 ou 2 dps près. Le tout premier bloc, écrit juste après le démarrage, peut s'écarter des suivants : sur la carte essayée, il donnait `Z: -0.252`, puis Z valait −1.004 dès le bloc suivant (voir plus bas). Posée sur un de ses bords, c'est X ou Y qui s'approche de +1 g ou de −1 g : c'est ainsi qu'on repère les axes. Quand on fait tourner la carte, les vitesses de rotation s'écartent de 0 le temps du mouvement, puis y reviennent.
 
 ```cpp file=.external/arduino-steami/examples/ISM330DL/BasicReader/BasicReader.ino
 
@@ -50,7 +66,9 @@ Le composant peut aussi signaler ses mesures sur une ligne d'interruption relié
 
 **Comment ça marche** : le programme appelle les trois lectures à la suite et n'écrit le bloc que si les trois ont réussi : avec `&&`, une lecture qui échoue arrête la suite, et rien n'est écrit pour ce tour. Il écrit l'accélération au millième de g et la vitesse de rotation au centième de dps.
 
-Au repos, quelle que soit la position de la carte, la pesanteur se répartit entre les trois axes : la longueur du vecteur, √(x² + y² + z²), reste proche de 1 g. Les valeurs ne tombent pas exactement sur 0 ou 1 g : chaque axe a un petit décalage propre à la puce, que la calibration `ca` sert à corriger. De même, le gyroscope immobile donne de petites valeurs, rarement exactement 0.
+Au repos, quelle que soit la position de la carte, la pesanteur se répartit entre les trois axes : la longueur du vecteur, √(x² + y² + z²), reste proche de 1 g. Les valeurs ne tombent pas exactement sur 0 ou 1 g : chaque axe a un petit décalage propre à la puce, que la calibration `ca` sert à corriger. De même, le gyroscope immobile donne de petites valeurs, rarement exactement 0 : sur la carte essayée, posée sur une table, environ 1 dps autour de x, −1,8 dps autour de y et 0,2 dps autour de z, à peu près les mêmes d'un bloc à l'autre.
+
+Le premier bloc vient d'une lecture faite aussitôt après `begin()`. Comme une lecture n'attend pas de nouvelle mesure, elle peut tomber avant que le composant, qui vient d'être redémarré, ait rangé une mesure stable dans ses registres : la valeur lue est alors fausse. Dès le tour suivant, 300 ms plus tard, les mesures sont régulières.
 
 La température est celle de la puce, pas forcément celle de l'air autour de la carte. Le driver la donne sans correction.
 
@@ -80,7 +98,12 @@ Au repos, un axe dépasse 0,75 g quand il est à moins de 41° environ de la ver
 
 Malgré son nom, `MOVING` ne détecte pas un mouvement : il veut dire qu'aucun axe n'est proche de la verticale. Une carte immobile, penchée à 45°, donne `MOVING`. À l'inverse, pendant une secousse, l'accéléromètre mesure aussi le mouvement de la main, et le résultat peut changer plusieurs fois : la position n'a de sens que carte immobile.
 
-Le programme lit la position toutes les 300 ms et ne l'écrit que quand elle change, grâce à la variable `lastOrientation`. Elle vaut `MOVING` au départ : une position nette est donc écrite dès le premier tour de boucle, une carte penchée n'est annoncée que quand elle prend une position nette. Ces premières lignes sont écrites juste après le démarrage du programme ; si la console ne les montre pas, retourner la carte puis la reposer fait écrire de nouveau sa position.
+Le programme lit la position toutes les 300 ms et ne l'écrit que quand elle change, grâce à la variable `lastOrientation`. Elle vaut `MOVING` au départ : une position nette est donc écrite dès le début, une carte penchée n'est annoncée que quand elle prend une position nette. La toute première lecture, faite aussitôt après `begin()`, peut tomber avant que l'accéléromètre ait une mesure stable (voir [BasicReader](#basicreader)) : elle donne alors `MOVING`, qui n'est pas écrit, et la position arrive au tour suivant, 300 ms plus tard. Ces premières lignes arrivent bien dans la console : juste après le téléversement, une carte posée à plat, écran vers le haut, affiche :
+
+```text
+Rotate the board...
+Orientation: SCREEN_UP
+```
 
 <EssayerExemple id="ISM330DL/Orientation" />
 
@@ -99,8 +122,8 @@ Le programme lit la position toutes les 300 ms et ne l'écrit que quand elle cha
 - sinon, pour la rotation autour de y : `TILTING_DOWN` au-dessus de +10 dps, `TILTING_UP` en dessous de −10 dps ;
 - dans tous les autres cas, `STABLE`.
 
-La fonction range le type dans le champ `type` de la variable `SteamiISM330DL::Motion`, et dans son champ `value` la vitesse de l'axe retenu, sans son signe. Le seuil de 10 dps écarte les rotations très lentes, moins d'un tour en 36 s, et, en principe, les petites valeurs que le gyroscope donne au repos. Une rotation qui combine plusieurs axes est nommée d'après le plus rapide. Les noms des sens (droite, gauche, haut, bas) sont ceux que le driver associe au signe de chaque axe.
+La fonction range le type dans le champ `type` de la variable `SteamiISM330DL::Motion`, et dans son champ `value` la vitesse de l'axe retenu, sans son signe. Le seuil de 10 dps écarte les rotations très lentes, moins d'un tour en 36 s, et les petites valeurs que le gyroscope donne au repos : 2 dps au plus sur la carte essayée, bien en dessous du seuil. Une rotation qui combine plusieurs axes est nommée d'après le plus rapide. Les noms des sens (droite, gauche, haut, bas) sont ceux que le driver associe au signe de chaque axe.
 
-Le programme lit le gyroscope toutes les 100 ms et n'écrit une ligne que quand le type de rotation change, grâce à la variable `lastMotion`. La vitesse écrite est celle de la première lecture du nouveau mouvement : elle n'est pas mise à jour tant que la carte continue de tourner dans le même sens. Comme chaque lecture ne voit que la vitesse de l'instant, un coup très bref, entre deux lectures, peut passer inaperçu.
+Le programme lit le gyroscope toutes les 100 ms et n'écrit une ligne que quand le type de rotation change, grâce à la variable `lastMotion`. Elle vaut `STABLE` au départ : carte immobile, la console n'écrit rien après `Move the board...`, et c'est bien ce qu'elle montre juste après le téléversement, carte posée sur une table. La vitesse écrite est celle de la première lecture du nouveau mouvement : elle n'est pas mise à jour tant que la carte continue de tourner dans le même sens. Comme chaque lecture ne voit que la vitesse de l'instant, un coup très bref, entre deux lectures, peut passer inaperçu.
 
 <EssayerExemple id="ISM330DL/Motion" />
