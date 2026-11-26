@@ -16,9 +16,9 @@ Sur cette page :
 
 Ses caractéristiques, sa fiche technique et son schéma (repère U13) sont sur la page [Capteur d'humidité et température — WSEN-HIDS](/docs/hardware/main-components/sensors/wsen-hids).
 
-Le WSEN-HIDS équipe la **V1b**. Pour la V1a, il figure dans la nomenclature, mais son montage reste à confirmer. Il est retiré sur la **V1c**, où le BME280 mesure l'humidité et la température (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)). Sur une V1c, les quatre exemples de cette page écrivent `WSEN-HIDS not detected — check wiring and I2C address.` puis ne font plus rien : pour la même chose sur une V1c, voir les exemples **STeaMi → BME280**, dont trois portent les mêmes noms (**BasicReader**, **ComfortZone**, **DewPointMonitor**).
+Le WSEN-HIDS équipe la **V1b**. Pour la V1a, il figure dans la nomenclature, mais son montage reste à confirmer. Il est retiré sur la **V1c**, où le BME280 mesure l'humidité et la température (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)). Sur une V1c, les quatre exemples de cette page ne trouvent pas le capteur : ils écrivent `WSEN-HIDS not detected — check wiring and I2C address.` au démarrage, puis ne font plus rien (la console reste vide si elle s'est ouverte après ce message). Les exemples **STeaMi → BME280** en sont les équivalents pour la V1c ; trois portent les mêmes noms (**BasicReader**, **ComfortZone**, **DewPointMonitor**).
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → WSEN-HIDS** de l'Arduino IDE. Ils écrivent leurs messages en anglais et n'utilisent pas l'écran. La page [Capteurs et écran](../capteurs#pression-humidité-et-température) donne la façon la plus simple de lire l'humidité et la température, avec les classes `SteamiHumidity` et `SteamiTemperature`, qui marchent sur les trois releases ; ici, les exemples utilisent directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → WSEN-HIDS** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#pression-humidité-et-température) donne la façon la plus simple de lire l'humidité et la température, avec les classes `SteamiHumidity` et `SteamiTemperature`, qui marchent sur les trois releases ; ici, les exemples utilisent directement le driver du composant.
 
 ## Le driver en bref
 
@@ -29,7 +29,7 @@ Les quatre exemples suivent le même schéma et n'utilisent que quelques fonctio
 - `deviceId()` renvoie la valeur de ce registre d'identité, `0xBC`.
 - `setContinuous(WSEN_HIDS_ODR_1_HZ)` réveille le capteur et lui fait mesurer tout seul, une fois par seconde. Le driver propose aussi 7 et 12,5 mesures par seconde (`WSEN_HIDS_ODR_7_HZ`, `WSEN_HIDS_ODR_12_5_HZ`). Il active en même temps le blocage des registres de sortie pendant une lecture (_Block Data Update_) : les deux octets d'une valeur viennent toujours de la même mesure.
 - `dataReady()` lit le registre d'état du capteur et n'est vrai que si ses deux indicateurs, nouvelle humidité et nouvelle température, sont levés.
-- `read()` lit l'humidité et la température de la même mesure et les renvoie ensemble : `reading.temperature` en °C, `reading.humidity` en %. Si le capteur est en veille, `read()` le réveille d'abord à 12,5 mesures par seconde et attend une mesure, jusqu'à 200 ms ; si rien n'arrive, il renvoie `NAN` pour les deux valeurs. Dans les exemples, le capteur mesure déjà, et `read()` lit directement ses registres.
+- `read()` lit l'humidité puis la température, l'une après l'autre, et les renvoie ensemble : `reading.temperature` en °C, `reading.humidity` en %. Si le capteur est en veille, `read()` le réveille d'abord à 12,5 mesures par seconde et attend une mesure, jusqu'à 200 ms ; si rien n'arrive, il renvoie `NAN` pour les deux valeurs. Dans les exemples, le capteur mesure déjà, et `read()` lit directement ses registres.
 
 Le capteur ne donne pas directement des °C et des % : il donne des nombres bruts. Chaque WSEN-HIDS garde en mémoire deux points de référence pour l'humidité et deux pour la température, mesurés en usine. `begin()` les lit, et `read()` convertit chaque nombre brut en traçant une droite entre ces deux points. L'humidité ainsi calculée est ramenée entre 0 et 100 %.
 
@@ -40,29 +40,29 @@ Deux points comptent pour comprendre les exemples :
 
 ## BasicReader {#basicreader}
 
-**Ce qu'on observe** : la console écrit `WSEN-HIDS detected (WHO_AM_I = 0xBC)`, puis, environ une fois par seconde, la température et l'humidité, par exemple `T = 22.41 C  |  H = 46.3 %`. En soufflant doucement sur la carte, l'humidité monte, puis redescend en quelques secondes.
+**Ce qu'on observe** : la console écrit `WSEN-HIDS detected (WHO_AM_I = 0xBC)` au démarrage (cette ligne manque si la console s'est ouverte après), puis, environ une fois par seconde, la température et l'humidité, par exemple `T = 22.41 C  |  H = 46.3 %`. En soufflant doucement sur la carte, l'humidité affichée monte nettement, puis redescend peu à peu.
 
 ```cpp file=.external/arduino-steami/examples/WSEN-HIDS/BasicReader/BasicReader.ino
 
 ```
 
-**Comment ça marche** : c'est le squelette des quatre exemples. Dans `setup()`, `begin()` vérifie le capteur, `deviceId()` affiche son identité, et `setContinuous(WSEN_HIDS_ODR_1_HZ)` le met en mesure continue, une fois par seconde. Dans `loop()`, le programme demande toutes les 10 ms si une mesure est prête ; quand c'est le cas, il la lit avec `read()`, l'affiche, puis attend une seconde. Pendant cette seconde, le capteur a fait la mesure suivante : le test `dataReady()` suivant est le plus souvent vrai tout de suite, et la console reçoit une ligne par seconde environ.
+**Comment ça marche** : c'est le squelette des quatre exemples. Dans `setup()`, `begin()` vérifie le capteur, `deviceId()` affiche son identité, et `setContinuous(WSEN_HIDS_ODR_1_HZ)` le met en mesure continue, une fois par seconde. Dans `loop()`, le programme demande toutes les 10 ms si une mesure est prête ; quand c'est le cas, il la lit avec `read()`, l'affiche, puis attend une seconde. Cette pause est calée sur le rythme du capteur : selon que la mesure suivante est déjà prête ou non, le test `dataReady()` est vrai tout de suite ou après quelques tours de 10 ms. La console reçoit ainsi une ligne par seconde environ.
 
-`read()` lit les deux grandeurs d'un coup, plutôt que `temperature()` puis `humidity()`, qui feraient chacune leur propre lecture : la température et l'humidité affichées viennent ainsi de la même mesure.
+`read()` lit les deux grandeurs l'une après l'autre, juste après la même attente : elles viennent en pratique de la même mesure. `temperature()` puis `humidity()` referaient chacune une lecture complète des deux grandeurs (et, capteur en veille, chacune sa propre mesure).
 
 <EssayerExemple id="WSEN-HIDS/BasicReader" />
 
 ## HumidityAlert {#humidityalert}
 
-**Ce qu'on observe** : la console affiche la température et l'humidité, environ une fois par seconde. Quand l'humidité dépasse 70 %, par exemple en soufflant sur la carte, la console écrit en plus `Warning: humidity too high (mold risk).` et le buzzer fait deux bips ; il recommence à chaque mesure, tant que l'humidité reste au-dessus de 70 %.
+**Ce qu'on observe** : la console écrit `Humidity alert started.`, puis, environ une fois par seconde, la température et l'humidité. Quand l'humidité dépasse 70 %, par exemple en soufflant de près sur la carte, la console écrit en plus `Warning: humidity too high (mold risk).` et le buzzer fait deux bips ; il recommence à chaque ligne affichée, tant que l'humidité reste au-dessus de 70 %.
 
 ```cpp file=.external/arduino-steami/examples/WSEN-HIDS/HumidityAlert/HumidityAlert.ino
 
 ```
 
-**Comment ça marche** : c'est BasicReader avec un seuil. À chaque mesure, le programme compare l'humidité à `HUMIDITY_THRESHOLD` (bipe si `humidity > 70`). Le code y voit un risque de moisissures : dans une pièce où l'air reste longtemps aussi humide, l'eau peut se déposer sur les murs froids.
+**Comment ça marche** : c'est BasicReader avec un seuil. À chaque lecture, le programme compare l'humidité à `HUMIDITY_THRESHOLD` (bipe si `humidity > 70`). Le code y voit un risque de moisissures : dans une pièce où l'air reste longtemps aussi humide, l'eau peut se déposer sur les murs froids.
 
-`buzzAlert()` joue deux bips de 200 ms à 1500 Hz. `tone(SPEAKER, 1500, 200)` lance un bip qui s'arrête tout seul, sans bloquer le programme (voir [Jouer un son](../premiers-programmes#jouer-un-son)) : c'est le `delay(300)` qui sépare les deux bips, avec 100 ms de silence entre eux.
+`buzzAlert()` joue deux bips de 200 ms à 1500 Hz. `tone(SPEAKER, 1500, 200)` lance un bip qui s'arrête tout seul, sans bloquer le programme (voir [Jouer un son](../premiers-programmes#jouer-un-son)) : c'est le `delay(300)` qui sépare les deux bips, avec 100 ms de silence entre eux. Ce délai s'ajoute au `delay(1000)` de la boucle : pendant l'alerte, une ligne s'affiche toutes les 1,3 s environ.
 
 <EssayerExemple id="WSEN-HIDS/HumidityAlert" />
 
@@ -82,7 +82,7 @@ La fonction ne donne qu'un verdict, et l'ordre des tests compte : la températur
 
 ## DewPointMonitor {#dewpointmonitor}
 
-**Ce qu'on observe** : la console écrit `Dew point monitor started.`, puis, environ une fois par seconde, la température, l'humidité et le **point de rosée**, par exemple `T = 20.00 C  |  H = 50.0 %  |  Td = 9.25 C`. Quand l'air est presque saturé, la console écrit en plus `Condensation risk is high.` et le buzzer fait un bip court, à chaque mesure.
+**Ce qu'on observe** : la console écrit `Dew point monitor started.`, puis, environ une fois par seconde, la température, l'humidité et le **point de rosée**, par exemple `T = 20.00 C  |  H = 50.0 %  |  Td = 9.25 C`. Quand l'air est presque saturé, la console écrit en plus `Condensation risk is high.` et le buzzer fait un bip court, à chaque ligne affichée.
 
 ```cpp file=.external/arduino-steami/examples/WSEN-HIDS/DewPointMonitor/DewPointMonitor.ino
 
