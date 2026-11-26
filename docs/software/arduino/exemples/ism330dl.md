@@ -58,7 +58,7 @@ Z: 0.20
 Temperature: 22.1 °C
 ```
 
-Z vaut environ −1 g, X et Y environ 0, et les trois vitesses de rotation restent proches de 0, à 1 ou 2 dps près. Le tout premier bloc, écrit juste après le démarrage, peut s'écarter des suivants : sur la carte essayée, il donnait `Z: -0.252`, puis Z valait −1.004 dès le bloc suivant (voir plus bas). Posée sur un de ses bords, c'est X ou Y qui s'approche de +1 g ou de −1 g : c'est ainsi qu'on repère les axes. Quand on fait tourner la carte, les vitesses de rotation s'écartent de 0 le temps du mouvement, puis y reviennent.
+Z vaut environ −1 g, X et Y environ 0, et les trois vitesses de rotation restent proches de 0, à 1 ou 2 dps près. Le tout premier bloc, écrit juste après le démarrage, peut s'écarter des suivants : sur la carte essayée, il donnait `Z: -0.252`, puis `Z: -1.004` dès le bloc suivant (voir plus bas). Posée sur un de ses bords, c'est X ou Y qui s'approche de +1 g ou de −1 g : c'est ainsi qu'on repère les axes. Quand on fait tourner la carte, les vitesses de rotation s'écartent de 0 le temps du mouvement, puis y reviennent.
 
 ```cpp file=.external/arduino-steami/examples/ISM330DL/BasicReader/BasicReader.ino
 
