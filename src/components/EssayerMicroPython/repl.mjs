@@ -563,15 +563,25 @@ export function creerRepl({
     }
     const donnees = typeof contenu === 'string' ? octetsDe(contenu) : Uint8Array.from(contenu);
     return enFile(async (op) => {
-      await entrerBrut(op);
-      await commande(op, CODE_MONTAGE, 'monter le disque en RAM');
-      let i = 0;
-      do {
+      try {
+        await entrerBrut(op);
+        await commande(op, CODE_MONTAGE, 'monter le disque en RAM');
+        let i = 0;
+        do {
+          verifierArret(op);
+          const morceau = donnees.subarray(i, i + MORCEAU_FICHIER);
+          await commande(op, codeEcriture(nom, morceau, i === 0 ? 'wb' : 'ab'), `écrire ${nom}`);
+          i += MORCEAU_FICHIER;
+        } while (i < donnees.length);
+        // Ctrl-C arrivé après la fin de la dernière commande : elle s'est
+        // terminée sans erreur, l'arrêt doit quand même être rendu.
         verifierArret(op);
-        const morceau = donnees.subarray(i, i + MORCEAU_FICHIER);
-        await commande(op, codeEcriture(nom, morceau, i === 0 ? 'wb' : 'ab'), `écrire ${nom}`);
-        i += MORCEAU_FICHIER;
-      } while (i < donnees.length);
+      } catch (err) {
+        // KeyboardInterrupt pendant une commande : c'est l'arrêt demandé, pas
+        // une erreur de la carte (même règle qu'executer).
+        if (op.arretDemande && err instanceof ErreurLecteur) throw new ArretDemande();
+        throw err;
+      }
     });
   }
 

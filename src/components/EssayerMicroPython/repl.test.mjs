@@ -7,7 +7,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { ErreurLecteur } from '../EssayerExemple/logique.mjs';
-import { DELAI_INVITE_MS, PAQUET, PAUSE_MS, creerRepl, estBanniereMicroPython } from './repl.mjs';
+import {
+  ArretDemande,
+  DELAI_INVITE_MS,
+  PAQUET,
+  PAUSE_MS,
+  creerRepl,
+  estBanniereMicroPython,
+} from './repl.mjs';
 
 const BANNIERE =
   'MicroPython c0ed7d70da-dirty on 2026-11-26; STEAM32-WB55 with STM32WB55RGV6\r\n' +
@@ -503,6 +510,38 @@ test('ecrireFichierRam : erreur de la carte et nom invalide', async () => {
   await assert.rejects(repl.ecrireFichierRam('gros.py', 'x'), /plein/);
   await assert.rejects(repl.ecrireFichierRam('../main.py', 'x'), ErreurLecteur);
   await assert.rejects(repl.ecrireFichierRam("a'b.py", 'x'), ErreurLecteur);
+});
+
+test('ecrireFichierRam : arrêtée pendant l’écriture (KeyboardInterrupt) → ArretDemande', async () => {
+  // L'écriture tourne encore quand Ctrl-C arrive : la carte répond par un
+  // traceback KeyboardInterrupt, qui n'est pas une erreur pour le lecteur.
+  const carte = fausseCarte({
+    programme: (code) => (code.includes('a2b_base64') ? { infini: '' } : {}),
+  });
+  const { repl } = replSur(carte);
+  const ecriture = repl.ecrireFichierRam('pins.py', 'A = 1');
+  ecriture.catch(() => {});
+  await jusqua(() => carte.mode === 'execution');
+  const arret = repl.arreter();
+  await assert.rejects(ecriture, ArretDemande);
+  assert.equal(await arret, true);
+});
+
+test('ecrireFichierRam : arrêt demandé pendant la dernière commande, finie normalement → ArretDemande', async () => {
+  // Ctrl-C arrive au REPL brut après la fin de la commande : il n'y efface
+  // que la ligne, la commande se termine sans erreur. L'arrêt doit quand même
+  // être rendu à l'appelant, qui ne doit rien lancer ensuite.
+  let arret = null;
+  let repl;
+  const carte = fausseCarte({
+    programme: (code) => {
+      if (code.includes('a2b_base64')) arret ??= repl.arreter();
+      return {};
+    },
+  });
+  ({ repl } = replSur(carte));
+  await assert.rejects(repl.ecrireFichierRam('pins.py', 'A = 1'), ArretDemande);
+  assert.equal(await arret, true);
 });
 
 test('lireVersion : "v0.29.0", "dev", puis null sans module', async () => {

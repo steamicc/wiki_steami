@@ -48,12 +48,16 @@ export const TEXTE_AUTRE_CAUSE =
 export const TEXTE_EPINGLAGE_ILLISIBLE =
   'Impossible de lire la version de MicroPython proposée par le wiki : vérifier la connexion à Internet, puis recharger la page.';
 
+export const TEXTE_CARTE_PERDUE =
+  'La carte a été déconnectée : la rebrancher si besoin, puis cliquer de nouveau sur « Essayer sur la carte ».';
+
 export const TEXTE_DECONNECTEE =
   'Carte déconnectée : la console ne suit plus le programme. Cliquer sur « Essayer sur la carte » pour le relancer.';
 
 // Étape affichée par la session :
 // - 'repos' : rien n'a été lancé ; 'fini' : le dernier essai est terminé ;
-// - 'programme' : le programme tourne (Arrêter, ou un autre bloc, l'arrête) ;
+// - 'fichiers', 'programme' : le programme est lancé (Arrêter, ou un autre bloc,
+//   l'arrête) ;
 // - les autres : préparation en cours, les boutons « Essayer » sont grisés.
 const TEXTES_ETAPES = Object.freeze({
   preparation: 'Préparation…',
@@ -68,7 +72,9 @@ const TEXTES_ETAPES = Object.freeze({
   programme: 'Programme en cours.',
 });
 
-const LIBRES = new Set(['repos', 'fini', 'programme']);
+// L'envoi des fichiers est déjà le lancement : comme pendant le programme,
+// un autre bloc peut être lancé (il arrête d'abord celui-ci).
+const LIBRES = new Set(['repos', 'fini', 'fichiers', 'programme']);
 // Étapes pendant lesquelles un programme (ou ses fichiers) occupe le REPL.
 const EN_MARCHE = new Set(['fichiers', 'programme']);
 
@@ -187,6 +193,8 @@ export function creerSession({ planifier = planifierImage, limiteSortie = LIMITE
   let jeton = 0;
   let repl = null;
   let reponse = null;
+  // Jeton de l'essai dont l'arrêt a été demandé (Arrêter).
+  let arretPour = null;
   let sortie = '';
   let sortiePlanifiee = false;
   const abonnes = new Set();
@@ -272,6 +280,14 @@ export function creerSession({ planifier = planifierImage, limiteSortie = LIMITE
     reporterDaplink() {
       poser({ daplink: null, daplinkReporte: true });
     },
+    // Arrêter : l'essai en cours ne doit plus rien envoyer à la carte, même
+    // si l'opération en cours se termine normalement.
+    demanderArret() {
+      arretPour = jeton;
+    },
+    arretDemande(j) {
+      return arretPour === j;
+    },
     obtenirRepl(creer) {
       repl ??= creer();
       return repl;
@@ -279,7 +295,7 @@ export function creerSession({ planifier = planifierImage, limiteSortie = LIMITE
     oublierRepl() {
       repl = null;
     },
-    // Termine l'essai en cours de l'extérieur (carte perdue).
+    // Termine l'essai en cours de l'extérieur (carte perdue, bloc quitté).
     terminer(partie) {
       jeton++;
       annulerQuestion();
@@ -295,8 +311,26 @@ export function signalerDeconnexion(session) {
   session.oublierRepl();
   if (EN_MARCHE.has(session.etat.etape) || session.etat.etape === 'arret') {
     session.terminer({ etape: 'fini', message: TEXTE_DECONNECTEE, programmeLance: false });
+  } else if (session.etat.etape === 'question') {
+    // Question (DAPLink, installation) sur une carte partie : sans objet.
+    session.terminer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE, programmeLance: false });
   } else if (session.etat.programmeLance) {
     session.retenir({ programmeLance: false });
+  }
+}
+
+// Le bloc id disparaît de la page (navigation) : sa question en attente est
+// retirée, sinon l'essai resterait en 'question' et griserait les boutons
+// « Essayer » de toutes les pages. Un essai en préparation est terminé (il
+// s'arrête au retour de la question, sans rien envoyer) ; une confirmation,
+// posée avant le début de l'essai, est simplement annulée.
+export function abandonnerBloc(session, id) {
+  const etat = session.etat;
+  if (etat.encart?.donnees.id !== id) return;
+  if (etat.actif === id && estOccupee(etat)) {
+    session.terminer({ etape: 'fini', message: 'Essai annulé.' });
+  } else {
+    session.repondre('non');
   }
 }
 
@@ -354,13 +388,15 @@ async function redemarrerEtGuetter(carte, delai) {
 }
 
 // Étape 2 : 'a-jour', 'dev', 'ancien' (MicroPython répond), 'occupee'
-// (muette mais la bannière apparaît au redémarrage) ou 'muette'.
+// (muette mais la bannière apparaît au redémarrage), 'muette' ou 'perdue'
+// (carte débranchée pendant l'attente de l'invite : pas de diagnostic).
 async function sonder(repl, carte, epinglee, delais, changer) {
   changer({ etape: 'sondage' });
   if (await repl.interrompre()) {
     const version = await repl.lireVersion();
     return decisionFirmware({ micropython: true, version }, epinglee);
   }
+  if (!carte.etat.connectee) return 'perdue';
   changer({ etape: 'diagnostic' });
   const banniereVue = await redemarrerEtGuetter(carte, delais.banniere);
   return diagnosticSansInvite({ banniereVue }) === 'occupee' ? 'occupee' : 'muette';
@@ -378,7 +414,8 @@ async function remettreAZero(repl, session, changer) {
 // Lance un bloc : étapes 0 à 5. Renvoie { fin } :
 // 'occupe' (un autre essai se prépare), 'annule', 'connexion', 'reset',
 // 'daplink' (étapes de mise à jour affichées), 'occupee' (carte tenue),
-// 'installation' (flash raté ou MicroPython muet ensuite), 'erreur',
+// 'installation' (flash raté ou MicroPython muet ensuite), 'deconnectee'
+// (carte partie avant d'agir dessus), 'erreur',
 // 'erreur-python' (traceback), 'arrete', 'abandonne' (essai remplacé), 'lance'.
 export async function essayer({ id, code, fichiers = [], confirmation }, dependances) {
   const { carte, session, demander } = dependances;
@@ -396,6 +433,14 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
   const jeton = session.commencer(id);
   const changer = (partie) => session.changer(jeton, partie);
   const remplace = () => session.jeton !== jeton;
+  // Arrêter, ou un autre bloc lancé : plus rien ne part vers la carte.
+  const stoppe = () => remplace() || session.arretDemande(jeton);
+  // Avant d'agir sur la carte après une attente : est-elle toujours là ?
+  const carteDisparue = () => {
+    if (carte.etat.connectee) return false;
+    changer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE });
+    return true;
+  };
 
   try {
     // 1. Connexion, au plus près du clic (la fenêtre de choix de Chrome
@@ -435,15 +480,29 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
         const reponse = await demander('daplink', { id, release });
         if (remplace()) return { fin: 'abandonne' };
         if (reponse === 'oui') {
-          changer({ etape: 'fini', daplink: { release } });
+          changer({
+            etape: 'fini',
+            daplink: { release },
+            message: 'Suivre les étapes ci-dessous pour mettre à jour le DAPLink.',
+          });
           return { fin: 'daplink' };
         }
+        // Seul « Plus tard » laisse l'essai continuer.
+        if (reponse !== 'plus-tard') {
+          changer({ etape: 'fini' });
+          return { fin: 'annule' };
+        }
         session.retenir({ daplinkReporte: true });
+        if (carteDisparue()) return { fin: 'deconnectee' };
       }
     }
 
     // 2. Sondage du REPL.
     const decision = await sonder(repl, carte, epinglee, delais, changer);
+    if (decision === 'perdue' || !carte.etat.connectee) {
+      changer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE });
+      return { fin: 'deconnectee' };
+    }
     if (decision === 'occupee') {
       changer({ etape: 'fini', erreur: TEXTE_CARTE_OCCUPEE });
       return { fin: 'occupee' };
@@ -462,6 +521,9 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
         changer({ etape: 'fini' });
         return { fin: 'annule' };
       }
+      // Carte partie pendant la question : flasherFirmware ne ferait rien,
+      // sans message.
+      if (carteDisparue()) return { fin: 'deconnectee' };
       changer({ etape: 'installation' });
       const guet = creerGuet(carte);
       try {
@@ -499,10 +561,13 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
       changer({ etape: 'fichiers' });
       for (const { nom, contenu } of fichiers) {
         await repl.ecrireFichierRam(nom, contenu);
+        if (stoppe()) return { fin: 'arrete' };
       }
     }
 
-    // 5. Lancement en RAM ; la sortie va dans la console du bloc.
+    // 5. Lancement en RAM ; la sortie va dans la console du bloc. Jamais
+    // après un arrêt demandé pendant l'envoi des fichiers.
+    if (stoppe()) return { fin: 'arrete' };
     changer({ etape: 'programme' });
     const { erreur, arrete } = await repl.executer(code, {
       surSortie: (texte) => session.ajouterSortie(jeton, texte),
@@ -521,6 +586,9 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     return { fin: 'lance' };
   } catch (err) {
     if (err instanceof ArretDemande || err?.name === 'ArretDemande') return { fin: 'arrete' };
+    // Erreur due à l'arrêt (KeyboardInterrupt d'une commande) : Arrêter ou
+    // l'autre bloc affichent la suite, pas de message d'erreur.
+    if (stoppe()) return { fin: 'arrete' };
     changer({ etape: 'fini', erreur: messageFrancais(err, 'ecriture') });
     return { fin: 'erreur' };
   }
@@ -534,6 +602,7 @@ export async function arreter({ session }) {
   if (!repl || !peutArreter(session.etat)) return null;
   const jeton = session.jeton;
   const changer = (partie) => session.changer(jeton, partie);
+  session.demanderArret();
   changer({ etape: 'arret', message: null });
   let ok;
   try {
@@ -544,7 +613,7 @@ export async function arreter({ session }) {
   }
   if (ok) {
     session.retenir({ programmeLance: false });
-    changer({ etape: 'fini', message: 'Programme arrêté.' });
+    changer({ etape: 'fini', message: 'Programme arrêté.', erreur: null });
   } else {
     changer({ etape: 'fini', erreur: TEXTE_RESET });
   }

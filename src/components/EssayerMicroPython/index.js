@@ -19,6 +19,7 @@ import { creerRepl } from './repl.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
+  abandonnerBloc,
   arreter,
   chargerEpingles,
   creerSession,
@@ -70,14 +71,18 @@ function SansWebUSB() {
 
 // Question en attente sous le bloc : le focus y passe, pour que les lecteurs
 // d'écran la lisent ; jamais sur le bouton d'action, qu'une touche Entrée de
-// trop validerait.
-function Encart({ encart }) {
+// trop validerait. surReponse : le bouton cliqué va disparaître, le bloc
+// reprend le focus ensuite.
+function Encart({ encart, surReponse }) {
   const ref = useRef(null);
   useEffect(() => {
     ref.current?.focus();
   }, [encart]);
   const { type, donnees } = encart;
-  const repondre = (valeur) => () => session.repondre(valeur);
+  const repondre = (valeur) => () => {
+    surReponse();
+    session.repondre(valeur);
+  };
   let contenu;
   let boutons;
   if (type === 'confirmation') {
@@ -134,10 +139,21 @@ function Encart({ encart }) {
 }
 
 // Mise à jour du DAPLink, guidée à la main comme dans le Codespace : le
-// DAPLink ne peut pas se flasher lui-même.
-function EtapesDaplink({ release, href }) {
+// DAPLink ne peut pas se flasher lui-même. Le focus y passe à l'affichage,
+// comme pour une question, pour que les étapes soient lues.
+function EtapesDaplink({ release, href, surPlusTard }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
   return (
-    <div className={styles.encart}>
+    <div
+      ref={ref}
+      className={styles.encart}
+      role="group"
+      aria-label="Mise à jour du DAPLink"
+      tabIndex={-1}
+    >
       <p>{texteMiseAJourDaplink(release)}</p>
       <ol className={styles.etapes}>
         <li>
@@ -163,7 +179,14 @@ function EtapesDaplink({ release, href }) {
           Si le lecteur MAINTENANCE n&apos;apparaît pas
         </Link>
       </p>
-      <button type="button" className={communs.boutonSecondaire} onClick={session.reporterDaplink}>
+      <button
+        type="button"
+        className={communs.boutonSecondaire}
+        onClick={() => {
+          surPlusTard();
+          session.reporterDaplink();
+        }}
+      >
         Plus tard
       </button>
     </div>
@@ -210,16 +233,32 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     () => SESSION_INITIALE,
   );
   const actif = etat.actif === id;
+  const essayerRef = useRef(null);
+  // Le bouton cliqué (Essayer grisé, réponse d'un encart, Arrêter,
+  // Déconnecter, Plus tard) disparaît ou se grise : le focus retombe sur la
+  // page. Quand le bloc est de nouveau libre, il revient sur « Essayer sur la
+  // carte », comme dans EssayerExemple.
+  const focaliserApresRef = useRef(false);
+  const focaliserApres = () => {
+    focaliserApresRef.current = true;
+  };
 
-  // Carte perdue ou libérée : le programme du bloc actif ne s'affiche plus.
-  const connecteeAvantRef = useRef(etatCarte.connectee);
+  // Carte absente alors qu'un programme ou une question l'attend (débranchée,
+  // libérée, y compris pendant qu'aucun bloc n'était affiché) : l'essai se
+  // termine avec un message.
   useEffect(() => {
-    const perdue = connecteeAvantRef.current && !etatCarte.connectee;
-    connecteeAvantRef.current = etatCarte.connectee;
-    if (perdue && actif) signalerDeconnexion(session);
-  }, [etatCarte.connectee, actif]);
+    if (!actif || etatCarte.connectee) return;
+    if (peutArreter(etat) || etat.etape === 'arret' || etat.etape === 'question') {
+      signalerDeconnexion(session);
+    }
+  }, [etatCarte.connectee, actif, etat]);
+
+  // Bloc quitté (navigation) : sa question en attente ne doit pas bloquer les
+  // boutons des autres pages.
+  useEffect(() => () => abandonnerBloc(session, id), [id]);
 
   function lancer() {
+    focaliserApres();
     void essayer(
       { id, code, fichiers, confirmation },
       {
@@ -236,22 +275,48 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
   const occupee = estOccupee(etat) || etatCarte.occupee;
   const message = actif ? messageSession(etat) : null;
   const erreur = actif ? etat.erreur : null;
-  const erreurCarte = etatCarte.dernierClic === id ? etatCarte.erreur : null;
+  // Erreur de la connexion partagée : sous le bloc MicroPython actif, sinon
+  // sous le dernier bloc cliqué ; pas en double d'une erreur de l'essai.
+  const blocCarte = etat.actif ?? etatCarte.dernierClic;
+  const erreurCarte = blocCarte === id && !erreur ? etatCarte.erreur : null;
   const encart = etat.encart?.donnees.id === id ? etat.encart : null;
+  const etapesDaplink = actif && etat.daplink;
+
+  useLayoutEffect(() => {
+    if (!focaliserApresRef.current || occupee) return;
+    // Une question ou les étapes du DAPLink prennent elles-mêmes le focus.
+    if (encart || etapesDaplink) {
+      focaliserApresRef.current = false;
+      return;
+    }
+    focaliserApresRef.current = false;
+    const actuel = document.activeElement;
+    if (actuel && actuel !== document.body) return;
+    essayerRef.current?.focus();
+  }, [occupee, encart, etapesDaplink, etat.etape, etatCarte.connectee]);
   const montrerConsole =
     actif && (etat.sortie !== '' || etat.traceback !== null || etat.etape === 'programme');
 
   return (
     <div className={communs.controles}>
       <div className={communs.boutons}>
-        <button type="button" className={communs.bouton} disabled={occupee} onClick={lancer}>
+        <button
+          ref={essayerRef}
+          type="button"
+          className={communs.bouton}
+          disabled={occupee}
+          onClick={lancer}
+        >
           Essayer sur la carte
         </button>
         {actif && peutArreter(etat) && (
           <button
             type="button"
             className={communs.boutonSecondaire}
-            onClick={() => arreter({ session })}
+            onClick={() => {
+              focaliserApres();
+              void arreter({ session });
+            }}
           >
             Arrêter
           </button>
@@ -262,7 +327,10 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
             type="button"
             className={communs.boutonSecondaire}
             disabled={occupee}
-            onClick={() => carte.deconnecter()}
+            onClick={() => {
+              focaliserApres();
+              void carte.deconnecter();
+            }}
           >
             Déconnecter
           </button>
@@ -271,9 +339,13 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
       <div className={communs.indicateurs}>
         <EtatCarte statut={statutPastille(etatCarte, etat, id)} />
       </div>
-      {encart && <Encart encart={encart} />}
-      {actif && etat.daplink && (
-        <EtapesDaplink release={etat.daplink.release} href={urls.daplinkBin} />
+      {encart && <Encart encart={encart} surReponse={focaliserApres} />}
+      {etapesDaplink && (
+        <EtapesDaplink
+          release={etat.daplink.release}
+          href={urls.daplinkBin}
+          surPlusTard={focaliserApres}
+        />
       )}
       {actif && etat.etape === 'installation' && etatCarte.occupee && (
         <Progression progression={etatCarte.progression} />
