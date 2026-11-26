@@ -5,6 +5,8 @@ sidebar_position: 5
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
+<!-- cspell:ignore Dbfs dbfs -->
+
 # Capteurs et écran
 
 Cette page donne un programme minimal pour chaque fonction de la carte. Chaque programme affiche ses mesures dans le moniteur série, à 115200 bauds.
@@ -18,7 +20,7 @@ Chaque section de capteur commence par la **classe par fonction**, comme `Steami
 
 Une seconde partie, nommée d'après le composant (par exemple **Avec le driver ISM330DL**), sert à ce que la classe n'offre pas, comme la proximité de l'APDS-9960 ou un réglage du composant. Les composants dépendent de la release de la carte (voir [Révisions](/docs/hardware/revisions)) : quand ils diffèrent, ces programmes sont présentés en onglets **V1a / V1b / V1c**. Un driver créé dans le programme ne reçoit pas les calibrations de la zone de configuration du DAPLink : pour une mesure calibrée, garder la classe (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)). La [forme commune des classes](./carte#la-forme-commune), leurs [messages](./carte#les-messages) et les [calibrations](./carte#calibrations) sont décrits dans [Reconnaître la carte](./carte).
 
-L'écran a aussi deux classes : `SteamiDisplay`, qui dessine sur l'écran de la release (version 0.37.0 de la bibliothèque), et `SteamiScreen`, qui y ajoute la mise en page des titres et des valeurs (version 0.38.0). Le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
+L'écran a aussi deux classes : `SteamiDisplay`, qui dessine sur l'écran de la release (version 0.37.0 de la bibliothèque), et `SteamiScreen`, qui y ajoute la mise en page des titres et des valeurs (version 0.38.0). Le microphone, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. La page [Exemples à essayer](./exemples/) les reprend un par un, avec un bouton pour les envoyer sur la carte ; chaque section ci-dessous renvoie aux exemples de son composant. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD** (voir [Exemples STEAMI_BOARD](./exemples/steami-board)).
 
@@ -755,6 +757,39 @@ Exemples à essayer sur la carte : [Exemples GC9A01](./exemples/gc9a01).
 </Release>
 </ReleaseTabs>
 
+## Microphone
+
+Le microphone IMP34DT05, présent sur toutes les releases, mesure le son en continu. Il n'a pas de classe par fonction : le programme utilise directement son driver, `SteamiIMP34DT05`, de la bibliothèque STeaMi, version 0.39.0 ou plus récente. Le microphone n'est pas sur le bus I²C : le driver se crée sans `Steami.wire()`.
+
+```cpp
+#include <SteamiIMP34DT05.h>
+
+SteamiIMP34DT05 micro;
+
+void setup() {
+  Serial.begin(115200);
+  if (!micro.begin()) {
+    Serial.println("Microphone non détecté");
+    while (true) {}
+  }
+  micro.setLevelWindowMs(200);            // un niveau toutes les 200 ms
+}
+
+void loop() {
+  if (micro.levelReady()) {
+    Serial.print("Niveau : ");
+    Serial.print(micro.levelDbfs(), 1);
+    Serial.println(" dBFS");
+  }
+}
+```
+
+Le driver mesure le niveau sonore sur une **fenêtre** de temps, 100 ms par défaut, réglée ici à 200 ms. `levelReady()` indique qu'une nouvelle fenêtre est terminée, et `levelDbfs()` donne son niveau en dBFS : 0 dBFS correspond au son le plus fort que le microphone peut coder, et une pièce calme donne autour de −60 dBFS. `level()` donne d'un coup la valeur efficace (`rms`), le plus fort échantillon (`peak`), le niveau en dBFS (`dbfs`) et une estimation en dB SPL (`dbSpl`), non étalonnée. Avant la fin de la première fenêtre, ces valeurs valent `NAN`. `dominantFrequencyHz()` enregistre 32 ms de son et renvoie sa fréquence la plus forte, en hertz.
+
+Dans l'Arduino IDE, les exemples sont rangés dans **STeaMi → IM34DT05**, sans le P, pour des raisons historiques : un indicateur de niveau sonore (**SoundLevel**), un détecteur de claquements de mains qui allume ou éteint la LED (**ClapDetector**), un accordeur (**FrequencyMeter**) et un test où la carte écoute son propre buzzer (**BuzzerSelfTest**).
+
+Exemples à essayer sur la carte : [Exemples IMP34DT05](./exemples/imp34dt05), qui expliquent aussi la conversion du son et son coût pour le processeur.
+
 ## Fichier sur le disque USB
 
 Le DAPLink, le second microcontrôleur de la carte qui fait apparaître le disque USB **STeaMi**, garde un seul fichier dans la mémoire flash externe de 8 Mo. Un programme peut y ajouter des lignes de texte, par exemple un relevé de mesures au format CSV, que l'ordinateur ouvre ensuite comme un fichier ordinaire. Driver : bibliothèque STeaMi.
@@ -808,7 +843,3 @@ Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, propo
 Le Bluetooth demande une pile radio, installée à part sur le second cœur du STM32WB55. Si `BLE.begin()` renvoie `0`, vérifier la pile et l'installer au besoin : voir [Pile radio Bluetooth](../pile-radio).
 
 Exemples à essayer sur la carte : [Exemples BLE](./exemples/ble).
-
-## Composants non pris en charge
-
-Le microphone (IM34DT05) n'a pas encore de driver Arduino. Il est utilisable en [MicroPython](../micropython/).

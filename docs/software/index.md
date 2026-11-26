@@ -19,7 +19,7 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 | --------------------------------- | --------- | -------------------------------------------------- |
 | [**MicroPython**](./micropython/) | Complète  | 15 drivers, 52 exemples, framework de test         |
 | [**CODAL**](./codal/)             | Partielle | Runtime C++ avec support des principaux composants |
-| [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 14 drivers STeaMi        |
+| [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 15 drivers STeaMi        |
 
 ## Outils et éditeurs
 
