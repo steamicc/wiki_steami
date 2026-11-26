@@ -1,7 +1,10 @@
 // Tests de la connexion partagée (carte.mjs), avec un faux DAP.js et un faux WebUSB.
 // Lancer : npm run test:js
 // Le module est un singleton : chaque test finit carte libérée, comme au départ.
-import test from 'node:test';
+// Un test raté est remis en ordre par afterEach, et chaque test a un délai
+// maximal : une promesse qui ne se résout plus (une écriture qui bloque, par
+// exemple) fait échouer ce test, nommé, au lieu de bloquer toute la suite.
+import { afterEach, test as testNode } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { DELAI_LIBERATION_MS, ETAT_INITIAL, PAUSE_LECTURE_MS, carte } from './carte.mjs';
@@ -25,6 +28,21 @@ let attenteEcriture = null;
 let reponseVersion = null;
 // Écouteurs posés sur navigator.usb (événement « disconnect »).
 const ecouteursUsb = {};
+
+const DELAI_TEST_MS = 3000;
+const test = (nom, fn) => testNode(nom, { timeout: DELAI_TEST_MS }, fn);
+
+// Résolue après chaque test : débloque ce qu'un test raté a laissé en attente
+// (lecture, écriture, flash, déconnexion ou téléchargement retenus).
+let nettoyer;
+let nettoyage;
+function nouveauNettoyage() {
+  nettoyage = new Promise((resolve) => {
+    nettoyer = resolve;
+  });
+}
+nouveauNettoyage();
+const retenue = (promesse) => Promise.race([promesse, nettoyage]);
 
 // Le DAPLink rend au plus 62 octets par lecture série et refuse les écritures
 // plus longues.
@@ -87,7 +105,7 @@ class FauxDAPLink {
     this.lectures += 1;
     if (journal.at(-1) !== 'serialRead') journal.push('serialRead');
     return this.commande('serialRead', async () => {
-      if (attenteLecture) await attenteLecture;
+      if (attenteLecture) await retenue(attenteLecture);
       if (pannes.lecture) throw new Error(pannes.lecture);
       if (!this.enAttente.length) return undefined;
       return new Uint8Array(this.enAttente.splice(0, PAQUET)).buffer;
@@ -98,7 +116,7 @@ class FauxDAPLink {
   serialWrite(chaine) {
     journal.push(`serialWrite ${chaine.length}`);
     return this.commande('serialWrite', async () => {
-      if (attenteEcriture) await attenteEcriture;
+      if (attenteEcriture) await retenue(attenteEcriture);
       if (pannes.ecriture) throw new Error(pannes.ecriture);
       if (chaine.length > PAQUET) throw new Error('Bad status for 8 -> 255');
       for (const caractere of chaine.split('')) this.ecrits.push(caractere.charCodeAt(0));
@@ -128,14 +146,20 @@ class FauxDAPLink {
     journal.push('flash');
     return this.commande('flash', async () => {
       for (const progression of etapesFlash) this.avancer(progression);
-      if (attenteFlash) await attenteFlash;
+      if (attenteFlash) await retenue(attenteFlash);
       if (pannes.flash) throw new Error(pannes.flash);
     });
   }
 
-  async disconnect() {
+  // Comptée comme une commande USB : fermer pendant une lecture série en
+  // cours est un chevauchement. Sauf carte débranchée : plus de câble où des
+  // commandes pourraient se mêler.
+  disconnect() {
     journal.push('disconnect');
-    if (attenteDeconnexion) await attenteDeconnexion;
+    const fermer = async () => {
+      if (attenteDeconnexion) await retenue(attenteDeconnexion);
+    };
+    return this.debranchee ? fermer() : this.commande('disconnect', fermer);
   }
 }
 
@@ -145,7 +169,13 @@ const appareil = {
   },
 };
 
-globalThis.window = { DAPjs: { DAPLink: FauxDAPLink, WebUSB: class {} } };
+class FauxWebUSB {
+  constructor(device) {
+    this.device = device;
+  }
+}
+
+globalThis.window = { DAPjs: { DAPLink: FauxDAPLink, WebUSB: FauxWebUSB } };
 globalThis.requestAnimationFrame = (fn) => queueMicrotask(fn);
 Object.defineProperty(globalThis, 'navigator', {
   configurable: true,
@@ -164,11 +194,54 @@ Object.defineProperty(globalThis, 'navigator', {
 
 // La carte est débranchée : WebUSB émet « disconnect » pour cet appareil.
 function debrancher(device = appareil) {
+  if (derniere?.transport.device === device) derniere.debranchee = true;
   ecouteursUsb.disconnect?.({ device });
 }
 
 // Laisse passer les promesses en attente (setImmediate n'est pas simulé).
 const attendre = () => new Promise((resolve) => setImmediate(resolve));
+
+// Composants abonnés et pas encore désabonnés : afterEach désabonne ceux
+// qu'un test raté a laissés.
+const abonnements = new Set();
+function abonner(fn) {
+  const desabonner = carte.abonner(fn);
+  const une = () => {
+    if (abonnements.delete(une)) desabonner();
+  };
+  abonnements.add(une);
+  return une;
+}
+
+// Après chaque test, remet la connexion singleton à zéro si le test l'a
+// laissée prise (échec en route) : carte débranchée, attentes débloquées,
+// composants désabonnés. Sans effet après un test réussi.
+afterEach(async (t) => {
+  if (carte.etat.connectee) debrancher();
+  nettoyer();
+  await attendre();
+  await attendre();
+  if (abonnements.size) {
+    // La libération planifiée par le dernier désabonnement passe tout de
+    // suite : sa minuterie ne doit pas survivre aux minuteries simulées de
+    // ce test (le test suivant l'annulerait dans les siennes).
+    try {
+      t.mock.timers.enable({ apis: ['setTimeout'] });
+    } catch {
+      // Déjà simulées par le test.
+    }
+    for (const desabonner of [...abonnements]) desabonner();
+    t.mock.timers.tick(DELAI_LIBERATION_MS);
+    await attendre();
+  }
+  nouveauNettoyage();
+  attenteFlash = null;
+  attenteDeconnexion = null;
+  attenteLecture = null;
+  attenteEcriture = null;
+  pannes = {};
+  choisir = async () => appareil;
+});
 
 // Abonne un composant et connecte la carte depuis l'exemple « A ».
 // Date est simulée aussi : le voyant d'activité série en dépend.
@@ -184,7 +257,7 @@ async function demarrer(t) {
   reponseVersion = null;
   choix = 0;
   choisir = async () => appareil;
-  const desabonner = carte.abonner(() => {});
+  const desabonner = abonner(() => {});
   await carte.connecter('A');
   // La boucle de lecture série fait sa première lecture, puis sa pause.
   await attendre();
@@ -263,7 +336,7 @@ test('connexion : fenêtre de choix fermée sans carte, état « connexion » re
     err.name = 'NotFoundError';
     throw err;
   };
-  const desabonner = carte.abonner(() => {});
+  const desabonner = abonner(() => {});
   await carte.connecter('A');
   assert.equal(carte.etat.connexion, false);
   assert.equal(carte.etat.occupee, false);
@@ -284,7 +357,7 @@ test('libération : après le délai sans composant, pas avant, et annulée par 
   assert.equal(carte.etat.connectee, true);
 
   // Page d'exemples suivante : un composant revient avant la fin du délai.
-  const autre = carte.abonner(() => {});
+  const autre = abonner(() => {});
   t.mock.timers.tick(DELAI_LIBERATION_MS);
   await attendre();
   assert.equal(carte.etat.connectee, true);
@@ -298,9 +371,11 @@ test('libération : jamais pendant un téléversement', async (t) => {
   const desabonner = await demarrer(t);
   let rendre;
   const enAttente = () =>
-    new Promise((resolve) => {
-      rendre = () => resolve(new ArrayBuffer(8));
-    });
+    retenue(
+      new Promise((resolve) => {
+        rendre = () => resolve(new ArrayBuffer(8));
+      }),
+    );
   carte.televerser('A', enAttente);
   // Occupée dès le clic, pendant le téléchargement du .bin.
   assert.equal(carte.etat.occupee, true);
@@ -390,7 +465,7 @@ test('connexion en échec après connect() : la connexion à moitié ouverte est
   t.mock.timers.enable({ apis: ['setTimeout'] });
   journal = [];
   pannes = { bauds: 'Bad response for 130 -> 0' };
-  const desabonner = carte.abonner(() => {});
+  const desabonner = abonner(() => {});
   await carte.connecter('C');
   assert.deepEqual(journal, ['connect', 'bauds 115200', 'disconnect', 'close']);
   assert.equal(carte.etat.connectee, false);
@@ -441,12 +516,12 @@ test('déconnexion : libère la carte tout de suite, sans erreur restante, puis 
 test('déconnexion : refusée pendant un téléversement', async (t) => {
   const desabonner = await demarrer(t);
   let rendre;
-  carte.televerser(
-    'A',
-    () =>
+  carte.televerser('A', () =>
+    retenue(
       new Promise((resolve) => {
         rendre = () => resolve(new ArrayBuffer(8));
       }),
+    ),
   );
   assert.equal(carte.etat.occupee, true);
   journal = [];
@@ -479,7 +554,7 @@ test('déconnexion : sans effet pendant une connexion', async (t) => {
     new Promise((resolve) => {
       choisirCarte = () => resolve(appareil);
     });
-  const desabonner = carte.abonner(() => {});
+  const desabonner = abonner(() => {});
   const connexion = carte.connecter('A');
   assert.equal(carte.etat.occupee, true);
   await carte.deconnecter();
@@ -521,7 +596,7 @@ test('déconnexion : annule la libération prévue', async (t) => {
 // Valeurs successives d'un champ de l'état, sans répétitions consécutives.
 function suivre(champ) {
   const vues = [];
-  const desabonner = carte.abonner((etat) => {
+  const desabonner = abonner((etat) => {
     if (vues.at(-1) !== etat[champ]) vues.push(etat[champ]);
   });
   return { vues, desabonner };
@@ -531,7 +606,7 @@ test('progression : suit le flash au pourcentage près, puis revient à null', a
   const desabonner = await demarrer(t);
   etapesFlash = [0, 0.004, 0.25, 0.251, 0.999, 1];
   const notifications = [];
-  const espion = carte.abonner((etat) => notifications.push(etat.progression));
+  const espion = abonner((etat) => notifications.push(etat.progression));
   const { vues, desabonner: fin } = suivre('progression');
   await carte.televerser('A', bin);
   espion();
@@ -565,12 +640,12 @@ test('progression : remise à null après un échec du flash', async (t) => {
 test('progression : rien pendant le téléchargement du .bin', async (t) => {
   const desabonner = await demarrer(t);
   let rendre;
-  carte.televerser(
-    'A',
-    () =>
+  carte.televerser('A', () =>
+    retenue(
       new Promise((resolve) => {
         rendre = () => resolve(new ArrayBuffer(8));
       }),
+    ),
   );
   assert.equal(carte.etat.occupee, true);
   assert.equal(carte.etat.progression, null);
@@ -588,7 +663,7 @@ test('activité série : au plus un signal par intervalle, remise à zéro au t�
   assert.equal(carte.etat.activite, 0);
 
   let notifications = 0;
-  const espion = carte.abonner(() => {
+  const espion = abonner(() => {
     notifications += 1;
   });
   // Vingt paquets en 95 ms, un par lecture (sans fin de ligne : la console
@@ -685,12 +760,12 @@ test('carte débranchée au repos : message sous le dernier exemple cliqué, con
 test('carte débranchée pendant le téléchargement du .bin : rien téléversé, message gardé', async (t) => {
   const desabonner = await demarrer(t);
   let rendre;
-  const televersement = carte.televerser(
-    'A',
-    () =>
+  const televersement = carte.televerser('A', () =>
+    retenue(
       new Promise((resolve) => {
         rendre = () => resolve(new ArrayBuffer(8));
       }),
+    ),
   );
   debrancher();
   assert.equal(carte.etat.connectee, false);
@@ -1076,5 +1151,111 @@ test('redémarrer : dap.reset(), refusé sans carte', async (t) => {
   await carte.redemarrer();
   assert.deepEqual(journal, ['reset']);
   assert.equal(carte.etat.connectee, true);
+  await quitter(t, desabonner);
+});
+
+// Retient la prochaine lecture série et la lance : renvoie la fonction qui la
+// laisse finir.
+async function retenirLecture(t) {
+  let finir;
+  attenteLecture = new Promise((resolve) => {
+    finir = resolve;
+  });
+  t.mock.timers.tick(PAUSE_LECTURE_MS);
+  await attendre();
+  assert.equal(derniere.enCours, 'serialRead');
+  return () => {
+    attenteLecture = null;
+    finir();
+  };
+}
+
+test('déconnexion : attend la fin de la lecture série en cours avant de fermer la carte', async (t) => {
+  const desabonner = await demarrer(t);
+  const finirLecture = await retenirLecture(t);
+  journal = [];
+  const deconnexion = carte.deconnecter();
+  await attendre();
+  // La lecture est encore sur le câble : rien n'est fermé.
+  assert.deepEqual(sansLectures(), []);
+  finirLecture();
+  await deconnexion;
+  assert.deepEqual(sansLectures(), ['disconnect', 'close']);
+  assert.deepEqual(derniere.chevauchements, []);
+  assert.deepEqual(carte.etat, ETAT_INITIAL);
+  await verifierArret(t);
+  desabonner();
+  t.mock.timers.tick(DELAI_LIBERATION_MS);
+  await attendre();
+});
+
+test('libération après le délai : attend la fin de la lecture série en cours avant de fermer la carte', async (t) => {
+  const desabonner = await demarrer(t);
+  const finirLecture = await retenirLecture(t);
+  journal = [];
+  desabonner();
+  t.mock.timers.tick(DELAI_LIBERATION_MS);
+  await attendre();
+  assert.deepEqual(sansLectures(), []);
+  finirLecture();
+  await attendre();
+  assert.deepEqual(sansLectures(), ['disconnect', 'close']);
+  assert.deepEqual(derniere.chevauchements, []);
+  assert.deepEqual(carte.etat, ETAT_INITIAL);
+  await verifierArret(t);
+});
+
+test('carte débranchée pendant une lecture série : le message habituel remplace celui de la console', async (t) => {
+  const desabonner = await demarrer(t);
+  await carte.televerser('B', bin);
+  // L'erreur de transfert arrive avant l'événement « disconnect » de WebUSB.
+  pannes.lecture = 'A transfer error has occurred.';
+  derniere.emettre('mesure\n');
+  await lire(t);
+  assert.equal(carte.etat.connectee, false);
+  assert.notEqual(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  // Un autre appareil USB débranché ne compte pas.
+  debrancher({});
+  assert.notEqual(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  debrancher();
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  assert.equal(carte.etat.connectee, false);
+  assert.equal(carte.etat.dernierClic, 'B');
+  pannes = {};
+  await finir(t, desabonner);
+});
+
+test("carte perdue par la console puis nouvelle connexion : l'ancien appareil débranché ne pose pas d'erreur", async (t) => {
+  const desabonner = await demarrer(t);
+  pannes.lecture = 'A transfer error has occurred.';
+  await lire(t);
+  assert.equal(carte.etat.connectee, false);
+  pannes = {};
+  // Le lecteur reconnecte la carte (nouvel objet USB) : l'événement de
+  // l'ancien appareil arrive pendant la fenêtre de choix.
+  const nouvelAppareil = {
+    async close() {
+      journal.push('close');
+    },
+  };
+  let choisirCarte;
+  choisir = () =>
+    new Promise((resolve) => {
+      choisirCarte = () => resolve(nouvelAppareil);
+    });
+  const connexion = carte.connecter('A');
+  assert.equal(carte.etat.connexion, true);
+  debrancher();
+  assert.equal(carte.etat.erreur, null);
+  choisirCarte();
+  await connexion;
+  await attendre();
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(carte.etat.erreur, null);
+  // Et une fois connectée, toujours rien.
+  debrancher();
+  assert.equal(carte.etat.erreur, null);
+  assert.equal(carte.etat.connectee, true);
+  choisir = async () => appareil;
   await quitter(t, desabonner);
 });

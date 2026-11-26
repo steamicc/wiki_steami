@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:js": "eslint .",
-    "test:js": "node --test \"src/**/*.test.mjs\"",
+    "test:js": "node --test --test-timeout=10000 --test-force-exit \"src/**/*.test.mjs\"",
     "test:scripts": "python3 -m unittest discover -s scripts/tests",
     "lint:js:fix": "eslint --fix .",
     "lint:links": "docker run --rm -v $PWD:/input lycheeverse/lychee --config /input/.lychee.toml --root-dir /input/static '/input/docs/**/*.md' '/input/README.md'",

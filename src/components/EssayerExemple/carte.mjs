@@ -57,6 +57,8 @@ const COMMANDE_VERSION = 0x9f;
 
 const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
 const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
+const MESSAGE_DEBRANCHEE =
+  'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».';
 
 export const ETAT_INITIAL = Object.freeze({
   connectee: false,
@@ -91,6 +93,8 @@ let file = Promise.resolve();
 // Rejetée quand la connexion est perdue ou fermée (voir executerSansAttendre).
 let perte = null;
 let flashEnCours = false;
+// Appareil de la dernière connexion perdue (voir ecouterDeconnexion).
+let appareilPerdu = null;
 let promesseDapjs = null; // partagée : le script n'est injecté qu'une fois
 let ecouteDeconnexion = false;
 let rafPlanifie = false;
@@ -218,6 +222,7 @@ function perdre(courant, message) {
   const appareil = peripherique;
   dap = null;
   peripherique = null;
+  appareilPerdu = appareil;
   // arreterBoucle() ne rejette jamais.
   if (boucle) void arreterBoucle(boucle);
   boucle = null;
@@ -303,10 +308,16 @@ function ecouterDeconnexion() {
   ecouteDeconnexion = true;
   navigator.usb.addEventListener('disconnect', (evenement) => {
     if (dap && evenement.device === peripherique) {
-      perdre(
-        dap,
-        'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».',
-      );
+      perdre(dap, MESSAGE_DEBRANCHEE);
+      return;
+    }
+    // Carte débranchée pendant une lecture série : l'erreur de transfert
+    // arrive souvent avant cet événement, et perdre() a déjà affiché l'erreur
+    // de la console. La carte est bien partie : le message habituel la
+    // remplace, sauf si le lecteur a déjà relancé une connexion.
+    if (!dap && evenement.device === appareilPerdu && !etat.connexion) {
+      appareilPerdu = null;
+      changer({ erreur: MESSAGE_DEBRANCHEE });
     }
   });
 }
@@ -376,6 +387,7 @@ function apresOperation(partie = {}) {
 // id : l'exemple sous lequel on a cliqué, qui affichera une éventuelle erreur.
 async function connecter(id, urlDapjs = URL_DAPJS) {
   if (dap || etat.occupee) return;
+  appareilPerdu = null;
   // Tampon, console et messages sont ceux de la connexion précédente.
   tampon.vider();
   oublierActivite();
