@@ -199,7 +199,7 @@ test('téléversement : erreur de DAP.js traduite, avec le message brut', async 
   await carte.televerser('A', bin);
   assert.equal(
     carte.etat.erreur,
-    'Le téléversement a échoué : débranche et rebranche la carte, puis réessaie. (Flash error)',
+    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Flash error)',
   );
   assert.equal(carte.etat.programmeActif, null);
   // La lecture série repart quand même.

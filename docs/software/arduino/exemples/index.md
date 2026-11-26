@@ -6,31 +6,31 @@ sidebar_position: 5.5
 
 # Exemples à essayer sur la carte
 
-La bibliothèque STeaMi est livrée avec des exemples, rangés par composant (dans l'Arduino IDE : **Fichier → Exemples → STeaMi**). Ces pages les reprennent un par un, pour que tu comprennes ce que fait chacun et comment il se sert du driver de son composant. Pour chaque exemple, tu trouveras :
+La bibliothèque STeaMi est livrée avec des exemples, rangés par composant (dans l'Arduino IDE : **Fichier → Exemples → STeaMi**). Ces pages les reprennent un par un, pour comprendre ce que fait chacun et comment il se sert du driver de son composant. Pour chaque exemple, on trouve :
 
-- **Ce que tu vas voir** sur la carte, et ce qu'il faut faire pour que l'exemple réagisse ;
+- **Ce qu'on observe** sur la carte, et ce qu'il faut faire pour que l'exemple réagisse ;
 - **Matériel**, quand l'exemple demande plus que la carte ;
 - le code complet de l'exemple ;
 - **Comment ça marche** : les fonctions du driver qu'il appelle et ce qu'elles montrent du composant ;
-- un bouton pour l'envoyer sur ta carte depuis la page.
+- un bouton pour l'envoyer sur la carte depuis la page.
 
-Tu n'as rien à installer ni à compiler : chaque exemple est déjà compilé, et le programme envoyé correspond exactement au code affiché, issu de la même version de la bibliothèque. Les pages se lisent aussi sans carte.
+Il n'y a rien à installer ni à compiler : chaque exemple est déjà compilé, et le programme envoyé correspond exactement au code affiché, issu de la même version de la bibliothèque. Les pages se lisent aussi sans carte.
 
 ## Essayer un exemple
 
 Avec **Chrome** ou **Edge** sur un ordinateur :
 
-1. Branche la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
-2. Sous un exemple, clique sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisis **STeaMi CMSIS-DAP**, puis clique sur **Connexion**. Tu n'autorises la carte qu'une fois par page : tu peux ensuite essayer tous les exemples de la page sans recommencer. Quand tu passes à une page sans exemple à essayer, la carte est libérée : un Codespace ou l'Arduino IDE peut alors s'en servir.
-3. Clique sur **Téléverser**. Quand le message « Programme téléversé. » apparaît, la carte redémarre et exécute l'exemple. La console série s'ouvre sous l'exemple et affiche ce que le programme écrit.
+1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
+2. Sous un exemple, cliquer sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte n'est à autoriser qu'une fois par page : tous les exemples de la page s'essaient ensuite sans recommencer. En passant à une page sans exemple à essayer, la carte est libérée : un Codespace ou l'Arduino IDE peut alors s'en servir.
+3. Cliquer sur **Téléverser**. Quand le message « Programme téléversé. » apparaît, la carte redémarre et exécute l'exemple. La console série s'ouvre sous l'exemple et affiche ce que le programme écrit.
 
-L'exemple remplace le programme qui était sur la carte, MicroPython compris : pour revenir à MicroPython, réinstalle son firmware (voir [Installation du firmware MicroPython](/docs/software/micropython/install)).
+L'exemple remplace le programme qui était sur la carte, MicroPython compris : pour revenir à MicroPython, réinstaller son firmware (voir [Installation du firmware MicroPython](/docs/software/micropython/install)).
 
-Avec un navigateur qui ne sait pas parler à la carte par USB (Firefox, Safari), le bouton est remplacé par un lien **Télécharger le .bin** : copie ce fichier sur le lecteur **STEAMI** de la carte, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). La page ne peut pas afficher la console dans ce cas : pour lire ce qu'écrit l'exemple, ouvre le moniteur série de l'Arduino IDE à 115200 bauds.
+Avec un navigateur qui ne sait pas parler à la carte par USB (Firefox, Safari), le bouton est remplacé par un lien **Télécharger le .bin** : copier ce fichier sur le lecteur **STEAMI** de la carte, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). La page ne peut pas afficher la console dans ce cas : pour lire ce qu'écrit l'exemple, ouvrir le moniteur série de l'Arduino IDE à 115200 bauds.
 
-Si Chrome ou Edge n'arrive pas à se connecter à la carte, un message d'erreur s'affiche sous l'exemple, suivi du lien **Télécharger le .bin** : glisse ce fichier sur le lecteur **STEAMI**, comme avec Firefox. C'est le cas quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)).
+Si Chrome ou Edge n'arrive pas à se connecter à la carte, un message d'erreur s'affiche sous l'exemple, suivi du lien **Télécharger le .bin** : glisser ce fichier sur le lecteur **STEAMI**, comme avec Firefox. C'est le cas quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)).
 
-Pour modifier un exemple, ouvre-le dans un [Codespace](../codespace), où la bibliothèque et ses exemples sont déjà installés, ou dans l'[Arduino IDE](../arduino-ide), après avoir installé la [bibliothèque STeaMi](../bibliotheques).
+Pour modifier un exemple, l'ouvrir dans un [Codespace](../codespace), où la bibliothèque et ses exemples sont déjà installés, ou dans l'[Arduino IDE](../arduino-ide), après avoir installé la [bibliothèque STeaMi](../bibliotheques).
 
 ## Les composants
 

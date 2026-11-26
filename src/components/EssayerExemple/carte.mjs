@@ -68,7 +68,7 @@ function chargerDapjs(src) {
         script.remove();
         reject(
           new ErreurLecteur(
-            'Impossible de charger la bibliothèque de téléversement : vérifie la connexion à Internet, puis réessaie.',
+            'Impossible de charger la bibliothèque de téléversement : vérifier la connexion à Internet, puis réessayer.',
           ),
         );
       };
@@ -119,7 +119,7 @@ function ecouterDeconnexion() {
     if (dap && evenement.device === peripherique) {
       perdre(
         dap,
-        'La carte a été débranchée : rebranche-la, puis clique sur « Connecter la carte ».',
+        'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».',
       );
     }
   });

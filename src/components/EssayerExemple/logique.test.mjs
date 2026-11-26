@@ -109,15 +109,15 @@ test('messageFrancais : garde la traduction de messageErreur', () => {
 test('messageFrancais : erreur de DAP.js non traduite, en français avec le message brut', () => {
   assert.equal(
     messageFrancais(new Error('Flash error')),
-    'Le téléversement a échoué : débranche et rebranche la carte, puis réessaie. (Flash error)',
+    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Flash error)',
   );
   assert.equal(
     messageFrancais(new Error('Transfer response FAULT'), 'televersement'),
-    'Le téléversement a échoué : débranche et rebranche la carte, puis réessaie. (Transfer response FAULT)',
+    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Transfer response FAULT)',
   );
   assert.match(
     messageFrancais(new Error('Bad response for 130 -> 0'), 'connexion'),
-    /^La connexion à la carte a échoué : débranche .*\(Bad response for 130 -> 0\)$/,
+    /^La connexion à la carte a échoué : débrancher .*\(Bad response for 130 -> 0\)$/,
   );
   assert.match(
     messageFrancais(new Error('Wait timed out'), 'console'),
@@ -148,7 +148,7 @@ test('telechargerExemple : réseau coupé, message en français qui dit quoi fai
   await assert.rejects(telechargerExemple('/x.bin', coupe), {
     name: 'ErreurLecteur',
     message:
-      "Impossible de télécharger l'exemple : vérifie la connexion à Internet, puis réessaie.",
+      "Impossible de télécharger l'exemple : vérifier la connexion à Internet, puis réessayer.",
   });
   const coupeEnCours = async () => ({
     ok: true,
@@ -156,14 +156,14 @@ test('telechargerExemple : réseau coupé, message en français qui dit quoi fai
       throw new TypeError('network error');
     },
   });
-  await assert.rejects(telechargerExemple('/x.bin', coupeEnCours), /vérifie la connexion/);
+  await assert.rejects(telechargerExemple('/x.bin', coupeEnCours), /vérifier la connexion/);
 });
 
 test('telechargerExemple : fichier absent', async () => {
   const absent = async () => ({ ok: false, status: 404 });
   await assert.rejects(telechargerExemple('/x.bin', absent), {
     name: 'ErreurLecteur',
-    message: /^Exemple introuvable sur le wiki \(erreur 404\) : recharge la page/,
+    message: /^Exemple introuvable sur le wiki \(erreur 404\) : recharger la page/,
   });
 });
 
