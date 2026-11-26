@@ -10,7 +10,7 @@ Ce guide montre, écran par écran, comment envoyer un exemple sur la carte depu
 
 :::note
 
-Les captures d'écran de cette page datent d'avant l'ajout des indicateurs d'activité (état de la carte, barre de progression, voyant de réception série) : ces indicateurs n'y figurent pas.
+Les captures d'écran de cette page datent d'avant l'ajout des indicateurs d'activité (état de la carte, barre de progression, voyant de réception série) et du bouton **Déconnecter** : ils n'y figurent pas.
 
 :::
 
@@ -42,7 +42,7 @@ Le navigateur ouvre une fenêtre qui liste les cartes branchées. Cliquer sur **
 
 Une fois la carte connectée, chaque bouton **Connecter la carte** de la page devient **Téléverser**, à côté d'un bouton **Déconnecter**. La carte ne s'autorise qu'une fois par page.
 
-Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, « Carte : connexion… » (pastille grise) tant que la fenêtre de choix est ouverte et que la page se connecte, puis « Carte : connectée ». À côté, le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données.
+Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, « Carte : connexion… » (pastille grise) tant que la fenêtre de choix est ouverte et que la page se connecte, puis « Carte : connectée ». Sous l'exemple qui a servi à connecter la carte, le message « Carte connectée. » s'affiche, et le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données. Ce voyant n'apparaît que sous un seul exemple : celui dont le programme tourne, ou, avant le premier téléversement, celui qui a servi à connecter la carte.
 
 ## 3. Téléverser l'exemple
 
@@ -70,13 +70,13 @@ En quittant les pages d'exemples, la carte est libérée au bout d'une seconde e
 
 ## En cas d'erreur
 
-Si la connexion ou l'envoi échoue, un message en rouge explique quoi faire, et un lien **Télécharger le .bin** apparaît dessous. Par exemple, après avoir fermé la fenêtre de choix sans sélectionner la carte :
+Si la connexion ou l'envoi échoue, un message en rouge s'affiche, le plus souvent avec ce qu'il faut faire, et un lien **Télécharger le .bin** apparaît dessous. Par exemple, après avoir fermé la fenêtre de choix sans sélectionner la carte :
 
 ![Encadré de l'exemple après une connexion annulée : message « Aucune carte choisie. », puis le lien « Télécharger le .bin » et la consigne « Glisser ce fichier sur le lecteur STEAMI de la carte. »](/img/software/arduino/essayer-exemple-05-erreur.png)
 
 Le fichier téléchargé est le même programme : le glisser sur le lecteur **STEAMI**, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). C'est la solution quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)).
 
-Quand la connexion ou l'envoi échoue en cours de route, le message demande de débrancher le câble USB et, s'il y en a une, la batterie, d'attendre quelques secondes, puis de rebrancher et de réessayer. La batterie compte : tant qu'elle est branchée, l'interface USB de la carte (son DAPLink) reste alimentée, et débrancher le câble seul ne la remet pas à zéro. Le bouton Reset ne suffit pas non plus : il redémarre le microcontrôleur de la carte, pas son interface USB. La même procédure sert à relire le fichier de la page [DAPLINK_FLASH](./daplink-flash).
+Quand la connexion ou l'envoi échoue en cours de route sur une erreur de la bibliothèque de téléversement, le message demande de débrancher le câble USB et, s'il y en a une, la batterie, d'attendre quelques secondes, puis de rebrancher et de réessayer. Les autres messages (carte débranchée, carte utilisée par un autre programme) ne parlent pas de la batterie, mais le conseil vaut pour tout échec en cours de route. La batterie compte : tant qu'elle est branchée, l'interface USB de la carte (son DAPLink) reste alimentée, et débrancher le câble seul ne la remet pas à zéro. Le bouton Reset ne suffit pas non plus : il redémarre le microcontrôleur de la carte, pas son interface USB. La même procédure sert à relire le fichier de la page [DAPLINK_FLASH](./daplink-flash).
 
 ## Sans Chrome ni Edge
 

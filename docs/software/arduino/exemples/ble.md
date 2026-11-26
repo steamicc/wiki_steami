@@ -204,7 +204,7 @@ Une carte seule, sans balise à portée, dessine un cadre vide, avec seulement l
 
 Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui les comprend (codes ANSI), effacent l'écran et ramènent le curseur en haut : la carte reste alors en place et s'anime. La console de cette page n'interprète pas ces codes : les cartes s'y affichent les unes sous les autres. Le moniteur série de l'Arduino IDE ne les interprète pas non plus, à notre connaissance, et empile lui aussi les cartes. Pour une carte animée, utiliser un terminal qui comprend les codes ANSI, comme `pio device monitor` (celui de la fiche d'activité), `screen` ou PuTTY, à 115200 bauds.
 
-**Matériel** : comme pour [BleTrilateration](#bletrilateration), trois balises `Beacon_M1` à `Beacon_M3` aux positions du code et cette carte, avec un terminal pour voir la carte animée et envoyer `c` et `h`. La bibliothèque fournit une fiche d'activité en anglais, [BleIndoorMap.md](https://github.com/steamicc/arduino-steami/blob/v0.36.2/examples/BLE/BleIndoorMap/BleIndoorMap.md) : installation des balises, étalonnage et déroulé d'une séance en classe.
+**Matériel** : comme pour [BleTrilateration](#bletrilateration), trois balises `Beacon_M1` à `Beacon_M3` aux positions du code et cette carte, avec un terminal pour voir la carte animée et envoyer `c` et `h`. La bibliothèque fournit une fiche d'activité en anglais, [BleIndoorMap.md](https://github.com/steamicc/arduino-steami/blob/main/examples/BLE/BleIndoorMap/BleIndoorMap.md) : installation des balises, étalonnage et déroulé d'une séance en classe.
 
 ```cpp file=.external/arduino-steami/examples/BLE/BleIndoorMap/BleIndoorMap.ino
 
