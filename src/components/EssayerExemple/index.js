@@ -1,17 +1,16 @@
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { carte } from './carte';
-import { etatWebUSB, idValide, nomFichier, urlBin } from './logique.mjs';
+import { ETAT_INITIAL, carte } from './carte.mjs';
+import {
+  estEnBas,
+  etatWebUSB,
+  idValide,
+  nomFichier,
+  telechargerExemple,
+  urlBin,
+} from './logique.mjs';
 import styles from './styles.module.css';
-
-const ETAT_SERVEUR = Object.freeze({
-  connectee: false,
-  occupee: false,
-  exempleActif: null,
-  lignes: [],
-  erreur: null,
-});
 
 function Telechargement({ id, href }) {
   return (
@@ -28,32 +27,41 @@ function Controles({ id, href }) {
   const etat = useSyncExternalStore(
     carte.abonner,
     () => carte.etat,
-    () => ETAT_SERVEUR,
+    () => ETAT_INITIAL,
   );
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
-  const [aClique, setAClique] = useState(false);
+  const consoleRef = useRef(null);
+  // Le lecteur était-il en bas de la console à son dernier défilement ?
+  const colleRef = useRef(true);
 
-  const actif = etat.exempleActif === id;
-  // Une erreur de connexion n'appartient à aucun exemple : seul l'exemple cliqué l'affiche.
-  const erreur = actif || (etat.exempleActif === null && aClique) ? etat.erreur : null;
+  // Statut et erreur ne s'affichent que sous l'exemple cliqué en dernier.
+  const clique = etat.dernierClic === id;
+  const erreur = clique ? etat.erreur : null;
+  const montrerConsole = etat.programmeActif === id && etat.lignes.length > 0;
+
+  // La console suit les nouvelles lignes, sauf si le lecteur est remonté.
+  useLayoutEffect(() => {
+    const pre = consoleRef.current;
+    if (!pre) {
+      colleRef.current = true;
+      return;
+    }
+    if (colleRef.current) pre.scrollTop = pre.scrollHeight;
+  }, [etat.lignes, montrerConsole]);
 
   function televerser() {
-    setAClique(true);
-    carte.televerser(id, async () => {
-      const reponse = await fetch(href);
-      if (!reponse.ok) throw new Error(`Exemple introuvable (${reponse.status}).`);
-      return reponse.arrayBuffer();
-    });
+    carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
-    setAClique(true);
-    carte.connecter(urlDapjs);
+    carte.connecter(id, urlDapjs);
   }
 
   let statut = null;
-  if (actif && etat.occupee) statut = 'Téléversement en cours…';
-  else if (actif && etat.connectee && !etat.erreur) statut = 'Programme téléversé.';
+  if (clique && etat.occupee && etat.connectee) statut = 'Téléversement en cours…';
+  else if (clique && etat.programmeActif === id && etat.connectee && !etat.occupee && !erreur) {
+    statut = 'Programme téléversé.';
+  }
 
   return (
     <div className={styles.controles}>
@@ -75,8 +83,22 @@ function Controles({ id, href }) {
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}
       </div>
-      {actif && etat.lignes.length > 0 && (
-        <pre className={styles.console} aria-label="Console série">
+      {/* WebUSB peut exister mais être inutilisable (poste géré, Linux sans
+          règle udev) : après une erreur, le .bin reste accessible. */}
+      {erreur && <Telechargement id={id} href={href} />}
+      {montrerConsole && (
+        // Région nommée et accessible au clavier pour défiler ; pas role="log",
+        // qui ferait lire cinq lignes par seconde.
+        <pre
+          ref={consoleRef}
+          className={styles.console}
+          role="region"
+          aria-label="Console série"
+          tabIndex={0}
+          onScroll={(evenement) => {
+            colleRef.current = estEnBas(evenement.currentTarget);
+          }}
+        >
           {etat.lignes.join('\n')}
         </pre>
       )}

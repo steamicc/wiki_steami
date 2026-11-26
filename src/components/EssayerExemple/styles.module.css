@@ -45,8 +45,13 @@
   margin: 0;
 }
 
+/* Contraste d'au moins 4,5:1 (WCAG AA) : --ifm-color-danger n'y arrive pas. */
 .erreur {
-  color: var(--ifm-color-danger);
+  color: var(--ifm-color-danger-darkest);
+}
+
+[data-theme='dark'] .erreur {
+  color: var(--ifm-color-danger-lighter);
 }
 
 .console {
