@@ -591,47 +591,64 @@ export function creerRepl({
     });
   }
 
-  // Arrête le programme en cours (Ctrl-C), puis remet MicroPython à zéro par
-  // un redémarrage logiciel (Ctrl-D) fait en REPL brut : il oublie les
-  // variables et le disque en RAM, et ne relance pas le main.py de
+  // Remise à zéro par un redémarrage logiciel (Ctrl-D) fait en REPL brut : il
+  // oublie les variables et le disque en RAM, et ne relance pas le main.py de
   // l'utilisateur (en REPL normal, Ctrl-D le relancerait). La carte revient
-  // ensuite au REPL normal (Ctrl-B), au repos sur l'invite « >>> ». Les
-  // opérations en file sont abandonnées. Un délai dépassé n'est pas une
-  // erreur : la carte est laissée telle quelle (sans Ctrl-D si elle n'est pas
-  // en REPL brut).
+  // ensuite au REPL normal (Ctrl-B), au repos sur l'invite « >>> ». true si
+  // l'invite est revenue ; false si la carte n'a pas répondu (délais
+  // dépassés), sans Ctrl-D si elle n'a pas pu entrer en REPL brut.
+  async function remettreAZero() {
+    try {
+      await envoyer('\r\x03\x03');
+      await attendre(PAUSE_INTERRUPTION_MS);
+      tampon.vider();
+      await envoyer([CTRL_A]);
+      await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
+    } catch (err) {
+      if (err instanceof ErreurDelai) return false;
+      throw err;
+    }
+    try {
+      await envoyer([CTRL_D]);
+      await attendreMotif(REDEMARRAGE, d.reponse, 'le redémarrage');
+      await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
+    } catch (err) {
+      if (!(err instanceof ErreurDelai)) throw err;
+    }
+    try {
+      await envoyer([CTRL_B]);
+      await attendreMotif(INVITE, d.reponse, 'l’invite >>>');
+      return true;
+    } catch (err) {
+      if (err instanceof ErreurDelai) return false;
+      throw err;
+    }
+  }
+
+  // Arrête le programme en cours (Ctrl-C) et les opérations en file, puis
+  // remet MicroPython à zéro (remettreAZero). Renvoie true si la carte est
+  // revenue au repos sur « >>> », false si elle n'a pas répondu (programme
+  // qui ignore Ctrl-C, pas d'invite) : il faut alors appuyer sur RESET.
   async function arreter() {
     for (const op of operations) op.arretDemande = true;
     const courante = operation;
-    await envoyer('\x03\x03');
-    if (courante && !(await dansLeDelai(courante.promesse, d.arret))) {
-      // Le programme ignore Ctrl-C : on cesse de l'attendre.
-      courante.annulee = true;
-      attente?.annuler(new ArretDemande());
-      await dansLeDelai(courante.promesse, d.arret);
+    // La remise à zéro prend sa place dans la file avant toute attente : une
+    // opération demandée pendant l'arrêt (« Lancer » juste après « Arrêter »)
+    // passe après elle.
+    const remise = enFile(remettreAZero);
+    try {
+      await envoyer('\x03\x03');
+      if (courante && !(await dansLeDelai(courante.promesse, d.arret))) {
+        // Le programme ignore Ctrl-C : on cesse de l'attendre.
+        courante.annulee = true;
+        attente?.annuler(new ArretDemande());
+        await dansLeDelai(courante.promesse, d.arret);
+      }
+    } catch (err) {
+      remise.catch(() => {});
+      throw err;
     }
-    await enFile(async () => {
-      let redemarre = false;
-      try {
-        await envoyer('\r\x03\x03');
-        await attendre(PAUSE_INTERRUPTION_MS);
-        tampon.vider();
-        await envoyer([CTRL_A]);
-        await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
-        await envoyer([CTRL_D]);
-        redemarre = true;
-        await attendreMotif(REDEMARRAGE, d.reponse, 'le redémarrage');
-        await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
-      } catch (err) {
-        if (!(err instanceof ErreurDelai)) throw err;
-      }
-      if (!redemarre) return;
-      await envoyer([CTRL_B]);
-      try {
-        await attendreMotif(INVITE, d.reponse, 'l’invite >>>');
-      } catch (err) {
-        if (!(err instanceof ErreurDelai)) throw err;
-      }
-    });
+    return remise;
   }
 
   return { interrompre, executer, ecrireFichierRam, lireVersion, arreter };

@@ -55,6 +55,8 @@ function fausseCarte({
     depassements: 0,
     redemarrages: 0,
     mainPy: 0,
+    // Suite des codes lancés (« code ») et des redémarrages (« redemarrage »).
+    ordre: [],
   };
   let mode = 'normal';
   let ligne = [];
@@ -97,6 +99,7 @@ function fausseCarte({
 
   function lancer(code, enPaste) {
     journal.codes.push(code);
+    journal.ordre.push('code');
     journal.modes.push(enPaste ? 'paste' : 'brut');
     if (!enPaste) emettre('OK');
     const r = programme(code) ?? {};
@@ -129,6 +132,7 @@ function fausseCarte({
         } else if (o === 4) {
           // En REPL normal, le redémarrage logiciel relance boot.py et main.py.
           journal.redemarrages++;
+          journal.ordre.push('redemarrage');
           journal.mainPy++;
           emettre('MPY: soft reboot\r\n', BANNIERE, '>>> ');
         } else emettre([o]);
@@ -145,6 +149,7 @@ function fausseCarte({
           if (ligne.length === 0) {
             // En REPL brut : redémarrage sans main.py, retour au REPL brut.
             journal.redemarrages++;
+            journal.ordre.push('redemarrage');
             emettre('OK\r\nMPY: soft reboot\r\n', INVITE_BRUT);
           } else lancer(decoder(ligne), false);
           ligne = [];
@@ -370,7 +375,7 @@ test('arreter : interrompt un programme sans fin, la sortie arrive pendant qu’
     surSortie: (t) => morceaux.push(t),
   });
   await jusqua(() => morceaux.join('').split('tic').length > 5);
-  await repl.arreter();
+  assert.equal(await repl.arreter(), true, 'remise à zéro confirmée');
   const r = await execution;
   assert.deepEqual(r, { erreur: null, arrete: true });
   assert.equal(carte.journal.redemarrages, 1, 'redémarrage logiciel (Ctrl-D)');
@@ -384,16 +389,46 @@ test('arreter : un programme qui ignore Ctrl-C ne bloque pas executer', async ()
   const { repl } = replSur(carte);
   const execution = repl.executer('while True: pass');
   await jusqua(() => carte.mode === 'execution');
-  await repl.arreter();
+  assert.equal(await repl.arreter(), false, 'la carte n’a pas répondu : appuyer sur RESET');
   assert.deepEqual(await execution, { erreur: null, arrete: true });
   assert.equal(carte.journal.mainPy, 0, 'pas de Ctrl-D hors du REPL brut');
+  assert.equal(carte.journal.redemarrages, 0);
+});
+
+test('arreter : false si MicroPython ne répond pas (programme Arduino)', async () => {
+  const carte = fausseCarte({ arduino: true });
+  const { repl } = replSur(carte);
+  assert.equal(await repl.arreter(), false);
+  assert.equal(carte.ecouteurs, 0);
+});
+
+test('arreter : un executer demandé pendant l’arrêt passe après la remise à zéro', async () => {
+  const carte = fausseCarte({
+    programme: (code) => (code.includes('while') ? { infini: 'tic\r\n' } : { sortie: 'après\r\n' }),
+  });
+  const { repl } = replSur(carte);
+  const morceaux = [];
+  const premier = repl.executer('while True: print("tic")', {
+    surSortie: (t) => morceaux.push(t),
+  });
+  await jusqua(() => morceaux.join('').includes('tic'));
+  // « Lancer » juste après « Arrêter », sans attendre la fin de l'arrêt.
+  const arret = repl.arreter();
+  const second = lancer(repl, 'print("après")');
+  assert.equal(await arret, true);
+  assert.deepEqual(await premier, { erreur: null, arrete: true });
+  const r = await second;
+  assert.equal(r.sortie, 'après\r\n');
+  assert.equal(r.arrete, false, 'le nouveau programme n’est pas arrêté');
+  assert.deepEqual(carte.journal.ordre, ['code', 'redemarrage', 'code']);
+  assert.equal(carte.journal.mainPy, 0);
 });
 
 test('arreter : depuis le REPL normal, redémarre en REPL brut puis revient à >>>', async () => {
   const carte = fausseCarte({ programme: () => ({ sortie: '2\r\n' }) });
   const { repl } = replSur(carte);
   assert.equal(await repl.interrompre(), true);
-  await repl.arreter();
+  assert.equal(await repl.arreter(), true);
   assert.equal(carte.journal.redemarrages, 1);
   assert.equal(carte.journal.mainPy, 0);
   assert.equal(carte.mode, 'normal');
@@ -404,7 +439,7 @@ test('arreter : depuis le REPL normal, redémarre en REPL brut puis revient à >
 test('arreter : sans programme en cours, remet la carte à zéro', async () => {
   const carte = fausseCarte();
   const { repl } = replSur(carte);
-  await repl.arreter();
+  assert.equal(await repl.arreter(), true);
   assert.equal(carte.journal.redemarrages, 1);
   assert.equal(carte.journal.mainPy, 0, 'main.py n’est pas relancé');
   assert.equal(carte.mode, 'normal');

@@ -43,13 +43,26 @@ const dap = new DAPjs.DAPLink(new DAPjs.USB(device));
 await dap.connect();
 await dap.setSerialBaudrate(115200);
 
-// DAP.js livre une chaîne d'un caractère par octet : conversion sans perte.
+// Lecture brute par dap.serialRead() (ArrayBuffer, ou undefined si rien) :
+// on relit aussitôt tant que des données arrivent, 5 ms de pause sinon.
+// Ni startSerialRead ni EVENT_SERIAL_DATA : DAP.js y décode lui-même l'UTF-8
+// (« é » arrive en un seul caractère, les octets sont perdus), et
+// startSerialRead(10) ne lit que 62 octets toutes les 10 ms (~6 ko/s), moins
+// que l'UART à 115200 bauds (~11,5 ko/s) : « <DAPLink:Overflow> » (mesuré sur
+// la V1c).
 const ecouteurs = new Set();
-dap.on(DAPjs.DAPLink.EVENT_SERIAL_DATA, (donnees) => {
-  const octets = Uint8Array.from(donnees, (c) => c.charCodeAt(0));
-  for (const fn of ecouteurs) fn(octets);
-});
-dap.startSerialRead(10).catch((err) => console.error('lecture série :', err.message));
+let lecture = true;
+const boucle = (async () => {
+  while (lecture) {
+    const donnees = await dap.serialRead();
+    if (donnees && donnees.byteLength) {
+      const octets = new Uint8Array(donnees);
+      for (const fn of ecouteurs) fn(octets);
+    } else {
+      await new Promise((r) => setTimeout(r, 5));
+    }
+  }
+})().catch((err) => console.error('lecture série :', err.message));
 
 const repl = creerRepl({
   ecrire: (octets) => dap.serialWrite(String.fromCharCode(...octets)),
@@ -152,7 +165,7 @@ await verifier('arreter un programme sans fin', async () => {
   );
   await new Promise((r) => setTimeout(r, 1500));
   attendu(sortie.includes('tic'), 'aucune sortie pendant que le programme tourne');
-  await repl.arreter();
+  attendu((await repl.arreter()) === true, 'arreter() : la carte n’est pas revenue à >>>');
   const r = await execution;
   attendu(r.arrete === true && r.erreur === null, JSON.stringify(r));
   return `${sortie.split('tic').length - 1} « tic » reçus`;
@@ -179,8 +192,8 @@ await verifier('redémarrage logiciel fait par arreter (modules et /ram oubliés
   attendu(r.erreur === null && r.sortie === 'False False\r\n', JSON.stringify(r));
 });
 
-dap.stopSerialRead();
-await new Promise((r) => setTimeout(r, 100));
+lecture = false;
+await boucle;
 await dap.disconnect();
 console.log(echecs === 0 ? 'Tout a réussi.' : `${echecs} échec(s).`);
 process.exit(echecs === 0 ? 0 : 1);
