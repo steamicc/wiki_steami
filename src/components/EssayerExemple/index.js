@@ -3,11 +3,15 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
 import {
+  LIBELLES_STATUT,
   estEnBas,
   etatWebUSB,
   idValide,
   nomFichier,
+  pourcentage,
+  statutCarte,
   telechargerExemple,
+  texteProgression,
   urlBin,
 } from './logique.mjs';
 import styles from './styles.module.css';
@@ -20,6 +24,54 @@ function Telechargement({ id, href }) {
       </a>{' '}
       Glisser ce fichier sur le lecteur STEAMI de la carte.
     </p>
+  );
+}
+
+// État de la carte : pastille de couleur et libellé, jamais la couleur seule.
+// Pas de région aria-live : chaque exemple de la page l'affiche, une
+// annonce serait répétée autant de fois. Les annonces passent par les
+// messages de l'exemple cliqué.
+function EtatCarte({ statut }) {
+  return (
+    <p className={styles.etatCarte}>
+      <span className={styles.pastille} data-statut={statut} aria-hidden="true" />
+      Carte : {LIBELLES_STATUT[statut]}
+    </p>
+  );
+}
+
+// Voyant d'activité série : la clé change à chaque signal (au plus dix par
+// seconde, voir activiteASignaler), ce qui recrée le voyant et rejoue son
+// clignotement CSS. Avec « réduire les animations », il reste allumé dès que
+// des données sont arrivées.
+function VoyantSerie({ activite }) {
+  const actif = activite > 0;
+  return (
+    <p className={styles.etatCarte}>
+      <span
+        key={activite}
+        className={styles.voyant}
+        data-actif={actif ? 'oui' : 'non'}
+        aria-hidden="true"
+      />
+      Réception série : {actif ? 'données reçues' : 'en attente'}
+    </p>
+  );
+}
+
+// Barre native : les lecteurs d'écran en donnent la valeur. Le pourcentage
+// écrit à côté est pour les yeux seulement.
+function Progression({ progression }) {
+  return (
+    <div className={styles.progression}>
+      <progress
+        className={styles.barre}
+        max={100}
+        value={pourcentage(progression)}
+        aria-label="Progression du téléversement"
+      />
+      <span aria-hidden="true">{texteProgression(progression)}</span>
+    </div>
   );
 }
 
@@ -114,6 +166,11 @@ function Controles({ id, href }) {
           </button>
         )}
       </div>
+      <div className={styles.indicateurs}>
+        <EtatCarte statut={statutCarte(etat, id)} />
+        {etat.connectee && <VoyantSerie activite={etat.activite} />}
+      </div>
+      {clique && etat.progression !== null && <Progression progression={etat.progression} />}
       <div className={styles.messages} aria-live="polite">
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}

@@ -7,9 +7,11 @@
 import {
   ErreurLecteur,
   TamponLignes,
+  activiteASignaler,
   messageFrancais,
   peutDeconnecter,
   peutLiberer,
+  progressionChangee,
 } from './logique.mjs';
 
 const VENDOR_ID_DAPLINK = 0x0d28;
@@ -30,6 +32,12 @@ export const ETAT_INITIAL = Object.freeze({
   programmeActif: null,
   lignes: [],
   erreur: null,
+  // Avancement du flash, de 0 à 1 ; null hors téléversement.
+  progression: null,
+  // Nombre de signaux d'activité série depuis le démarrage du programme :
+  // chaque changement fait clignoter le voyant. Au plus un signal par
+  // INTERVALLE_ACTIVITE_MS (voir activiteASignaler).
+  activite: 0,
 });
 
 const tampon = new TamponLignes();
@@ -43,6 +51,7 @@ let ecouteDeconnexion = false;
 let rafPlanifie = false;
 let minuterieLiberation = null;
 let liberation = null; // promesse de la libération en cours
+let derniereActivite = null; // instant (ms) du dernier signal d'activité série
 
 let etat = ETAT_INITIAL;
 
@@ -61,6 +70,21 @@ function planifierLignes() {
     rafPlanifie = false;
     changer({ lignes: tampon.lignes });
   });
+}
+
+// Données série reçues : fait clignoter le voyant, au plus une fois par
+// INTERVALLE_ACTIVITE_MS pour ne pas redessiner la page à chaque paquet.
+function signalerActivite(donnees) {
+  if (!donnees) return;
+  const maintenant = Date.now();
+  if (!activiteASignaler(maintenant, derniereActivite)) return;
+  derniereActivite = maintenant;
+  changer({ activite: etat.activite + 1 });
+}
+
+// Nouveau programme ou nouvelle connexion : le voyant repart éteint.
+function oublierActivite() {
+  derniereActivite = null;
 }
 
 function chargerDapjs(src) {
@@ -102,7 +126,8 @@ function perdre(courant, message) {
   peripherique = null;
   boucle = null;
   fermer(courant, appareil);
-  changer({ connectee: false, erreur: message });
+  oublierActivite();
+  changer({ connectee: false, erreur: message, activite: 0 });
 }
 
 function demarrerSerie() {
@@ -144,6 +169,7 @@ async function relacher() {
   peripherique = null;
   boucle = null;
   tampon.vider();
+  oublierActivite();
   changer(ETAT_INITIAL);
   liberation = (async () => {
     if (boucleCourante) {
@@ -188,8 +214,8 @@ function annulerLiberation() {
   minuterieLiberation = null;
 }
 
-function apresOperation() {
-  changer({ occupee: false });
+function apresOperation(partie = {}) {
+  changer({ ...partie, occupee: false });
   if (abonnes.size === 0) planifierLiberation();
 }
 
@@ -198,6 +224,7 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
   if (dap || etat.occupee) return;
   // Tampon, console et messages sont ceux de la connexion précédente.
   tampon.vider();
+  oublierActivite();
   changer({ ...ETAT_INITIAL, occupee: true, dernierClic: id });
   let appareil = null;
   let nouvelle = null;
@@ -212,7 +239,15 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
     nouvelle = new window.DAPjs.DAPLink(new window.DAPjs.WebUSB(appareil));
     const connexion = nouvelle;
     nouvelle.on(window.DAPjs.DAPLink.EVENT_SERIAL_DATA, (donnees) => {
-      if (dap === connexion && tampon.ajouter(donnees).length) planifierLignes();
+      if (dap !== connexion) return;
+      if (tampon.ajouter(donnees).length) planifierLignes();
+      signalerActivite(donnees);
+    });
+    // DAP.js émet l'avancement du flash (de 0 à 1) après chaque paquet, puis
+    // 1 à la fin. Ignoré hors téléversement (progression à null).
+    nouvelle.on(window.DAPjs.DAPLink.EVENT_PROGRESS, (progression) => {
+      if (dap !== connexion || etat.progression === null) return;
+      if (progressionChangee(etat.progression, progression)) changer({ progression });
     });
     await nouvelle.connect();
     await nouvelle.setSerialBaudrate(BAUDS);
@@ -235,9 +270,9 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
 // .bin) se fait pendant que la carte est réservée. Si le téléchargement
 // échoue, l'ancien programme continue et garde sa console. Sinon : arrête la
 // lecture série, puis vide la console (dans cet ordre, pour que rien de
-// l'ancien programme n'y passe), téléverse, et relance la lecture. Pas de
-// dap.reset() : le DAPLink redémarre déjà la carte à la fin du flash. Ne
-// rejette jamais : l'erreur est dans l'état.
+// l'ancien programme n'y passe), téléverse en suivant la progression, et
+// relance la lecture. Pas de dap.reset() : le DAPLink redémarre déjà la
+// carte à la fin du flash. Ne rejette jamais : l'erreur est dans l'état.
 async function televerser(id, obtenirDonnees) {
   if (!dap || etat.occupee) return;
   const courant = dap;
@@ -246,7 +281,8 @@ async function televerser(id, obtenirDonnees) {
     const donnees = await obtenirDonnees();
     await arreterSerie();
     tampon.vider();
-    changer({ programmeActif: null, lignes: [] });
+    oublierActivite();
+    changer({ programmeActif: null, lignes: [], activite: 0, progression: 0 });
     await courant.flash(donnees);
     if (dap === courant) changer({ programmeActif: id });
   } catch (err) {
@@ -254,7 +290,8 @@ async function televerser(id, obtenirDonnees) {
     if (dap === courant) changer({ erreur: messageFrancais(err, 'televersement') });
   } finally {
     if (dap === courant && !boucle) demarrerSerie();
-    apresOperation();
+    // Réussi ou non, la barre de progression disparaît.
+    apresOperation({ progression: null });
   }
 }
 

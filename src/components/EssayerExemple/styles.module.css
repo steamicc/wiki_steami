@@ -94,3 +94,90 @@
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.85rem;
 }
+
+/* Indicateurs d'activité : état de la carte et voyant série. */
+.indicateurs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.etatCarte {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+/* Pastille : couleurs d'Infima, qui changent avec le thème. Le libellé à
+   côté dit toujours l'état ; la bordure la détache du fond clair ou sombre. */
+.pastille,
+.voyant {
+  display: inline-block;
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-600);
+  border-radius: 50%;
+}
+
+/* Déconnectée : pastille creuse, la forme aussi change. */
+.pastille[data-statut='deconnectee'] {
+  background: transparent;
+}
+
+.pastille[data-statut='connectee'] {
+  background: var(--ifm-color-info);
+}
+
+.pastille[data-statut='televersement'] {
+  background: var(--ifm-color-warning);
+}
+
+.pastille[data-statut='programme'] {
+  background: var(--ifm-color-success);
+}
+
+/* Voyant série : éteint au repos, bref éclat à chaque signal d'activité. */
+.voyant {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.voyant[data-actif='oui'] {
+  animation: clignoter 150ms ease-out;
+}
+
+@keyframes clignoter {
+  from {
+    background: var(--ifm-color-success);
+    box-shadow: 0 0 0.3rem var(--ifm-color-success);
+  }
+
+  to {
+    background: var(--ifm-color-emphasis-200);
+  }
+}
+
+/* Sans animation : le voyant reste allumé dès que des données sont arrivées. */
+@media (prefers-reduced-motion: reduce) {
+  .voyant[data-actif='oui'] {
+    animation: none;
+    background: var(--ifm-color-success);
+  }
+}
+
+.progression {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.barre {
+  flex: 1;
+  max-width: 20rem;
+  height: 0.75rem;
+  accent-color: var(--ifm-color-primary);
+}

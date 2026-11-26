@@ -150,3 +150,65 @@ export function urlBin(id) {
 export function nomFichier(id) {
   return `${id.split('/').pop()}.bin`;
 }
+
+// État de la carte affiché sous chaque exemple, avec une pastille de couleur
+// et toujours un libellé :
+// - 'deconnectee' : pas de carte connectée, y compris pendant une tentative
+//   de connexion (la fenêtre de choix est ouverte, le bouton est grisé) ;
+// - 'televersement' : carte connectée et réservée par un téléversement,
+//   téléchargement du .bin compris ;
+// - 'programme' : carte connectée et libre, le dernier téléversement réussi
+//   est celui de cet exemple, et la console série est lue (elle l'est
+//   toujours quand la carte est connectée et libre) ; seul l'exemple dont le
+//   programme tourne l'affiche ;
+// - 'connectee' : les autres cas, carte connectée.
+export function statutCarte({ connectee, occupee, programmeActif }, id) {
+  if (!connectee) return 'deconnectee';
+  if (occupee) return 'televersement';
+  if (programmeActif === id) return 'programme';
+  return 'connectee';
+}
+
+export const LIBELLES_STATUT = Object.freeze({
+  deconnectee: 'déconnectée',
+  connectee: 'connectée',
+  televersement: 'téléversement',
+  programme: 'programme en cours',
+});
+
+// Progression du flash (0 à 1, émise par DAP.js) en pourcentage entier,
+// arrondi vers le bas : 100 % seulement quand DAP.js annonce la fin.
+// null : pas de téléversement en cours.
+export function pourcentage(progression) {
+  if (progression === null || progression === undefined) return null;
+  const valeur = Number(progression);
+  if (!Number.isFinite(valeur)) return 0;
+  return Math.min(100, Math.max(0, Math.floor(valeur * 100)));
+}
+
+export function texteProgression(progression) {
+  const pct = pourcentage(progression);
+  return pct === null ? '' : `${pct}\u00a0%`;
+}
+
+// DAP.js émet une progression par paquet USB (des centaines par
+// téléversement) : l'état ne change que quand le pourcentage affiché change.
+export function progressionChangee(avant, apres) {
+  return pourcentage(avant) !== pourcentage(apres);
+}
+
+// Intervalle minimal entre deux clignotements du voyant d'activité série :
+// la console est lue toutes les 10 ms, sans limite la page se redessinerait
+// à chaque paquet.
+export const INTERVALLE_ACTIVITE_MS = 100;
+
+// Faut-il signaler les données série arrivées à l'instant maintenant (ms) ?
+// derniere : instant du dernier signal, null s'il n'y en a pas encore eu.
+// Les données reçues moins de intervalle ms après un signal ne font pas
+// clignoter le voyant : un flux continu le fait clignoter au plus dix fois
+// par seconde. Une horloge qui recule (heure du système changée) signale
+// aussi, pour que le voyant ne reste pas éteint.
+export function activiteASignaler(maintenant, derniere, intervalle = INTERVALLE_ACTIVITE_MS) {
+  if (derniere === null || maintenant < derniere) return true;
+  return maintenant - derniere >= intervalle;
+}

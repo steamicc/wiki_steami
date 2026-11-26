@@ -5,7 +5,10 @@ import assert from 'node:assert/strict';
 
 import {
   ErreurLecteur,
+  INTERVALLE_ACTIVITE_MS,
+  LIBELLES_STATUT,
   TamponLignes,
+  activiteASignaler,
   estEnBas,
   etatWebUSB,
   idValide,
@@ -14,7 +17,11 @@ import {
   nomFichier,
   peutDeconnecter,
   peutLiberer,
+  pourcentage,
+  progressionChangee,
+  statutCarte,
   telechargerExemple,
+  texteProgression,
   urlBin,
 } from './logique.mjs';
 
@@ -190,4 +197,77 @@ test('peutDeconnecter : seulement carte connectée et libre', () => {
   assert.equal(peutDeconnecter({ occupee: true, connectee: true }), false);
   assert.equal(peutDeconnecter({ occupee: false, connectee: false }), false);
   assert.equal(peutDeconnecter({ occupee: true, connectee: false }), false);
+});
+
+test("statutCarte : déconnectée tant que la carte n'est pas connectée, même pendant la connexion", () => {
+  assert.equal(
+    statutCarte({ connectee: false, occupee: false, programmeActif: null }, 'A'),
+    'deconnectee',
+  );
+  assert.equal(
+    statutCarte({ connectee: false, occupee: true, programmeActif: null }, 'A'),
+    'deconnectee',
+  );
+  // Carte perdue alors qu'un programme tournait.
+  assert.equal(
+    statutCarte({ connectee: false, occupee: false, programmeActif: 'A' }, 'A'),
+    'deconnectee',
+  );
+});
+
+test('statutCarte : téléversement sous chaque exemple tant que la carte est réservée', () => {
+  const etat = { connectee: true, occupee: true, programmeActif: 'A' };
+  assert.equal(statutCarte(etat, 'A'), 'televersement');
+  assert.equal(statutCarte(etat, 'B'), 'televersement');
+});
+
+test("statutCarte : programme en cours sous l'exemple actif seulement", () => {
+  const etat = { connectee: true, occupee: false, programmeActif: 'A' };
+  assert.equal(statutCarte(etat, 'A'), 'programme');
+  assert.equal(statutCarte(etat, 'B'), 'connectee');
+  assert.equal(statutCarte({ ...etat, programmeActif: null }, 'A'), 'connectee');
+});
+
+test('statutCarte : chaque statut a un libellé', () => {
+  for (const statut of ['deconnectee', 'connectee', 'televersement', 'programme']) {
+    assert.ok(LIBELLES_STATUT[statut], statut);
+  }
+  assert.equal(LIBELLES_STATUT.programme, 'programme en cours');
+});
+
+test('pourcentage : entier arrondi vers le bas, borné, null sans téléversement', () => {
+  assert.equal(pourcentage(null), null);
+  assert.equal(pourcentage(undefined), null);
+  assert.equal(pourcentage(0), 0);
+  assert.equal(pourcentage(0.426), 42);
+  assert.equal(pourcentage(0.999), 99);
+  assert.equal(pourcentage(1), 100);
+  assert.equal(pourcentage(1.5), 100);
+  assert.equal(pourcentage(-0.1), 0);
+  assert.equal(pourcentage(Number.NaN), 0);
+});
+
+test('texteProgression : pourcentage avec espace insécable', () => {
+  assert.equal(texteProgression(0.5), '50\u00a0%');
+  assert.equal(texteProgression(null), '');
+});
+
+test('progressionChangee : seulement quand le pourcentage affiché change', () => {
+  assert.equal(progressionChangee(null, 0), true);
+  assert.equal(progressionChangee(0, 0.004), false);
+  assert.equal(progressionChangee(0.004, 0.01), true);
+  assert.equal(progressionChangee(0.99, 1), true);
+  assert.equal(progressionChangee(1, null), true);
+  assert.equal(progressionChangee(null, null), false);
+});
+
+test('activiteASignaler : au plus un signal par intervalle', () => {
+  assert.equal(INTERVALLE_ACTIVITE_MS, 100);
+  assert.equal(activiteASignaler(5000, null), true);
+  assert.equal(activiteASignaler(5050, 5000), false);
+  assert.equal(activiteASignaler(5099, 5000), false);
+  assert.equal(activiteASignaler(5100, 5000), true);
+  assert.equal(activiteASignaler(30, 0, 20), true);
+  // Horloge qui recule : on signale plutôt que de laisser le voyant éteint.
+  assert.equal(activiteASignaler(1000, 5000), true);
 });
