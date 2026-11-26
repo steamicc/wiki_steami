@@ -14,8 +14,12 @@ Pour chaque bloc exécutable :
    sans deux fichiers de même nom ;
 3. il n'importe aucun driver non gelé dans le firmware (sinon l'essai échoue sur
    la carte : vaut pour un `run` explicite) ;
-4. s'il est dans la liste des exemples destructifs
-   (scripts/micropython-exemples-destructifs.txt), il porte `confirm="…"`.
+4. un exemple de la bibliothèque destructif porte `confirm="…"`. Destructif :
+   il appelle une opération qui écrit ou efface un stockage persistant de la
+   carte (voir ECRITURES), ou il est dans scripts/micropython-exemples-destructifs.txt
+   (ajouts explicites pour ce que la détection manquerait).
+
+Chaque ligne de cette liste doit désigner au moins un exemple de la bibliothèque.
 
 Usage :
     python3 scripts/check-micropython-blocks.py [--racine DIR] [--pages DIR]
@@ -137,6 +141,81 @@ def _motif(glob):
     )
 
 
+# Opérations qui écrivent ou effacent un stockage persistant de la carte
+# (API de la bibliothèque au tag épinglé) :
+# - DaplinkFlash (flash externe du DAPLink) : write, write_line, clear_flash ;
+# - DaplinkBridge (zone de configuration du DAPLink) : write_config, clear_config ;
+# - SteamiConfig : save (les set_* ne modifient que la copie en RAM).
+ECRITURES = {
+    "DaplinkFlash": {"write", "write_line", "clear_flash"},
+    "DaplinkBridge": {"write_config", "clear_config"},
+    "SteamiConfig": {"save"},
+}
+# Noms propres à ces opérations : détectés quel que soit l'objet, et aussi
+# comme fonctions (config_zone.py les réécrit en I2C brut).
+NOMS_SANS_AMBIGUITE = {"write_line", "clear_flash", "write_config", "clear_config"}
+
+
+def _type_de(expression, types):
+    """Classe de stockage d'une expression (variable typée, constructeur, .config), ou None."""
+    if isinstance(expression, ast.Name):
+        return types.get(expression.id)
+    if isinstance(expression, ast.Call):
+        fonction = expression.func
+        nom = fonction.id if isinstance(fonction, ast.Name) else getattr(fonction, "attr", None)
+        return nom if nom in ECRITURES else None
+    if isinstance(expression, ast.Attribute) and expression.attr == "config":
+        return "SteamiConfig"  # Steami().config
+    return None
+
+
+def operations_persistantes(arbre):
+    """Appels qui écrivent ou effacent un stockage persistant, « texte() (ligne N) », dans l'ordre."""
+    types = {}
+    for noeud in ast.walk(arbre):
+        if isinstance(noeud, ast.Assign):
+            genre = _type_de(noeud.value, types)
+            if genre:
+                for cible in noeud.targets:
+                    if isinstance(cible, ast.Name):
+                        types[cible.id] = genre
+    operations = []
+    for noeud in ast.walk(arbre):
+        if not isinstance(noeud, ast.Call):
+            continue
+        fonction = noeud.func
+        if isinstance(fonction, ast.Name):
+            trouve = fonction.id in NOMS_SANS_AMBIGUITE
+        elif isinstance(fonction, ast.Attribute):
+            genre = _type_de(fonction.value, types)
+            trouve = fonction.attr in NOMS_SANS_AMBIGUITE or (
+                genre is not None and fonction.attr in ECRITURES[genre]
+            )
+        else:
+            trouve = False
+        if trouve:
+            operations.append((noeud.lineno, f"{ast.unparse(fonction)}() (ligne {noeud.lineno})"))
+    return [texte for _, texte in sorted(operations)]
+
+
+def exemples_destructifs_detectes(lib):
+    """{"<driver>/examples/<nom>.py": première opération persistante} pour les exemples de la lib."""
+    resultat = {}
+    for exemple in sorted(Path(lib).glob("*/examples/*.py")):
+        try:
+            operations = operations_persistantes(ast.parse(exemple.read_text(encoding="utf-8")))
+        except SyntaxError:
+            continue
+        if operations:
+            resultat[str(exemple.relative_to(lib))] = operations[0]
+    return resultat
+
+
+def destructifs_sans_exemple(motifs, lib):
+    """Lignes de la liste des destructifs qui ne désignent aucun exemple (renommé, retiré)."""
+    return [motif for motif in motifs if not any(Path(lib).glob(motif))]
+
+
 def lire_destructifs(chemin):
     lignes = Path(chemin).read_text(encoding="utf-8").splitlines()
     return [ligne.strip() for ligne in lignes if ligne.strip() and not ligne.strip().startswith("#")]
@@ -203,13 +282,15 @@ def verifier(pages, racine, non_geles, destructifs, executables=None):
                     vus.add(nom)
 
             if exemple and not meta["confirm"]:
-                for glob, motif in motifs:
-                    if motif.match(exemple):
-                        erreurs.append(
-                            f"{ou} : l'exemple destructif {exemple} (liste : {glob}) "
-                            'doit porter confirm="<ce qui sera modifié>" (ou norun)'
-                        )
-                        break
+                operations = operations_persistantes(arbre)
+                raison = next((f"liste : {glob}" for glob, motif in motifs if motif.match(exemple)), None)
+                if operations:
+                    raison = f"appelle {operations[0]}"
+                if raison:
+                    erreurs.append(
+                        f"{ou} : l'exemple destructif {exemple} ({raison}) "
+                        'doit porter confirm="<ce qui sera modifié>" (ou norun)'
+                    )
     return erreurs
 
 
@@ -231,10 +312,13 @@ def main(argv=None):
         for p in sorted(pages_dir.rglob("*.md*"))
         if p.suffix in (".md", ".mdx")
     }
+    destructifs = lire_destructifs(args.destructifs)
     executables = []
-    erreurs = verifier(
-        pages, racine, modules_non_geles(lib), lire_destructifs(args.destructifs), executables
-    )
+    erreurs = verifier(pages, racine, modules_non_geles(lib), destructifs, executables)
+    erreurs += [
+        f"{args.destructifs.name} : « {motif} » ne désigne aucun exemple de la bibliothèque"
+        for motif in destructifs_sans_exemple(destructifs, lib)
+    ]
     print(f"{len(pages)} pages vérifiées, {len(executables)} bloc(s) exécutable(s) :")
     for position in executables:
         print(f"  {position}")

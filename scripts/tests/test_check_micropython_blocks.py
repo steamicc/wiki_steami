@@ -180,6 +180,116 @@ class TestVerifier(unittest.TestCase):
             self.assertEqual(check.modules_non_geles(r.racine / LIB), {"hts221", "gc9a01"})
 
 
+class TestDestructifs(unittest.TestCase):
+    """Détection des exemples qui écrivent ou effacent un stockage persistant de la carte."""
+
+    ENTETE = (
+        "from machine import I2C\n"
+        "from daplink_bridge import DaplinkBridge\n"
+        "from daplink_flash import DaplinkFlash\n"
+        "from steami_config import SteamiConfig\n"
+        "from steami import Steami\n"
+        "i2c = I2C(1)\n"
+        "bridge = DaplinkBridge(i2c)\n"
+        "flash = DaplinkFlash(bridge)\n"
+        "config = SteamiConfig(bridge)\n"
+    )
+
+    def detecter(self, code):
+        import ast
+
+        return check.operations_persistantes(ast.parse(self.ENTETE + code))
+
+    def test_ecritures_detectees(self):
+        cas = {
+            'flash.set_filename("A", "CSV")\nflash.write("x")\n': "flash.write",
+            'flash.write_line("x")\n': "flash.write_line",
+            "flash.clear_flash()\n": "flash.clear_flash",
+            'DaplinkFlash(bridge).write("x")\n': "DaplinkFlash(bridge).write",
+            "bridge.clear_config()\n": "bridge.clear_config",
+            'bridge.write_config(b"x")\n': "bridge.write_config",
+            'config.set_temperature_calibration("x", gain=1.0)\nconfig.save()\n': "config.save",
+            "Steami().config.save()\n": "Steami().config.save",
+            "cfg = Steami().config\ncfg.save()\n": "cfg.save",
+            # config_zone.py : fonctions locales qui parlent au DAPLink en I2C brut.
+            "def clear_config():\n    i2c.writeto(0x3B, bytearray([0x32]))\nclear_config()\n": "clear_config",
+        }
+        for code, appel in cas.items():
+            operations = self.detecter(code)
+            self.assertTrue(operations, code)
+            self.assertIn(f"{appel}()", operations[0], code)
+
+    def test_lectures_non_detectees(self):
+        code = (
+            "config.load()\n"
+            'print(config.board_name, config.get_temperature_calibration("hts221"))\n'
+            'config.set_boot_count(3)  # en RAM seulement, sans save()\n'
+            "print(bridge.read_config(), bridge.device_id())\n"
+            "print(flash.get_filename(), flash.read(), flash.read_sector(0))\n"
+            "from machine import UART\n"
+            'UART(1).write(b"x")\n'
+            "screen.save()\n"
+        )
+        self.assertEqual(self.detecter(code), [])
+
+    def test_exemple_detecte_sans_confirm_signale(self):
+        with Racine() as r:
+            r.ecrire(f"{LIB}/daplink_flash/daplink_flash/__init__.py", "")
+            r.ecrire(
+                f"{LIB}/daplink_flash/examples/logger.py",
+                "from daplink_flash import DaplinkFlash\nflash = DaplinkFlash(None)\nflash.write_line('x')\n",
+            )
+            erreurs = r.verifier(bloc(f"file={LIB}/daplink_flash/examples/logger.py"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("flash.write_line()", erreurs[0])
+            self.assertIn("confirm", erreurs[0])
+            meta = f'file={LIB}/daplink_flash/examples/logger.py confirm="Efface la flash externe"'
+            self.assertEqual(r.verifier(bloc(meta)), [])
+
+    def test_ligne_de_liste_sans_exemple_signalee(self):
+        with Racine() as r:
+            erreurs = check.destructifs_sans_exemple(["daplink_flash/examples/disparu.py"], r.racine / LIB)
+            self.assertEqual(erreurs, ["daplink_flash/examples/disparu.py"])
+            self.assertEqual(
+                check.destructifs_sans_exemple(["steami_config/examples/calibrate_*.py"], r.racine / LIB), []
+            )
+
+
+CLONE = SCRIPTS.parent / LIB
+ATTENDUS_V0_29_0 = {
+    "bme280/examples/weather_station.py",
+    "daplink_flash/examples/config_zone.py",
+    "daplink_flash/examples/erase_flash.py",
+    "daplink_flash/examples/sensor_log.py",
+    "daplink_flash/examples/write_csv.py",
+    "lis2mdl/examples/field_logger.py",
+    "steami_config/examples/boot_counter.py",
+    "steami_config/examples/calibrate_accelerometer.py",
+    "steami_config/examples/calibrate_magnetometer.py",
+    "steami_config/examples/calibrate_temperature.py",
+    "steami_config/examples/populate_demo_config.py",
+    "wsen-hids/examples/data_logger.py",
+    "wsen-pads/examples/weather_station.py",
+}
+
+
+@unittest.skipUnless((CLONE / "steami_config").is_dir(), "bibliothèque non clonée (npm run prebuild)")
+class TestDestructifsDuClone(unittest.TestCase):
+    """Au tag épinglé : la détection trouve tous les exemples destructifs connus, et la liste est d'accord."""
+
+    def test_detection_sur_le_clone(self):
+        self.assertEqual(set(check.exemples_destructifs_detectes(CLONE)), ATTENDUS_V0_29_0)
+
+    def test_liste_d_accord_avec_la_detection(self):
+        motifs = check.lire_destructifs(check.DESTRUCTIFS_DEFAUT)
+        listes = {
+            str(f.relative_to(CLONE))
+            for motif in motifs
+            for f in CLONE.glob(motif)
+        }
+        self.assertEqual(listes, ATTENDUS_V0_29_0)
+
+
 class TestMain(unittest.TestCase):
     def test_bibliotheque_absente(self):
         with tempfile.TemporaryDirectory() as tmp:
