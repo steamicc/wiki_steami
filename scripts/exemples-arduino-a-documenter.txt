@@ -21,7 +21,6 @@ SSD1327/random_pixels
 SSD1327/rotating_3d_cube
 SSD1327/rotation
 SSD1327/shades
-STEAMI_CONFIG/show_config
 WSEN-PADS/altitude
 WSEN-PADS/floor_detector
 WSEN-PADS/read_pressure_temperature
