@@ -15,6 +15,11 @@ let etapesFlash = [];
 // Fenêtre de choix de la carte : nombre d'ouvertures, et réponse du lecteur.
 let choix = 0;
 let choisir = async () => appareil;
+// Promesses attendues par le faux flash et la fausse déconnexion (null : tout de suite).
+let attenteFlash = null;
+let attenteDeconnexion = null;
+// Écouteurs posés sur navigator.usb (événement « disconnect »).
+const ecouteursUsb = {};
 
 class FauxDAPLink {
   static EVENT_SERIAL_DATA = 'serial';
@@ -62,11 +67,13 @@ class FauxDAPLink {
   async flash() {
     journal.push('flash');
     for (const progression of etapesFlash) this.avancer(progression);
+    if (attenteFlash) await attenteFlash;
     if (pannes.flash) throw new Error(pannes.flash);
   }
 
   async disconnect() {
     journal.push('disconnect');
+    if (attenteDeconnexion) await attenteDeconnexion;
   }
 }
 
@@ -86,10 +93,17 @@ Object.defineProperty(globalThis, 'navigator', {
         choix += 1;
         return choisir();
       },
-      addEventListener() {},
+      addEventListener(nom, fn) {
+        ecouteursUsb[nom] = fn;
+      },
     },
   },
 });
+
+// La carte est débranchée : WebUSB émet « disconnect » pour cet appareil.
+function debrancher(device = appareil) {
+  ecouteursUsb.disconnect?.({ device });
+}
 
 // Laisse passer les promesses en attente (setImmediate n'est pas simulé).
 const attendre = () => new Promise((resolve) => setImmediate(resolve));
@@ -101,6 +115,8 @@ async function demarrer(t) {
   journal = [];
   pannes = {};
   etapesFlash = [];
+  attenteFlash = null;
+  attenteDeconnexion = null;
   choix = 0;
   choisir = async () => appareil;
   const desabonner = carte.abonner(() => {});
@@ -519,5 +535,106 @@ test('déconnexion : progression et activité remises à zéro, données suivant
   await carte.connecter('A');
   derniere.emettre('z');
   assert.equal(carte.etat.activite, 1);
+  await quitter(t, desabonner);
+});
+
+const MESSAGE_DEBRANCHEE =
+  'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».';
+
+// Fin d'un test où la carte a été perdue : rien à libérer, l'erreur reste affichée.
+async function finir(t, desabonner) {
+  desabonner();
+  t.mock.timers.tick(DELAI_LIBERATION_MS);
+  await attendre();
+}
+
+test('carte débranchée au repos : message sous le dernier exemple cliqué, connexion refermée', async (t) => {
+  const desabonner = await demarrer(t);
+  await carte.televerser('B', bin);
+  journal = [];
+  // Un autre appareil USB débranché ne compte pas.
+  debrancher({});
+  assert.equal(carte.etat.connectee, true);
+
+  debrancher();
+  assert.equal(carte.etat.connectee, false);
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  assert.equal(carte.etat.dernierClic, 'B');
+  assert.equal(carte.etat.activite, 0);
+  await attendre();
+  assert.deepEqual(journal, ['disconnect', 'close']);
+
+  // Rebranchée : la reconnexion repart de zéro, sans l'erreur.
+  journal = [];
+  await carte.connecter('A');
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(carte.etat.erreur, null);
+  await quitter(t, desabonner);
+});
+
+test('carte débranchée pendant le téléchargement du .bin : rien téléversé, message gardé', async (t) => {
+  const desabonner = await demarrer(t);
+  let rendre;
+  const televersement = carte.televerser(
+    'A',
+    () =>
+      new Promise((resolve) => {
+        rendre = () => resolve(new ArrayBuffer(8));
+      }),
+  );
+  debrancher();
+  assert.equal(carte.etat.connectee, false);
+  // Toujours réservée : « Connecter la carte » reste grisé jusqu'à la fin.
+  assert.equal(carte.etat.occupee, true);
+  journal = [];
+  rendre();
+  await televersement;
+  assert.ok(!journal.includes('flash'), journal.join(', '));
+  assert.ok(!journal.includes('startSerialRead'), journal.join(', '));
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  await finir(t, desabonner);
+});
+
+test("carte débranchée pendant le flash : l'échec du flash n'écrase pas le message", async (t) => {
+  const desabonner = await demarrer(t);
+  let rejeter;
+  attenteFlash = new Promise((_, reject) => {
+    rejeter = reject;
+  });
+  const televersement = carte.televerser('A', bin);
+  await attendre();
+  assert.ok(journal.includes('flash'));
+  debrancher();
+  assert.equal(carte.etat.connectee, false);
+  assert.equal(carte.etat.occupee, true);
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+
+  rejeter(new Error('A transfer error has occurred.'));
+  await televersement;
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.progression, null);
+  assert.equal(carte.etat.programmeActif, null);
+  await finir(t, desabonner);
+});
+
+test("reconnexion après une carte perdue : attend la fermeture de l'ancienne connexion", async (t) => {
+  const desabonner = await demarrer(t);
+  let finirDeconnexion;
+  attenteDeconnexion = new Promise((resolve) => {
+    finirDeconnexion = resolve;
+  });
+  debrancher();
+  journal = [];
+  const reconnexion = carte.connecter('A');
+  await attendre();
+  // L'ancienne connexion n'est pas encore fermée : pas de nouvelle ouverture.
+  assert.ok(!journal.includes('connect'), journal.join(', '));
+  attenteDeconnexion = null;
+  finirDeconnexion();
+  await reconnexion;
+  assert.deepEqual(journal, ['close', 'connect', 'bauds 115200', 'startSerialRead']);
+  assert.equal(carte.etat.connectee, true);
   await quitter(t, desabonner);
 });

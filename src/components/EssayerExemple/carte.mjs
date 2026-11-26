@@ -120,6 +120,16 @@ async function fermer(connexion, appareil) {
   await appareil?.close().catch(() => {});
 }
 
+// Retient la fermeture en cours : connecter() l'attend avant d'ouvrir la
+// carte, sinon le close() de l'ancienne connexion pourrait fermer la nouvelle.
+function suivreLiberation(promesse) {
+  const suivie = promesse.finally(() => {
+    if (liberation === suivie) liberation = null;
+  });
+  liberation = suivie;
+  return suivie;
+}
+
 // La carte n'est plus utilisable (débranchée, lecture série en erreur) : on
 // repasse à « non connectée », sauf si une autre connexion a déjà pris le relais.
 function perdre(courant, message) {
@@ -128,7 +138,8 @@ function perdre(courant, message) {
   dap = null;
   peripherique = null;
   boucle = null;
-  fermer(courant, appareil);
+  // fermer() ne rejette jamais.
+  void suivreLiberation(fermer(courant, appareil));
   oublierActivite();
   changer({ connectee: false, erreur: message, activite: 0 });
 }
@@ -174,15 +185,15 @@ async function relacher() {
   tampon.vider();
   oublierActivite();
   changer(ETAT_INITIAL);
-  liberation = (async () => {
-    if (boucleCourante) {
-      courant.stopSerialRead();
-      await boucleCourante;
-    }
-    await fermer(courant, appareil);
-  })();
-  await liberation;
-  liberation = null;
+  await suivreLiberation(
+    (async () => {
+      if (boucleCourante) {
+        courant.stopSerialRead();
+        await boucleCourante;
+      }
+      await fermer(courant, appareil);
+    })(),
+  );
 }
 
 // Plus aucun composant affiché depuis DELAI_LIBERATION_MS : libère la carte.
@@ -282,6 +293,9 @@ async function televerser(id, obtenirDonnees) {
   changer({ occupee: true, erreur: null, dernierClic: id });
   try {
     const donnees = await obtenirDonnees();
+    // Carte perdue pendant le téléchargement : perdre() a posé le message,
+    // il n'y a plus rien à téléverser.
+    if (dap !== courant) return;
     await arreterSerie();
     tampon.vider();
     oublierActivite();
