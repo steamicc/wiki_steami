@@ -1,5 +1,6 @@
 ---
 title: Exemples à essayer
+sidebar_label: Exemples
 sidebar_position: 5.5
 ---
 
@@ -20,14 +21,16 @@ Tu n'as rien à installer ni à compiler : chaque exemple est déjà compilé, e
 Avec **Chrome** ou **Edge** sur un ordinateur :
 
 1. Branche la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
-2. Sous un exemple, clique sur **Connecter la carte**, puis choisis **STeaMi CMSIS-DAP** dans la fenêtre du navigateur. Tu n'autorises la carte qu'une fois par page : tu peux ensuite essayer tous les exemples de la page sans recommencer.
+2. Sous un exemple, clique sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisis **STeaMi CMSIS-DAP**, puis clique sur **Connexion**. Tu n'autorises la carte qu'une fois par page : tu peux ensuite essayer tous les exemples de la page sans recommencer.
 3. Clique sur **Téléverser**. Quand le message « Programme téléversé. » apparaît, la carte redémarre et exécute l'exemple. La console série s'ouvre sous l'exemple et affiche ce que le programme écrit.
 
 L'exemple remplace le programme qui était sur la carte, MicroPython compris : pour revenir à MicroPython, réinstalle son firmware (voir [Installation du firmware MicroPython](/docs/software/micropython/install)).
 
-Avec un autre navigateur (Firefox, Safari), ou si le téléversement depuis le navigateur n'est pas autorisé sur ton ordinateur, le bouton est remplacé par un lien **Télécharger le .bin** : copie ce fichier sur le lecteur **STEAMI** de la carte, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). La page ne peut pas afficher la console dans ce cas : pour lire ce qu'écrit l'exemple, ouvre le moniteur série de l'Arduino IDE à 115200 bauds.
+Avec un navigateur qui ne sait pas parler à la carte par USB (Firefox, Safari), le bouton est remplacé par un lien **Télécharger le .bin** : copie ce fichier sur le lecteur **STEAMI** de la carte, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). La page ne peut pas afficher la console dans ce cas : pour lire ce qu'écrit l'exemple, ouvre le moniteur série de l'Arduino IDE à 115200 bauds.
 
-Pour modifier un exemple, ouvre-le dans l'[Arduino IDE](../arduino-ide) ou dans un [Codespace](../codespace), où les exemples sont déjà installés.
+Si Chrome ou Edge n'arrive pas à se connecter à la carte, un message d'erreur s'affiche sous l'exemple, sans lien de téléchargement. C'est le cas quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)). Ouvre alors la page dans Firefox pour obtenir le lien de téléchargement.
+
+Pour modifier un exemple, ouvre-le dans un [Codespace](../codespace), où la bibliothèque et ses exemples sont déjà installés, ou dans l'[Arduino IDE](../arduino-ide), après avoir installé la [bibliothèque STeaMi](../bibliotheques).
 
 ## Les composants
 
@@ -53,9 +56,9 @@ La V1c est la carte diffusée aujourd'hui. Elle a les composants communs aux tro
 
 ### Sur les V1a et V1b seulement
 
-| Composant | Ce que montrent les exemples           | Cartes   |
-| --------- | -------------------------------------- | -------- |
-| SSD1327   | écran OLED rond, monochrome, 128 × 128 | V1a, V1b |
-| APDS9960  | lumière, couleur, proximité et gestes  | V1a, V1b |
-| WSEN-HIDS | humidité et température                | V1a, V1b |
-| WSEN-PADS | pression                               | V1a, V1b |
+| Composant | Ce que montrent les exemples                   | Cartes   |
+| --------- | ---------------------------------------------- | -------- |
+| SSD1327   | écran OLED rond, 16 niveaux de gris, 128 × 128 | V1a, V1b |
+| APDS9960  | lumière, couleur, proximité et gestes          | V1a, V1b |
+| WSEN-HIDS | humidité et température                        | V1a, V1b |
+| WSEN-PADS | pression                                       | V1a, V1b |
