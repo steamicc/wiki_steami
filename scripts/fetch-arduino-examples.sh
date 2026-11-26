@@ -5,6 +5,11 @@
 # (téléchargement, sha256, décompression, clone) se font dans des dossiers de
 # préparation placés dans .external/ (même système de fichiers que les cibles,
 # ignoré par git et par Docusaurus), puis les cibles sont échangées par renommage.
+#
+# Rien n'est téléchargé quand les exemples sont déjà là pour la version
+# épinglée : index.json à cette version, empreinte de l'archive (.sha256,
+# écrit à l'extraction) égale au sha256 épinglé et sources au même tag.
+# FORCER_EXEMPLES_ARDUINO=1 force le téléchargement.
 
 set -euo pipefail
 
@@ -17,6 +22,18 @@ VERSION=$(node -p "require('./$PIN').version")
 SHA256=$(node -p "require('./$PIN').sha256")
 ZIP="steami-exemples-${VERSION}.zip"
 URL="https://github.com/${REPO}/releases/download/${VERSION}/${ZIP}"
+
+CURRENT=""
+if [ -d "$SRC_DIR/.git" ]; then
+  CURRENT=$(git -C "$SRC_DIR" describe --tags --exact-match 2>/dev/null || true)
+fi
+
+if [ "${FORCER_EXEMPLES_ARDUINO:-0}" != "1" ] && [ "$CURRENT" = "$VERSION" ] \
+  && [ -f "$DEST/.sha256" ] && [ "$(cat "$DEST/.sha256")" = "$SHA256" ] \
+  && [ "$(node -p "JSON.parse(require('fs').readFileSync('$DEST/index.json', 'utf8')).version" 2>/dev/null)" = "$VERSION" ]; then
+  echo "Exemples Arduino ${VERSION} déjà présents dans $DEST (FORCER_EXEMPLES_ARDUINO=1 pour les retélécharger)"
+  exit 0
+fi
 
 mkdir -p .external "$(dirname "$DEST")"
 TMP=$(mktemp -d .external/.fetch-XXXXXX)
@@ -45,11 +62,9 @@ if [ -n "$(find "$TMP/out" -type l)" ]; then
   exit 1
 fi
 [ -f "$TMP/out/index.json" ] || { echo "Erreur : index.json absent de l'archive" >&2; exit 1; }
+# Empreinte de l'archive vérifiée : permet de sauter le téléchargement la fois suivante.
+printf '%s\n' "$SHA256" > "$TMP/out/.sha256"
 
-CURRENT=""
-if [ -d "$SRC_DIR/.git" ]; then
-  CURRENT=$(git -C "$SRC_DIR" describe --tags --exact-match 2>/dev/null || true)
-fi
 NEW_SRC=""
 if [ "$CURRENT" != "$VERSION" ]; then
   echo "Clonage de arduino-steami ${VERSION}..."
