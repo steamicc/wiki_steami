@@ -98,7 +98,7 @@ Comme le capteur voit un cône et non un fin faisceau, un objet peut être compt
 
 ## GestureDetection {#gesturedetection}
 
-**Ce que tu vas voir** : passe la main devant le capteur, à moins de 15 cm, et retire-la aussitôt : la LED RGB s'allume en bleu et la console écrit `Wave: LED on`. Un deuxième passage l'éteint, `Wave: LED off`. Une main qui reste devant le capteur ne fait rien : il faut l'éloigner à plus de 25 cm au plus 0,6 s après son arrivée.
+**Ce que tu vas voir** : passe la main devant le capteur, à moins de 15 cm, et retire-la aussitôt : la LED RGB s'allume en bleu et la console écrit `Wave: LED on`. Un deuxième passage l'éteint, `Wave: LED off`. Une main qui reste devant le capteur ne fait rien : il faut la retirer au-delà de 25 cm moins de 0,6 s après l'avoir approchée.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/GestureDetection/GestureDetection.ino
 
