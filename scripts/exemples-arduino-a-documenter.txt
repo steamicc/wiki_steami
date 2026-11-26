@@ -1,9 +1,3 @@
-BLE/BleBeacon
-BLE/BleHotCold
-BLE/BleIndoorMap
-BLE/BleRssiMapper
-BLE/BleRssiProximity
-BLE/BleTrilateration
 DAPLINK_FLASH/data_logger
 SSD1327/framebuf_lines
 SSD1327/framebuf_pixels
