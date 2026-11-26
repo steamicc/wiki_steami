@@ -3,10 +3,13 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
 import {
+  LIBELLES_STATUT,
+  affichageProgression,
   estEnBas,
   etatWebUSB,
   idValide,
   nomFichier,
+  statutCarte,
   telechargerExemple,
   urlBin,
 } from './logique.mjs';
@@ -23,6 +26,57 @@ function Telechargement({ id, href }) {
   );
 }
 
+// État de la carte : pastille de couleur et libellé, jamais la couleur seule.
+// Pas de région aria-live : chaque exemple de la page l'affiche, une
+// annonce serait répétée autant de fois. Les annonces passent par les
+// messages de l'exemple cliqué.
+function EtatCarte({ statut }) {
+  return (
+    <p className={styles.etatCarte}>
+      <span className={styles.pastille} data-statut={statut} aria-hidden="true" />
+      Carte : {LIBELLES_STATUT[statut]}
+    </p>
+  );
+}
+
+// Voyant d'activité série : la clé change à chaque signal (au plus dix par
+// seconde, voir activiteASignaler), ce qui recrée le voyant et rejoue son
+// clignotement CSS. Avec « réduire les animations », il reste allumé dès que
+// des données sont arrivées.
+function VoyantSerie({ activite }) {
+  const actif = activite > 0;
+  return (
+    <p className={styles.etatCarte}>
+      <span
+        key={activite}
+        className={styles.voyant}
+        data-actif={actif ? 'oui' : 'non'}
+        aria-hidden="true"
+      />
+      Réception série : {actif ? 'données reçues' : 'en attente'}
+    </p>
+  );
+}
+
+// Barre native : les lecteurs d'écran en donnent la valeur. Tant que DAP.js
+// n'a pas commencé à écrire, elle est indéterminée (pas d'attribut value) et
+// annonce la préparation de la carte. Le texte écrit à côté est pour les yeux
+// seulement : « Téléversement en cours… » est déjà annoncé.
+function Progression({ progression }) {
+  const { valeur, texte } = affichageProgression(progression);
+  return (
+    <div className={styles.progression}>
+      <progress
+        className={styles.barre}
+        max={100}
+        value={valeur ?? undefined}
+        aria-label="Progression du téléversement"
+      />
+      <span aria-hidden="true">{texte}</span>
+    </div>
+  );
+}
+
 function Controles({ id, href }) {
   const etat = useSyncExternalStore(
     carte.abonner,
@@ -31,6 +85,10 @@ function Controles({ id, href }) {
   );
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const consoleRef = useRef(null);
+  const connecterRef = useRef(null);
+  // Après « Déconnecter », le bouton cliqué disparaît : le focus passe à
+  // « Connecter la carte », qui le remplace, au lieu de retomber sur la page.
+  const refocaliserRef = useRef(false);
   // Le lecteur était-il en bas de la console à son dernier défilement ?
   const colleRef = useRef(true);
 
@@ -49,6 +107,12 @@ function Controles({ id, href }) {
     if (colleRef.current) pre.scrollTop = pre.scrollHeight;
   }, [etat.lignes, montrerConsole]);
 
+  useLayoutEffect(() => {
+    if (etat.connectee || !refocaliserRef.current) return;
+    refocaliserRef.current = false;
+    connecterRef.current?.focus();
+  }, [etat.connectee]);
+
   function televerser() {
     carte.televerser(id, () => telechargerExemple(href));
   }
@@ -57,28 +121,61 @@ function Controles({ id, href }) {
     carte.connecter(id, urlDapjs);
   }
 
+  function deconnecter() {
+    refocaliserRef.current = true;
+    carte.deconnecter();
+  }
+
+  const statutEtat = statutCarte(etat, id);
+  // Téléversement lancé depuis cet exemple, téléchargement du .bin compris.
+  const televersement = clique && statutEtat === 'televersement';
   let statut = null;
-  if (clique && etat.occupee && etat.connectee) statut = 'Téléversement en cours…';
+  if (televersement) statut = 'Téléversement en cours…';
   else if (clique && etat.programmeActif === id && etat.connectee && !etat.occupee && !erreur) {
     statut = 'Programme téléversé.';
   }
 
   return (
     <div className={styles.controles}>
-      {etat.connectee ? (
-        <button
-          type="button"
-          className={styles.bouton}
-          disabled={etat.occupee}
-          onClick={televerser}
-        >
-          Téléverser
-        </button>
-      ) : (
-        <button type="button" className={styles.bouton} disabled={etat.occupee} onClick={connecter}>
-          Connecter la carte
-        </button>
-      )}
+      <div className={styles.boutons}>
+        {etat.connectee ? (
+          <>
+            <button
+              type="button"
+              className={styles.bouton}
+              disabled={etat.occupee}
+              onClick={televerser}
+            >
+              Téléverser
+            </button>
+            {/* Libère la carte tout de suite, pour un Codespace ou l'Arduino
+                IDE ; grisé pendant un téléversement, qu'il ne faut pas couper. */}
+            <button
+              type="button"
+              className={styles.boutonSecondaire}
+              disabled={etat.occupee}
+              onClick={deconnecter}
+            >
+              Déconnecter
+            </button>
+          </>
+        ) : (
+          <button
+            ref={connecterRef}
+            type="button"
+            className={styles.bouton}
+            disabled={etat.occupee}
+            onClick={connecter}
+          >
+            Connecter la carte
+          </button>
+        )}
+      </div>
+      <div className={styles.indicateurs}>
+        <EtatCarte statut={statutEtat} />
+        {etat.connectee && <VoyantSerie activite={etat.activite} />}
+      </div>
+      {televersement && <Progression progression={etat.progression} />}
       <div className={styles.messages} aria-live="polite">
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}

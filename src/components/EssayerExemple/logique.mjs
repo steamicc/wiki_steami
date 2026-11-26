@@ -49,6 +49,14 @@ export class ErreurLecteur extends Error {
   }
 }
 
+// Conseil ajouté aux erreurs de DAP.js. Avec une batterie branchée,
+// l'interface USB de la carte (son DAPLink) reste alimentée quand on débranche
+// le câble : seule, cette coupure ne la remet pas à zéro, et le dialogue
+// USB peut rester décalé (« Bad response for 8 -> 17 ») tant que l'interface
+// n'a pas redémarré.
+export const CONSEIL_REINITIALISATION =
+  "débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer.";
+
 const ECHECS = {
   connexion: 'La connexion à la carte a échoué',
   televersement: 'Le téléversement a échoué',
@@ -65,7 +73,7 @@ export function messageFrancais(err, etape = 'televersement') {
   const traduit = messageErreur(err);
   if (traduit !== brut) return traduit;
   const echec = ECHECS[etape] ?? ECHECS.televersement;
-  return `${echec} : débrancher et rebrancher la carte, puis réessayer. (${brut})`;
+  return `${echec} : ${CONSEIL_REINITIALISATION} (${brut})`;
 }
 
 // Télécharge le .bin d'un exemple. cache: 'no-cache' revalide auprès du
@@ -96,7 +104,14 @@ export function estEnBas({ scrollTop, clientHeight, scrollHeight }, marge = 4) {
 // La carte se libère quand plus aucun composant n'est affiché, jamais pendant
 // une connexion ou un téléversement.
 export function peutLiberer({ abonnes, occupee, connectee }) {
-  return abonnes === 0 && !occupee && connectee;
+  return abonnes === 0 && peutDeconnecter({ occupee, connectee });
+}
+
+// Le bouton « Déconnecter » ne sert que carte connectée, et jamais pendant
+// une connexion ou un téléversement : un flash interrompu peut laisser la
+// carte inutilisable.
+export function peutDeconnecter({ occupee, connectee }) {
+  return !occupee && connectee;
 }
 
 // Tampon de lignes pour la console série : le flux arrive par morceaux
@@ -142,4 +157,78 @@ export function urlBin(id) {
 
 export function nomFichier(id) {
   return `${id.split('/').pop()}.bin`;
+}
+
+// État de la carte affiché sous chaque exemple, avec une pastille de couleur
+// et toujours un libellé :
+// - 'connexion' : tentative de connexion en cours (la fenêtre de choix est
+//   ouverte ou DAP.js se connecte, le bouton est grisé) ;
+// - 'deconnectee' : pas de carte connectée ;
+// - 'televersement' : carte connectée et réservée par un téléversement,
+//   téléchargement du .bin compris ;
+// - 'programme' : carte connectée et libre, le dernier téléversement réussi
+//   est celui de cet exemple, et la console série est lue (elle l'est
+//   toujours quand la carte est connectée et libre) ; seul l'exemple dont le
+//   programme tourne l'affiche ;
+// - 'connectee' : les autres cas, carte connectée.
+export function statutCarte({ connexion, connectee, occupee, programmeActif }, id) {
+  if (connexion) return 'connexion';
+  if (!connectee) return 'deconnectee';
+  if (occupee) return 'televersement';
+  if (programmeActif === id) return 'programme';
+  return 'connectee';
+}
+
+export const LIBELLES_STATUT = Object.freeze({
+  connexion: 'connexion…',
+  deconnectee: 'déconnectée',
+  connectee: 'connectée',
+  televersement: 'téléversement',
+  programme: 'programme en cours',
+});
+
+// Progression du flash (0 à 1, émise par DAP.js) en pourcentage entier,
+// arrondi vers le bas : 100 % seulement quand DAP.js annonce la fin.
+// null : pas de téléversement en cours.
+export function pourcentage(progression) {
+  if (progression === null || progression === undefined) return null;
+  const valeur = Number(progression);
+  if (!Number.isFinite(valeur)) return 0;
+  return Math.min(100, Math.max(0, Math.floor(valeur * 100)));
+}
+
+export const TEXTE_PREPARATION = 'Préparation de la carte…';
+
+// Ce qu'affiche la barre pendant un téléversement. DAP.js n'émet de
+// progression qu'une fois l'écriture commencée : avant (téléchargement du
+// .bin, connexion au processeur, effacement), elle reste à null ou à 0 pendant
+// plusieurs secondes. La barre est alors indéterminée (valeur : null, la
+// <progress> n'a pas d'attribut value) avec le texte TEXTE_PREPARATION ; elle
+// passe au pourcentage dès qu'il n'est plus nul.
+export function affichageProgression(progression) {
+  const pct = pourcentage(progression);
+  if (!pct) return { valeur: null, texte: TEXTE_PREPARATION };
+  return { valeur: pct, texte: `${pct}\u00a0%` };
+}
+
+// DAP.js émet une progression par paquet USB (des centaines par
+// téléversement) : l'état ne change que quand le pourcentage affiché change.
+export function progressionChangee(avant, apres) {
+  return pourcentage(avant) !== pourcentage(apres);
+}
+
+// Intervalle minimal entre deux clignotements du voyant d'activité série :
+// la console est lue toutes les 10 ms, sans limite la page se redessinerait
+// à chaque paquet.
+export const INTERVALLE_ACTIVITE_MS = 100;
+
+// Faut-il signaler les données série arrivées à l'instant maintenant (ms) ?
+// derniere : instant du dernier signal, null s'il n'y en a pas encore eu.
+// Les données reçues moins de intervalle ms après un signal ne font pas
+// clignoter le voyant : un flux continu le fait clignoter au plus dix fois
+// par seconde. Une horloge qui recule (heure du système changée) signale
+// aussi, pour que le voyant ne reste pas éteint.
+export function activiteASignaler(maintenant, derniere, intervalle = INTERVALLE_ACTIVITE_MS) {
+  if (derniere === null || maintenant < derniere) return true;
+  return maintenant - derniere >= intervalle;
 }
