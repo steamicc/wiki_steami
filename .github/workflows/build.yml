@@ -7,8 +7,9 @@ on:
   pull_request:
     branches:
       - main
-  # Lancé par suivre-exemples-arduino.yml sur ses branches : une PR ouverte
-  # avec GITHUB_TOKEN ne déclenche pas pull_request.
+  # Lancement à la main (Actions > Build > Run workflow). Les PR du robot
+  # suivre-exemples-arduino.yml, ouvertes avec le jeton de la GitHub App,
+  # déclenchent pull_request normalement.
   workflow_dispatch:
 
 permissions:
