@@ -40,7 +40,7 @@ mpremote repl
 
 Taper du code Python directement :
 
-```python
+```python run
 from machine import I2C
 i2c = I2C(1)
 print(i2c.scan())
@@ -52,7 +52,7 @@ Cela affiche la liste des adresses I2C des périphériques connectés sur le bus
 
 Créer un fichier `hello.py` :
 
-```python
+```python run
 from machine import I2C
 
 i2c = I2C(1)

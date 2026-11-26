@@ -30,7 +30,7 @@ mpremote repl
 
 Le prompt MicroPython `>>>` doit apparaître. Taper :
 
-```python
+```python run
 import sys
 print(sys.implementation)
 print(sys.platform)

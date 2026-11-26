@@ -19,7 +19,7 @@ L'outil d'installation propose par défaut **BLE HCI Layer extended** : ne pas l
 
 En MicroPython, `stm.rfcore_fw_version()` donne la version du FUS, le programme de ST qui installe les piles, et celle de la pile radio :
 
-```python
+```python run
 import stm
 
 print(stm.rfcore_fw_version(0))  # FUS, par exemple (1, 2, 0, 0, 0)
