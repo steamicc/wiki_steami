@@ -1,15 +1,1 @@
-BLE/BleBeacon
-BLE/BleHotCold
-BLE/BleIndoorMap
-BLE/BleRssiMapper
-BLE/BleRssiProximity
-BLE/BleTrilateration
 DAPLINK_FLASH/data_logger
-MCP23009E/MorseCode
-MCP23009E/MusicPlayer
-MCP23009E/ReactionTimer
-MCP23009E/SimonGame
-MCP23009E/dpad_reader
-WSEN-PADS/altitude
-WSEN-PADS/floor_detector
-WSEN-PADS/read_pressure_temperature
