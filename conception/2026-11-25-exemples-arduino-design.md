@@ -232,12 +232,26 @@ de l'image : une fois par jour et à la demande, lit la dernière release de
 `steamicc/arduino-steami` ; si elle est plus récente que la version épinglée
 et porte l'archive, il crée la branche `chore/exemples-arduino-<tag>` (points
 du tag remplacés par des tirets, ex. `v0-37-0`, règle des noms de branche), met à
-jour `exemples-arduino.json` (version et sha256) et ouvre la PR, puis lance
-le CI sur la branche par `workflow_dispatch` (une PR ouverte avec
-`GITHUB_TOKEN` ne déclenche pas `pull_request` ; l'organisation autorise déjà
-Actions à ouvrir des PR, le robot de l'image s'en sert). Si de
+jour `exemples-arduino.json` (version et sha256), ouvre la PR et active sa
+fusion automatique (squash) : elle est fusionnée dès que le CI est vert. Si de
 nouveaux exemples ne sont pas expliqués, le CI de la PR échoue et les nomme :
 l'utilisateur décide de les rédiger ou de les ajouter à la liste d'attente.
+
+Le robot agit avec un jeton d'installation de la GitHub App de l'organisation
+(celle des releases de `arduino-steami-lib`), limité au dépôt du wiki : une PR
+ouverte avec `GITHUB_TOKEN` attend une approbation manuelle avant que le CI
+tourne, celle de l'App déclenche `pull_request` normalement (#227). Il faut :
+
+- les secrets `RELEASE_APP_ID` et `RELEASE_APP_SECRET` dans le dépôt du wiki,
+  sans quoi le workflow échoue en les nommant ;
+- l'App installée sur le dépôt, avec Contents et Pull requests en écriture ;
+- « Allow auto-merge » coché, et un ruleset « CI verte avant fusion » sur
+  `main` qui exige la vérification `build`. Sans vérification exigée, GitHub
+  fusionnerait la PR tout de suite, même avec un CI rouge : le robot vérifie
+  donc les règles de `main` et, si `build` n'y est pas exigé, laisse la PR à
+  fusionner à la main avec un avertissement.
+
+Une PR en brouillon n'est pas fusionnée automatiquement.
 
 ### 7. Liens vers les pages
 
