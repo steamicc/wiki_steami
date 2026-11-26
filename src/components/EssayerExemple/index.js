@@ -114,11 +114,28 @@ function Controles({ id, href }) {
     if (colleRef.current) pre.scrollTop = pre.scrollHeight;
   }, [etat.lignes, montrerConsole]);
 
+  // Valeur de etat.connectee au rendu précédent, pour ne réagir qu'au passage
+  // de connectée à déconnectée (et pas au montage du composant).
+  const connecteeAvantRef = useRef(etat.connectee);
+
   useLayoutEffect(() => {
-    if (etat.connectee || !refocaliserRef.current) return;
-    refocaliserRef.current = false;
+    const vientDeSeDeconnecter = connecteeAvantRef.current && !etat.connectee;
+    connecteeAvantRef.current = etat.connectee;
+    if (etat.connectee) return;
+    if (refocaliserRef.current) {
+      refocaliserRef.current = false;
+      connecterRef.current?.focus();
+      return;
+    }
+    // Carte débranchée hors de toute opération : « Téléverser » et
+    // « Déconnecter » disparaissent. Si le focus est retombé sur la page, il
+    // passe à « Connecter la carte » de l'exemple cliqué en dernier.
+    // Comportement non couvert par les tests (pas de rendu du composant).
+    if (!vientDeSeDeconnecter || !clique) return;
+    const actif = document.activeElement;
+    if (actif && actif !== document.body) return;
     connecterRef.current?.focus();
-  }, [etat.connectee]);
+  }, [etat.connectee, clique]);
 
   // Opération finie : « Téléverser » si la carte est connectée, sinon
   // « Connecter la carte » (connexion échouée). Seulement si le focus est
