@@ -43,7 +43,7 @@ La V1c est la carte diffusée aujourd'hui. Elle a les composants communs aux tro
 | Composant            | Ce que montrent les exemples                                                      | Cartes                                                |
 | -------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------- |
 | [VL53L1X](./vl53l1x) | distance par temps de vol                                                         | V1a, V1b, V1c                                         |
-| BME280               | pression, humidité et température                                                 | V1c                                                   |
+| [BME280](./bme280)   | pression, humidité et température                                                 | V1c                                                   |
 | GC9A01               | écran TFT rond, couleur, 240 × 240                                                | V1c                                                   |
 | STEAMI_BOARD         | classes par fonction, qui choisissent le composant présent sur la carte           | V1a, V1b, V1c (lumière, couleur et gestes : V1a, V1b) |
 | ISM330DL             | accéléromètre et gyroscope                                                        | V1a, V1b, V1c                                         |
