@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """
-Vérifie les blocs MicroPython exécutables des pages du wiki (ceux qui reçoivent
-le bouton « Essayer sur la carte » du plugin plugins/remark-micropython-run.js,
-dont ce script reprend les règles).
+Vérifie les blocs MicroPython exécutables des pages du wiki : ceux qui reçoivent
+le bouton « Essayer sur la carte » du plugin plugins/remark-micropython-run.js.
 
-Un bloc ```python est exécutable s'il porte `run`, ou s'il inclut un exemple de
-la bibliothèque (`file=.external/micropython-steami-lib/lib/<driver>/examples/…`)
-dont aucun import ne vise un driver marqué `.not-frozen` ; `norun` l'emporte.
+Les blocs sont listés par scripts/blocs-micropython.mjs, qui analyse les pages
+comme le build (même analyse Markdown/MDX, mêmes plugins remark) et rapporte la
+décision du plugin : le CI vérifie exactement les blocs qui ont un bouton, y
+compris dans une citation, une liste ou avec un meta séparé par une tabulation.
+Une page que le plugin refuse (fichier annexe absent, hors de .external/, deux
+fichiers de même nom…) est une erreur.
 
 Pour chaque bloc exécutable :
 1. le programme est du Python valide (ast.parse) ;
-2. ses fichiers annexes (`files=a.py,b.py`) sont sous .external/ et existent,
-   sans deux fichiers de même nom ;
-3. il n'importe aucun driver non gelé dans le firmware (sinon l'essai échoue sur
-   la carte : vaut pour un `run` explicite) ;
-4. un exemple de la bibliothèque destructif porte `confirm="…"`. Destructif :
-   il appelle une opération qui écrit ou efface un stockage persistant de la
-   carte (voir ECRITURES), ou il est dans scripts/micropython-exemples-destructifs.txt
+2. il n'importe aucun driver non gelé dans le firmware (sinon l'essai échoue sur
+   la carte : cas d'un `run` explicite) ;
+3. s'il est destructif, il porte `confirm="…"`. Destructif : il appelle une
+   opération qui écrit ou efface un stockage persistant de la carte (voir
+   ECRITURES), quelle que soit l'origine du bloc (en ligne, `file=`) ; ou c'est
+   un exemple de la bibliothèque listé dans scripts/micropython-exemples-destructifs.txt
    (ajouts explicites pour ce que la détection manquerait).
 
 Chaque ligne de cette liste doit désigner au moins un exemple de la bibliothèque.
@@ -28,72 +29,29 @@ Usage :
 
 import argparse
 import ast
-import posixpath
+import json
 import re
+import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
 DESTRUCTIFS_DEFAUT = Path(__file__).resolve().parent / "micropython-exemples-destructifs.txt"
+LISTEUR = Path(__file__).resolve().parent / "blocs-micropython.mjs"
 DOSSIER_LIB = ".external/micropython-steami-lib/lib"
 EXEMPLE_LIB = re.compile(r"^\.external/micropython-steami-lib/lib/([^/]+/examples/[^/]+\.py)$")
 
-# Mêmes jetons que le plugin : clé=valeur (valeur entre guillemets possible) ou mot seul.
-JETON = re.compile(r"""([A-Za-z_][\w-]*)=(?:"([^"]*)"|'([^']*)'|(\S+))|\S+""")
-OUVERTURE = re.compile(r"^( *)(`{3,}|~{3,})(.*)$")
-
-
-def lire_meta(meta):
-    resultat = {"run": False, "norun": False, "confirm": None, "files": None, "file": None}
-    for m in JETON.finditer(meta or ""):
-        jeton, cle = m.group(0), m.group(1)
-        valeur = next((g for g in m.groups()[1:] if g is not None), None)
-        if jeton == "run":
-            resultat["run"] = True
-        elif jeton == "norun":
-            resultat["norun"] = True
-        elif cle == "confirm":
-            resultat["confirm"] = valeur
-        elif cle == "files":
-            resultat["files"] = [f for f in valeur.split(",") if f]
-        elif cle == "file":
-            resultat["file"] = valeur
-    return resultat
-
-
-@dataclass
-class Bloc:
-    ligne: int
-    langage: str
-    meta: str
-    code: str
-
-
-def blocs(texte):
-    """Blocs de code délimités (``` ou ~~~) d'une page, dans l'ordre."""
-    resultat = []
-    lignes = texte.splitlines()
-    i = 0
-    while i < len(lignes):
-        m = OUVERTURE.match(lignes[i])
-        if not m or (m.group(2)[0] == "`" and "`" in m.group(3)):
-            i += 1
-            continue
-        retrait, cloture, info = len(m.group(1)), m.group(2), m.group(3).strip()
-        fin = re.compile(r"^ *" + re.escape(cloture[0]) + "{" + str(len(cloture)) + r",}\s*$")
-        contenu = []
-        j = i + 1
-        while j < len(lignes) and not fin.match(lignes[j]):
-            ligne = lignes[j]
-            enleve = len(ligne) - len(ligne.lstrip(" "))
-            contenu.append(ligne[min(retrait, enleve):])
-            j += 1
-        langage, _, meta = info.partition(" ")
-        code = "".join(f"{ligne}\n" for ligne in contenu)
-        resultat.append(Bloc(i + 1, langage, meta.strip(), code))
-        i = j + 1
-    return resultat
+def blocs_publies(pages, racine):
+    """Blocs python des pages, avec la décision du plugin (voir scripts/blocs-micropython.mjs)."""
+    entree = json.dumps(
+        {"racine": str(racine), "pages": [{"chemin": str(c), "texte": t} for c, t in pages.items()]}
+    )
+    sortie = subprocess.run(
+        ["node", str(LISTEUR)], input=entree, capture_output=True, text=True, encoding="utf-8"
+    )
+    if sortie.returncode != 0:
+        raise RuntimeError(f"{LISTEUR.name} a échoué :\n{sortie.stderr}")
+    return json.loads(sortie.stdout)
 
 
 def modules_non_geles(lib):
@@ -125,16 +83,6 @@ def modules_importes(arbre):
     return modules
 
 
-def chemin_autorise(chemin):
-    """Chemin normalisé sous .external/, ou None (mêmes règles que remark-code-file)."""
-    if chemin.startswith("/"):
-        return None
-    normalise = posixpath.normpath(chemin)
-    if normalise.startswith("..") or not normalise.startswith(".external/"):
-        return None
-    return normalise
-
-
 def _motif(glob):
     return re.compile(
         "^" + "".join("[^/]*" if c == "*" else "[^/]" if c == "?" else re.escape(c) for c in glob) + "$"
@@ -163,9 +111,9 @@ def _type_de(expression, types):
     if isinstance(expression, ast.Call):
         fonction = expression.func
         nom = fonction.id if isinstance(fonction, ast.Name) else getattr(fonction, "attr", None)
+        if nom == "config":
+            return "SteamiConfig"  # Steami().config() rend la SteamiConfig de la carte
         return nom if nom in ECRITURES else None
-    if isinstance(expression, ast.Attribute) and expression.attr == "config":
-        return "SteamiConfig"  # Steami().config
     return None
 
 
@@ -223,74 +171,43 @@ def lire_destructifs(chemin):
 
 def verifier(pages, racine, non_geles, destructifs, executables=None):
     """Erreurs des blocs exécutables ; `executables` (liste) reçoit leur position."""
-    racine = Path(racine)
     motifs = [(glob, _motif(glob)) for glob in destructifs]
     erreurs = []
-    for chemin_page, texte in pages.items():
-        for bloc in blocs(texte):
-            if bloc.langage != "python":
-                continue
-            ou = f"{chemin_page}:{bloc.ligne}"
-            meta = lire_meta(bloc.meta)
-            if meta["norun"]:
-                continue
+    for bloc in blocs_publies(pages, racine):
+        if "erreur" in bloc:
+            erreurs.append(f"{bloc['page']} : {bloc['erreur']}")
+            continue
+        if not bloc["bouton"]:
+            continue
+        ou = f"{bloc['page']}:{bloc['ligne']}"
+        m = EXEMPLE_LIB.match(bloc["source"] or "")
+        exemple = m.group(1) if m else None
+        if executables is not None:
+            executables.append(ou + (f" ({exemple})" if exemple else ""))
+        try:
+            arbre = ast.parse(bloc["code"])
+        except SyntaxError as e:
+            erreurs.append(f"{ou} : erreur de syntaxe Python ligne {e.lineno} du bloc : {e.msg}")
+            continue
 
-            code = bloc.code
-            exemple = None
-            if meta["file"]:
-                inclus = chemin_autorise(meta["file"])
-                if inclus is None or not (racine / inclus).is_file():
-                    erreurs.append(f"{ou} : fichier inclus introuvable ou interdit : {meta['file']}")
-                    continue
-                code = (racine / inclus).read_text(encoding="utf-8")
-                m = EXEMPLE_LIB.match(inclus)
-                exemple = m.group(1) if m else None
-            if not meta["run"] and exemple is None:
-                continue
+        non_gele = sorted(modules_importes(arbre) & non_geles)
+        if non_gele:
+            erreurs.append(
+                f"{ou} : bloc exécutable qui importe un driver non gelé dans le firmware "
+                f"({', '.join(non_gele)}) : retirer `run`"
+            )
 
-            if executables is not None:
-                executables.append(f"{ou}" + (f" ({exemple})" if exemple else ""))
-            try:
-                arbre = ast.parse(code)
-            except SyntaxError as e:
-                erreurs.append(f"{ou} : erreur de syntaxe Python ligne {e.lineno} du bloc : {e.msg}")
-                continue
-
-            non_gele = sorted(modules_importes(arbre) & non_geles)
-            if non_gele:
-                if not meta["run"]:
-                    if executables is not None:
-                        executables.pop()  # exemple de la lib sans bouton : rien à vérifier
-                    continue
-                erreurs.append(
-                    f"{ou} : bloc exécutable qui importe un driver non gelé dans le firmware "
-                    f"({', '.join(non_gele)}) : retirer `run`"
-                )
-
-            if meta["files"]:
-                vus = set()
-                for annexe in meta["files"]:
-                    normalise = chemin_autorise(annexe)
-                    if normalise is None:
-                        erreurs.append(f"{ou} : fichier annexe hors de .external/ : {annexe}")
-                        continue
-                    if not (racine / normalise).is_file():
-                        erreurs.append(f"{ou} : fichier annexe introuvable : {annexe}")
-                    nom = posixpath.basename(normalise)
-                    if nom in vus:
-                        erreurs.append(f"{ou} : deux fichiers annexes s'appellent {nom}")
-                    vus.add(nom)
-
-            if exemple and not meta["confirm"]:
-                operations = operations_persistantes(arbre)
+        if not bloc["confirmation"]:
+            operations = operations_persistantes(arbre)
+            raison = f"appelle {operations[0]}" if operations else None
+            if raison is None and exemple:
                 raison = next((f"liste : {glob}" for glob, motif in motifs if motif.match(exemple)), None)
-                if operations:
-                    raison = f"appelle {operations[0]}"
-                if raison:
-                    erreurs.append(
-                        f"{ou} : l'exemple destructif {exemple} ({raison}) "
-                        'doit porter confirm="<ce qui sera modifié>" (ou norun)'
-                    )
+            if raison:
+                nom = exemple or "bloc"
+                erreurs.append(
+                    f"{ou} : {nom} modifie la carte durablement ({raison}) : "
+                    'porter confirm="<ce qui sera modifié>" (ou norun)'
+                )
     return erreurs
 
 

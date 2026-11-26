@@ -69,30 +69,6 @@ class Racine:
         return check.verifier({PAGE: texte}, self.racine, non_geles, DESTRUCTIFS)
 
 
-class TestLireMeta(unittest.TestCase):
-    def test_marques(self):
-        meta = check.lire_meta('title="run" run confirm="Efface l’heure, vraiment" files=a.py,b.py')
-        self.assertTrue(meta["run"])
-        self.assertFalse(meta["norun"])
-        self.assertEqual(meta["confirm"], "Efface l’heure, vraiment")
-        self.assertEqual(meta["files"], ["a.py", "b.py"])
-
-    def test_run_dans_un_titre_ignore(self):
-        self.assertFalse(check.lire_meta('title="run"')["run"])
-
-
-class TestBlocs(unittest.TestCase):
-    def test_blocs_et_lignes(self):
-        texte = "# T\n\n```python run\nprint(1)\n```\n\n````md\n```python run\nx\n```\n````\n"
-        blocs = check.blocs(texte)
-        self.assertEqual([(b.ligne, b.langage) for b in blocs], [(3, "python"), (7, "md")])
-        self.assertEqual(blocs[0].code, "print(1)\n")
-
-    def test_bloc_indente_dans_une_liste(self):
-        blocs = check.blocs("1. Lancer :\n\n   ```python run\n   print(1)\n   ```\n")
-        self.assertEqual(blocs[0].code, "print(1)\n")
-
-
 class TestVerifier(unittest.TestCase):
     def test_bloc_valide(self):
         with Racine() as r:
@@ -209,8 +185,10 @@ class TestDestructifs(unittest.TestCase):
             "bridge.clear_config()\n": "bridge.clear_config",
             'bridge.write_config(b"x")\n': "bridge.write_config",
             'config.set_temperature_calibration("x", gain=1.0)\nconfig.save()\n': "config.save",
-            "Steami().config.save()\n": "Steami().config.save",
-            "cfg = Steami().config\ncfg.save()\n": "cfg.save",
+            # Steami.config() : méthode qui rend la SteamiConfig de la carte (v0.29.0).
+            "Steami().config().save()\n": "Steami().config().save",
+            "cfg = Steami().config()\ncfg.save()\n": "cfg.save",
+            "board = Steami()\ncfg = board.config()\ncfg.save()\n": "cfg.save",
             # config_zone.py : fonctions locales qui parlent au DAPLink en I2C brut.
             "def clear_config():\n    i2c.writeto(0x3B, bytearray([0x32]))\nclear_config()\n": "clear_config",
         }
@@ -288,6 +266,78 @@ class TestDestructifsDuClone(unittest.TestCase):
             for f in CLONE.glob(motif)
         }
         self.assertEqual(listes, ATTENDUS_V0_29_0)
+
+
+class TestBlocsExecutablesHorsBibliotheque(unittest.TestCase):
+    """Tout bloc exécutable qui modifie la carte durablement demande confirm, quelle que soit son origine."""
+
+    def test_bloc_run_destructif_sans_confirm_signale(self):
+        with Racine() as r:
+            code = "from daplink_flash import DaplinkFlash\nflash = DaplinkFlash(None)\nflash.clear_flash()\n"
+            erreurs = r.verifier(bloc("run", code))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("flash.clear_flash()", erreurs[0])
+            self.assertIn("confirm", erreurs[0])
+            self.assertEqual(r.verifier(bloc('run confirm="Efface la flash externe"', code)), [])
+
+    def test_bloc_file_hors_lib_destructif_sans_confirm_signale(self):
+        with Racine() as r:
+            r.ecrire(
+                ".external/samples/logger.py",
+                "from steami import Steami\nSteami().config().save()\n",
+            )
+            erreurs = r.verifier(bloc("run file=.external/samples/logger.py"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("save()", erreurs[0])
+
+    def test_bloc_non_executable_destructif_ignore(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier(bloc("", "flash.clear_flash()\n")), [])
+
+
+class TestMemesBlocsQueLePlugin(unittest.TestCase):
+    """Le CI voit les blocs que le plugin munit d'un bouton, où qu'ils soient dans la page."""
+
+    def test_bloc_dans_une_citation(self):
+        with Racine() as r:
+            erreurs = r.verifier("Texte.\n\n> ```python run\n> print(1\n> ```\n")
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("essai.md:3", erreurs[0])
+
+    def test_meta_separe_par_une_tabulation(self):
+        with Racine() as r:
+            erreurs = r.verifier("Texte.\n\n```python\trun\nprint(1\n```\n")
+            self.assertEqual(len(erreurs), 1)
+
+    def test_bloc_sur_la_ligne_d_un_element_de_liste(self):
+        with Racine() as r:
+            erreurs = r.verifier("Texte.\n\n1. ```python run\n   print(1\n   ```\n")
+            self.assertEqual(len(erreurs), 1)
+
+    def test_bloc_dans_une_liste_indentee(self):
+        with Racine() as r:
+            erreurs = r.verifier("1. Lancer :\n\n   ```python run\n   print(1\n   ```\n")
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("essai.md:3", erreurs[0])
+
+    def test_bloc_cite_dans_un_autre_bloc_ignore(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier("````md\n```python run\nprint(1\n```\n````\n"), [])
+
+    def test_page_refusee_par_le_plugin_signalee(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc("run files=docs/x.py", "x = 1\n"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("docs/x.py", erreurs[0])
+
+    def test_exemple_destructif_dans_une_citation(self):
+        with Racine() as r:
+            meta = f"file={LIB}/steami_config/examples/calibrate_magnetometer.py"
+            erreurs = r.verifier(f"Texte.\n\n> ```python {meta}\n>\n> ```\n")
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("confirm", erreurs[0])
+            meta += ' confirm="Écrit la calibration"'
+            self.assertEqual(r.verifier(f"Texte.\n\n> ```python {meta}\n>\n> ```\n"), [])
 
 
 class TestMain(unittest.TestCase):
