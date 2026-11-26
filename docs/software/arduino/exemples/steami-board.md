@@ -16,7 +16,7 @@ Sur cette page :
 
 <TOCInline toc={toc} maxHeadingLevel={2} />
 
-Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DL (mouvement), le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, qui n'existe que sur la V1a et la V1b : sur une V1c, ils montrent comment une classe signale une fonction absente. Les onze autres exemples marchent sur toutes les cartes.
+Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DLC (mouvement), que la bibliothèque et la console appellent `ISM330DL`, le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, prévu sur la V1a et la V1b et absent de la V1c : sur une V1c, ils montrent comment une classe signale une fonction absente. Les onze autres exemples marchent sur toutes les cartes.
 
 Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** de l'Arduino IDE. Ils écrivent leurs messages en anglais et n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs) détaille chaque classe et [Reconnaître la carte](../carte) ce qu'elles ont en commun ; cette page-ci explique ce que montre chaque exemple. Les pages d'exemples par composant, comme [VL53L1X](./vl53l1x), utilisent au contraire directement le driver du composant.
 
@@ -112,27 +112,27 @@ La jauge mesure elle-même la tension et le courant de la batterie, et en dédui
 
 ```
 
-**Comment ça marche** : `SteamiAccelerometer` utilise l'[ISM330DL](/docs/hardware/main-components/sensors/ism330dlc), présent sur les trois releases. Un accéléromètre mesure aussi la pesanteur : au repos, il ne mesure qu'elle, 1 g, dans la direction du sol. C'est ce qui permet de connaître l'inclinaison de la carte.
+**Comment ça marche** : `SteamiAccelerometer` utilise l'[ISM330DLC](/docs/hardware/main-components/sensors/ism330dlc), présent sur les trois releases. Un accéléromètre mesure aussi la pesanteur : au repos, il ne mesure qu'elle, 1 g, dans la direction du sol. C'est ce qui permet de connaître l'inclinaison de la carte.
 
-`begin()` règle le capteur sur ±8 g, à 104 mesures par seconde ; sur la plage de ±2 g que le driver choisit seul, une secousse de plus de 2 g ne serait jamais vue. `read()` renvoie les trois axes dans un `SteamiVector`, avec la calibration `ca` de la zone de configuration si elle existe. `strength()` refait une mesure et en calcule la norme, `√(x² + y² + z²)` ; `isShaken()` en refait une troisième et vaut `true` au-dessus de 2 g. `SHAKEN` peut donc apparaître sur une ligne dont la norme affichée est inférieure à 2. Voir aussi [Mouvement](../capteurs#mouvement--accéléromètre-et-gyroscope).
+`begin()` règle le capteur sur ±8 g, à 104 mesures par seconde. Sur la plage de ±2 g que le driver choisit seul, chaque axe plafonnerait à 2 g et une forte secousse serait en grande partie masquée : ±8 g laisse la place de la mesurer. `read()` renvoie les trois axes dans un `SteamiVector`, avec la calibration `ca` de la zone de configuration si elle existe. `strength()` refait une mesure et en calcule la norme, `√(x² + y² + z²)` ; `isShaken()` en refait une troisième et vaut `true` au-dessus de 2 g. `SHAKEN` peut donc apparaître sur une ligne dont la norme affichée est inférieure à 2. Voir aussi [Mouvement](../capteurs#mouvement--accéléromètre-et-gyroscope).
 
 <EssayerExemple id="STEAMI_BOARD/Accelerometer" />
 
 ## Gyroscope {#gyroscope}
 
-**Ce qu'on observe** : `Gyroscope: ISM330DL`, puis cinq fois par seconde la vitesse de rotation autour des trois axes, par exemple `x=0.3 y=-0.2 z=0.1 dps`. Au repos, les valeurs restent proches de 0. En faisant tourner la carte posée à plat sur la table, z s'écarte de 0, puis y revient dès que la carte s'arrête.
+**Ce qu'on observe** : `Gyroscope: ISM330DL`, puis cinq fois par seconde la vitesse de rotation autour des trois axes, par exemple `x=0.3 y=-0.2 z=0.1 dps`. Au repos, les valeurs restent proches de 0. En faisant tourner la carte posée à plat sur la table, z s'écarte de 0, puis revient près de 0 dès que la carte s'arrête.
 
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/Gyroscope/Gyroscope.ino
 
 ```
 
-**Comment ça marche** : `SteamiGyroscope` utilise le même ISM330DL que `SteamiAccelerometer`. Un gyroscope mesure une vitesse de rotation, en degrés par seconde (`dps`), et non un angle : une carte immobile, même penchée, donne des valeurs proches de 0. La classe garde le réglage du driver, ±250 degrés par seconde à 104 mesures par seconde : une rotation plus rapide dépasse la plage du capteur. Aucune calibration n'est appliquée au gyroscope : au repos, les valeurs ne sont pas exactement 0.
+**Comment ça marche** : `SteamiGyroscope` utilise le même ISM330DLC que `SteamiAccelerometer`. Un gyroscope mesure une vitesse de rotation, en degrés par seconde (`dps`), et non un angle : une carte immobile, même penchée, donne des valeurs proches de 0. La classe garde le réglage du driver, ±250 degrés par seconde à 104 mesures par seconde : une rotation plus rapide dépasse la plage du capteur. Aucune calibration n'est appliquée au gyroscope : au repos, les valeurs ne sont pas exactement 0.
 
 <EssayerExemple id="STEAMI_BOARD/Gyroscope" />
 
 ## Buttons {#buttons}
 
-**Ce qu'on observe** : `Buttons ready.`, puis une ligne à chaque appui et à chaque relâchement des sept boutons : `A pressed`, `A released`, `UP pressed`… Un bouton maintenu n'écrit qu'une ligne `pressed`, puis `released` quand on le lâche. Un bouton déjà enfoncé au démarrage ne compte pas comme un appui. Le bouton Reset ne fait pas partie des sept : il redémarre la carte.
+**Ce qu'on observe** : `Buttons ready.`, puis une ligne à chaque appui et à chaque relâchement des sept boutons : `A pressed`, `A released`, `UP pressed`… Un bouton maintenu n'écrit qu'une ligne `pressed`, puis `released` quand on le lâche. Un bouton déjà enfoncé au démarrage ne compte pas comme un appui : s'il est relâché ensuite, seule la ligne `released` s'écrit. Le bouton Reset ne fait pas partie des sept : il redémarre la carte.
 
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/Buttons/Buttons.ino
 
@@ -210,13 +210,15 @@ Les trois nombres augmentent tous avec la quantité de lumière : c'est leur pro
 
 ## Gesture {#gesture}
 
-**Ce qu'on observe** : sur une V1a ou une V1b, `Gesture sensor: APDS-9960`, puis une ligne à chaque geste reconnu quand une main passe au-dessus du capteur : `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR` ou `FAR`. Rien ne s'écrit tant qu'il n'y a pas de geste. Sur une V1c, la console écrit le message `E20` de `SteamiGesture`, puis `No gesture sensor: not on this board`, et plus rien ensuite.
+**Ce qu'on observe** : sur une V1a ou une V1b, `Gesture sensor: APDS-9960`, puis une ligne à chaque geste reconnu quand une main balaie le capteur : `LEFT`, `RIGHT`, `UP` ou `DOWN`. Rien ne s'écrit tant qu'il n'y a pas de geste. Sur une V1c, la console écrit le message `E20` de `SteamiGesture`, puis `No gesture sensor: not on this board`, et plus rien ensuite.
 
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/Gesture/Gesture.ino
 
 ```
 
-**Comment ça marche** : `SteamiGesture` utilise le même APDS-9960 que les deux exemples précédents. `begin()` met en marche son mode gestes : le capteur éclaire en infrarouge et mesure la lumière renvoyée par la main sur quatre photodiodes, haut, bas, gauche et droite. Le driver compare l'équilibre haut-bas et gauche-droite au début et à la fin du passage de la main : la façon dont il change donne la direction. `NEAR` et `FAR` sont prévus pour une main qui s'approche ou s'éloigne sans balayer le capteur.
+**Comment ça marche** : `SteamiGesture` utilise le même APDS-9960 que les deux exemples précédents. `begin()` met en marche son mode gestes : le capteur éclaire en infrarouge et mesure la lumière renvoyée par la main sur quatre photodiodes, haut, bas, gauche et droite. Le driver compare l'équilibre haut-bas et gauche-droite au début et à la fin du passage de la main : la façon dont il change donne la direction.
+
+Le driver connaît aussi `NEAR` et `FAR`, que cite le commentaire en tête de l'exemple, mais il ne les donne qu'après au moins douze lots de mesures où cet équilibre change à peine, séparés par une pause de 30 ms. Or `read(200)` lit sept lots au plus et remet ces compteurs à zéro à chaque appel : avec cet exemple, `NEAR` et `FAR` ne peuvent pas apparaître.
 
 `read(200)` renvoie `NONE` tout de suite s'il n'y a pas de geste en cours, sans attendre qu'un geste commence ; sinon, il suit le geste pendant 200 ms au plus. La boucle l'appelle donc sans pause. Pendant qu'une main est suivie, la lumière et la couleur ne sont plus mesurées. Le décodage des gestes n'a pas encore été vérifié sur une carte (voir [Lumière, couleur et gestes](../capteurs#lumière-couleur-et-gestes)).
 
