@@ -76,7 +76,7 @@ Si la connexion ou l'envoi échoue, un message en rouge explique quoi faire, et 
 
 Le fichier téléchargé est le même programme : le glisser sur le lecteur **STEAMI**, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). C'est la solution quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)).
 
-Quand la connexion ou l'envoi échoue en cours de route, le message demande de débrancher le câble USB et, s'il y en a une, la batterie, d'attendre quelques secondes, puis de rebrancher et de réessayer. La batterie compte : tant qu'elle est branchée, l'interface USB de la carte (son DAPLink) reste alimentée, et débrancher le câble seul ne la remet pas à zéro.
+Quand la connexion ou l'envoi échoue en cours de route, le message demande de débrancher le câble USB et, s'il y en a une, la batterie, d'attendre quelques secondes, puis de rebrancher et de réessayer. La batterie compte : tant qu'elle est branchée, l'interface USB de la carte (son DAPLink) reste alimentée, et débrancher le câble seul ne la remet pas à zéro. Le bouton Reset ne suffit pas non plus : il redémarre le microcontrôleur de la carte, pas son interface USB. La même procédure sert à relire le fichier de la page [DAPLINK_FLASH](./daplink-flash).
 
 ## Sans Chrome ni Edge
 
