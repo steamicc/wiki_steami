@@ -69,6 +69,13 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome != 'skipped' }}
         run: npm run lint:arduino-examples
 
+      # Blocs « Essayer sur la carte » : syntaxe, fichiers annexes, imports gelés,
+      # confirm des exemples destructifs. Lancé même si le build échoue (un
+      # fichier annexe absent le fait échouer) ; le prebuild a cloné la lib.
+      - name: Check MicroPython blocks
+        if: ${{ !cancelled() && steps.build.outcome != 'skipped' }}
+        run: npm run lint:micropython-blocks
+
       - name: Validate code examples
         run: npm run lint:examples
 

@@ -1,0 +1,11 @@
+# Exemples de micropython-steami-lib qui modifient la carte durablement.
+# Chemins relatifs à lib/ de la bibliothèque ; * et ? ne franchissent pas « / ».
+# Publié avec le bouton « Essayer sur la carte », un de ces exemples doit porter
+# confirm="<ce qui sera modifié>" (vérifié par scripts/check-micropython-blocks.py).
+
+# Remplace la configuration et les calibrations par des valeurs de démonstration.
+steami_config/examples/populate_demo_config.py
+# Écrivent dans la zone de configuration.
+steami_config/examples/calibrate_*.py
+# Efface la flash externe.
+daplink_flash/examples/erase_flash.py

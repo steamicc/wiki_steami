@@ -1,0 +1,209 @@
+import contextlib
+import importlib.util
+import io
+import tempfile
+import unittest
+from pathlib import Path
+
+SCRIPTS = Path(__file__).resolve().parents[1]
+
+
+def charger(nom, fichier):
+    spec = importlib.util.spec_from_file_location(nom, SCRIPTS / fichier)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+check = charger("check_micropython_blocks", "check-micropython-blocks.py")
+validate = charger("validate_code_examples", "validate-code-examples.py")
+
+LIB = ".external/micropython-steami-lib/lib"
+PAGE = Path("docs/software/essai.md")
+DESTRUCTIFS = ["steami_config/examples/calibrate_*.py", "daplink_flash/examples/erase_flash.py"]
+
+
+def bloc(meta, code=""):
+    return f"Texte.\n\n```python {meta}\n{code}```\n"
+
+
+class Racine:
+    """Petite copie de la bibliothèque dans un dossier temporaire."""
+
+    def __enter__(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.racine = Path(self._tmp.name)
+        self.ecrire(f"{LIB}/hts221/.not-frozen", "Not frozen.\n")
+        self.ecrire(f"{LIB}/hts221/hts221/__init__.py", "")
+        self.ecrire(f"{LIB}/hts221/examples/humidity.py", "from hts221 import HTS221\n")
+        self.ecrire(f"{LIB}/gc9a01/.not-frozen", "Not frozen.\n")
+        self.ecrire(f"{LIB}/ism330dl/ism330dl/__init__.py", "")
+        self.ecrire(f"{LIB}/ism330dl/examples/basic_read.py", "from ism330dl import ISM330DL\n")
+        self.ecrire(f"{LIB}/wsen-pads/wsen_pads/__init__.py", "")
+        self.ecrire(
+            f"{LIB}/wsen-pads/examples/station_env.py",
+            "from wsen_pads import WSEN_PADS\nfrom hts221 import (\n    HTS221,\n)\n",
+        )
+        self.ecrire(f"{LIB}/steami_config/steami_config/__init__.py", "")
+        self.ecrire(
+            f"{LIB}/steami_config/examples/calibrate_magnetometer.py",
+            "from steami_config import SteamiConfig\n",
+        )
+        self.ecrire(
+            f"{LIB}/steami_config/examples/calibrate_temperature.py",
+            "from hts221 import HTS221\n",
+        )
+        self.ecrire(".external/samples/pins.py", "LED = 1\n")
+        return self
+
+    def __exit__(self, *exc):
+        self._tmp.cleanup()
+
+    def ecrire(self, relatif, contenu):
+        chemin = self.racine / relatif
+        chemin.parent.mkdir(parents=True, exist_ok=True)
+        chemin.write_text(contenu, encoding="utf-8")
+
+    def verifier(self, texte):
+        non_geles = check.modules_non_geles(self.racine / LIB)
+        return check.verifier({PAGE: texte}, self.racine, non_geles, DESTRUCTIFS)
+
+
+class TestLireMeta(unittest.TestCase):
+    def test_marques(self):
+        meta = check.lire_meta('title="run" run confirm="Efface l’heure, vraiment" files=a.py,b.py')
+        self.assertTrue(meta["run"])
+        self.assertFalse(meta["norun"])
+        self.assertEqual(meta["confirm"], "Efface l’heure, vraiment")
+        self.assertEqual(meta["files"], ["a.py", "b.py"])
+
+    def test_run_dans_un_titre_ignore(self):
+        self.assertFalse(check.lire_meta('title="run"')["run"])
+
+
+class TestBlocs(unittest.TestCase):
+    def test_blocs_et_lignes(self):
+        texte = "# T\n\n```python run\nprint(1)\n```\n\n````md\n```python run\nx\n```\n````\n"
+        blocs = check.blocs(texte)
+        self.assertEqual([(b.ligne, b.langage) for b in blocs], [(3, "python"), (7, "md")])
+        self.assertEqual(blocs[0].code, "print(1)\n")
+
+    def test_bloc_indente_dans_une_liste(self):
+        blocs = check.blocs("1. Lancer :\n\n   ```python run\n   print(1)\n   ```\n")
+        self.assertEqual(blocs[0].code, "print(1)\n")
+
+
+class TestVerifier(unittest.TestCase):
+    def test_bloc_valide(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier(bloc("run", "print(1)\n")), [])
+
+    def test_syntaxe_invalide_signalee(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc("run", "print(1\n"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("essai.md:3", erreurs[0])
+            self.assertIn("syntaxe", erreurs[0])
+
+    def test_bloc_sans_marque_ignore(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier(bloc("", "print(1\n")), [])
+
+    def test_norun_ignore(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier(bloc("run norun", "print(1\n")), [])
+
+    def test_fichier_annexe_absent_signale(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc("run files=.external/samples/pins.py,.external/samples/mesh.py", "x = 1\n"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn(".external/samples/mesh.py", erreurs[0])
+
+    def test_fichier_annexe_hors_external_signale(self):
+        with Racine() as r:
+            for chemin in ("docs/x.py", "/etc/passwd", ".external/../x.py"):
+                erreurs = r.verifier(bloc(f"run files={chemin}", "x = 1\n"))
+                self.assertEqual(len(erreurs), 1, chemin)
+
+    def test_fichiers_annexes_de_meme_nom_signales(self):
+        with Racine() as r:
+            r.ecrire(".external/autre/pins.py", "")
+            erreurs = r.verifier(bloc("run files=.external/samples/pins.py,.external/autre/pins.py", "x = 1\n"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("pins.py", erreurs[0])
+
+    def test_exemple_destructif_sans_confirm_signale(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc(f"file={LIB}/steami_config/examples/calibrate_magnetometer.py"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("confirm", erreurs[0])
+            self.assertIn("calibrate_magnetometer.py", erreurs[0])
+
+    def test_exemple_destructif_avec_confirm_ok(self):
+        with Racine() as r:
+            meta = f'file={LIB}/steami_config/examples/calibrate_magnetometer.py confirm="Écrit la calibration"'
+            self.assertEqual(r.verifier(bloc(meta)), [])
+
+    def test_exemple_destructif_sans_bouton_ok(self):
+        with Racine() as r:
+            meta = f"file={LIB}/steami_config/examples/calibrate_magnetometer.py norun"
+            self.assertEqual(r.verifier(bloc(meta)), [])
+            # Sans bouton (hts221 non gelé) : pas de confirm demandé.
+            self.assertEqual(r.verifier(bloc(f"file={LIB}/steami_config/examples/calibrate_temperature.py")), [])
+
+    def test_exemple_non_gele_sans_bouton_ok(self):
+        with Racine() as r:
+            for exemple in ("hts221/examples/humidity.py", "wsen-pads/examples/station_env.py"):
+                self.assertEqual(r.verifier(bloc(f"file={LIB}/{exemple}")), [], exemple)
+
+    def test_import_non_gele_dans_un_bloc_run_signale(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc(f"run file={LIB}/hts221/examples/humidity.py"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("hts221", erreurs[0])
+            erreurs = r.verifier(bloc("run", "import gc9a01.device\n"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("gc9a01", erreurs[0])
+
+    def test_exemple_gele_ok(self):
+        with Racine() as r:
+            self.assertEqual(r.verifier(bloc(f"file={LIB}/ism330dl/examples/basic_read.py")), [])
+
+    def test_fichier_inclus_absent_signale(self):
+        with Racine() as r:
+            erreurs = r.verifier(bloc(f"file={LIB}/ism330dl/examples/absent.py"))
+            self.assertEqual(len(erreurs), 1)
+            self.assertIn("absent.py", erreurs[0])
+
+    def test_modules_non_geles(self):
+        with Racine() as r:
+            self.assertEqual(check.modules_non_geles(r.racine / LIB), {"hts221", "gc9a01"})
+
+
+class TestMain(unittest.TestCase):
+    def test_bibliotheque_absente(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sortie = io.StringIO()
+            with contextlib.redirect_stdout(sortie), contextlib.redirect_stderr(sortie):
+                code = check.main(["--racine", tmp])
+            self.assertEqual(code, 1)
+            self.assertIn("npm run prebuild", sortie.getvalue())
+
+
+class TestValidateCodeExamples(unittest.TestCase):
+    def test_bloc_python_run_reconnu(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp) / "page.md"
+            page.write_text(
+                "```python run\nprint(1)\n```\n\n"
+                '```python title="essai.py"\nprint(2)\n```\n\n'
+                "```python file=.external/x.py\n\n```\n",
+                encoding="utf-8",
+            )
+            blocs = validate.extract_python_blocks(page)
+            self.assertEqual([code for code, _ in blocs], ["print(1)", "print(2)"])
+            self.assertEqual([ligne for _, ligne in blocs], [1, 5])
+
+
+if __name__ == "__main__":
+    unittest.main()

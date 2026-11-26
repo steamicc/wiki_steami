@@ -35,7 +35,11 @@ const config = {
           editUrl: 'https://github.com/steamicc/wiki_steami/edit/main/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
-          remarkPlugins: [require('./plugins/remark-code-file')],
+          // remark-micropython-run après remark-code-file : il lit les blocs file= remplis.
+          remarkPlugins: [
+            require('./plugins/remark-code-file'),
+            require('./plugins/remark-micropython-run'),
+          ],
         },
         blog: false,
         theme: {
