@@ -230,7 +230,8 @@ pas encore rédigés ; elle est vide à la fin.
 Workflow `suivre-exemples-arduino.yml`, sur le modèle de `suivre-paquet.yml`
 de l'image : une fois par jour et à la demande, lit la dernière release de
 `steamicc/arduino-steami` ; si elle est plus récente que la version épinglée
-et porte l'archive, il crée la branche `chore/exemples-arduino-<tag>`, met à
+et porte l'archive, il crée la branche `chore/exemples-arduino-<tag>` (points
+du tag remplacés par des tirets, ex. `v0-37-0`, règle des noms de branche), met à
 jour `exemples-arduino.json` (version et sha256) et ouvre la PR, puis lance
 le CI sur la branche par `workflow_dispatch` (une PR ouverte avec
 `GITHUB_TOKEN` ne déclenche pas `pull_request` ; l'organisation autorise déjà
