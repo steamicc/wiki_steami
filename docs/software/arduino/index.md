@@ -10,10 +10,10 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 La carte STeaMi se programme en C++ avec l'Arduino IDE. Elle fait partie des cartes officiellement prises en charge par le paquet **STM32 MCU based boards** de STMicroelectronics ([STM32duino](https://github.com/stm32duino/Arduino_Core_STM32)), sous le nom **STeaMi Board**.
 
 - La LED RGB, les boutons A, B et MENU, le buzzer et le port série s'utilisent avec les fonctions Arduino standard, sans bibliothèque.
-- Les autres composants (accéléromètre, magnétomètre, capteurs de distance, de pression, d'humidité et de lumière, D-PAD, jauge de batterie, écran) se pilotent avec des drivers. Ils sont réunis dans la bibliothèque **STeaMi** du gestionnaire de bibliothèques (développée dans [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)).
+- Les autres composants (accéléromètre, magnétomètre, capteurs de distance, de pression, d'humidité et de lumière, microphone, D-PAD, jauge de batterie, écran) se pilotent avec des drivers. Ils sont réunis dans la bibliothèque **STeaMi** du gestionnaire de bibliothèques (développée dans [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib)).
 
 :::info Support en cours de développement
-Le support Arduino couvre les composants des trois releases, V1a, V1b et V1c, sauf le microphone, qui n'est pas encore pris en charge. Pour le microphone, voir [MicroPython](../micropython/).
+Le support Arduino couvre les composants des trois releases, V1a, V1b et V1c. Le microphone est pris en charge depuis la version 0.39.0 de la bibliothèque STeaMi, avec la classe `SteamiIMP34DT05` : voir [Capteurs et écran](./capteurs#microphone) et [Exemples IMP34DT05](./exemples/imp34dt05).
 :::
 
 ## Par où commencer
@@ -22,7 +22,7 @@ Le support Arduino couvre les composants des trois releases, V1a, V1b et V1c, sa
    - Sans pouvoir installer de logiciel : [**Programmer sans installation**](./codespace), depuis un navigateur, avec un GitHub Codespace.
 2. [**Premiers programmes**](./premiers-programmes) : LED RGB, boutons et buzzer, sans bibliothèque.
 3. [**Bibliothèques STeaMi**](./bibliotheques) : installer la bibliothèque STeaMi depuis le gestionnaire de bibliothèques et comprendre le bus I²C interne.
-4. [**Capteurs et écran**](./capteurs) : pour chaque capteur, un programme minimal avec sa classe par fonction, le même sur V1a, V1b et V1c (la V1c n'a ni lumière, ni couleur, ni gestes), puis avec le driver du composant ; l'écran avec ses classes `SteamiDisplay` et `SteamiScreen` ou son driver ; le disque USB et le Bluetooth avec leur driver.
+4. [**Capteurs et écran**](./capteurs) : pour chaque capteur, un programme minimal avec sa classe par fonction, le même sur V1a, V1b et V1c (la V1c n'a ni lumière, ni couleur, ni gestes), puis avec le driver du composant ; l'écran avec ses classes `SteamiDisplay` et `SteamiScreen` ou son driver ; le microphone, le disque USB et le Bluetooth avec leur driver.
 5. [**Exemples à essayer**](./exemples/) : les exemples de la bibliothèque expliqués un par un et envoyés sur la carte depuis la page, sans rien installer. Pour commencer : [**Premier essai pas à pas**](./exemples/premier-essai).
 
 Pour aller plus loin :
@@ -48,7 +48,7 @@ Pour aller plus loin :
 | D-PAD                        | MCP23009E | bibliothèque STeaMi               |         5          |
 | Jauge de batterie            | BQ27441   | bibliothèque STeaMi               |         2          |
 | Bluetooth Low Energy         | STM32WB55 | bibliothèque STM32duinoBLE        |         6          |
-| Microphone                   | IM34DT05  | non pris en charge                |         —          |
+| Microphone                   | IMP34DT05 | bibliothèque STeaMi               |         4          |
 | Flash externe, configuration | DAPLink   | bibliothèque STeaMi               |         2          |
 
 ### Selon la release

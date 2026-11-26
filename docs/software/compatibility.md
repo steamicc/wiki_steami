@@ -15,7 +15,7 @@ Matrice détaillée du support de chaque composant de la carte STeaMi selon le l
 | Pression (WSEN-PADS, V1a et V1b)      |     ✅      |  🔶   |   ✅    |
 | Humidité/Temp (WSEN-HIDS, V1a et V1b) |     ✅      |  🔶   |   ✅    |
 | Lumière/Geste (APDS-9960, V1a et V1b) |     ✅      |  ✅   |   ✅    |
-| Microphone (IMP34DT05)                |     🔶      |  ✅   |   ❌    |
+| Microphone (IMP34DT05)                |     🔶      |  ✅   |   ✅    |
 | Écran OLED (SSD1327, V1a et V1b)      |     ✅      |  ✅   |   ✅    |
 | Boutons (MCP23009)                    |     ✅      |  ✅   |   ✅    |
 | Jauge batterie (BQ27441)              |     ✅      |  ❌   |   ✅    |

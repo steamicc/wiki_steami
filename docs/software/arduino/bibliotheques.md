@@ -72,7 +72,7 @@ Le tableau suivant donne, pour chaque composant de la carte, la bibliothèque qu
 | Fichier sur le disque USB (DAPLink)               | STeaMi                   | `<SteamiDaplinkFlash.h>` | V1a, V1b, V1c |
 | Configuration persistante (DAPLink)               | STeaMi                   | `<SteamiConfig.h>`       | V1a, V1b, V1c |
 | Bluetooth Low Energy (STM32WB55)                  | STM32duinoBLE            | `<STM32duinoBLE.h>`      | V1a, V1b, V1c |
-| Microphone (IM34DT05)                             | pas encore de driver     | —                        | V1a, V1b, V1c |
+| Microphone (IMP34DT05)                            | STeaMi                   | `<SteamiIMP34DT05.h>`    | V1a, V1b, V1c |
 
 STM32duinoBLE est proposée automatiquement à l'installation de STeaMi.
 
