@@ -48,7 +48,7 @@ Deux points comptent pour comprendre les exemples :
 
 **Comment ça marche** : c'est le squelette des quatre exemples. Dans `setup()`, `begin()` vérifie le capteur, `deviceId()` affiche son identité, et `setContinuous(WSEN_HIDS_ODR_1_HZ)` le met en mesure continue, une fois par seconde. Dans `loop()`, le programme demande toutes les 10 ms si une mesure est prête ; quand c'est le cas, il la lit avec `read()`, l'affiche, puis attend une seconde. Cette pause est calée sur le rythme du capteur : selon que la mesure suivante est déjà prête ou non, le test `dataReady()` est vrai tout de suite ou après quelques tours de 10 ms. La console reçoit ainsi une ligne par seconde environ.
 
-`read()` lit les deux grandeurs l'une après l'autre, juste après la même attente : elles viennent en pratique de la même mesure. `temperature()` puis `humidity()` referaient chacune une lecture complète des deux grandeurs (et, capteur en veille, chacune sa propre mesure).
+`read()` lit les deux grandeurs l'une après l'autre, juste après la même attente : elles viennent en pratique de la même mesure. `temperature()` puis `humidity()` referaient chacune une lecture complète des deux grandeurs (capteur en veille, seul le premier appel le réveille et attend une mesure ; le second trouve le capteur déjà en marche et lit ses registres tout de suite).
 
 <EssayerExemple id="WSEN-HIDS/BasicReader" />
 
