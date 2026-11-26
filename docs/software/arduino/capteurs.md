@@ -18,7 +18,7 @@ Chaque section de capteur commence par la **classe par fonction**, comme `Steami
 
 Une seconde partie, nommée d'après le composant (par exemple **Avec le driver ISM330DL**), sert à ce que la classe n'offre pas, comme la proximité de l'APDS-9960 ou un réglage du composant. Les composants dépendent de la release de la carte (voir [Révisions](/docs/hardware/revisions)) : quand ils diffèrent, ces programmes sont présentés en onglets **V1a / V1b / V1c**. Un driver créé dans le programme ne reçoit pas les calibrations de la zone de configuration du DAPLink : pour une mesure calibrée, garder la classe (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)). La [forme commune des classes](./carte#la-forme-commune), leurs [messages](./carte#les-messages) et les [calibrations](./carte#calibrations) sont décrits dans [Reconnaître la carte](./carte).
 
-L'écran, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
+L'écran a aussi sa classe, `SteamiDisplay`, qui dessine sur l'écran de la release (version 0.37.0 de la bibliothèque). Le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. La page [Exemples à essayer](./exemples/) les reprend un par un, avec un bouton pour les envoyer sur la carte ; chaque section ci-dessous renvoie aux exemples de son composant. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD** (voir [Exemples STEAMI_BOARD](./exemples/steami-board)).
 
@@ -621,6 +621,40 @@ La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a �
 </ReleaseTabs>
 
 ## Écran
+
+```cpp
+#include <SteamiDisplay.h>
+
+SteamiDisplay ecran;
+
+void setup() {
+  Serial.begin(115200);
+  if (!ecran.begin()) {                    // en premier : l'image prend beaucoup de mémoire
+    Serial.print("Pas d'écran : ");
+    Serial.println(ecran.error());
+    return;
+  }
+  const int16_t cx = ecran.centerX(), cy = ecran.centerY();
+  ecran.clear();                           // fond noir
+  ecran.circle(cx, cy, ecran.radius() - 1, STEAMI_GREEN);
+  ecran.text("Bonjour !", cx - ecran.textWidth("Bonjour !") / 2, cy - 4);
+  ecran.show();                            // envoie l'image à l'écran
+}
+
+void loop() {}
+```
+
+`SteamiDisplay` demande la version 0.37.0 de la bibliothèque. `begin()` reconnaît la release, comme les autres classes, puis démarre son écran : le SSD1327 en niveaux de gris (128 × 128) sur une V1a ou une V1b, le GC9A01 en couleur (240 × 240) sur une V1c. Le même programme dessine la même image sur les deux : `centerX()`, `centerY()` et `radius()` donnent le centre et le rayon de l'écran rond, `width()` et `height()` sa taille en pixels, `(0, 0)` étant le coin en haut à gauche.
+
+Le dessin se fait dans une image en mémoire (`clear`, `pixel`, `line`, `rect`, `circle`, `triangle`, `arc`, `text`), et rien n'apparaît avant l'appel à `show()`. Ce qui dépasse de l'écran est coupé, sans erreur. Les couleurs sont des constantes `SteamiRgb` (`STEAMI_WHITE`, `STEAMI_GREEN`, `STEAMI_RED`…) : en couleur sur une V1c, elles deviennent l'un des 16 niveaux de gris sur une V1a ou une V1b. `text()` écrit en caractères de 8 × 8 pixels, agrandis par un dernier argument facultatif ; les lettres accentuées s'affichent sans accent.
+
+Si `begin()` échoue, la bibliothèque écrit un message codé (`E30` quand la release reste inconnue, `E31` quand l'image de la V1c, 115 200 octets d'un seul bloc, ne trouve pas sa place en mémoire, voir [Les messages](./carte#les-messages)), `error()` vaut `unknown board` ou `no memory`, et les fonctions de dessin ne font plus rien. C'est pourquoi `begin()` s'appelle au tout début de `setup()`, tant que la mémoire est encore libre.
+
+L'exemple **STeaMi → STEAMI_BOARD → Drawing** dessine une galerie de formes avec cette classe : voir [Drawing](./exemples/steami-board#drawing).
+
+### Avec les drivers SSD1327 et GC9A01
+
+Le driver de l'écran de chaque release offre ce que la classe n'a pas, comme les 16 niveaux de gris en valeurs brutes ou les couleurs RGB565 du GC9A01. Il ne marche que sur une carte qui a cet écran.
 
 <ReleaseTabs>
 <Release releases="v1a v1b">
