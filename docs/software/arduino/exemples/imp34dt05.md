@@ -79,7 +79,7 @@ Les trois valeurs de la ligne se déduisent l'une de l'autre. Avec une valeur ef
 
 ## ClapDetector {#clapdetector}
 
-**Ce qu'on observe** : la console écrit `Clap your hands near the board.` Chaque claquement de mains près de la carte allume ou éteint la LED RGB en bleu, et la console écrit le numéro du claquement, la valeur du plus fort échantillon (`peak`) et le bruit de fond mesuré juste avant (`background RMS`), sous la forme `Clap #1  peak …  background RMS …`. Une voix ou un bruit continu ne déclenche en général rien, une fois le bruit de fond installé ; le début brusque d'un son fort tout près peut compter, comme un claquement de doigts ou un coup sur la table.
+**Ce qu'on observe** : la console écrit `Clap your hands near the board.` Chaque claquement de mains près de la carte allume ou éteint la LED RGB en bleu, et la console écrit le numéro du claquement, la valeur du plus fort échantillon (`peak`) et le bruit de fond mesuré juste avant (`background RMS`), sous la forme `Clap #1  peak …  background RMS …`. Sans claquement, rien d'autre ne s'affiche après le premier message. Une voix ou un bruit continu ne déclenche en général rien, une fois le bruit de fond installé ; le début brusque d'un son fort tout près peut compter, comme un claquement de doigts ou un coup sur la table.
 
 ```cpp file=.external/arduino-steami/examples/IM34DT05/ClapDetector/ClapDetector.ino
 
@@ -98,7 +98,7 @@ Après un claquement, le programme ignore le son pendant 300 ms (`HOLD_OFF_MS`) 
 
 ## FrequencyMeter {#frequencymeter}
 
-**Ce qu'on observe** : la console écrit `Make a sound: whistle, sing or play a note.`, puis trois ou quatre lignes par seconde. Quand un son assez fort arrive, une ligne donne sa fréquence dominante, la note la plus proche, l'écart avec cette note et le niveau, comme un accordeur. Pour un son de 440 Hz, le la du diapason, la ligne commence par `440.0 Hz  A4 +0 cents` ; pour un son de 3000 Hz, par `3000.0 Hz  F#7 +23 cents`. Sous −50 dBFS, la ligne est `(too quiet)`. Dans une pièce ordinaire, le bruit de fond dépasse souvent ce seuil : sans son net, la console donne alors des fréquences qui changent d'une ligne à l'autre. Siffler, chanter une note, ou en jouer une avec un instrument ou une application de téléphone, près de la carte.
+**Ce qu'on observe** : la console écrit `Make a sound: whistle, sing or play a note.`, puis trois ou quatre lignes par seconde. Quand un son assez fort arrive, une ligne donne sa fréquence dominante, la note la plus proche, l'écart avec cette note et le niveau, comme un accordeur. Pour un son de 440 Hz, le la du diapason, la ligne commence par `440.0 Hz  A4 +0 cents` ; pour un son de 3000 Hz, par `3000.0 Hz  F#7 +23 cents`. Sous −50 dBFS, la ligne est `(too quiet)`. Dans une pièce ordinaire, le bruit de fond dépasse souvent ce seuil : sans son net, la console donne alors des fréquences qui changent d'une ligne à l'autre. Sur une V1c posée sur un bureau, sans son, la console alternait par exemple `(too quiet)` et des lignes comme `29.8 Hz  A#0 +40 cents  (-50 dBFS)` : des fréquences basses du bruit de fond, entre 15 et 50 Hz, sans signification. Siffler, chanter une note, ou en jouer une avec un instrument ou une application de téléphone, près de la carte.
 
 ```cpp file=.external/arduino-steami/examples/IM34DT05/FrequencyMeter/FrequencyMeter.ino
 
