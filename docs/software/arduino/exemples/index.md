@@ -18,7 +18,7 @@ Il n'y a rien à installer ni à compiler : chaque exemple est déjà compilé, 
 
 ## Essayer un exemple
 
-Avec **Chrome** ou **Edge** sur un ordinateur :
+Pour un premier essai, le guide [Premier essai pas à pas](./premier-essai) montre chaque étape en images. En résumé, avec **Chrome** ou **Edge** sur un ordinateur :
 
 1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
 2. Sous un exemple, cliquer sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte ne s'autorise qu'une fois par page : tous les exemples de la page s'essaient ensuite sans recommencer. Quand on passe à une page sans exemple à essayer, la carte est libérée : un Codespace ou l'Arduino IDE peut alors s'en servir.
