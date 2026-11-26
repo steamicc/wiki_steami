@@ -714,6 +714,8 @@ La zone de configuration du DAPLink (nom de la carte, calibrations des capteurs)
 
 Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, proposée automatiquement à l'installation de STeaMi. Les exemples propres à la STeaMi sont dans **Fichier → Exemples → STeaMi → BLE** : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
 
+Le Bluetooth demande une pile radio, installée à part sur le second cœur du STM32WB55. Si `BLE.begin()` renvoie `0`, vérifier la pile et l'installer au besoin : voir [Pile radio Bluetooth](../pile-radio).
+
 ## Composants non pris en charge
 
 Le microphone (IM34DT05) n'a pas encore de driver Arduino. Il est utilisable en [MicroPython](../micropython/).
