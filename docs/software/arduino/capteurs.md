@@ -784,7 +784,7 @@ void loop() {
 }
 ```
 
-Le driver mesure le niveau sonore sur une **fenêtre** de temps, 100 ms par défaut, réglée ici à 200 ms. `levelReady()` indique qu'une nouvelle fenêtre est terminée, et `levelDbfs()` donne son niveau en dBFS : 0 dBFS correspond au son le plus fort que le microphone peut coder, et une pièce calme donne autour de −60 dBFS. `level()` donne d'un coup la valeur efficace (`rms`), le plus fort échantillon (`peak`), le niveau en dBFS (`dbfs`) et une estimation en dB SPL (`dbSpl`), non étalonnée. Avant la fin de la première fenêtre, ces valeurs valent `NAN`. `dominantFrequencyHz()` enregistre 32 ms de son et renvoie sa fréquence la plus forte, en hertz.
+Le driver mesure le niveau sonore sur une **fenêtre** de temps, 100 ms par défaut, réglée ici à 200 ms. `levelReady()` indique qu'une nouvelle fenêtre est terminée, et `levelDbfs()` donne son niveau en dBFS : 0 dBFS correspond au son le plus fort que le microphone peut coder, et une pièce calme donne autour de −60 dBFS. `level()` donne d'un coup la valeur efficace (`rms`), le plus fort échantillon (`peak`), le niveau en dBFS (`dbfs`) et une estimation en dB SPL (`dbSpl`), non étalonnée. Avant la fin de la première fenêtre, `rms`, `dbfs` et `dbSpl` valent `NAN`, et `peak` vaut 0. `dominantFrequencyHz()` enregistre 32 ms de son et renvoie sa fréquence la plus forte, en hertz.
 
 Dans l'Arduino IDE, les exemples sont rangés dans **STeaMi → IM34DT05**, sans le P, pour des raisons historiques : un indicateur de niveau sonore (**SoundLevel**), un détecteur de claquements de mains qui allume ou éteint la LED (**ClapDetector**), un accordeur (**FrequencyMeter**) et un test où la carte écoute son propre buzzer (**BuzzerSelfTest**).
 

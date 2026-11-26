@@ -42,7 +42,7 @@ Les quatre exemples n'utilisent que quelques fonctions du driver :
 - `begin()` configure SAI1 et le DMA, démarre l'horloge et attend les premiers échantillons, en 50 ms environ. L'interface lit deux microphones par fil de données, un sur chaque front de l'horloge : `begin()` cherche lequel des deux porte celui de la carte. Si aucun flot de bits n'arrive, ou si la carte n'est pas une STeaMi, `begin()` renvoie `false` et les exemples écrivent `Microphone not detected - check that this is a STeaMi board.` puis s'arrêtent.
 - `setLevelWindowMs(ms)` règle la durée de la **fenêtre** sur laquelle le driver mesure le niveau sonore, 100 ms par défaut : une fenêtre courte (10 ms) attrape un claquement de mains, une fenêtre longue (200 ms ou plus) donne un niveau plus stable.
 - `levelReady()` indique qu'une fenêtre s'est terminée depuis la dernière lecture du niveau.
-- `level()` renvoie les valeurs de la dernière fenêtre terminée, ensemble : `rms`, `peak`, `dbfs` et `dbSpl`. `levelDbfs()` n'en renvoie qu'une. Avant la fin de la première fenêtre, ces valeurs valent `NAN`.
+- `level()` renvoie les valeurs de la dernière fenêtre terminée, ensemble : `rms`, `peak`, `dbfs` et `dbSpl`. `levelDbfs()` n'en renvoie qu'une. Avant la fin de la première fenêtre, `rms`, `dbfs` et `dbSpl` valent `NAN`, et `peak` vaut 0.
 - `dominantFrequencyHz()` enregistre 32 ms de son et renvoie sa fréquence la plus forte, en hertz.
 
 Le niveau sonore se donne de trois façons :
@@ -53,7 +53,7 @@ Le niveau sonore se donne de trois façons :
 
 Au volume par défaut, un son de 94 dB SPL donne environ −6 dBFS, et le signal converti sature au-delà de 100 dB SPL environ : un son très fort tout près du microphone, comme le buzzer de la carte ou un claquement de mains à quelques centimètres, atteint le maximum des échantillons.
 
-La conversion a un coût : elle tourne dans l'interruption, chaque milliseconde, tant que le microphone est en marche. Mesurée sur une V1c, elle prend **16,8 % du processeur** à 32 MHz, la fréquence du STM32WB55 sur la STeaMi. L'interruption a la priorité la plus basse : `tone()`, `Serial` et `Wire` passent avant elle. Un programme qui fait un gros travail en même temps, comme dessiner sur l'écran, est donc un peu ralenti, et un programme qui bloque les interruptions plus d'une milliseconde perd du son. Le driver occupe aussi SAI1 et le canal 1 du DMA1 : une autre bibliothèque qui s'en sert ne peut pas fonctionner en même temps que le microphone.
+La conversion a un coût : elle tourne dans l'interruption, chaque milliseconde, tant que le microphone est en marche. Mesurée sur une V1c, elle prend **16,8 % du processeur** à 32 MHz, la fréquence à laquelle le paquet STM32duino fait tourner le processeur de la STeaMi, et un peu plus en comptant l'entrée dans l'interruption (environ 18,6 %). L'interruption a la priorité la plus basse : `tone()`, `Serial` et `Wire` passent avant elle. Un programme qui fait un gros travail en même temps, comme dessiner sur l'écran, est donc un peu ralenti, et un programme qui bloque les interruptions plus d'une milliseconde perd du son. Le driver occupe aussi SAI1 et le canal 1 du DMA1 : une autre bibliothèque qui s'en sert ne peut pas fonctionner en même temps que le microphone.
 
 ## SoundLevel {#soundlevel}
 
@@ -79,7 +79,7 @@ Les trois valeurs de la ligne se déduisent l'une de l'autre. Avec une valeur ef
 
 ## ClapDetector {#clapdetector}
 
-**Ce qu'on observe** : la console écrit `Clap your hands near the board.` Chaque claquement de mains près de la carte allume ou éteint la LED RGB en bleu, et la console écrit le numéro du claquement, la valeur du plus fort échantillon (`peak`) et le bruit de fond mesuré juste avant (`background RMS`), sous la forme `Clap #1  peak …  background RMS …`. Une voix ou un bruit continu, même fort, ne déclenche rien ; un claquement de doigts tout près ou un coup sur la table peut compter aussi.
+**Ce qu'on observe** : la console écrit `Clap your hands near the board.` Chaque claquement de mains près de la carte allume ou éteint la LED RGB en bleu, et la console écrit le numéro du claquement, la valeur du plus fort échantillon (`peak`) et le bruit de fond mesuré juste avant (`background RMS`), sous la forme `Clap #1  peak …  background RMS …`. Une voix ou un bruit continu ne déclenche en général rien, une fois le bruit de fond installé ; le début brusque d'un son fort tout près peut compter, comme un claquement de doigts ou un coup sur la table.
 
 ```cpp file=.external/arduino-steami/examples/IM34DT05/ClapDetector/ClapDetector.ino
 
@@ -98,7 +98,7 @@ Après un claquement, le programme ignore le son pendant 300 ms (`HOLD_OFF_MS`) 
 
 ## FrequencyMeter {#frequencymeter}
 
-**Ce qu'on observe** : la console écrit `Make a sound: whistle, sing or play a note.`, puis trois ou quatre lignes par seconde. Quand un son assez fort arrive, une ligne donne sa fréquence dominante, la note la plus proche, l'écart avec cette note et le niveau, comme un accordeur. Pour un son de 440 Hz, le la du diapason, la ligne commence par `440.0 Hz  A4 +0 cents` ; pour un son de 3000 Hz, par `3000.0 Hz  F#7 +23 cents`. Sous −50 dBFS, la ligne est `(too quiet)`. Siffler, chanter une note, ou en jouer une avec un instrument ou une application de téléphone, près de la carte.
+**Ce qu'on observe** : la console écrit `Make a sound: whistle, sing or play a note.`, puis trois ou quatre lignes par seconde. Quand un son assez fort arrive, une ligne donne sa fréquence dominante, la note la plus proche, l'écart avec cette note et le niveau, comme un accordeur. Pour un son de 440 Hz, le la du diapason, la ligne commence par `440.0 Hz  A4 +0 cents` ; pour un son de 3000 Hz, par `3000.0 Hz  F#7 +23 cents`. Sous −50 dBFS, la ligne est `(too quiet)`. Dans une pièce ordinaire, le bruit de fond dépasse souvent ce seuil : sans son net, la console donne alors des fréquences qui changent d'une ligne à l'autre. Siffler, chanter une note, ou en jouer une avec un instrument ou une application de téléphone, près de la carte.
 
 ```cpp file=.external/arduino-steami/examples/IM34DT05/FrequencyMeter/FrequencyMeter.ino
 
@@ -106,11 +106,11 @@ Après un claquement, le programme ignore le son pendant 300 ms (`HOLD_OFF_MS`) 
 
 **Comment ça marche** : `dominantFrequencyHz()` enregistre 512 échantillons, soit 32 ms de son, puis cherche la fréquence la plus forte avec une **transformée de Fourier rapide** (FFT). La FFT décompose le son en une somme de sinusoïdes et donne l'intensité de chacune, par pas de 16 000 / 512 = 31,25 Hz. Avant le calcul, une fenêtre de Hann adoucit le début et la fin de l'enregistrement, pour que la coupure ne crée pas de fausses fréquences ; après, le driver interpole autour du pic le plus fort, ce qui donne la fréquence à 1 Hz près environ. La fonction bloque le programme pendant 35 ms environ.
 
-`levelDbfs()` donne ensuite le niveau de la dernière fenêtre de 50 ms (`setLevelWindowMs(50)`), presque le même moment que l'enregistrement. En dessous de −50 dBFS (`SILENCE_DBFS`), la fréquence « la plus forte » n'est que celle du bruit, et le programme écrit `(too quiet)`. Dans une pièce bruyante (ventilation, conversations), le bruit de fond peut dépasser ce seuil : la fréquence affichée saute alors d'une ligne à l'autre sans signification.
+`levelDbfs()` donne ensuite le niveau de la dernière fenêtre de 50 ms (`setLevelWindowMs(50)`), presque le même moment que l'enregistrement. En dessous de −50 dBFS (`SILENCE_DBFS`), la fréquence « la plus forte » n'est que celle du bruit, et le programme écrit `(too quiet)`. Dans une pièce ordinaire, le bruit de fond est vers −40 dBFS (voir [SoundLevel](#soundlevel)) et dépasse souvent ce seuil : la fréquence affichée saute alors d'une ligne à l'autre sans signification. Pour n'afficher que les sons nets, relever `SILENCE_DBFS`, par exemple à −30.
 
 `printNote()` convertit la fréquence en note de la gamme tempérée : le numéro MIDI `69 + 12 × log2(f / 440)` compte les demi-tons depuis le la à 440 Hz (numéro 69). Le numéro entier le plus proche donne le nom de la note et son octave (`A4` pour le la du diapason, `C4` pour le do du milieu du piano) ; l'écart restant, multiplié par 100, donne l'écart en **cents**, le centième de demi-ton. Un écart de quelques cents ne s'entend presque pas.
 
-Pour essayer avec le buzzer de la carte, rester entre 2000 et 4000 Hz : en dessous, l'appareil affiche une harmonique du son plutôt que le son lui-même (voir [BuzzerSelfTest](#buzzerselftest)). Un instrument, une voix ou une application de téléphone n'ont pas ce défaut.
+Pour essayer avec le buzzer de la carte, ajouter `tone(SPEAKER, 3000);` à la fin de `setup()` (voir [Jouer un son](../premiers-programmes#jouer-un-son)), en restant entre 2000 et 4000 Hz : en dessous, le programme affiche une harmonique du son plutôt que le son lui-même (voir [BuzzerSelfTest](#buzzerselftest)). Un instrument, une voix ou une application de téléphone n'ont pas ce défaut.
 
 <EssayerExemple id="IM34DT05/FrequencyMeter" />
 
@@ -119,6 +119,7 @@ Pour essayer avec le buzzer de la carte, rester entre 2000 et 4000 Hz : en desso
 **Ce qu'on observe** : la carte s'écoute elle-même. La console écrit le niveau du bruit de fond (`Background level:`), puis le buzzer joue cinq sons, de 2000 à 4000 Hz, et pour chacun la console écrit la fréquence jouée, la fréquence entendue par le microphone, le niveau et le verdict. Sur une V1c, par exemple :
 
 ```text
+…
 Played 2500 Hz, heard 2499.0 Hz (1 dBFS): PASS
 …
 Result: 5/5 tones recognised - SELF-TEST PASSED
