@@ -10,15 +10,15 @@ import TOCInline from '@theme/TOCInline';
 
 # Exemples STEAMI_BOARD : classes par fonction
 
-Les exemples STEAMI_BOARD ne portent pas sur un composant : ils montrent les **classes par fonction** de la bibliothèque STeaMi, comme `SteamiTemperature` ou `SteamiCompass`. Chaque classe mesure une grandeur (température, distance, cap…) et choisit elle-même le composant qui la mesure sur la carte : le même programme tourne sur une V1a, une V1b ou une V1c.
+Les exemples STEAMI_BOARD ne portent pas sur un composant : ils montrent les **classes par fonction** de la bibliothèque STeaMi, comme `SteamiTemperature` ou `SteamiCompass`. Chaque classe mesure une grandeur (température, distance, cap…), ou dessine sur l'écran pour `SteamiDisplay`, et choisit elle-même le composant qui la sert sur la carte : le même programme tourne sur une V1a, une V1b ou une V1c.
 
 Sur cette page :
 
 <TOCInline toc={toc} maxHeadingLevel={2} />
 
-Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DLC (mouvement), que la bibliothèque et la console appellent `ISM330DL`, le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, prévu sur la V1a et la V1b et absent de la V1c : sur une V1c, ils montrent comment une classe signale une fonction absente. Les onze autres exemples marchent sur toutes les cartes.
+Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DLC (mouvement), que la bibliothèque et la console appellent `ISM330DL`, le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. L'écran change lui aussi : un OLED de 128 × 128 pixels en niveaux de gris (SSD1327) sur la V1a et la V1b, un TFT couleur de 240 × 240 pixels (GC9A01) sur la V1c. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, prévu sur la V1a et la V1b et absent de la V1c : sur une V1c, ils montrent comment une classe signale une fonction absente. Les douze autres exemples marchent sur toutes les cartes.
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** de l'Arduino IDE. Ils écrivent leurs messages en anglais et n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs) détaille chaque classe et [Reconnaître la carte](../carte) ce qu'elles ont en commun ; cette page-ci explique ce que montre chaque exemple. Les pages d'exemples par composant, comme [VL53L1X](./vl53l1x), utilisent au contraire directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Tous, sauf **Drawing**, laissent l'écran de côté : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs) détaille chaque classe et [Reconnaître la carte](../carte) ce qu'elles ont en commun ; cette page-ci explique ce que montre chaque exemple. Les pages d'exemples par composant, comme [VL53L1X](./vl53l1x), utilisent au contraire directement le driver du composant.
 
 ## Le driver en bref
 
@@ -31,6 +31,8 @@ Ces exemples n'appellent pas le driver d'un composant : ils passent par une clas
 - Les lectures (`read()`, `heading()`, `percent()`…) renvoient alors une valeur d'absence : `NAN` (affiché `nan`), `-1`, `0` ou `false` selon la classe (voir [Quand une fonction manque](../carte#quand-une-fonction-manque)). Une fonction qui a échoué n'est pas réessayée avant le redémarrage de la carte.
 
 Chaque appel de lecture interroge le composant : deux appels à la suite, comme `read()` puis `strength()`, font deux mesures distinctes. Les lignes de démarrage ne s'écrivent qu'une fois : pour les relire, appuyer sur le bouton Reset de la carte.
+
+`SteamiDisplay`, la classe de l'écran, suit le même schéma avec deux différences. Elle n'a pas de `chip()`. Et son `error()` vaut `unknown board` quand la release reste inconnue, `no memory` quand l'image de l'écran ne tient pas en mémoire ; après un échec, ses fonctions de dessin et `show()` ne font rien. L'exemple [Drawing](#drawing) la détaille.
 
 ## Temperature {#temperature}
 
@@ -224,9 +226,43 @@ Le driver connaît aussi `NEAR` et `FAR`, que cite le commentaire en tête de l'
 
 <EssayerExemple id="STEAMI_BOARD/Gesture" />
 
+## Drawing {#drawing}
+
+**Ce qu'on observe** : l'écran affiche une galerie de formes, centrée sur la partie ronde de la carte. Un cercle gris foncé suit le bord de l'écran, et une jauge en arc de cercle, ouverte vers le bas, est remplie de vert sur sa moitié gauche. En haut, `STeaMi` s'écrit en blanc et, juste en dessous, `20°C e` en jaune. Au milieu, un rectangle bleu dans un cadre gris clair, à gauche, fait face à un disque rouge, à droite. En bas, un trait gris horizontal passe au-dessus d'un triangle jaune pointe en haut. Sur une V1c, ces formes sont en couleur ; sur une V1a ou une V1b, la même scène s'affiche en niveaux de gris, à la taille de l'écran.
+
+L'image ne change plus ensuite. Après la ligne de la release, par exemple `[STeaMi] Board V1c (read from the board config, revision 131)`, la console écrit toutes les deux secondes le temps mis à envoyer l'image à l'écran, en microsecondes : `show(): <durée> us`.
+
+```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/Drawing/Drawing.ino
+
+```
+
+**Comment ça marche** : `SteamiDisplay screen;` crée la classe de l'écran, sans toucher au matériel. `screen.begin()` reconnaît la release, comme les autres classes, puis choisit l'écran de cette release : le GC9A01 sur une V1c (voir les [exemples GC9A01](./gc9a01)), le SSD1327 sur une V1a ou une V1b (voir les [exemples SSD1327](./ssd1327)). Il démarre l'écran avec une image en mémoire vive, sur laquelle se fait le dessin : 115 200 octets d'un seul bloc sur une V1c, 8 192 octets sur une V1a ou une V1b. C'est pourquoi l'exemple appelle `screen.begin()` au tout début de `setup()`, tant que la mémoire est encore libre.
+
+Les coordonnées sont les pixels de l'écran : `(0, 0)` en haut à gauche, `x` vers la droite, `y` vers le bas. `centerX()`, `centerY()` et `radius()` donnent le centre et le rayon de l'écran rond : `(120, 120)` et 120 sur une V1c, `(64, 64)` et 64 sur une V1a ou une V1b. Le programme place chaque forme à partir du centre, avec des fractions du rayon `r` : le même code dessine la même scène sur les deux écrans. Le texte suit la même règle : `s` vaut 2 sur l'écran de 240 pixels (des caractères de 16 × 16 pixels) et 1 sur celui de 128 pixels (8 × 8 pixels). `textWidth()` donne la largeur d'un texte en pixels, en comptant les caractères et non les octets : `°` et `é` occupent deux octets chacun en UTF-8, mais un seul caractère. Le programme s'en sert pour centrer les deux textes. La police n'a pas de lettres accentuées : `é` s'affiche `e`, alors que `°` a son propre dessin.
+
+Les fonctions de dessin :
+
+- `clear()` remplit l'image de noir.
+- `circle(x, y, rayon, couleur)` trace un cercle ; avec `true` en dernier argument, un disque plein.
+- `rect(x, y, w, h, couleur)` trace le contour d'un rectangle de `w` pixels de large et `h` de haut, dont le coin en haut à gauche est `(x, y)` ; avec `true`, un rectangle plein.
+- `triangle(x0, y0, x1, y1, x2, y2, couleur, true)` remplit le triangle de ces trois sommets.
+- `line(x1, y1, x2, y2, couleur)` trace un segment.
+- `arc(x, y, rayon, début, étendue, couleur, épaisseur)` trace un morceau d'anneau. Les angles sont en degrés : 0 en haut, comme midi sur une montre, en tournant dans le sens des aiguilles. `rayon` est le bord extérieur, et l'épaisseur va vers l'intérieur. La jauge part de 225°, en bas à gauche : le fond, gris très foncé, s'étend sur 270° jusqu'en bas à droite ; le vert, sur 135°, s'arrête en haut.
+- `text(texte, x, y, couleur, s)` écrit un texte dont le coin en haut à gauche du premier caractère est `(x, y)`, agrandi `s` fois.
+
+Ce qui dépasse de l'écran est coupé, sans erreur. Les couleurs sont des constantes `SteamiRgb` : `STEAMI_WHITE`, `STEAMI_GREEN`, `STEAMI_RED`… Sur une V1c, elles s'affichent telles quelles. Sur une V1a ou une V1b, chacune devient l'un des 16 niveaux de gris, d'après sa luminosité : le jaune et le vert, clairs, ressortent plus que le rouge et le bleu.
+
+Comme avec les drivers des écrans, le dessin se fait dans l'image en mémoire, et rien n'apparaît avant `show()`, qui l'envoie en entier. `setup()` dessine la scène une seule fois ; `loop()` renvoie la même image toutes les deux secondes, seulement pour mesurer `show()` avec `micros()`. L'envoi prend au moins 58 ms environ sur une V1c et 8,2 ms sur une V1a ou une V1b, dont l'image est 14 fois plus petite.
+
+Si `begin()` échoue, la bibliothèque écrit un message codé, puis l'exemple écrit `No screen:` suivi du texte de `error()`, et plus rien ensuite. Quand la release reste inconnue (message `E01`), le message est `[STeaMi] SteamiDisplay: cannot tell if this board is a V1a/V1b or a V1c. Add #define STEAMI_BOARD_V1C (or V1B) before #include <STeaMi.h>. (E30)`, puis `No screen: unknown board` : forcer la release (voir [Forcer la release](../carte#forcer-la-release)). Quand l'image de la V1c ne trouve pas 115 200 octets d'un seul bloc, le message est `E31`, puis `No screen: no memory`. Dans les deux cas, `loop()` teste `isAvailable()` et ne fait rien.
+
+Cet exemple marche sur les trois releases. Les exemples GC9A01 et SSD1327, eux, appellent directement le driver de leur écran et ne marchent que sur leur release.
+
+<EssayerExemple id="STEAMI_BOARD/Drawing" />
+
 ## BoardInfo {#boardinfo}
 
-**Ce qu'on observe** : la console écrit une seule fois, au démarrage, la release reconnue et l'état de chaque composant I²C de cette release. Sur une V1c, par exemple :
+**Ce qu'on observe** : la console écrit une seule fois, au démarrage, la release reconnue, l'état de chaque composant I²C de cette release, puis celui de son écran. Sur une V1c, par exemple :
 
 ```text
 [STeaMi] Board V1c (read from the board config, revision 131)
@@ -236,9 +272,10 @@ LIS2MDL 0x1E OK
 VL53L1X 0x29 OK
 BQ27441 0x55 OK
 MCP23009E 0x20 OK
+GC9A01 screen not started
 ```
 
-La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de configuration du DAPLink ne donne pas de code de révision. Sans batterie, la jauge affiche `BQ27441 0x55 not responding`. Sur une V1a ou une V1b, la liste donne le WSEN-HIDS (`0x5F`), le WSEN-PADS (`0x5D`) et l'APDS-9960 (`0x39`) à la place du BME280. Le programme ne fait ensuite plus rien.
+La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de configuration du DAPLink ne donne pas de code de révision. Sans batterie, la jauge affiche `BQ27441 0x55 not responding`. Sur une V1a ou une V1b, la liste donne le WSEN-HIDS (`0x5F`), le WSEN-PADS (`0x5D`) et l'APDS-9960 (`0x39`) à la place du BME280, et la dernière ligne devient `SSD1327 screen not started`. Le programme ne fait ensuite plus rien.
 
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/BoardInfo/BoardInfo.ino
 
@@ -246,7 +283,7 @@ La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de confi
 
 **Comment ça marche** : cet exemple utilise directement l'objet `Steami`, sans classe par fonction. `Steami.begin()` reconnaît la release, dans cet ordre : une release forcée par le programme, puis le code de révision de la zone de configuration du DAPLink, puis les capteurs présents sur le bus I²C interne (le BME280 désigne une V1c ; le WSEN-HIDS, le WSEN-PADS ou l'APDS-9960 une V1a ou une V1b, sans pouvoir les distinguer : la release s'écrit alors `V1a/V1b`). La première ligne dit d'où vient la réponse.
 
-La boucle parcourt ensuite toutes les fonctions de la carte, sauf l'écran. Pour chacune, `steamiRoute()` donne les composants qui peuvent la servir sur cette release, et `Steami.claim()` crée et démarre le driver de chacun, en retenant s'il répond. `Steami.printInfo()` liste enfin les composants I²C de la release, avec leur adresse et leur état : `OK` ou `not responding`. Sans cette boucle, un composant qu'aucune classe n'a encore demandé s'afficherait `not tried` (voir [Afficher la carte détectée](../carte#afficher-la-carte-détectée)). Quand la release reste inconnue (message `E01`), la boucle essaie les neuf composants possibles, et la liste les donne tous. `claim()` n'applique pas les calibrations : `, calibrated` n'apparaît jamais dans cet exemple.
+La boucle parcourt ensuite toutes les fonctions de la carte, sauf l'écran. Pour chacune, `steamiRoute()` donne les composants qui peuvent la servir sur cette release, et `Steami.claim()` crée et démarre le driver de chacun, en retenant s'il répond. `Steami.printInfo()` liste enfin les composants I²C de la release, avec leur adresse et leur état : `OK` ou `not responding`. Sans cette boucle, un composant qu'aucune classe n'a encore demandé s'afficherait `not tried` (voir [Afficher la carte détectée](../carte#afficher-la-carte-détectée)). La dernière ligne donne l'écran de la release et son état : `not started`, puisque l'exemple ne s'en sert pas ; après un `begin()` de `SteamiDisplay`, comme dans [Drawing](#drawing), elle afficherait `OK`. Quand la release reste inconnue (message `E01`), la boucle essaie les neuf composants possibles, la liste les donne tous, et la ligne de l'écran n'apparaît pas. `claim()` n'applique pas les calibrations : `, calibrated` n'apparaît jamais dans cet exemple.
 
 Quand une classe répond `no answer`, cet exemple montre quel composant ne répond pas. Le `#define STEAMI_BOARD_V1C`, en commentaire en tête du code, force la release (voir [Forcer la release](../carte#forcer-la-release)) : le programme téléversé depuis cette page ne le contient pas.
 
