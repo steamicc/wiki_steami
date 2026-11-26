@@ -1,7 +1,7 @@
 ---
 title: Essayer le code sur la carte
 sidebar_label: Essayer sur la carte
-sidebar_position: 3
+sidebar_position: 1.5
 ---
 
 import TOCInline from '@theme/TOCInline';
@@ -23,14 +23,15 @@ Le bouton apparaît sous les programmes MicroPython complets, qui peuvent tourne
 
 Les extraits de code (quelques lignes qui ne tournent pas seules), les sessions du REPL (lignes qui commencent par `>>>`) et les commandes à taper dans un terminal n'ont pas de bouton.
 
-Le bouton demande **Chrome** ou **Edge** sur un ordinateur : il passe par WebUSB, que les autres navigateurs ne proposent pas (voir [Sans Chrome ni Edge](#sans-chrome-ni-edge)).
+Le bouton passe par WebUSB : il est prévu pour **Chrome** ou **Edge** sur un ordinateur. Firefox et Safari ne le proposent pas (voir [Sans Chrome ni Edge](#sans-chrome-ni-edge)).
 
 ## Lancer un programme
 
 1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
-2. Sous le programme, cliquer sur **Essayer sur la carte**. Au premier essai, le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte ne s'autorise qu'une fois par page : les autres programmes de la page s'essaient ensuite sans recommencer.
-3. Le wiki vérifie la carte (voir [Vérifications avant le lancement](#vérifications-avant-le-lancement)), puis lance le programme. La console s'ouvre sous le programme et affiche ce qu'il écrit avec `print()`. Une erreur Python (_traceback_) y est mise en évidence.
-4. Cliquer sur **Arrêter** pour interrompre le programme. Lancer un autre programme de la page arrête d'abord celui qui tourne.
+2. Fermer Thonny ou `mpremote` s'ils sont ouverts : ils occupent la carte.
+3. Sous le programme, cliquer sur **Essayer sur la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. Tant que la carte reste connectée, les autres programmes s'essaient sans repasser par cette fenêtre. Elle revient après un clic sur **Déconnecter**, un débranchement de la carte, ou un passage par une page sans bouton d'essai.
+4. Le wiki vérifie la carte (voir [Vérifications avant le lancement](#vérifications-avant-le-lancement)), puis lance le programme. La console s'ouvre sous le programme et affiche ce qu'il écrit avec `print()`. Une erreur Python (_traceback_) y est mise en évidence.
+5. Cliquer sur **Arrêter** pour interrompre le programme. Lancer un autre programme de la page arrête d'abord celui qui tourne.
 
 Le bouton **Déconnecter** libère la carte, pour que Thonny, `mpremote` ou un Codespace puisse s'en servir.
 
@@ -48,7 +49,7 @@ Avant de lancer le programme, le wiki vérifie le DAPLink de la carte (son firmw
 
 ### Mise à jour du DAPLink
 
-Si le DAPLink de la carte est plus ancien que la version retenue par le wiki, un encart propose de le mettre à jour. Cette mise à jour n'est pas obligatoire : **Plus tard** masque l'encart jusqu'au rechargement de la page, et le programme est lancé.
+Si le DAPLink de la carte est plus ancien que la version retenue par le wiki, un encart propose de le mettre à jour. Cette mise à jour n'est pas obligatoire : dans cet encart, **Plus tard** le masque jusqu'au rechargement de la page, et le programme est lancé.
 
 Le DAPLink ne peut pas se mettre à jour lui-même : **Mettre à jour…** affiche les étapes à suivre à la main, les mêmes que [dans le Codespace](../arduino/codespace#mettre-à-jour-le-daplink-depuis-la-page) :
 
@@ -57,13 +58,13 @@ Le DAPLink ne peut pas se mettre à jour lui-même : **Mettre à jour…** affic
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 4. Cliquer de nouveau sur **Essayer sur la carte**, puis choisir la carte.
 
-Si le lecteur MAINTENANCE n'apparaît pas, voir [le dépannage du Codespace](../arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
+Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la page, sans lancer le programme : cliquer ensuite de nouveau sur **Essayer sur la carte**. Si le lecteur MAINTENANCE n'apparaît pas, voir [le dépannage du Codespace](../arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
 ### Installation de MicroPython
 
-Le wiki affiche le code d'une version précise de la bibliothèque MicroPython STeaMi (actuellement **v0.29.0**) et propose le firmware de cette même version : le code affiché et le firmware installé correspondent toujours.
+Le wiki affiche le code d'une version précise de la bibliothèque MicroPython STeaMi, celle du firmware qu'il propose d'installer. Une carte qui a cette version de MicroPython, ou une plus récente, lance le programme directement.
 
-Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose d'installer MicroPython. Rien n'est installé sans un clic sur **Installer MicroPython**. Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé.
+Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose de l'installer. Rien n'est installé sans un clic sur **Installer MicroPython** (suivi du numéro de version proposé). Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé.
 
 :::warning
 
@@ -71,15 +72,24 @@ L'installation de MicroPython peut effacer les fichiers enregistrés sur la cart
 
 :::
 
-Si un autre outil utilise déjà la carte (Thonny, `mpremote`), MicroPython ne répond pas au wiki. Quand MicroPython est bien installé, le wiki le signale au lieu de proposer l'installation : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
+### Carte occupée
+
+Si un autre outil utilise déjà la carte (Thonny, `mpremote`) ou si un programme en cours ignore l'interruption (Ctrl-C), MicroPython ne répond pas au wiki. Le wiki redémarre alors la carte une fois, ce qui interrompt ce qu'elle exécutait :
+
+- si MicroPython démarre, le wiki signale que la carte est occupée, sans proposer d'installation ;
+- avec un DAPLink trop ancien, ce redémarrage n'est pas possible : l'encart d'installation peut alors apparaître même si MicroPython est installé, et il le rappelle (« Si MicroPython est déjà installé… »).
+
+Dans les deux cas, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
 
 ## Programmes qui modifient la carte
 
 Quelques exemples modifient la carte de façon durable : ils effacent ou écrivent la mémoire flash externe du DAPLink (les fichiers du lecteur **STEAMI**), ou la zone de configuration de la carte, avec ses calibrations. Ces programmes gardent le bouton, mais le clic ouvre d'abord un encart qui dit ce qui sera modifié. Le programme n'est lancé qu'après **Lancer quand même** ; **Annuler** l'abandonne sans rien envoyer à la carte.
 
-## Sur une V1c : l'écran reste noir
+## Sur une V1c
 
-Le firmware MicroPython ne gère pas encore l'écran rond de la V1c (GC9A01). Sur une V1c, un programme qui dessine à l'écran tourne quand même, mais l'écran reste noir. La console affiche toujours ce que le programme écrit. Les V1a et V1b ont un autre écran (SSD1327), géré par MicroPython (voir [Révisions de la carte](/docs/hardware/revisions)).
+Le firmware MicroPython ne gère pas l'écran rond de la V1c (GC9A01). Sur une V1c, un programme qui dessine à l'écran tourne quand même, mais l'écran reste noir. La console montre ce que le programme écrit. Les V1a et V1b ont un autre écran (SSD1327), géré par MicroPython.
+
+Les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960 ne sont pas montés sur la V1c : leurs exemples s'y arrêtent sur une erreur (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)).
 
 ## Sans Chrome ni Edge
 
@@ -102,15 +112,15 @@ print(i2c.scan())
 ```
 ````
 
-Ne marquer que des programmes complets, qui tournent seuls sur la carte : pas d'extrait, pas de session du REPL (`>>>`).
+Ne marquer que des programmes complets, qui tournent seuls sur la carte : pas d'extrait, pas de session du REPL (`>>>`). Juste après une étape qui ouvre `mpremote repl`, prévenir le lecteur de quitter `mpremote` avant d'utiliser le bouton, ou ne pas marquer le bloc.
 
 Les autres marques possibles, après `python` :
 
-| Marque            | Effet                                                                                                                                                                                                                                                                                                |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `run confirm="…"` | Le clic ouvre d'abord un encart avec ce texte, et le programme n'est lancé qu'après **Lancer quand même**. Obligatoire pour un programme qui modifie la carte de façon durable. Le texte dit précisément ce qui sera modifié, par exemple `confirm="Efface toute la flash externe de la carte."`.    |
-| `run files=…`     | Fichiers annexes déposés dans `/ram` avant le lancement, séparés par des virgules, sans espace, par exemple `files=.external/micropython-steami-lib/lib/a.py,.external/b/pins.py`. Chemins sous `.external/` uniquement ; deux fichiers ne peuvent pas avoir le même nom. Se combine avec `confirm`. |
-| `norun`           | Jamais de bouton, même pour un exemple inclus avec `file=` : l'emporte sur tout le reste.                                                                                                                                                                                                            |
+| Marque            | Effet                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run confirm="…"` | Le clic ouvre d'abord un encart avec ce texte, et le programme n'est lancé qu'après **Lancer quand même**. Obligatoire pour un programme qui modifie la carte de façon durable. Le texte dit précisément ce qui sera modifié, par exemple `confirm="Efface toute la flash externe de la carte."`.                                                                                                                                     |
+| `run files=…`     | Fichiers annexes déposés dans `/ram` avant le lancement, séparés par des virgules, sans espace, par exemple `files=.external/micropython-steami-lib/lib/a.py,.external/b/pins.py`. Chemins sous `.external/` uniquement ; deux fichiers ne peuvent pas avoir le même nom. Taille totale limitée par le disque en RAM de la carte (32 ko, moins la place du système de fichiers) : le CI ne la vérifie pas. Se combine avec `confirm`. |
+| `norun`           | Jamais de bouton, même pour un exemple inclus avec `file=` : l'emporte sur tout le reste.                                                                                                                                                                                                                                                                                                                                             |
 
 Un exemple de la bibliothèque inclus avec `file=.external/micropython-steami-lib/lib/<driver>/examples/<nom>.py` reçoit le bouton sans marque `run`, sauf s'il importe un driver absent du firmware. S'il modifie la carte de façon durable, il porte aussi `confirm="…"`.
 

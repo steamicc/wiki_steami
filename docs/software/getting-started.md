@@ -40,7 +40,7 @@ mpremote repl
 
 Taper du code Python directement :
 
-```python run
+```python
 from machine import I2C
 i2c = I2C(1)
 print(i2c.scan())
@@ -49,6 +49,8 @@ print(i2c.scan())
 Cela affiche la liste des adresses I2C des périphériques connectés sur le bus interne.
 
 ### Méthode 2 : Exécuter un script
+
+Quitter d'abord le REPL de la méthode 1 (`Ctrl+]`) : tant que `mpremote repl` est ouvert, il occupe la carte. Avec Chrome ou Edge, le bouton **Essayer sur la carte** sous le programme ci-dessous le lance aussi depuis la page, sans fichier ni terminal (voir [Essayer le code sur la carte](./micropython/essayer)).
 
 Créer un fichier `hello.py` :
 

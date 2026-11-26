@@ -28,7 +28,9 @@ Ouvrir un terminal REPL :
 mpremote repl
 ```
 
-Le prompt MicroPython `>>>` doit apparaître. Taper :
+Le prompt MicroPython `>>>` doit apparaître. Taper les lignes ci-dessous.
+
+Avec Chrome ou Edge, le bouton **Essayer sur la carte** sous ces lignes les lance aussi depuis la page, sans terminal (voir [Essayer le code sur la carte](./essayer)). Quitter d'abord `mpremote` (`Ctrl+]`) : tant qu'il est ouvert, il occupe la carte.
 
 ```python run
 import sys
