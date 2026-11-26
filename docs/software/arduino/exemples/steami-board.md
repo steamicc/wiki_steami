@@ -6,19 +6,19 @@ sidebar_label: STEAMI_BOARD (classes par fonction)
 import EssayerExemple from '@site/src/components/EssayerExemple';
 import TOCInline from '@theme/TOCInline';
 
-<!-- cspell:ignore colour -->
+<!-- cspell:ignore colour vline -->
 
 # Exemples STEAMI_BOARD : classes par fonction
 
-Les exemples STEAMI_BOARD ne portent pas sur un composant : ils montrent les **classes par fonction** de la bibliothèque STeaMi, comme `SteamiTemperature` ou `SteamiCompass`. Chaque classe mesure une grandeur (température, distance, cap…), ou dessine sur l'écran pour `SteamiDisplay`, et choisit elle-même le composant qui la sert sur la carte : le même programme tourne sur une V1a, une V1b ou une V1c.
+Les exemples STEAMI_BOARD ne portent pas sur un composant : ils montrent les **classes par fonction** de la bibliothèque STeaMi, comme `SteamiTemperature` ou `SteamiCompass`. Chaque classe mesure une grandeur (température, distance, cap…), ou dessine sur l'écran pour `SteamiDisplay` et `SteamiScreen`, et choisit elle-même le composant qui la sert sur la carte : le même programme tourne sur une V1a, une V1b ou une V1c.
 
 Sur cette page :
 
 <TOCInline toc={toc} maxHeadingLevel={2} />
 
-Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DLC (mouvement), que la bibliothèque et la console appellent `ISM330DL`, le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. L'écran change lui aussi : un OLED de 128 × 128 pixels en niveaux de gris (SSD1327) sur la V1a et la V1b, un TFT couleur de 240 × 240 pixels (GC9A01) sur la V1c. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, prévu sur la V1a et la V1b et absent de la V1c : sur une V1c, ils montrent comment une classe signale une fonction absente. Les douze autres exemples marchent sur toutes les cartes.
+Les composants changent d'une release à l'autre (voir [Révisions de la carte](/docs/hardware/revisions)). Sur la V1c, le BME280 mesure à lui seul la température, l'humidité et la pression, que se partagent le WSEN-HIDS et le WSEN-PADS sur la V1a et la V1b. Les autres composants de ces exemples sont sur les trois releases : l'ISM330DLC (mouvement), que la bibliothèque et la console appellent `ISM330DL`, le LIS2MDL (champ magnétique), le VL53L1X (distance), la jauge de batterie BQ27441 et l'extenseur MCP23009E du D-PAD. L'écran change lui aussi : un OLED de 128 × 128 pixels en niveaux de gris (SSD1327) sur la V1a et la V1b, un TFT couleur de 240 × 240 pixels (GC9A01) sur la V1c. Seuls **Light**, **Color** et **Gesture** demandent l'APDS-9960, prévu sur la V1a et la V1b et absent de la V1c : sur une V1c, ils montrent comment une classe signale une fonction absente. Les quinze autres exemples marchent sur toutes les cartes.
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Tous, sauf **Drawing**, laissent l'écran de côté : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs) détaille chaque classe et [Reconnaître la carte](../carte) ce qu'elles ont en commun ; cette page-ci explique ce que montre chaque exemple. Les pages d'exemples par composant, comme [VL53L1X](./vl53l1x), utilisent au contraire directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Tous, sauf **Drawing**, **ScreenTemperature**, **ScreenBattery** et **ScreenComfort**, laissent l'écran de côté : il garde l'image laissée par le programme précédent, ce n'est pas une panne. Les trois exemples dont le nom commence par **Screen** utilisent la classe `SteamiScreen` : ils demandent la version 0.38.0 de la bibliothèque, ou une plus récente (voir l'encart « Version de la bibliothèque » de [Reconnaître la carte](../carte)). La page [Capteurs et écran](../capteurs) détaille chaque classe et [Reconnaître la carte](../carte) ce qu'elles ont en commun ; cette page-ci explique ce que montre chaque exemple. Les pages d'exemples par composant, comme [VL53L1X](./vl53l1x), utilisent au contraire directement le driver du composant.
 
 ## Le driver en bref
 
@@ -32,7 +32,7 @@ Ces exemples n'appellent pas le driver d'un composant : ils passent par une clas
 
 Chaque appel de lecture interroge le composant : deux appels à la suite, comme `read()` puis `strength()`, font deux mesures distinctes. Les lignes de démarrage ne s'écrivent qu'une fois : pour les relire, appuyer sur le bouton Reset de la carte.
 
-`SteamiDisplay`, la classe de l'écran, suit le même schéma avec deux différences. Elle n'a pas de `chip()`. Et son `error()` vaut `unknown board` quand la release reste inconnue, `no memory` quand l'image de l'écran ne tient pas en mémoire ; après un échec, ses fonctions de dessin et `show()` ne font rien. L'exemple [Drawing](#drawing) la détaille.
+`SteamiDisplay`, la classe de l'écran, suit le même schéma avec deux différences. Elle n'a pas de `chip()`. Et son `error()` vaut `unknown board` quand la release reste inconnue, `no memory` quand l'image de l'écran ne tient pas en mémoire ; après un échec, ses fonctions de dessin et `show()` ne font rien. L'exemple [Drawing](#drawing) la détaille. `SteamiScreen` est une `SteamiDisplay` qui place elle-même titres, valeurs et barres sur l'écran rond : les exemples [ScreenTemperature](#screentemperature), [ScreenBattery](#screenbattery) et [ScreenComfort](#screencomfort) s'en servent.
 
 ## Temperature {#temperature}
 
@@ -232,6 +232,10 @@ Le driver connaît aussi `NEAR` et `FAR`, que cite le commentaire en tête de l'
 
 L'image ne change plus ensuite. Après la ligne de la release, par exemple `[STeaMi] Board V1c (read from the board config, revision 131)`, la console écrit toutes les deux secondes le temps mis à envoyer l'image à l'écran, en microsecondes : `show(): <durée> us`.
 
+![Écran rond d'une V1c pendant l'exemple Drawing : à gauche, un arc vert ; en haut, STeaMi en blanc et 20°C e en jaune ; au milieu, un rectangle bleu à gauche et un disque rouge à droite, au-dessus d'un trait gris ; en bas, un triangle jaune pointe en haut](/img/software/arduino/steami-board-drawing.jpg)
+
+Sur la photo, prise avec une webcam, le cercle gris foncé du bord et le fond de la jauge se voient à peine.
+
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/Drawing/Drawing.ino
 
 ```
@@ -259,6 +263,79 @@ Si `begin()` échoue, la bibliothèque écrit un message codé, puis l'exemple �
 Cet exemple marche sur les trois releases. Les exemples GC9A01 et SSD1327, eux, appellent directement le driver de leur écran et ne marchent que sur leur release.
 
 <EssayerExemple id="STEAMI_BOARD/Drawing" />
+
+## ScreenTemperature {#screentemperature}
+
+**Ce qu'on observe** : l'écran affiche `Temperature` en gris en haut, la température en grands chiffres blancs au centre, par exemple `27.2`, avec `°C` en gris clair juste en dessous, et le nom du capteur en gris foncé en bas : `BME280` sur une V1c. L'image est refaite deux fois par seconde. Sur une V1a ou une V1b, la même disposition s'affiche en niveaux de gris sur l'écran de 128 pixels, avec `WSEN-HIDS` en bas.
+
+L'exemple n'écrit rien dans la console. Seule la bibliothèque y écrit la ligne de la release, par exemple `[STeaMi] Board V1c (read from the board config, revision 131)`, puis un message codé si l'écran ou le capteur manque.
+
+![Écran rond d'une V1c pendant l'exemple ScreenTemperature : Temperature en gris en haut, 27.2 en grands chiffres blancs au centre, °C juste en dessous et BME280 en gris foncé en bas](/img/software/arduino/steami-board-screen-temperature.jpg)
+
+```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/ScreenTemperature/ScreenTemperature.ino
+
+```
+
+**Comment ça marche** : `SteamiScreen` est une `SteamiDisplay` : `begin()`, `clear()`, `show()` et les fonctions de dessin de [Drawing](#drawing) s'utilisent de la même façon, et `screen.begin()` vient aussi au tout début de `setup()`, tant que la mémoire est encore libre (voir [Drawing](#drawing)). La classe ajoute des fonctions de mise en page, qui calculent elles-mêmes leur place sur l'écran rond : le programme ne donne aucune coordonnée. Chaque tour de `loop()` refait toute l'image : `clear()` la remplit de noir, les fonctions dessinent dans l'ordre des appels, puis `show()` l'envoie à l'écran.
+
+- `title("Temperature")` écrit une ligne centrée en haut de l'écran, en gris (`STEAMI_GRAY`) par défaut.
+- `value(temperature.read(), "°C")` écrit la valeur au centre de l'écran, en blanc, et son unité centrée en dessous, en gris clair. Un nombre à virgule (`float`) s'écrit avec un chiffre après le point, comme `27.2` ; `screen.setDecimals(2)` en donne deux, et 4 au plus. `NAN`, que `read()` renvoie quand la mesure manque, s'écrit `--`.
+- `subtitle(temperature.chip())` écrit le nom du composant en bas, en gris foncé (`STEAMI_DARK`) par défaut.
+
+Les positions et les marges sont données pour l'écran de 128 pixels, puis agrandies dans le rapport 240/128 sur une V1c, où les caractères sont deux fois plus grands : 8 × 8 pixels pour le titre, l'unité et le sous-titre sur une V1a ou une V1b, 16 × 16 sur une V1c. Les chiffres de la valeur sont encore deux fois plus grands : 16 pixels de haut sur l'écran de 128, 32 sur celui de 240. Le même programme donne ainsi la même image sur les deux écrans. Aucun texte ne sort du cercle : une valeur trop large passe à des chiffres plus petits, et un texte qui ne tient toujours pas est coupé, sans points de suspension.
+
+Si le capteur ne répond pas, la console reçoit un message de `SteamiTemperature` : `E11` quand la release vient de la zone de configuration ou d'un `#define` (le cas habituel), `E10` sinon (voir [Les messages](../carte#les-messages)). L'écran affiche `--` à la place de la valeur, sans nom en bas : `chip()` renvoie alors un texte vide, que `subtitle()` n'écrit pas. Si l'écran ne démarre pas, `screen.begin()` écrit les messages `E30` ou `E31` décrits dans [Drawing](#drawing), avec `SteamiScreen` à la place de `SteamiDisplay`, par exemple `[STeaMi] SteamiScreen: not enough RAM for the colour screen (115200 bytes in one block). Call screen.begin() first in setup(). (E31)`. L'exemple ne teste pas ce que renvoie `begin()` : après un échec, les fonctions de l'écran ne font rien et la boucle continue sans rien afficher.
+
+<EssayerExemple id="STEAMI_BOARD/ScreenTemperature" />
+
+## ScreenBattery {#screenbattery}
+
+**Ce qu'on observe** : l'écran affiche `Battery` en haut, puis la charge de la batterie en grands chiffres, par exemple `100`, avec `%` en dessous, et une barre horizontale remplie de vert depuis la gauche, en proportion de la charge. En bas, deux lignes en gris foncé : la tension en millivolts, par exemple `4172 mV`, et `BQ27441`, le nom de la jauge. L'image est refaite chaque seconde. Sur une V1a ou une V1b, la même disposition s'affiche en niveaux de gris sur l'écran de 128 pixels, la partie remplie de la barre en gris clair.
+
+Comme pour [ScreenTemperature](#screentemperature), la console ne reçoit que les lignes de la bibliothèque. Sans batterie, la jauge ne répond pas : la console écrit le message `E10` de `SteamiBattery` (voir [Battery](#battery)), et l'écran affiche `0`, une barre vide, dont seul le fond gris très foncé apparaît, et `--` à la place de la tension. Brancher la batterie, puis appuyer sur le bouton Reset.
+
+![Écran rond d'une V1c pendant l'exemple ScreenBattery : Battery en haut, 100 en grands chiffres blancs, % en dessous, une barre verte pleine sur toute sa largeur, puis 4172 mV et BQ27441 en gris foncé en bas](/img/software/arduino/steami-board-screen-battery.jpg)
+
+**Matériel** : une batterie branchée sur la carte.
+
+```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/ScreenBattery/ScreenBattery.ino
+
+```
+
+**Comment ça marche** : `percent()` renvoie un nombre entier, de 0 à 100 : `value()` l'écrit sans décimale. Sans jauge, il vaut 0, d'où le `0` à l'écran, et non `--`. `voltage()` renvoie la tension en volts, ou `NAN` sans jauge. Le programme prépare lui-même le texte de la première ligne du bas dans `volts` : `snprintf` y écrit la tension arrondie en millivolts, suivie de `mV`, et le texte reste `--` quand la tension vaut `NAN`.
+
+- `value(battery.percent(), "%", SteamiAt::CENTER, nullptr, STEAMI_WHITE, 2, -12)` précise tous les arguments, parce que le décalage vertical vient en dernier : la position (`CENTER`, le centre), l'étiquette (`nullptr` : aucune), la couleur, la taille (2, celle par défaut) et le décalage vertical. Ce décalage, `-12`, remonte la valeur de 12 pixels sur l'écran de 128 pixels, et de 22 sur celui de 240 : comme les positions, il se compte en pixels de l'écran de 128.
+- `bar(battery.percent(), 100, -12, STEAMI_GREEN)` trace une barre horizontale centrée, sous le centre de l'écran et remontée du même décalage : 88 × 8 pixels sur l'écran de 128, 165 × 15 sur celui de 240. Son fond est gris très foncé (`STEAMI_GRID_DARK`) ; la partie remplie, en vert, part de la gauche et couvre la fraction `v / maxV` de la largeur, ici la charge sur 100. Une valeur hors de l'intervalle de 0 à `maxV` est ramenée à la borne la plus proche, et `NAN` laisse la barre vide. Sur l'écran en niveaux de gris, la partie remplie est éclaircie au besoin pour rester au moins 4 niveaux au-dessus du fond.
+- `subtitle(volts, "BQ27441")` écrit deux lignes centrées en bas ; `subtitle()` en accepte trois au plus. `BQ27441` est un texte fixe du programme : il reste affiché même sans jauge.
+
+Comme tout appel de lecture, chaque `percent()` interroge la jauge : le nombre et la barre viennent de deux lectures successives.
+
+<EssayerExemple id="STEAMI_BOARD/ScreenBattery" />
+
+## ScreenComfort {#screencomfort}
+
+**Ce qu'on observe** : l'écran affiche `Comfort` en haut, puis deux valeurs côte à côte, de part et d'autre d'un trait vertical gris foncé : à gauche, la température, par exemple `27.3`, sous le petit mot `TEMP` et au-dessus de `°C` ; à droite, l'humidité, par exemple `30.1`, sous `HUM` et au-dessus de `%`. En bas, deux lignes en vert : `Comfortable` quand la température est entre 19 et 24 °C et l'humidité entre 40 et 60 %, `Uncomfortable` sinon, puis le nom du capteur d'humidité, `BME280` sur une V1c. L'image est refaite chaque seconde. Sur une V1a ou une V1b, la même disposition s'affiche en niveaux de gris sur l'écran de 128 pixels, avec `WSEN-HIDS` en bas.
+
+La console ne reçoit que les lignes de la bibliothèque. Si un capteur ne répond pas, elle reçoit le message `E11` ou `E10` de sa classe, selon d'où vient la release, comme pour [ScreenTemperature](#screentemperature), et l'écran affiche `--` à la place de sa valeur et `Uncomfortable` ; sans capteur d'humidité, le nom du capteur n'apparaît pas.
+
+![Écran rond d'une V1c pendant l'exemple ScreenComfort : Comfort en haut ; à gauche d'un trait vertical, TEMP, 27.3 et °C ; à droite, HUM, 30.1 et % ; en bas, Uncomfortable et BME280 en vert](/img/software/arduino/steami-board-screen-comfort.jpg)
+
+Sur la photo, l'humidité de 30,1 % est sous 40 % : l'écran affiche `Uncomfortable`.
+
+```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/ScreenComfort/ScreenComfort.ino
+
+```
+
+**Comment ça marche** : le programme lit une seule fois la température et l'humidité à chaque tour, dans `t` et `h` : l'écran et le test du confort utilisent les mêmes mesures. Ce test vaut `false` quand une mesure manque, car toute comparaison avec `NAN` est fausse : l'écran affiche alors `Uncomfortable`.
+
+- `vline(x, y, h, couleur)` est une fonction de dessin de `SteamiDisplay` : elle trace un trait vertical de `h` pixels, de `(x, y)` vers le bas. Ici, le trait est sur la colonne du centre, part d'un demi-rayon au-dessus du centre et mesure un rayon : il est centré, et calculé à partir de `centerX()`, `centerY()` et `radius()` comme les formes de [Drawing](#drawing).
+- `value(t, "°C", SteamiAt::W, "TEMP")` place la température à gauche (`W`, ouest) et `value(h, "%", SteamiAt::E, "HUM")` l'humidité à droite (`E`, est). Chacune reste dans sa moitié de l'écran, avec son étiquette au-dessus, en petites lettres grises de 5 × 7 pixels (10 × 14 sur l'écran de 240), et son unité en dessous.
+- À gauche et à droite, toute valeur qui n'est pas plus large que `88.8` (trois chiffres ou signes et un point) reçoit la même taille de chiffres : 16 pixels de haut sur l'écran de 128, comme au centre, et 24 sur celui de 240, un peu moins qu'au centre. Les deux valeurs côte à côte ont donc la même taille. Une valeur plus large passe à des chiffres plus petits.
+- `subtitle(..., humidity.chip(), STEAMI_GREEN)` écrit les deux lignes du bas en vert : la couleur, en dernier argument, vaut pour toutes les lignes, si bien que `Uncomfortable` s'écrit aussi en vert. Plus la ligne la plus longue est large, plus le bloc part haut, pour que chaque ligne tienne dans le cercle : avec `Uncomfortable`, plus long, il est plus haut qu'avec `Comfortable`.
+
+`SteamiAt` nomme neuf positions : le centre, `CENTER`, et les huit points cardinaux `N`, `NE`, `E`, `SE`, `S`, `SW`, `W` et `NW`, le nord étant en haut de l'écran. `value()` et `text(texte, position)` les acceptent ; `title()` écrit au nord, et `subtitle()` part du sud.
+
+<EssayerExemple id="STEAMI_BOARD/ScreenComfort" />
 
 ## BoardInfo {#boardinfo}
 

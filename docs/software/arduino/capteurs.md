@@ -18,7 +18,7 @@ Chaque section de capteur commence par la **classe par fonction**, comme `Steami
 
 Une seconde partie, nommée d'après le composant (par exemple **Avec le driver ISM330DL**), sert à ce que la classe n'offre pas, comme la proximité de l'APDS-9960 ou un réglage du composant. Les composants dépendent de la release de la carte (voir [Révisions](/docs/hardware/revisions)) : quand ils diffèrent, ces programmes sont présentés en onglets **V1a / V1b / V1c**. Un driver créé dans le programme ne reçoit pas les calibrations de la zone de configuration du DAPLink : pour une mesure calibrée, garder la classe (voir [les drivers partagés](./carte#aller-plus-loin--les-drivers-partagés)). La [forme commune des classes](./carte#la-forme-commune), leurs [messages](./carte#les-messages) et les [calibrations](./carte#calibrations) sont décrits dans [Reconnaître la carte](./carte).
 
-L'écran a aussi sa classe, `SteamiDisplay`, qui dessine sur l'écran de la release (version 0.37.0 de la bibliothèque). Le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
+L'écran a aussi deux classes : `SteamiDisplay`, qui dessine sur l'écran de la release (version 0.37.0 de la bibliothèque), et `SteamiScreen`, qui y ajoute la mise en page des titres et des valeurs (version 0.38.0). Le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
 Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. La page [Exemples à essayer](./exemples/) les reprend un par un, avec un bouton pour les envoyer sur la carte ; chaque section ci-dessous renvoie aux exemples de son composant. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD** (voir [Exemples STEAMI_BOARD](./exemples/steami-board)).
 
@@ -651,6 +651,41 @@ Le dessin se fait dans une image en mémoire (`clear`, `pixel`, `line`, `rect`, 
 Si `begin()` échoue, la bibliothèque écrit un message codé (`E30` quand la release reste inconnue, `E31` quand l'image de la V1c, 115 200 octets d'un seul bloc, ne trouve pas sa place en mémoire, voir [Les messages](./carte#les-messages)), `error()` vaut `unknown board` ou `no memory`, et les fonctions de dessin ne font plus rien. C'est pourquoi `begin()` s'appelle au tout début de `setup()`, tant que la mémoire est encore libre.
 
 L'exemple **STeaMi → STEAMI_BOARD → Drawing** dessine une galerie de formes avec cette classe : voir [Drawing](./exemples/steami-board#drawing).
+
+Pour afficher une mesure sans calculer de coordonnées, `SteamiScreen` place elle-même le texte sur l'écran rond :
+
+```cpp
+#include <SteamiScreen.h>
+#include <SteamiHumidity.h>
+
+SteamiScreen ecran;
+SteamiHumidity humidite;
+
+void setup() {
+  Serial.begin(115200);
+  ecran.begin();                     // en premier, comme pour SteamiDisplay
+  humidite.begin();
+}
+
+void loop() {
+  float h = humidite.read();         // NAN si la mesure manque
+  ecran.clear();
+  ecran.title("Humidité");           // en haut ; s'affiche sans accent
+  ecran.value(h, "%");               // au centre, unité en dessous ; NAN s'écrit --
+  ecran.bar(h);                      // barre remplie de 0 à 100, vide pour NAN
+  ecran.subtitle(humidite.chip());   // nom du capteur, en bas
+  ecran.show();
+  delay(1000);
+}
+```
+
+`SteamiScreen` demande la version 0.38.0 de la bibliothèque. C'est une `SteamiDisplay` : `begin()`, `clear()`, `show()`, `error()` et les fonctions de dessin ci-dessus restent disponibles, et ses messages `E30` et `E31` commencent par `SteamiScreen:`.
+
+Elle ajoute des fonctions qui calculent leur place à partir de la taille de l'écran : `title()` en haut, `subtitle()` en bas (trois lignes au plus), `value()` pour un nombre avec son unité et une étiquette facultative, `bar()` pour une barre horizontale, et `text(texte, position)`. La position est l'une des neuf constantes `SteamiAt` : `CENTER` et les points cardinaux `N`, `NE`, `E`, `SE`, `S`, `SW`, `W`, `NW`, le nord en haut.
+
+Positions et marges sont données pour l'écran de 128 pixels et agrandies sur celui de 240, où les caractères sont deux fois plus grands : le même programme donne la même image sur les deux écrans. Aucun texte ne sort du cercle : une valeur trop large passe à des chiffres plus petits, un texte trop long est coupé. `value()` écrit un `float` avec un chiffre après le point (`setDecimals()` en change le nombre) et `--` pour `NAN`.
+
+Les exemples [ScreenTemperature](./exemples/steami-board#screentemperature), [ScreenBattery](./exemples/steami-board#screenbattery) et [ScreenComfort](./exemples/steami-board#screencomfort) affichent ainsi une température, la charge de la batterie avec une barre, et deux valeurs côte à côte.
 
 ### Avec les drivers SSD1327 et GC9A01
 
