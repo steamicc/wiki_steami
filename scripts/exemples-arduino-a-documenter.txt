@@ -5,11 +5,6 @@ BLE/BleRssiMapper
 BLE/BleRssiProximity
 BLE/BleTrilateration
 DAPLINK_FLASH/data_logger
-MCP23009E/MorseCode
-MCP23009E/MusicPlayer
-MCP23009E/ReactionTimer
-MCP23009E/SimonGame
-MCP23009E/dpad_reader
 SSD1327/framebuf_lines
 SSD1327/framebuf_pixels
 SSD1327/framebuf_rects
