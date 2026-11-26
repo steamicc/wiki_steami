@@ -1,7 +1,3 @@
-APDS9960/ambient_light
-APDS9960/gesture
-APDS9960/light_theremin
-APDS9960/proximity
 BLE/BleBeacon
 BLE/BleHotCold
 BLE/BleIndoorMap
