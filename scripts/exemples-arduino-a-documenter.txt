@@ -63,7 +63,6 @@ STEAMI_BOARD/Light
 STEAMI_BOARD/Magnetometer
 STEAMI_BOARD/Pressure
 STEAMI_BOARD/Temperature
-STEAMI_CONFIG/show_config
 WSEN-HIDS/BasicReader
 WSEN-HIDS/ComfortZone
 WSEN-HIDS/DewPointMonitor
