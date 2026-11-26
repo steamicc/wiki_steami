@@ -32,7 +32,7 @@ function Telechargement({ id, href }) {
 // Pas de région aria-live : chaque exemple de la page l'affiche, une
 // annonce serait répétée autant de fois. Les annonces passent par les
 // messages de l'exemple cliqué.
-function EtatCarte({ statut }) {
+export function EtatCarte({ statut }) {
   return (
     <p className={styles.etatCarte}>
       <span className={styles.pastille} data-statut={statut} aria-hidden="true" />
@@ -64,7 +64,7 @@ function VoyantSerie({ activite }) {
 // n'a pas commencé à écrire, elle est indéterminée (pas d'attribut value) et
 // annonce la préparation de la carte. Le texte écrit à côté est pour les yeux
 // seulement : « Téléversement en cours… » est déjà annoncé.
-function Progression({ progression }) {
+export function Progression({ progression }) {
   const { valeur, texte } = affichageProgression(progression);
   return (
     <div className={styles.progression}>
