@@ -7,9 +7,6 @@ BLE/BleTrilateration
 BQ27441/battery_status
 BQ27441/low_battery_alert
 DAPLINK_FLASH/data_logger
-ISM330DL/BasicReader
-ISM330DL/Motion
-ISM330DL/Orientation
 MCP23009E/MorseCode
 MCP23009E/MusicPlayer
 MCP23009E/ReactionTimer
