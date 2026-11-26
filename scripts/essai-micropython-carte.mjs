@@ -10,7 +10,10 @@
 // La carte doit avoir MicroPython. Le script ne flashe jamais la carte : il ne
 // se sert que du port série du DAPLink (115200 bauds). Il lance print(1+1),
 // écrit deux fichiers dans le disque en RAM et les relit, lit la version du
-// firmware, puis arrête un programme sans fin. Code de sortie 0 si tout réussit.
+// firmware, puis arrête un programme sans fin et vérifie que la carte est
+// redémarrée sans relancer main.py (au repos, sur >>>). Code de sortie 0 si
+// tout réussit. Si le main.py de la carte imprime en boucle, le contrôle « au
+// repos » le détecte : c'est le but (arreter ne doit pas le relancer).
 import { createRequire } from 'node:module';
 
 import { creerRepl } from '../src/components/EssayerMicroPython/repl.mjs';
@@ -155,8 +158,25 @@ await verifier('arreter un programme sans fin', async () => {
   return `${sortie.split('tic').length - 1} « tic » reçus`;
 });
 
-await verifier('invite >>> après arreter', async () => {
+// arreter() redémarre en REPL brut (sans relancer main.py) puis revient au
+// REPL normal : la carte doit être au repos sur >>>, sans rien imprimer.
+await verifier('carte au repos sur >>> après arreter (main.py non relancé)', async () => {
+  let recu = '';
+  const espion = (octets) => {
+    recu += new TextDecoder().decode(octets);
+  };
+  ecouteurs.add(espion);
+  await new Promise((r) => setTimeout(r, 1000));
+  ecouteurs.delete(espion);
+  attendu(recu === '', `la carte imprime après arreter : ${JSON.stringify(recu.slice(0, 120))}`);
   attendu(await repl.interrompre(), 'pas d’invite >>>');
+});
+
+await verifier('redémarrage logiciel fait par arreter (modules et /ram oubliés)', async () => {
+  const r = await executer(
+    "import sys, os\nprint('essai_ram' in sys.modules, 'ram' in os.listdir('/'))\n",
+  );
+  attendu(r.erreur === null && r.sortie === 'False False\r\n', JSON.stringify(r));
 });
 
 dap.stopSerialRead();

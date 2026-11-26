@@ -47,7 +47,15 @@ function fausseCarte({
   programme = () => ({}),
 } = {}) {
   const ecouteurs = new Set();
-  const journal = { ecritures: [], codes: [], modes: [], depassements: 0, redemarrages: 0 };
+  // mainPy : redémarrages qui auraient relancé le main.py de l'utilisateur.
+  const journal = {
+    ecritures: [],
+    codes: [],
+    modes: [],
+    depassements: 0,
+    redemarrages: 0,
+    mainPy: 0,
+  };
   let mode = 'normal';
   let ligne = [];
   let entete = [];
@@ -119,7 +127,9 @@ function fausseCarte({
           ligne = [];
           emettre(INVITE_BRUT);
         } else if (o === 4) {
+          // En REPL normal, le redémarrage logiciel relance boot.py et main.py.
           journal.redemarrages++;
+          journal.mainPy++;
           emettre('MPY: soft reboot\r\n', BANNIERE, '>>> ');
         } else emettre([o]);
         break;
@@ -132,8 +142,11 @@ function fausseCarte({
           emettre('\r\n', BANNIERE, '>>> ');
         } else if (o === 3) ligne = [];
         else if (o === 4) {
-          if (ligne.length === 0) journal.redemarrages++;
-          else lancer(decoder(ligne), false);
+          if (ligne.length === 0) {
+            // En REPL brut : redémarrage sans main.py, retour au REPL brut.
+            journal.redemarrages++;
+            emettre('OK\r\nMPY: soft reboot\r\n', INVITE_BRUT);
+          } else lancer(decoder(ligne), false);
           ligne = [];
         } else if (o === 5 && rawPaste !== 'inconnu') {
           mode = 'entete';
@@ -361,6 +374,7 @@ test('arreter : interrompt un programme sans fin, la sortie arrive pendant qu’
   const r = await execution;
   assert.deepEqual(r, { erreur: null, arrete: true });
   assert.equal(carte.journal.redemarrages, 1, 'redémarrage logiciel (Ctrl-D)');
+  assert.equal(carte.journal.mainPy, 0, 'main.py n’est pas relancé');
   assert.equal(carte.mode, 'normal', 'retour au REPL normal');
   assert.equal(carte.ecouteurs, 0);
 });
@@ -372,6 +386,19 @@ test('arreter : un programme qui ignore Ctrl-C ne bloque pas executer', async ()
   await jusqua(() => carte.mode === 'execution');
   await repl.arreter();
   assert.deepEqual(await execution, { erreur: null, arrete: true });
+  assert.equal(carte.journal.mainPy, 0, 'pas de Ctrl-D hors du REPL brut');
+});
+
+test('arreter : depuis le REPL normal, redémarre en REPL brut puis revient à >>>', async () => {
+  const carte = fausseCarte({ programme: () => ({ sortie: '2\r\n' }) });
+  const { repl } = replSur(carte);
+  assert.equal(await repl.interrompre(), true);
+  await repl.arreter();
+  assert.equal(carte.journal.redemarrages, 1);
+  assert.equal(carte.journal.mainPy, 0);
+  assert.equal(carte.mode, 'normal');
+  // La carte reste utilisable ensuite.
+  assert.equal((await lancer(repl, 'print(1+1)')).sortie, '2\r\n');
 });
 
 test('arreter : sans programme en cours, remet la carte à zéro', async () => {
@@ -379,6 +406,7 @@ test('arreter : sans programme en cours, remet la carte à zéro', async () => {
   const { repl } = replSur(carte);
   await repl.arreter();
   assert.equal(carte.journal.redemarrages, 1);
+  assert.equal(carte.journal.mainPy, 0, 'main.py n’est pas relancé');
   assert.equal(carte.mode, 'normal');
 });
 

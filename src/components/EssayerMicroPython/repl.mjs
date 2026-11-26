@@ -56,6 +56,7 @@ export const DELAIS = Object.freeze({
 });
 
 const CTRL_A = 0x01;
+const CTRL_B = 0x02;
 const CTRL_D = 0x04;
 const CTRL_E = 0x05;
 const INVITE = '>>> ';
@@ -590,10 +591,14 @@ export function creerRepl({
     });
   }
 
-  // Arrête le programme en cours (Ctrl-C), puis remet MicroPython à zéro :
-  // sortie du REPL brut (Ctrl-B) et redémarrage logiciel en REPL normal
-  // (Ctrl-D), qui oublie les variables et le disque en RAM. Les opérations en
-  // file sont abandonnées.
+  // Arrête le programme en cours (Ctrl-C), puis remet MicroPython à zéro par
+  // un redémarrage logiciel (Ctrl-D) fait en REPL brut : il oublie les
+  // variables et le disque en RAM, et ne relance pas le main.py de
+  // l'utilisateur (en REPL normal, Ctrl-D le relancerait). La carte revient
+  // ensuite au REPL normal (Ctrl-B), au repos sur l'invite « >>> ». Les
+  // opérations en file sont abandonnées. Un délai dépassé n'est pas une
+  // erreur : la carte est laissée telle quelle (sans Ctrl-D si elle n'est pas
+  // en REPL brut).
   async function arreter() {
     for (const op of operations) op.arretDemande = true;
     const courante = operation;
@@ -605,11 +610,24 @@ export function creerRepl({
       await dansLeDelai(courante.promesse, d.arret);
     }
     await enFile(async () => {
-      await envoyer('\r\x03\x03');
-      await attendre(PAUSE_INTERRUPTION_MS);
-      await envoyer('\x02\x04');
+      let redemarre = false;
       try {
+        await envoyer('\r\x03\x03');
+        await attendre(PAUSE_INTERRUPTION_MS);
+        tampon.vider();
+        await envoyer([CTRL_A]);
+        await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
+        await envoyer([CTRL_D]);
+        redemarre = true;
         await attendreMotif(REDEMARRAGE, d.reponse, 'le redémarrage');
+        await attendreMotif(INVITE_BRUT, d.reponse, 'l’invite du REPL brut');
+      } catch (err) {
+        if (!(err instanceof ErreurDelai)) throw err;
+      }
+      if (!redemarre) return;
+      await envoyer([CTRL_B]);
+      try {
+        await attendreMotif(INVITE, d.reponse, 'l’invite >>>');
       } catch (err) {
         if (!(err instanceof ErreurDelai)) throw err;
       }
