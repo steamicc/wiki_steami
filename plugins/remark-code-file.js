@@ -72,7 +72,9 @@ function remarkCodeFile() {
       } catch (err) {
         const relPath = path.relative(rootDir, absolutePath);
         throw new Error(
-          `[remark-code-file] File not found: ${relPath}. Run "npm run prebuild" to fetch external examples.`,
+          `[remark-code-file] File not found: ${relPath}. Run "npm run prebuild" to fetch external examples. ` +
+            'If they are already fetched, the example was probably removed or renamed upstream: ' +
+            '"npm run lint:arduino-examples" lists the Arduino ones.',
         );
       }
     });
