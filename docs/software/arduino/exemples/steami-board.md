@@ -262,7 +262,7 @@ Cet exemple marche sur les trois releases. Les exemples GC9A01 et SSD1327, eux, 
 
 ## BoardInfo {#boardinfo}
 
-**Ce qu'on observe** : la console écrit une seule fois, au démarrage, la release reconnue et l'état de chaque composant I²C de cette release. Sur une V1c, par exemple :
+**Ce qu'on observe** : la console écrit une seule fois, au démarrage, la release reconnue, l'état de chaque composant I²C de cette release, puis celui de son écran. Sur une V1c, par exemple :
 
 ```text
 [STeaMi] Board V1c (read from the board config, revision 131)
@@ -272,9 +272,10 @@ LIS2MDL 0x1E OK
 VL53L1X 0x29 OK
 BQ27441 0x55 OK
 MCP23009E 0x20 OK
+GC9A01 screen not started
 ```
 
-La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de configuration du DAPLink ne donne pas de code de révision. Sans batterie, la jauge affiche `BQ27441 0x55 not responding`. Sur une V1a ou une V1b, la liste donne le WSEN-HIDS (`0x5F`), le WSEN-PADS (`0x5D`) et l'APDS-9960 (`0x39`) à la place du BME280. Le programme ne fait ensuite plus rien.
+La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de configuration du DAPLink ne donne pas de code de révision. Sans batterie, la jauge affiche `BQ27441 0x55 not responding`. Sur une V1a ou une V1b, la liste donne le WSEN-HIDS (`0x5F`), le WSEN-PADS (`0x5D`) et l'APDS-9960 (`0x39`) à la place du BME280, et la dernière ligne devient `SSD1327 screen not started`. Le programme ne fait ensuite plus rien.
 
 ```cpp file=.external/arduino-steami/examples/STEAMI_BOARD/BoardInfo/BoardInfo.ino
 
@@ -282,7 +283,7 @@ La première ligne finit par `(detected: BME280 at 0x76)` quand la zone de confi
 
 **Comment ça marche** : cet exemple utilise directement l'objet `Steami`, sans classe par fonction. `Steami.begin()` reconnaît la release, dans cet ordre : une release forcée par le programme, puis le code de révision de la zone de configuration du DAPLink, puis les capteurs présents sur le bus I²C interne (le BME280 désigne une V1c ; le WSEN-HIDS, le WSEN-PADS ou l'APDS-9960 une V1a ou une V1b, sans pouvoir les distinguer : la release s'écrit alors `V1a/V1b`). La première ligne dit d'où vient la réponse.
 
-La boucle parcourt ensuite toutes les fonctions de la carte, sauf l'écran. Pour chacune, `steamiRoute()` donne les composants qui peuvent la servir sur cette release, et `Steami.claim()` crée et démarre le driver de chacun, en retenant s'il répond. `Steami.printInfo()` liste enfin les composants I²C de la release, avec leur adresse et leur état : `OK` ou `not responding`. Sans cette boucle, un composant qu'aucune classe n'a encore demandé s'afficherait `not tried` (voir [Afficher la carte détectée](../carte#afficher-la-carte-détectée)). Quand la release reste inconnue (message `E01`), la boucle essaie les neuf composants possibles, et la liste les donne tous. `claim()` n'applique pas les calibrations : `, calibrated` n'apparaît jamais dans cet exemple.
+La boucle parcourt ensuite toutes les fonctions de la carte, sauf l'écran. Pour chacune, `steamiRoute()` donne les composants qui peuvent la servir sur cette release, et `Steami.claim()` crée et démarre le driver de chacun, en retenant s'il répond. `Steami.printInfo()` liste enfin les composants I²C de la release, avec leur adresse et leur état : `OK` ou `not responding`. Sans cette boucle, un composant qu'aucune classe n'a encore demandé s'afficherait `not tried` (voir [Afficher la carte détectée](../carte#afficher-la-carte-détectée)). La dernière ligne donne l'écran de la release et son état : `not started`, puisque l'exemple ne s'en sert pas ; après un `begin()` de `SteamiDisplay`, comme dans [Drawing](#drawing), elle afficherait `OK`. Quand la release reste inconnue (message `E01`), la boucle essaie les neuf composants possibles, la liste les donne tous, et la ligne de l'écran n'apparaît pas. `claim()` n'applique pas les calibrations : `, calibrated` n'apparaît jamais dans cet exemple.
 
 Quand une classe répond `no answer`, cet exemple montre quel composant ne répond pas. Le `#define STEAMI_BOARD_V1C`, en commentaire en tête du code, force la release (voir [Forcer la release](../carte#forcer-la-release)) : le programme téléversé depuis cette page ne le contient pas.
 
