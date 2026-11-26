@@ -8,11 +8,6 @@ BLE/BleIndoorMap
 BLE/BleRssiMapper
 BLE/BleRssiProximity
 BLE/BleTrilateration
-BME280/Altitude
-BME280/BasicReader
-BME280/ComfortZone
-BME280/DewPointMonitor
-BME280/WeatherStation
 BQ27441/battery_status
 BQ27441/low_battery_alert
 DAPLINK_FLASH/data_logger
