@@ -7,8 +7,10 @@
 # publiée du paquet (ni brouillon ni prerelease : c'est ce que renvoie
 # /releases/latest). Si elle est plus récente que la version épinglée, si
 # elle contient l'archive steami-exemples-<tag>.zip et qu'aucune branche ni
-# PR `chore/exemples-arduino-<tag>` n'existe, il télécharge l'archive,
-# calcule son sha256, met à jour exemples-arduino.json et ouvre la PR.
+# PR `chore/exemples-arduino-<tag>` n'existe (points du tag remplacés par
+# des tirets, ex. chore/exemples-arduino-v0-37-0, pour respecter la règle
+# de .validate-branch-namerc.js), il télécharge l'archive, calcule son
+# sha256, met à jour exemples-arduino.json et ouvre la PR.
 #
 # Le dépôt n'a pas de secret d'application GitHub : tout passe par
 # GITHUB_TOKEN. Une PR créée avec GITHUB_TOKEN ne déclenche pas les
@@ -81,7 +83,9 @@ jobs:
           empreinte=$(jq -r --arg a "$archive" \
             'first(.assets[] | select(.name == $a)) | .digest // ""' <<<"$release")
           # Branche ou PR (ouverte ou fermée) déjà là : on ne recommence pas.
-          branche="chore/exemples-arduino-$derniere"
+          # Points remplacés par des tirets : .validate-branch-namerc.js refuse les points
+          # après chore/, et le hook pre-commit bloquerait les commits faits sur la branche.
+          branche="chore/exemples-arduino-${derniere//./-}"
           if git ls-remote --exit-code --heads origin "$branche" >/dev/null 2>&1 \
              || [ -n "$(gh pr list --state all --head "$branche" --json number --jq '.[].number')" ]; then
             echo "$branche existe déjà : rien à faire."
@@ -143,7 +147,7 @@ jobs:
 
           Cette PR change seulement \`exemples-arduino.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
 
-          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouvel exemple qui n'est pas encore expliqué. Pour chacun, il faut soit une section sur sa page dans \`docs/software/arduino/exemples/\`, soit une ligne dans \`scripts/exemples-arduino-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner.
+          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouvel exemple qui n'est pas encore expliqué. Pour chacun, il faut soit une section sur sa page dans \`docs/software/arduino/exemples/\`, soit une ligne dans \`scripts/exemples-arduino-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les exemples retirés ou renommés encore cités dans une page (\`<EssayerExemple id=...>\`) ou dans la liste : corriger la page ou la liste.
           EOT
           gh pr create --base main --head "$BRANCHE" \
             --title "chore(configs): exemples Arduino $DERNIERE" \
