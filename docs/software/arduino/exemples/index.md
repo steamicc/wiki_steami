@@ -21,7 +21,7 @@ Il n'y a rien à installer ni à compiler : chaque exemple est déjà compilé, 
 Avec **Chrome** ou **Edge** sur un ordinateur :
 
 1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
-2. Sous un exemple, cliquer sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte n'est à autoriser qu'une fois par page : tous les exemples de la page s'essaient ensuite sans recommencer. En passant à une page sans exemple à essayer, la carte est libérée : un Codespace ou l'Arduino IDE peut alors s'en servir.
+2. Sous un exemple, cliquer sur **Connecter la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte ne s'autorise qu'une fois par page : tous les exemples de la page s'essaient ensuite sans recommencer. Quand on passe à une page sans exemple à essayer, la carte est libérée : un Codespace ou l'Arduino IDE peut alors s'en servir.
 3. Cliquer sur **Téléverser**. Quand le message « Programme téléversé. » apparaît, la carte redémarre et exécute l'exemple. La console série s'ouvre sous l'exemple et affiche ce que le programme écrit.
 
 L'exemple remplace le programme qui était sur la carte, MicroPython compris : pour revenir à MicroPython, réinstaller son firmware (voir [Installation du firmware MicroPython](/docs/software/micropython/install)).

@@ -10,15 +10,15 @@ import TOCInline from '@theme/TOCInline';
 
 Le VL53L1X mesure la distance de ce qui se trouve devant lui par **temps de vol** (_time of flight_, ToF) : il envoie de brèves impulsions de lumière infrarouge invisible et chronomètre le temps qu'elles mettent à revenir après s'être réfléchies sur l'objet. La lumière parcourt 30 cm par nanoseconde : pour un objet à 15 cm, l'aller-retour dure une nanoseconde. Le capteur fait ce calcul lui-même et donne directement une distance en millimètres.
 
+Sur cette page :
+
+<TOCInline toc={toc} maxHeadingLevel={2} />
+
 Sa portée va jusqu'à 4 m dans de bonnes conditions. Elle diminue avec un objet sombre ou en plein soleil (le soleil contient aussi de l'infrarouge), mais la distance mesurée dépend peu de la couleur de l'objet. Le capteur ne vise pas un point : il voit un cône d'environ 27°, et la distance donnée est celle de ce qui occupe ce cône. Ses caractéristiques, sa fiche technique et son schéma sont sur la page [Capteur de distance — VL53L1X](/docs/hardware/main-components/sensors/vl53l1x).
 
 Le VL53L1X est monté sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)) : les cinq exemples de cette page marchent sur toutes les cartes. Il se trouve sur la face avant, sur le bord de la partie ronde, juste à droite de l'écran : c'est le petit boîtier à deux fenêtres marqué U11, l'une pour l'émetteur, l'autre pour le récepteur. À travers une webcam, on voit son émetteur infrarouge briller pendant les mesures, alors qu'il reste invisible à l'œil nu.
 
 Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → VL53L1X** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#distance--capteur-de-temps-de-vol) donne la façon la plus simple de lire la distance, avec la classe `SteamiDistance` ; ici, les exemples utilisent directement le driver du composant.
-
-Sur cette page :
-
-<TOCInline toc={toc} maxHeadingLevel={2} />
 
 ## Le driver en bref
 
@@ -69,7 +69,7 @@ La condition `distance > 0` traite `0` comme une absence de mesure, comme dans l
 
 ## ParkingSensor {#parkingsensor}
 
-**Ce qu'on observe** : quand la main s'approche du capteur à 20 cm ou moins, le buzzer bipe, de plus en plus vite à mesure que la main se rapproche, comme le radar de recul d'une voiture. Au-delà, il se tait. La console affiche chaque distance mesurée.
+**Ce qu'on observe** : quand la main est à 20 cm ou moins du capteur, le buzzer bipe, de plus en plus vite à mesure que la main se rapproche, comme le radar de recul d'une voiture. Au-delà, il se tait. La console affiche chaque distance mesurée.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/ParkingSensor/ParkingSensor.ino
 
