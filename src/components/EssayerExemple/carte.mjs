@@ -26,6 +26,9 @@ export const DELAI_LIBERATION_MS = 1000;
 export const ETAT_INITIAL = Object.freeze({
   connectee: false,
   occupee: false,
+  // Tentative de connexion en cours : fenêtre de choix ouverte, puis
+  // connexion de DAP.js. occupee l'est aussi.
+  connexion: false,
   // Exemple d'où vient la dernière action : lui seul affiche le statut et l'erreur.
   dernierClic: null,
   // Exemple dont le programme tourne sur la carte : lui seul affiche la console.
@@ -225,7 +228,7 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
   // Tampon, console et messages sont ceux de la connexion précédente.
   tampon.vider();
   oublierActivite();
-  changer({ ...ETAT_INITIAL, occupee: true, dernierClic: id });
+  changer({ ...ETAT_INITIAL, occupee: true, connexion: true, dernierClic: id });
   let appareil = null;
   let nouvelle = null;
   try {
@@ -262,7 +265,7 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
     if (nouvelle) await fermer(nouvelle, appareil);
     changer({ connectee: false, erreur: messageFrancais(err, 'connexion') });
   } finally {
-    apresOperation();
+    apresOperation({ connexion: false });
   }
 }
 

@@ -126,6 +126,49 @@ test('connexion : bauds à 115200 et console lancée', async (t) => {
   await quitter(t, desabonner);
 });
 
+test("connexion : état « connexion » pendant la fenêtre de choix, jusqu'à la carte connectée", async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  journal = [];
+  pannes = {};
+  let choisirCarte;
+  choisir = () =>
+    new Promise((resolve) => {
+      choisirCarte = () => resolve(appareil);
+    });
+  const { vues, desabonner } = suivre('connexion');
+  const connexion = carte.connecter('A');
+  assert.equal(carte.etat.connexion, true);
+  assert.equal(carte.etat.connectee, false);
+  choisirCarte();
+  await connexion;
+  assert.equal(carte.etat.connexion, false);
+  assert.equal(carte.etat.connectee, true);
+  assert.deepEqual(vues, [true, false]);
+  choisir = async () => appareil;
+  await quitter(t, desabonner);
+});
+
+test('connexion : fenêtre de choix fermée sans carte, état « connexion » retiré', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  journal = [];
+  pannes = {};
+  choisir = async () => {
+    const err = new Error('No device selected.');
+    err.name = 'NotFoundError';
+    throw err;
+  };
+  const desabonner = carte.abonner(() => {});
+  await carte.connecter('A');
+  assert.equal(carte.etat.connexion, false);
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.erreur, 'Aucune carte choisie.');
+  assert.deepEqual(journal, []);
+  choisir = async () => appareil;
+  desabonner();
+  t.mock.timers.tick(DELAI_LIBERATION_MS);
+  await attendre();
+});
+
 test('libération : après le délai sans composant, pas avant, et annulée par un nouveau composant', async (t) => {
   const desabonner = await demarrer(t);
   journal = [];
@@ -217,7 +260,7 @@ test('téléversement : erreur de DAP.js traduite, avec le message brut', async 
   await carte.televerser('A', bin);
   assert.equal(
     carte.etat.erreur,
-    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Flash error)',
+    "Le téléversement a échoué : débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer. (Flash error)",
   );
   assert.equal(carte.etat.programmeActif, null);
   // La lecture série repart quand même.
@@ -233,6 +276,7 @@ test('connexion en échec après connect() : la connexion à moitié ouverte est
   await carte.connecter('C');
   assert.deepEqual(journal, ['connect', 'bauds 115200', 'disconnect', 'close']);
   assert.equal(carte.etat.connectee, false);
+  assert.equal(carte.etat.connexion, false);
   assert.equal(carte.etat.dernierClic, 'C');
   assert.match(carte.etat.erreur, /^La connexion à la carte a échoué : .*\(Bad response/);
   desabonner();

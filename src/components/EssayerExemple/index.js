@@ -4,14 +4,13 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
 import {
   LIBELLES_STATUT,
+  affichageProgression,
   estEnBas,
   etatWebUSB,
   idValide,
   nomFichier,
-  pourcentage,
   statutCarte,
   telechargerExemple,
-  texteProgression,
   urlBin,
 } from './logique.mjs';
 import styles from './styles.module.css';
@@ -59,18 +58,21 @@ function VoyantSerie({ activite }) {
   );
 }
 
-// Barre native : les lecteurs d'écran en donnent la valeur. Le pourcentage
-// écrit à côté est pour les yeux seulement.
+// Barre native : les lecteurs d'écran en donnent la valeur. Tant que DAP.js
+// n'a pas commencé à écrire, elle est indéterminée (pas d'attribut value) et
+// annonce la préparation de la carte. Le texte écrit à côté est pour les yeux
+// seulement : « Téléversement en cours… » est déjà annoncé.
 function Progression({ progression }) {
+  const { valeur, texte } = affichageProgression(progression);
   return (
     <div className={styles.progression}>
       <progress
         className={styles.barre}
         max={100}
-        value={pourcentage(progression)}
+        value={valeur ?? undefined}
         aria-label="Progression du téléversement"
       />
-      <span aria-hidden="true">{texteProgression(progression)}</span>
+      <span aria-hidden="true">{texte}</span>
     </div>
   );
 }
@@ -124,8 +126,11 @@ function Controles({ id, href }) {
     carte.deconnecter();
   }
 
+  const statutEtat = statutCarte(etat, id);
+  // Téléversement lancé depuis cet exemple, téléchargement du .bin compris.
+  const televersement = clique && statutEtat === 'televersement';
   let statut = null;
-  if (clique && etat.occupee && etat.connectee) statut = 'Téléversement en cours…';
+  if (televersement) statut = 'Téléversement en cours…';
   else if (clique && etat.programmeActif === id && etat.connectee && !etat.occupee && !erreur) {
     statut = 'Programme téléversé.';
   }
@@ -167,10 +172,10 @@ function Controles({ id, href }) {
         )}
       </div>
       <div className={styles.indicateurs}>
-        <EtatCarte statut={statutCarte(etat, id)} />
+        <EtatCarte statut={statutEtat} />
         {etat.connectee && <VoyantSerie activite={etat.activite} />}
       </div>
-      {clique && etat.progression !== null && <Progression progression={etat.progression} />}
+      {televersement && <Progression progression={etat.progression} />}
       <div className={styles.messages} aria-live="polite">
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}

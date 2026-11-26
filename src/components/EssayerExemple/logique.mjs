@@ -49,6 +49,14 @@ export class ErreurLecteur extends Error {
   }
 }
 
+// Conseil ajouté aux erreurs de DAP.js. Avec une batterie branchée,
+// l'interface USB de la carte (son DAPLink) reste alimentée quand on débranche
+// le câble : seule, cette coupure ne la remet pas à zéro, et le dialogue
+// USB peut rester décalé (« Bad response for 8 -> 17 ») tant que l'interface
+// n'a pas redémarré.
+export const CONSEIL_REINITIALISATION =
+  "débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer.";
+
 const ECHECS = {
   connexion: 'La connexion à la carte a échoué',
   televersement: 'Le téléversement a échoué',
@@ -65,7 +73,7 @@ export function messageFrancais(err, etape = 'televersement') {
   const traduit = messageErreur(err);
   if (traduit !== brut) return traduit;
   const echec = ECHECS[etape] ?? ECHECS.televersement;
-  return `${echec} : débrancher et rebrancher la carte, puis réessayer. (${brut})`;
+  return `${echec} : ${CONSEIL_REINITIALISATION} (${brut})`;
 }
 
 // Télécharge le .bin d'un exemple. cache: 'no-cache' revalide auprès du
@@ -153,8 +161,9 @@ export function nomFichier(id) {
 
 // État de la carte affiché sous chaque exemple, avec une pastille de couleur
 // et toujours un libellé :
-// - 'deconnectee' : pas de carte connectée, y compris pendant une tentative
-//   de connexion (la fenêtre de choix est ouverte, le bouton est grisé) ;
+// - 'connexion' : tentative de connexion en cours (la fenêtre de choix est
+//   ouverte ou DAP.js se connecte, le bouton est grisé) ;
+// - 'deconnectee' : pas de carte connectée ;
 // - 'televersement' : carte connectée et réservée par un téléversement,
 //   téléchargement du .bin compris ;
 // - 'programme' : carte connectée et libre, le dernier téléversement réussi
@@ -162,7 +171,8 @@ export function nomFichier(id) {
 //   toujours quand la carte est connectée et libre) ; seul l'exemple dont le
 //   programme tourne l'affiche ;
 // - 'connectee' : les autres cas, carte connectée.
-export function statutCarte({ connectee, occupee, programmeActif }, id) {
+export function statutCarte({ connexion, connectee, occupee, programmeActif }, id) {
+  if (connexion) return 'connexion';
   if (!connectee) return 'deconnectee';
   if (occupee) return 'televersement';
   if (programmeActif === id) return 'programme';
@@ -170,6 +180,7 @@ export function statutCarte({ connectee, occupee, programmeActif }, id) {
 }
 
 export const LIBELLES_STATUT = Object.freeze({
+  connexion: 'connexion…',
   deconnectee: 'déconnectée',
   connectee: 'connectée',
   televersement: 'téléversement',
@@ -186,9 +197,18 @@ export function pourcentage(progression) {
   return Math.min(100, Math.max(0, Math.floor(valeur * 100)));
 }
 
-export function texteProgression(progression) {
+export const TEXTE_PREPARATION = 'Préparation de la carte…';
+
+// Ce qu'affiche la barre pendant un téléversement. DAP.js n'émet de
+// progression qu'une fois l'écriture commencée : avant (téléchargement du
+// .bin, connexion au processeur, effacement), elle reste à null ou à 0 pendant
+// plusieurs secondes. La barre est alors indéterminée (valeur : null, la
+// <progress> n'a pas d'attribut value) avec le texte TEXTE_PREPARATION ; elle
+// passe au pourcentage dès qu'il n'est plus nul.
+export function affichageProgression(progression) {
   const pct = pourcentage(progression);
-  return pct === null ? '' : `${pct}\u00a0%`;
+  if (!pct) return { valeur: null, texte: TEXTE_PREPARATION };
+  return { valeur: pct, texte: `${pct}\u00a0%` };
 }
 
 // DAP.js émet une progression par paquet USB (des centaines par

@@ -4,11 +4,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  CONSEIL_REINITIALISATION,
   ErreurLecteur,
   INTERVALLE_ACTIVITE_MS,
   LIBELLES_STATUT,
+  TEXTE_PREPARATION,
   TamponLignes,
   activiteASignaler,
+  affichageProgression,
   estEnBas,
   etatWebUSB,
   idValide,
@@ -21,7 +24,6 @@ import {
   progressionChangee,
   statutCarte,
   telechargerExemple,
-  texteProgression,
   urlBin,
 } from './logique.mjs';
 
@@ -117,15 +119,15 @@ test('messageFrancais : garde la traduction de messageErreur', () => {
 test('messageFrancais : erreur de DAP.js non traduite, en français avec le message brut', () => {
   assert.equal(
     messageFrancais(new Error('Flash error')),
-    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Flash error)',
+    "Le téléversement a échoué : débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer. (Flash error)",
   );
   assert.equal(
     messageFrancais(new Error('Transfer response FAULT'), 'televersement'),
-    'Le téléversement a échoué : débrancher et rebrancher la carte, puis réessayer. (Transfer response FAULT)',
+    `Le téléversement a échoué : ${CONSEIL_REINITIALISATION} (Transfer response FAULT)`,
   );
-  assert.match(
-    messageFrancais(new Error('Bad response for 130 -> 0'), 'connexion'),
-    /^La connexion à la carte a échoué : débrancher .*\(Bad response for 130 -> 0\)$/,
+  assert.equal(
+    messageFrancais(new Error('Bad response for 8 -> 17'), 'connexion'),
+    `La connexion à la carte a échoué : ${CONSEIL_REINITIALISATION} (Bad response for 8 -> 17)`,
   );
   assert.match(
     messageFrancais(new Error('Wait timed out'), 'console'),
@@ -199,11 +201,12 @@ test('peutDeconnecter : seulement carte connectée et libre', () => {
   assert.equal(peutDeconnecter({ occupee: true, connectee: false }), false);
 });
 
-test("statutCarte : déconnectée tant que la carte n'est pas connectée, même pendant la connexion", () => {
+test("statutCarte : déconnectée tant que la carte n'est pas connectée", () => {
   assert.equal(
     statutCarte({ connectee: false, occupee: false, programmeActif: null }, 'A'),
     'deconnectee',
   );
+  // Carte perdue pendant le téléchargement du .bin : réservée, mais pas en connexion.
   assert.equal(
     statutCarte({ connectee: false, occupee: true, programmeActif: null }, 'A'),
     'deconnectee',
@@ -213,6 +216,15 @@ test("statutCarte : déconnectée tant que la carte n'est pas connectée, même 
     statutCarte({ connectee: false, occupee: false, programmeActif: 'A' }, 'A'),
     'deconnectee',
   );
+});
+
+test('statutCarte : connexion sous chaque exemple pendant une tentative de connexion', () => {
+  const etat = { connexion: true, connectee: false, occupee: true, programmeActif: null };
+  assert.equal(statutCarte(etat, 'A'), 'connexion');
+  assert.equal(statutCarte(etat, 'B'), 'connexion');
+  // DAP.js vient de se connecter, la console démarre : toujours en connexion.
+  assert.equal(statutCarte({ ...etat, connectee: true }, 'A'), 'connexion');
+  assert.equal(statutCarte({ ...etat, connexion: false, occupee: false }, 'A'), 'deconnectee');
 });
 
 test('statutCarte : téléversement sous chaque exemple tant que la carte est réservée', () => {
@@ -229,9 +241,10 @@ test("statutCarte : programme en cours sous l'exemple actif seulement", () => {
 });
 
 test('statutCarte : chaque statut a un libellé', () => {
-  for (const statut of ['deconnectee', 'connectee', 'televersement', 'programme']) {
+  for (const statut of ['connexion', 'deconnectee', 'connectee', 'televersement', 'programme']) {
     assert.ok(LIBELLES_STATUT[statut], statut);
   }
+  assert.equal(LIBELLES_STATUT.connexion, 'connexion…');
   assert.equal(LIBELLES_STATUT.programme, 'programme en cours');
 });
 
@@ -247,9 +260,20 @@ test('pourcentage : entier arrondi vers le bas, borné, null sans téléversemen
   assert.equal(pourcentage(Number.NaN), 0);
 });
 
-test('texteProgression : pourcentage avec espace insécable', () => {
-  assert.equal(texteProgression(0.5), '50\u00a0%');
-  assert.equal(texteProgression(null), '');
+test('affichageProgression : préparation indéterminée tant que la progression est nulle', () => {
+  const preparation = { valeur: null, texte: 'Préparation de la carte…' };
+  assert.equal(TEXTE_PREPARATION, 'Préparation de la carte…');
+  assert.deepEqual(affichageProgression(null), preparation);
+  assert.deepEqual(affichageProgression(undefined), preparation);
+  assert.deepEqual(affichageProgression(0), preparation);
+  // Moins de 1 % : le pourcentage affiché serait encore 0.
+  assert.deepEqual(affichageProgression(0.004), preparation);
+});
+
+test('affichageProgression : pourcentage avec espace insécable dès la première progression', () => {
+  assert.deepEqual(affichageProgression(0.05), { valeur: 5, texte: '5\u00a0%' });
+  assert.deepEqual(affichageProgression(0.5), { valeur: 50, texte: '50\u00a0%' });
+  assert.deepEqual(affichageProgression(1), { valeur: 100, texte: '100\u00a0%' });
 });
 
 test('progressionChangee : seulement quand le pourcentage affiché change', () => {

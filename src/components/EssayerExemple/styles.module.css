@@ -127,6 +127,12 @@
   background: transparent;
 }
 
+/* Connexion en cours : pleine mais neutre, ni l'état déconnecté ni un
+   état de la carte connectée. */
+.pastille[data-statut='connexion'] {
+  background: var(--ifm-color-emphasis-400);
+}
+
 .pastille[data-statut='connectee'] {
   background: var(--ifm-color-info);
 }

@@ -42,11 +42,11 @@ Le navigateur ouvre une fenêtre qui liste les cartes branchées. Cliquer sur **
 
 Une fois la carte connectée, chaque bouton **Connecter la carte** de la page devient **Téléverser**, à côté d'un bouton **Déconnecter**. La carte ne s'autorise qu'une fois par page.
 
-Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, puis « Carte : connectée ». À côté, le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données.
+Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, « Carte : connexion… » (pastille grise) tant que la fenêtre de choix est ouverte et que la page se connecte, puis « Carte : connectée ». À côté, le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données.
 
 ## 3. Téléverser l'exemple
 
-Cliquer sur **Téléverser**. Le message « Téléversement en cours… » s'affiche et les boutons restent grisés pendant l'envoi, qui dure moins de dix secondes. Sous chaque exemple, l'état passe à « Carte : téléversement ». Sous l'exemple choisi, une barre de progression et un pourcentage suivent l'écriture du programme sur la carte ; la barre disparaît à la fin de l'envoi, qu'il ait réussi ou non.
+Cliquer sur **Téléverser**. Le message « Téléversement en cours… » s'affiche et les boutons restent grisés pendant l'envoi, qui dure moins de dix secondes. Sous chaque exemple, l'état passe à « Carte : téléversement ». Sous l'exemple choisi, une barre de progression apparaît. Pendant les premières secondes, la carte se prépare (téléchargement de l'exemple, effacement de la mémoire) : la barre défile sans valeur, avec le texte « Préparation de la carte… ». Dès que l'écriture du programme commence, un pourcentage la remplace ; la barre disparaît à la fin de l'envoi, qu'il ait réussi ou non.
 
 ![Encadré de l'exemple pendant l'envoi : bouton Téléverser grisé et message « Téléversement en cours… »](/img/software/arduino/essayer-exemple-03-televersement.png)
 
@@ -75,6 +75,8 @@ Si la connexion ou l'envoi échoue, un message en rouge explique quoi faire, et 
 ![Encadré de l'exemple après une connexion annulée : message « Aucune carte choisie. », puis le lien « Télécharger le .bin » et la consigne « Glisser ce fichier sur le lecteur STEAMI de la carte. »](/img/software/arduino/essayer-exemple-05-erreur.png)
 
 Le fichier téléchargé est le même programme : le glisser sur le lecteur **STEAMI**, comme décrit dans [Glisser le fichier sur le lecteur STEAMI](../codespace#autre-méthode--glisser-le-fichier-sur-le-lecteur-steami). C'est la solution quand l'USB est bloqué sur un poste géré, ou sous Linux sans règle `udev` pour la carte (voir [Envoyer le programme sur la carte](../codespace#5-envoyer-le-programme-sur-la-carte)).
+
+Quand la connexion ou l'envoi échoue en cours de route, le message demande de débrancher le câble USB et, s'il y en a une, la batterie, d'attendre quelques secondes, puis de rebrancher et de réessayer. La batterie compte : tant qu'elle est branchée, l'interface USB de la carte (son DAPLink) reste alimentée, et débrancher le câble seul ne la remet pas à zéro.
 
 ## Sans Chrome ni Edge
 
