@@ -1,14 +1,3 @@
-BLE/BleBeacon
-BLE/BleHotCold
-BLE/BleIndoorMap
-BLE/BleRssiMapper
-BLE/BleRssiProximity
-BLE/BleTrilateration
-MCP23009E/MorseCode
-MCP23009E/MusicPlayer
-MCP23009E/ReactionTimer
-MCP23009E/SimonGame
-MCP23009E/dpad_reader
 SSD1327/framebuf_lines
 SSD1327/framebuf_pixels
 SSD1327/framebuf_rects
@@ -20,6 +9,3 @@ SSD1327/random_pixels
 SSD1327/rotating_3d_cube
 SSD1327/rotation
 SSD1327/shades
-WSEN-PADS/altitude
-WSEN-PADS/floor_detector
-WSEN-PADS/read_pressure_temperature
