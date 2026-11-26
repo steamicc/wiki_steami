@@ -4,10 +4,15 @@ sidebar_label: VL53L1X (distance)
 ---
 
 import EssayerExemple from '@site/src/components/EssayerExemple';
+import TOCInline from '@theme/TOCInline';
 
 # Exemples VL53L1X : capteur de distance
 
 Le VL53L1X mesure la distance de ce qui se trouve devant lui par **temps de vol** (_time of flight_, ToF) : il envoie de brèves impulsions de lumière infrarouge invisible et chronomètre le temps qu'elles mettent à revenir après s'être réfléchies sur l'objet. La lumière parcourt 30 cm par nanoseconde : pour un objet à 15 cm, l'aller-retour dure une nanoseconde. Le capteur fait ce calcul lui-même et donne directement une distance en millimètres.
+
+Sur cette page :
+
+<TOCInline toc={toc} maxHeadingLevel={2} />
 
 Sa portée va jusqu'à 4 m dans de bonnes conditions. Elle diminue avec un objet sombre ou en plein soleil (le soleil contient aussi de l'infrarouge), mais la distance mesurée dépend peu de la couleur de l'objet. Le capteur ne vise pas un point : il voit un cône d'environ 27°, et la distance donnée est celle de ce qui occupe ce cône. Ses caractéristiques, sa fiche technique et son schéma sont sur la page [Capteur de distance — VL53L1X](/docs/hardware/main-components/sensors/vl53l1x).
 
@@ -34,7 +39,7 @@ Le capteur signale aussi chaque nouvelle mesure sur une ligne d'interruption rel
 
 ## BasicDistance {#basicdistance}
 
-**Ce que tu vas voir** : la console écrit `VL53L1X basic distance example`, puis la distance à chaque nouvelle mesure, environ cinq fois par seconde, par exemple `Distance: 182 mm`. Approche ta main du capteur puis éloigne-la : la valeur suit. Si rien n'est à portée, le nombre affiché n'a pas de sens.
+**Ce qu'on observe** : la console écrit `VL53L1X basic distance example`, puis la distance à chaque nouvelle mesure, environ cinq fois par seconde, par exemple `Distance: 182 mm`. Quand la main s'approche puis s'éloigne du capteur, la valeur suit. Si rien n'est à portée, le nombre affiché n'a pas de sens.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/BasicDistance/BasicDistance.ino
 
@@ -48,7 +53,7 @@ Le capteur et le programme ont chacun leur rythme. Sans le test `dataReady()`, `
 
 ## ProximityAlarm {#proximityalarm}
 
-**Ce que tu vas voir** : la console affiche les distances mesurées. Approche un doigt du capteur : quand la distance lue tombe à 30 mm ou moins, le buzzer sonne, et il se tait dès qu'elle remonte au-dessus.
+**Ce qu'on observe** : la console affiche les distances mesurées. Quand un doigt s'approche du capteur et que la distance lue tombe à 30 mm ou moins, le buzzer sonne ; il se tait dès qu'elle remonte au-dessus.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/ProximityAlarm/ProximityAlarm.ino
 
@@ -64,7 +69,7 @@ La condition `distance > 0` traite `0` comme une absence de mesure, comme dans l
 
 ## ParkingSensor {#parkingsensor}
 
-**Ce que tu vas voir** : approche la main du capteur. Jusqu'à 20 cm, le buzzer bipe, de plus en plus vite à mesure que la main se rapproche, comme le radar de recul d'une voiture. Au-delà, il se tait. La console affiche chaque distance mesurée.
+**Ce qu'on observe** : quand la main est à 20 cm ou moins du capteur, le buzzer bipe, de plus en plus vite à mesure que la main se rapproche, comme le radar de recul d'une voiture. Au-delà, il se tait. La console affiche chaque distance mesurée.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/ParkingSensor/ParkingSensor.ino
 
@@ -80,9 +85,9 @@ Comme la décision de biper est prise à l'arrivée de chaque mesure, les bips n
 
 ## ObjectCounter {#objectcounter}
 
-**Ce que tu vas voir** : pose la carte face à un mur ou à un meuble, à quelques dizaines de centimètres, et ne passe rien devant le capteur au démarrage, jusqu'à ce que la console affiche la distance du fond, par exemple `Background: 640 mm. Counting objects...` (quelques secondes). Passe ensuite la main, ou un objet, entre le capteur et le fond : chaque passage ajoute 1 au compteur, `Object detected! Count: 3`.
+**Ce qu'on observe** : poser la carte face à un mur ou à un meuble, à quelques dizaines de centimètres, et ne rien passer devant le capteur au démarrage, jusqu'à ce que la console affiche la distance du fond, par exemple `Background: 640 mm. Counting objects...` (quelques secondes). Ensuite, chaque passage de la main, ou d'un objet, entre le capteur et le fond ajoute 1 au compteur, `Object detected! Count: 3`.
 
-Si le fond est trop proche (5 cm ou moins) ou n'a pas pu être mesuré, l'exemple l'écrit et s'arrête : dégage le champ devant le capteur et appuie sur le bouton Reset de la carte.
+Si le fond est trop proche (5 cm ou moins) ou n'a pas pu être mesuré, l'exemple l'écrit et s'arrête : dégager le champ devant le capteur et appuyer sur le bouton Reset de la carte.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/ObjectCounter/ObjectCounter.ino
 
@@ -98,7 +103,7 @@ Comme le capteur voit un cône et non un fin faisceau, un objet peut être compt
 
 ## GestureDetection {#gesturedetection}
 
-**Ce que tu vas voir** : passe la main devant le capteur, à moins de 15 cm, et retire-la aussitôt : la LED RGB s'allume en bleu et la console écrit `Wave: LED on`. Un deuxième passage l'éteint, `Wave: LED off`. Une main qui reste devant le capteur ne fait rien : il faut la retirer au-delà de 25 cm moins de 0,6 s après l'avoir approchée.
+**Ce qu'on observe** : quand la main passe devant le capteur, à moins de 15 cm, et se retire aussitôt, la LED RGB s'allume en bleu et la console écrit `Wave: LED on`. Un deuxième passage l'éteint, `Wave: LED off`. Une main qui reste devant le capteur ne fait rien : il faut la retirer au-delà de 25 cm moins de 0,6 s après l'avoir approchée.
 
 ```cpp file=.external/arduino-steami/examples/VL53L1X/GestureDetection/GestureDetection.ino
 

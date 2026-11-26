@@ -65,7 +65,7 @@ export function messageFrancais(err, etape = 'televersement') {
   const traduit = messageErreur(err);
   if (traduit !== brut) return traduit;
   const echec = ECHECS[etape] ?? ECHECS.televersement;
-  return `${echec} : débranche et rebranche la carte, puis réessaie. (${brut})`;
+  return `${echec} : débrancher et rebrancher la carte, puis réessayer. (${brut})`;
 }
 
 // Télécharge le .bin d'un exemple. cache: 'no-cache' revalide auprès du
@@ -78,11 +78,11 @@ export async function telechargerExemple(href, recuperer = fetch) {
     if (reponse.ok) return await reponse.arrayBuffer();
   } catch {
     throw new ErreurLecteur(
-      "Impossible de télécharger l'exemple : vérifie la connexion à Internet, puis réessaie.",
+      "Impossible de télécharger l'exemple : vérifier la connexion à Internet, puis réessayer.",
     );
   }
   throw new ErreurLecteur(
-    `Exemple introuvable sur le wiki (erreur ${reponse.status}) : recharge la page, puis réessaie.`,
+    `Exemple introuvable sur le wiki (erreur ${reponse.status}) : recharger la page, puis réessayer.`,
   );
 }
 

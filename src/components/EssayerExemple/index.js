@@ -18,7 +18,7 @@ function Telechargement({ id, href }) {
       <a href={href} download={nomFichier(id)}>
         Télécharger le .bin
       </a>{' '}
-      Glisse ce fichier sur le lecteur STEAMI de la carte.
+      Glisser ce fichier sur le lecteur STEAMI de la carte.
     </p>
   );
 }
