@@ -58,7 +58,7 @@ L'écran de la carte ne change pas : les exemples VL53L1X ne s'en servent pas, e
 
 Les autres exemples de la page se téléversent directement avec leur bouton **Téléverser**, sans reconnecter la carte. La console de l'exemple précédent disparaît, et celle du nouvel exemple s'ouvre sous lui.
 
-En quittant les pages d'exemples, la carte est libérée au bout d'une seconde environ. Pour la libérer tout de suite, cliquer sur **Déconnecter**, grisé pendant un envoi pour ne pas l'interrompre : chaque bouton de la page redevient **Connecter la carte**. Une fois la carte libérée, un [Codespace](../codespace) ou l'[Arduino IDE](../arduino-ide) peut s'en servir, sans fermer l'onglet du wiki. Pour essayer de nouveau un exemple, cliquer sur **Connecter la carte** et choisir la carte comme à l'étape 2.
+En quittant les pages d'exemples, la carte est libérée au bout d'une seconde environ. Pour la libérer tout de suite, cliquer sur **Déconnecter**, grisé pendant un téléversement pour ne pas l'interrompre : chaque bouton de la page redevient **Connecter la carte**. Une fois la carte libérée, un [Codespace](../codespace) ou l'[Arduino IDE](../arduino-ide) peut s'en servir, sans fermer l'onglet du wiki. Pour essayer de nouveau un exemple, cliquer sur **Connecter la carte** et choisir la carte comme à l'étape 2.
 
 ## En cas d'erreur
 
