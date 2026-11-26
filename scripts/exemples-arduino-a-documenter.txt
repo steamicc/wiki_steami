@@ -29,10 +29,6 @@ GC9A01/rotation
 ISM330DL/BasicReader
 ISM330DL/Motion
 ISM330DL/Orientation
-LIS2MDL/BasicReader
-LIS2MDL/DigitalCompass
-LIS2MDL/MagneticCalibration
-LIS2MDL/MetalDetector
 MCP23009E/MorseCode
 MCP23009E/MusicPlayer
 MCP23009E/ReactionTimer
