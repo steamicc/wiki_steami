@@ -1,6 +1,8 @@
 // Fonctions pures du composant EssayerExemple (sans DOM, testables avec node).
 // etatWebUSB, messageErreur et TamponLignes viennent de la page « Téléverser » du Codespace
-// (steamicc/arduino-steami-devcontainer, .devcontainer/source/flasher/).
+// (steamicc/arduino-steami-devcontainer, .devcontainer/source/flasher/). Les messages de
+// messageErreur s'en écartent volontairement : ton neutre (infinitifs, sans « vous »), comme le
+// reste du wiki, et conseil corrigé pour un accès refusé (SecurityError).
 
 // 'absent' : le navigateur n'a pas WebUSB (Firefox, Safari) ;
 // 'iframe' : WebUSB existe mais la page est dans un cadre (aperçu de
@@ -25,18 +27,20 @@ export function messageErreur(err) {
   if (nom === 'SecurityError' && /permissions policy/i.test(message)) {
     return "Le navigateur interdit l'USB dans cet aperçu : ouvrir la page dans un onglet du navigateur.";
   }
+  // La fenêtre de choix a déjà donné l'accès au site : un refus vient du
+  // système (Linux sans règle udev) ou d'un autre programme qui tient la carte.
   if (nom === 'SecurityError') {
-    return "Le navigateur indique : accès à la carte refusé. Autorisez l'USB pour ce site, puis réessayez.";
+    return "Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte : l'installer, ou glisser le .bin ci-dessous sur le lecteur STEAMI (voir la page Codespace). Sinon, un autre programme ou onglet utilise la carte (Arduino IDE, Codespace…) : le fermer, puis réessayer.";
   }
   if (nom === 'NetworkError' && /claim interface/i.test(message)) {
-    return 'La carte est déjà utilisée par un autre onglet ou un autre programme : fermez-le puis réessayez.';
+    return 'La carte est déjà utilisée par un autre onglet ou un autre programme : le fermer, puis réessayer.';
   }
   if (
     /transfer error|controlTransfer(In|Out)|transfer(In|Out)|device unavailable|disconnected/i.test(
       message,
     )
   ) {
-    return 'La carte a été débranchée ou elle est utilisée par un autre onglet : rebranchez-la, puis réessayez.';
+    return 'La carte a été débranchée ou elle est utilisée par un autre onglet : la rebrancher, puis réessayer.';
   }
   return message;
 }
@@ -64,9 +68,9 @@ const ECHECS = {
 };
 
 // Message à afficher pour une erreur survenue pendant une étape (connexion,
-// televersement ou console). messageErreur reste identique à la copie du
-// Codespace : ce qu'il ne traduit pas (erreurs de DAP.js, comme « Flash error »)
-// devient une phrase en français qui dit quoi faire, suivie du message d'origine.
+// televersement ou console). Ce que messageErreur ne traduit pas (erreurs de
+// DAP.js, comme « Flash error ») devient une phrase en français qui dit quoi
+// faire, suivie du message d'origine.
 export function messageFrancais(err, etape = 'televersement') {
   if (err?.name === 'ErreurLecteur') return err.message;
   const brut = err?.message || String(err);
@@ -177,6 +181,33 @@ export function statutCarte({ connexion, connectee, occupee, programmeActif }, i
   if (occupee) return 'televersement';
   if (programmeActif === id) return 'programme';
   return 'connectee';
+}
+
+// Message annoncé (région aria-live) sous l'exemple id, null s'il n'y en a
+// pas. Seul l'exemple cliqué en dernier en a un :
+// - pendant un téléversement lancé depuis lui ;
+// - « Programme téléversé. » quand son programme tourne ;
+// - « Carte connectée. » après une connexion réussie depuis lui, tant
+//   qu'aucun exemple n'a été téléversé : l'état de la carte n'a pas de
+//   région aria-live, c'est la seule annonce de la connexion.
+// Jamais avec une erreur, qui s'annonce elle-même.
+export function messageStatut(etat, id) {
+  if (etat.dernierClic !== id || etat.erreur) return null;
+  if (statutCarte(etat, id) === 'televersement') return 'Téléversement en cours…';
+  if (!etat.connectee || etat.occupee) return null;
+  if (etat.programmeActif === id) return 'Programme téléversé.';
+  if (etat.programmeActif === null) return 'Carte connectée.';
+  return null;
+}
+
+// Le voyant d'activité série accompagne la console : il n'est affiché que
+// sous l'exemple dont le programme tourne, ou, tant qu'aucun exemple n'a été
+// téléversé (le programme d'avant tourne encore), sous l'exemple cliqué en
+// dernier. Sinon, chaque exemple de la page aurait son voyant, qui clignoterait
+// pour un programme qui n'est pas le sien.
+export function voyantVisible({ connectee, programmeActif, dernierClic }, id) {
+  if (!connectee) return false;
+  return programmeActif === null ? dernierClic === id : programmeActif === id;
 }
 
 export const LIBELLES_STATUT = Object.freeze({

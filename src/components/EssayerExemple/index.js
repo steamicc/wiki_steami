@@ -8,10 +8,12 @@ import {
   estEnBas,
   etatWebUSB,
   idValide,
+  messageStatut,
   nomFichier,
   statutCarte,
   telechargerExemple,
   urlBin,
+  voyantVisible,
 } from './logique.mjs';
 import styles from './styles.module.css';
 
@@ -86,9 +88,14 @@ function Controles({ id, href }) {
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const consoleRef = useRef(null);
   const connecterRef = useRef(null);
+  const televerserRef = useRef(null);
   // Après « Déconnecter », le bouton cliqué disparaît : le focus passe à
   // « Connecter la carte », qui le remplace, au lieu de retomber sur la page.
   const refocaliserRef = useRef(false);
+  // Pendant une connexion ou un téléversement lancé depuis cet exemple, le
+  // bouton cliqué est grisé, voire remplacé : il perd le focus. À la fin de
+  // l'opération, le focus revient sur le bouton suivant de cet exemple.
+  const focaliserApresRef = useRef(false);
   // Le lecteur était-il en bas de la console à son dernier défilement ?
   const colleRef = useRef(true);
 
@@ -107,17 +114,47 @@ function Controles({ id, href }) {
     if (colleRef.current) pre.scrollTop = pre.scrollHeight;
   }, [etat.lignes, montrerConsole]);
 
+  // Valeur de etat.connectee au rendu précédent, pour ne réagir qu'au passage
+  // de connectée à déconnectée (et pas au montage du composant).
+  const connecteeAvantRef = useRef(etat.connectee);
+
   useLayoutEffect(() => {
-    if (etat.connectee || !refocaliserRef.current) return;
-    refocaliserRef.current = false;
+    const vientDeSeDeconnecter = connecteeAvantRef.current && !etat.connectee;
+    connecteeAvantRef.current = etat.connectee;
+    if (etat.connectee) return;
+    if (refocaliserRef.current) {
+      refocaliserRef.current = false;
+      connecterRef.current?.focus();
+      return;
+    }
+    // Carte débranchée hors de toute opération : « Téléverser » et
+    // « Déconnecter » disparaissent. Si le focus est retombé sur la page, il
+    // passe à « Connecter la carte » de l'exemple cliqué en dernier.
+    // Comportement non couvert par les tests (pas de rendu du composant).
+    if (!vientDeSeDeconnecter || !clique) return;
+    const actif = document.activeElement;
+    if (actif && actif !== document.body) return;
     connecterRef.current?.focus();
-  }, [etat.connectee]);
+  }, [etat.connectee, clique]);
+
+  // Opération finie : « Téléverser » si la carte est connectée, sinon
+  // « Connecter la carte » (connexion échouée). Seulement si le focus est
+  // perdu (retombé sur la page) : s'il est ailleurs, le lecteur l'y a mis.
+  useLayoutEffect(() => {
+    if (etat.occupee || !focaliserApresRef.current) return;
+    focaliserApresRef.current = false;
+    const actif = document.activeElement;
+    if (actif && actif !== document.body) return;
+    (etat.connectee ? televerserRef : connecterRef).current?.focus();
+  }, [etat.occupee, etat.connectee]);
 
   function televerser() {
+    focaliserApresRef.current = true;
     carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
+    focaliserApresRef.current = true;
     carte.connecter(id, urlDapjs);
   }
 
@@ -129,11 +166,7 @@ function Controles({ id, href }) {
   const statutEtat = statutCarte(etat, id);
   // Téléversement lancé depuis cet exemple, téléchargement du .bin compris.
   const televersement = clique && statutEtat === 'televersement';
-  let statut = null;
-  if (televersement) statut = 'Téléversement en cours…';
-  else if (clique && etat.programmeActif === id && etat.connectee && !etat.occupee && !erreur) {
-    statut = 'Programme téléversé.';
-  }
+  const statut = messageStatut(etat, id);
 
   return (
     <div className={styles.controles}>
@@ -141,6 +174,7 @@ function Controles({ id, href }) {
         {etat.connectee ? (
           <>
             <button
+              ref={televerserRef}
               type="button"
               className={styles.bouton}
               disabled={etat.occupee}
@@ -173,7 +207,7 @@ function Controles({ id, href }) {
       </div>
       <div className={styles.indicateurs}>
         <EtatCarte statut={statutEtat} />
-        {etat.connectee && <VoyantSerie activite={etat.activite} />}
+        {voyantVisible(etat, id) && <VoyantSerie activite={etat.activite} />}
       </div>
       {televersement && <Progression progression={etat.progression} />}
       <div className={styles.messages} aria-live="polite">

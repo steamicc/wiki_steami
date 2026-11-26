@@ -1,4 +1,8 @@
+import contextlib
 import importlib.util
+import io
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -64,6 +68,41 @@ class TestVerifier(unittest.TestCase):
         texte = page(titre="### GestureDetection {#gesturedetection}")
         erreurs = verifier({ID}, {PAGE: texte}, [])
         self.assertTrue(any(ID in e for e in erreurs))
+
+
+class TestVersion(unittest.TestCase):
+    def test_same_version_ok(self):
+        self.assertIsNone(module.verifier_version("v0.37.0", "v0.37.0"))
+
+    def test_stale_index(self):
+        erreur = module.verifier_version("v0.36.2", "v0.37.0")
+        self.assertIn("index des exemples périmé", erreur)
+        self.assertIn("relancer npm run prebuild", erreur)
+        self.assertIn("v0.36.2", erreur)
+        self.assertIn("v0.37.0", erreur)
+
+    def test_main_stops_on_stale_index(self):
+        with tempfile.TemporaryDirectory() as dossier:
+            dossier = Path(dossier)
+            index = dossier / "index.json"
+            index.write_text(
+                json.dumps({"version": "v0.36.2", "exemples": [{"id": ID}]}), encoding="utf-8"
+            )
+            epingle = dossier / "exemples-arduino.json"
+            epingle.write_text(json.dumps({"version": "v0.37.0"}), encoding="utf-8")
+            pages = dossier / "pages"
+            pages.mkdir()
+            (pages / "vl53l1x.md").write_text(page(), encoding="utf-8")
+            args = ["--index", str(index), "--pages", str(pages), "--epingle", str(epingle)]
+            args += ["--attente", str(dossier / "absente.txt")]
+            sortie = io.StringIO()
+            with contextlib.redirect_stderr(sortie):
+                self.assertEqual(module.main(args), 1)
+            self.assertIn("relancer npm run prebuild", sortie.getvalue())
+
+            epingle.write_text(json.dumps({"version": "v0.36.2"}), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(module.main(args), 0)
 
 
 if __name__ == "__main__":

@@ -10,8 +10,12 @@ Règles :
 4. un id documenté ne doit plus être en attente ;
 5. un id en attente doit exister dans l'index.
 
+Avant tout, la version de l'index doit être celle épinglée dans
+exemples-arduino.json : sinon l'index est périmé (npm run prebuild).
+
 Usage :
     python3 scripts/check-arduino-examples.py [--index PATH] [--pages DIR] [--attente PATH]
+                                              [--epingle PATH]
 """
 
 import argparse
@@ -24,6 +28,7 @@ RACINE = Path(__file__).resolve().parent.parent
 INDEX_DEFAUT = RACINE / "static" / "exemples-arduino" / "index.json"
 PAGES_DEFAUT = RACINE / "docs" / "software" / "arduino" / "exemples"
 ATTENTE_DEFAUT = Path(__file__).resolve().parent / "exemples-arduino-a-documenter.txt"
+EPINGLE_DEFAUT = RACINE / "exemples-arduino.json"
 
 TITRE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
 BALISE = re.compile(r"<EssayerExemple\b[^>]*?\bid=(?:\"([^\"]*)\"|'([^']*)')[^>]*>")
@@ -90,11 +95,22 @@ def verifier(index_ids, pages, attente):
     return erreurs
 
 
+def verifier_version(version_index, version_epinglee):
+    """Message d'erreur si l'index n'est pas celui de la version épinglée, sinon None."""
+    if version_index == version_epinglee:
+        return None
+    return (
+        f"index des exemples périmé ({version_index}, version épinglée {version_epinglee}) : "
+        "relancer npm run prebuild"
+    )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--index", type=Path, default=INDEX_DEFAUT)
     parser.add_argument("--pages", type=Path, default=PAGES_DEFAUT)
     parser.add_argument("--attente", type=Path, default=ATTENTE_DEFAUT)
+    parser.add_argument("--epingle", type=Path, default=EPINGLE_DEFAUT)
     args = parser.parse_args(argv)
 
     if not args.index.is_file():
@@ -105,6 +121,12 @@ def main(argv=None):
         return 1
 
     index = json.loads(args.index.read_text(encoding="utf-8"))
+    if args.epingle.is_file():
+        epinglee = json.loads(args.epingle.read_text(encoding="utf-8")).get("version")
+        erreur = verifier_version(index.get("version"), epinglee)
+        if erreur:
+            print(f"Erreur : {erreur}", file=sys.stderr)
+            return 1
     index_ids = {e["id"] for e in index["exemples"]}
     pages = {
         p: p.read_text(encoding="utf-8") for p in sorted(args.pages.glob("*.md"))

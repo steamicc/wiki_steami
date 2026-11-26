@@ -56,11 +56,16 @@ jobs:
         run: npm run test:scripts
 
       - name: Build site
+        id: build
         run: |
           set -o pipefail
           npm run build 2>&1 | tee build.log
 
+      # Lancé même si le build échoue : un exemple retiré ou renommé fait
+      # échouer le build (fichier .ino introuvable), et cette vérification dit
+      # lequel. Le prebuild du build a déjà écrit l'index des exemples.
       - name: Check Arduino examples
+        if: ${{ !cancelled() && steps.build.outcome != 'skipped' }}
         run: npm run lint:arduino-examples
 
       - name: Validate code examples

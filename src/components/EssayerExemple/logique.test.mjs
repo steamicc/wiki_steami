@@ -17,6 +17,7 @@ import {
   idValide,
   messageErreur,
   messageFrancais,
+  messageStatut,
   nomFichier,
   peutDeconnecter,
   peutLiberer,
@@ -25,6 +26,7 @@ import {
   statutCarte,
   telechargerExemple,
   urlBin,
+  voyantVisible,
 } from './logique.mjs';
 
 test('TamponLignes : ne renvoie que les lignes complètes', () => {
@@ -67,7 +69,7 @@ test('messageErreur : messages de Chrome', () => {
   );
   assert.match(
     messageErreur({ name: 'SecurityError', message: 'Access denied.' }),
-    /accès à la carte refusé/,
+    /Accès à la carte refusé/,
   );
   assert.match(
     messageErreur({ name: 'SecurityError', message: 'Failed ... permissions policy ... usb' }),
@@ -77,6 +79,30 @@ test('messageErreur : messages de Chrome', () => {
     messageErreur({ name: 'NetworkError', message: 'Unable to claim interface.' }),
     /utilisée par un autre onglet/,
   );
+});
+
+test('messageErreur : accès refusé (Linux sans règle udev, carte tenue par un autre programme)', () => {
+  const texte = messageErreur({ name: 'SecurityError', message: 'Access denied.' });
+  assert.match(texte, /^Accès à la carte refusé/);
+  assert.match(texte, /Sous Linux, il manque sans doute la règle udev de la carte/);
+  assert.match(texte, /un autre programme ou onglet utilise la carte/);
+  // Le site a déjà l'accès par la fenêtre de choix : pas de réglage du site à changer.
+  assert.doesNotMatch(texte, /pour ce site/);
+});
+
+test('messageErreur : ton neutre, sans « vous » ni impératif', () => {
+  const erreurs = [
+    { name: 'NotFoundError', message: 'No device selected.' },
+    { name: 'NotFoundError', message: 'The device was disconnected.' },
+    { name: 'SecurityError', message: 'Access denied.' },
+    { name: 'SecurityError', message: 'Failed ... permissions policy ... usb' },
+    { name: 'NetworkError', message: 'Unable to claim interface.' },
+    { name: 'NetworkError', message: 'A transfer error has occurred.' },
+  ];
+  for (const err of erreurs) {
+    const texte = messageErreur(err);
+    assert.doesNotMatch(texte, /\bvous\b|\bvotre\b|ez\b/i, texte);
+  }
 });
 
 test('messageErreur : carte débranchée pendant un transfert', () => {
@@ -238,6 +264,50 @@ test("statutCarte : programme en cours sous l'exemple actif seulement", () => {
   assert.equal(statutCarte(etat, 'A'), 'programme');
   assert.equal(statutCarte(etat, 'B'), 'connectee');
   assert.equal(statutCarte({ ...etat, programmeActif: null }, 'A'), 'connectee');
+});
+
+// État de base : carte connectée et libre, dernière action depuis A.
+const LIBRE = {
+  connexion: false,
+  connectee: true,
+  occupee: false,
+  dernierClic: 'A',
+  programmeActif: null,
+  erreur: null,
+};
+
+test("messageStatut : « Carte connectée. » sous l'exemple qui a connecté la carte seulement", () => {
+  assert.equal(messageStatut(LIBRE, 'A'), 'Carte connectée.');
+  assert.equal(messageStatut(LIBRE, 'B'), null);
+  // Pendant la connexion, rien : l'état « connexion… » est affiché.
+  const enConnexion = { ...LIBRE, connexion: true, connectee: false, occupee: true };
+  assert.equal(messageStatut(enConnexion, 'A'), null);
+  assert.equal(messageStatut({ ...enConnexion, connectee: true }, 'A'), null);
+  // Connexion échouée : l'erreur s'annonce seule.
+  assert.equal(
+    messageStatut({ ...LIBRE, connectee: false, erreur: 'Aucune carte choisie.' }, 'A'),
+    null,
+  );
+});
+
+test('messageStatut : téléversement, programme téléversé, erreur', () => {
+  assert.equal(messageStatut({ ...LIBRE, occupee: true }, 'A'), 'Téléversement en cours…');
+  assert.equal(messageStatut({ ...LIBRE, occupee: true }, 'B'), null);
+  assert.equal(messageStatut({ ...LIBRE, programmeActif: 'A' }, 'A'), 'Programme téléversé.');
+  // Le programme de B tourne, la dernière action (téléchargement raté) vient de A.
+  assert.equal(messageStatut({ ...LIBRE, programmeActif: 'B', erreur: 'x' }, 'A'), null);
+  assert.equal(messageStatut({ ...LIBRE, programmeActif: 'B' }, 'B'), null);
+  assert.equal(messageStatut({ ...LIBRE, erreur: 'Flash error' }, 'A'), null);
+  assert.equal(messageStatut({ ...LIBRE, connectee: false }, 'A'), null);
+});
+
+test("voyantVisible : sous l'exemple dont le programme tourne, sinon sous le dernier cliqué", () => {
+  assert.equal(voyantVisible(LIBRE, 'A'), true);
+  assert.equal(voyantVisible(LIBRE, 'B'), false);
+  const programmeB = { ...LIBRE, programmeActif: 'B' };
+  assert.equal(voyantVisible(programmeB, 'B'), true);
+  assert.equal(voyantVisible(programmeB, 'A'), false);
+  assert.equal(voyantVisible({ ...LIBRE, connectee: false }, 'A'), false);
 });
 
 test('statutCarte : chaque statut a un libellé', () => {

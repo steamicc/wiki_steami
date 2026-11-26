@@ -51,8 +51,8 @@ La V1c est la carte diffusée aujourd'hui. Elle a les composants communs aux tro
 | [BQ27441](./bq27441)             | jauge de batterie                                                                 | V1a, V1b, V1c                                         |
 | [MCP23009E](./mcp23009e)         | D-PAD (boutons directionnels)                                                     | V1a, V1b, V1c                                         |
 | [BLE](./ble)                     | Bluetooth Low Energy                                                              | V1a, V1b, V1c                                         |
-| [DAPLINK_FLASH](./daplink-flash) | fichier gardé par le DAPLink dans sa mémoire flash, visible sur le lecteur STEAMI | V1a, V1b, V1c                                         |
-| [STEAMI_CONFIG](./steami-config) | zone de configuration du DAPLink (révision, calibrations)                         | V1a, V1b, V1c                                         |
+| [DAPLINK_FLASH](./daplink-flash) | fichier gardé par le DAPLink dans sa mémoire flash, visible sur le lecteur STEAMI | V1c ; V1b non vérifiée ; V1a à confirmer              |
+| [STEAMI_CONFIG](./steami-config) | zone de configuration du DAPLink (révision, calibrations)                         | V1b, V1c ; V1a à confirmer                            |
 
 ### Sur les V1a et V1b seulement
 
