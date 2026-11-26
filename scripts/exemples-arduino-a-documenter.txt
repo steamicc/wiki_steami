@@ -4,8 +4,6 @@ BLE/BleIndoorMap
 BLE/BleRssiMapper
 BLE/BleRssiProximity
 BLE/BleTrilateration
-BQ27441/battery_status
-BQ27441/low_battery_alert
 DAPLINK_FLASH/data_logger
 MCP23009E/MorseCode
 MCP23009E/MusicPlayer
