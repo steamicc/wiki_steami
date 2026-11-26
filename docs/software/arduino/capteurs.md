@@ -20,7 +20,7 @@ Une seconde partie, nommée d'après le composant (par exemple **Avec le driver 
 
 L'écran, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
-Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD**.
+Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. La page [Exemples à essayer](./exemples/) les reprend un par un, avec un bouton pour les envoyer sur la carte ; chaque section ci-dessous renvoie aux exemples de son composant. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD** (voir [Exemples STEAMI_BOARD](./exemples/steami-board)).
 
 ## Mouvement : accéléromètre et gyroscope
 
@@ -98,6 +98,8 @@ Carte posée à plat, écran vers le haut, l'axe z mesure environ −1 g (la pes
 Les méthodes de lecture de ce driver remplissent une variable passée en paramètre et renvoient `true` si la lecture a réussi.
 
 Ce driver, créé dans le programme, ne reçoit pas la calibration `ca` : pour une accélération calibrée, utiliser `SteamiAccelerometer`.
+
+Exemples à essayer sur la carte : [Exemples ISM330DL](./exemples/ism330dl).
 
 ## Boussole : magnétomètre
 
@@ -196,6 +198,8 @@ Le cap n'est fiable qu'après une calibration et loin des objets métalliques : 
 
 La classe `SteamiCompass` calcule le même cap, avec `headingFlatOnly()` du driver partagé, et lui applique d'elle-même la calibration `cm` de la zone de configuration du DAPLink. Un driver créé dans le programme, comme ci-dessus, ne reçoit pas cette calibration.
 
+Exemples à essayer sur la carte : [Exemples LIS2MDL](./exemples/lis2mdl).
+
 ## Distance : capteur de temps de vol
 
 ```cpp
@@ -248,6 +252,8 @@ void loop() {
 ```
 
 Les exemples **STeaMi → VL53L1X** montrent aussi un radar de recul (**ParkingSensor**), une alarme de proximité (**ProximityAlarm**), un compteur de passages (**ObjectCounter**) et un geste de la main devant le capteur qui allume ou éteint la LED (**GestureDetection**).
+
+Exemples à essayer sur la carte : [Exemples VL53L1X](./exemples/vl53l1x).
 
 ## Boutons et D-PAD
 
@@ -328,6 +334,8 @@ Ce programme lit le niveau des broches : il affiche le nom d'un bouton tant qu'i
 
 La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
 
+Exemples à essayer sur la carte : [Exemples MCP23009E](./exemples/mcp23009e).
+
 ## Batterie
 
 ```cpp
@@ -385,6 +393,8 @@ void loop() {
 ```
 
 Sans batterie branchée, la jauge ne répond pas et ce programme affiche « BQ27441 non détecté ». Brancher la batterie, puis appuyer sur le bouton Reset de la carte.
+
+Exemples à essayer sur la carte : [Exemples BQ27441](./exemples/bq27441).
 
 ## Pression, humidité et température
 
@@ -459,6 +469,8 @@ void loop() {
 }
 ```
 
+Exemples à essayer sur la carte : [Exemples WSEN-PADS](./exemples/wsen-pads) et [Exemples WSEN-HIDS](./exemples/wsen-hids).
+
 </Release>
 <Release releases="v1c">
 
@@ -492,6 +504,8 @@ void loop() {
 ```
 
 Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le point de rosée (**DewPointMonitor**) et le confort d'une pièce (**ComfortZone**).
+
+Exemples à essayer sur la carte : [Exemples BME280](./exemples/bme280).
 
 </Release>
 </ReleaseTabs>
@@ -596,6 +610,8 @@ La valeur est un nombre brut du capteur, sans unité, qui augmente avec la lumi�
 
 Les exemples **STeaMi → APDS9960** montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**). La proximité n'a pas de classe par fonction : elle se lit avec ce driver.
 
+Exemples à essayer sur la carte : [Exemples APDS9960](./exemples/apds9960).
+
 </Release>
 <Release releases="v1c">
 
@@ -627,6 +643,8 @@ void loop() {}
 ```
 
 Le dessin se fait en mémoire (`fill`, `pixel`, `line`, `fillRect`, `text`) ; rien n'apparaît avant l'appel à `show()`. Les couleurs vont de `0` (noir) à `15` (blanc).
+
+Exemples à essayer sur la carte : [Exemples SSD1327](./exemples/ssd1327).
 
 </Release>
 <Release releases="v1c">
@@ -662,6 +680,8 @@ L'écran est rond : les coins de l'image ne s'affichent pas. Le plus grand carr�
 L'image occupe 115 200 octets de mémoire vive, plus de la moitié de celle disponible pour un programme. Cette mémoire est réservée par `begin()` pendant l'exécution : le rapport de compilation de l'IDE ne la compte pas. Si l'écran reste noir dans un programme plus gros, c'est que la mémoire manque.
 
 Les exemples **STeaMi → GC9A01** reprennent ceux de l'écran des V1a et V1b, en couleur (**color_palette**, **rotating_3d_cube**…).
+
+Exemples à essayer sur la carte : [Exemples GC9A01](./exemples/gc9a01).
 
 </Release>
 </ReleaseTabs>
@@ -710,9 +730,13 @@ L'exemple **STeaMi → DAPLINK_FLASH → data_logger** relit aussi le fichier de
 
 La zone de configuration du DAPLink (nom de la carte, calibrations des capteurs) se lit avec le driver `SteamiConfig` : voir l'exemple **STeaMi → STEAMI_CONFIG → show_config**. Sur une carte dont le firmware DAPLink n'a pas de zone de configuration, `SteamiConfig::begin()` renvoie `false` ; là aussi, mettre à jour le firmware.
 
+Exemples à essayer sur la carte : [Exemples DAPLINK_FLASH](./exemples/daplink-flash) et [Exemples STEAMI_CONFIG](./exemples/steami-config).
+
 ## Bluetooth
 
 Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, proposée automatiquement à l'installation de STeaMi. Les exemples propres à la STeaMi sont dans **Fichier → Exemples → STeaMi → BLE** : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
+
+Exemples à essayer sur la carte : [Exemples BLE](./exemples/ble).
 
 ## Composants non pris en charge
 
