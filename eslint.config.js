@@ -5,7 +5,7 @@ const reactPlugin = require('eslint-plugin-react');
 module.exports = [
   js.configs.recommended,
   {
-    files: ['**/*.js', '**/*.jsx'],
+    files: ['**/*.js', '**/*.jsx', '**/*.mjs'],
     plugins: {
       react: reactPlugin,
     },
@@ -34,6 +34,6 @@ module.exports = [
     },
   },
   {
-    ignores: ['build/**', '.docusaurus/**', 'node_modules/**'],
+    ignores: ['static/vendor/**', '.external/**', 'build/**', '.docusaurus/**', 'node_modules/**'],
   },
 ];

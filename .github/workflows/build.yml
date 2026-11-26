@@ -46,10 +46,19 @@ jobs:
       - name: Lint JavaScript
         run: npm run lint:js
 
+      - name: Test JavaScript
+        run: npm run test:js
+
+      - name: Test scripts
+        run: npm run test:scripts
+
       - name: Build site
         run: |
           set -o pipefail
           npm run build 2>&1 | tee build.log
+
+      - name: Check Arduino examples
+        run: npm run lint:arduino-examples
 
       - name: Validate code examples
         run: npm run lint:examples
