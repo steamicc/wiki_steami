@@ -25,6 +25,7 @@ import {
   progressionChangee,
   statutCarte,
   telechargerExemple,
+  telechargerFirmware,
   urlBin,
   voyantVisible,
 } from './logique.mjs';
@@ -201,6 +202,42 @@ test('telechargerExemple : fichier absent', async () => {
     name: 'ErreurLecteur',
     message: /^Exemple introuvable sur le wiki \(erreur 404\) : recharger la page/,
   });
+});
+
+test('telechargerFirmware : renvoie le .bin revalidé, messages propres au firmware', async () => {
+  const appels = [];
+  const contenu = new ArrayBuffer(4);
+  const recuperer = async (href, options) => {
+    appels.push([href, options]);
+    return { ok: true, arrayBuffer: async () => contenu };
+  };
+  assert.equal(await telechargerFirmware('/micropython/firmware.bin', recuperer), contenu);
+  assert.deepEqual(appels, [['/micropython/firmware.bin', { cache: 'no-cache' }]]);
+
+  const coupe = async () => {
+    throw new TypeError('Failed to fetch');
+  };
+  await assert.rejects(telechargerFirmware('/x.bin', coupe), {
+    name: 'ErreurLecteur',
+    message:
+      'Impossible de télécharger MicroPython : vérifier la connexion à Internet, puis réessayer.',
+  });
+  const absent = async () => ({ ok: false, status: 404 });
+  await assert.rejects(telechargerFirmware('/x.bin', absent), {
+    name: 'ErreurLecteur',
+    message: /^Firmware MicroPython introuvable sur le wiki \(erreur 404\) : recharger la page/,
+  });
+});
+
+test("messageFrancais : échecs d'écriture série et de redémarrage", () => {
+  assert.match(
+    messageFrancais(new Error('Bad status for 8 -> 255'), 'ecriture'),
+    /^L'envoi à la carte a échoué : débrancher .*\(Bad status for 8 -> 255\)$/,
+  );
+  assert.match(
+    messageFrancais(new Error('Bad response for 10 -> 0'), 'redemarrage'),
+    /^Le redémarrage de la carte a échoué : débrancher .*\(Bad response for 10 -> 0\)$/,
+  );
 });
 
 test('estEnBas : la console suit seulement si le lecteur est en bas', () => {

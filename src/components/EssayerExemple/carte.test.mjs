@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DELAI_LIBERATION_MS, ETAT_INITIAL, carte } from './carte.mjs';
+import { DELAI_LIBERATION_MS, ETAT_INITIAL, PAUSE_LECTURE_MS, carte } from './carte.mjs';
 import { ErreurLecteur } from './logique.mjs';
 
 let journal = [];
@@ -15,19 +15,37 @@ let etapesFlash = [];
 // Fenêtre de choix de la carte : nombre d'ouvertures, et réponse du lecteur.
 let choix = 0;
 let choisir = async () => appareil;
-// Promesses attendues par le faux flash et la fausse déconnexion (null : tout de suite).
+// Promesses attendues par le faux flash, la fausse déconnexion, les fausses
+// lecture et écriture série (null : tout de suite).
 let attenteFlash = null;
 let attenteDeconnexion = null;
+let attenteLecture = null;
+let attenteEcriture = null;
+// Réponse du faux DAPLink à la commande vendeur 0x9F.
+let reponseVersion = null;
 // Écouteurs posés sur navigator.usb (événement « disconnect »).
 const ecouteursUsb = {};
 
+// Le DAPLink rend au plus 62 octets par lecture série et refuse les écritures
+// plus longues.
+const PAQUET = 62;
+
 class FauxDAPLink {
-  static EVENT_SERIAL_DATA = 'serial';
   static EVENT_PROGRESS = 'progress';
 
   constructor(transport) {
     this.transport = transport;
     this.ecouteurs = {};
+    // Octets envoyés par le programme de la carte, pas encore lus.
+    this.enAttente = [];
+    // Octets reçus par la carte (serialWrite).
+    this.ecrits = [];
+    // Nombre d'appels à serialRead, et commande USB en cours.
+    this.lectures = 0;
+    this.enCours = null;
+    // Commandes lancées pendant qu'une autre était en cours : DAP.js ne les
+    // ordonne pas, elles se mélangeraient sur le câble USB.
+    this.chevauchements = [];
     derniere = this;
   }
 
@@ -35,8 +53,23 @@ class FauxDAPLink {
     this.ecouteurs[nom] = fn;
   }
 
+  // Le programme de la carte écrit sur le port série.
   emettre(texte) {
-    this.ecouteurs[FauxDAPLink.EVENT_SERIAL_DATA]?.(texte);
+    this.emettreOctets(new TextEncoder().encode(texte));
+  }
+
+  emettreOctets(octets) {
+    this.enAttente.push(...octets);
+  }
+
+  async commande(nom, executer) {
+    if (this.enCours) this.chevauchements.push(`${nom} pendant ${this.enCours}`);
+    this.enCours = nom;
+    try {
+      return await executer();
+    } finally {
+      this.enCours = null;
+    }
   }
 
   async connect() {
@@ -48,27 +81,56 @@ class FauxDAPLink {
     if (pannes.bauds) throw new Error(pannes.bauds);
   }
 
-  startSerialRead() {
-    journal.push('startSerialRead');
-    return new Promise((resolve) => {
-      this.arret = resolve;
+  // Comme DAP.js : l'ArrayBuffer brut, ou undefined si rien n'attend. Le
+  // journal ne note pas les lectures successives, seulement la première.
+  serialRead() {
+    this.lectures += 1;
+    if (journal.at(-1) !== 'serialRead') journal.push('serialRead');
+    return this.commande('serialRead', async () => {
+      if (attenteLecture) await attenteLecture;
+      if (pannes.lecture) throw new Error(pannes.lecture);
+      if (!this.enAttente.length) return undefined;
+      return new Uint8Array(this.enAttente.splice(0, PAQUET)).buffer;
     });
   }
 
-  stopSerialRead() {
-    journal.push('stopSerialRead');
-    this.arret?.();
+  // DAP.js envoie un octet par caractère (son code).
+  serialWrite(chaine) {
+    journal.push(`serialWrite ${chaine.length}`);
+    return this.commande('serialWrite', async () => {
+      if (attenteEcriture) await attenteEcriture;
+      if (pannes.ecriture) throw new Error(pannes.ecriture);
+      if (chaine.length > PAQUET) throw new Error('Bad status for 8 -> 255');
+      for (const caractere of chaine.split('')) this.ecrits.push(caractere.charCodeAt(0));
+    });
+  }
+
+  send(code) {
+    journal.push(`send 0x${code.toString(16)}`);
+    return this.commande('send', async () => {
+      if (pannes.send) throw new Error(pannes.send);
+      return reponseVersion;
+    });
+  }
+
+  reset() {
+    journal.push('reset');
+    return this.commande('reset', async () => {
+      if (pannes.reset) throw new Error(pannes.reset);
+    });
   }
 
   avancer(progression) {
     this.ecouteurs[FauxDAPLink.EVENT_PROGRESS]?.(progression);
   }
 
-  async flash() {
+  flash() {
     journal.push('flash');
-    for (const progression of etapesFlash) this.avancer(progression);
-    if (attenteFlash) await attenteFlash;
-    if (pannes.flash) throw new Error(pannes.flash);
+    return this.commande('flash', async () => {
+      for (const progression of etapesFlash) this.avancer(progression);
+      if (attenteFlash) await attenteFlash;
+      if (pannes.flash) throw new Error(pannes.flash);
+    });
   }
 
   async disconnect() {
@@ -117,11 +179,35 @@ async function demarrer(t) {
   etapesFlash = [];
   attenteFlash = null;
   attenteDeconnexion = null;
+  attenteLecture = null;
+  attenteEcriture = null;
+  reponseVersion = null;
   choix = 0;
   choisir = async () => appareil;
   const desabonner = carte.abonner(() => {});
   await carte.connecter('A');
+  // La boucle de lecture série fait sa première lecture, puis sa pause.
+  await attendre();
   return desabonner;
+}
+
+// La boucle de lecture série attend PAUSE_LECTURE_MS quand rien n'arrive :
+// avance le temps d'une pause et laisse la boucle lire ce qui attend.
+// La boucle a d'abord le temps de se mettre en pause.
+async function lire(t) {
+  await attendre();
+  t.mock.timers.tick(PAUSE_LECTURE_MS);
+  await attendre();
+}
+
+// La connexion est fermée ou perdue : sa boucle de lecture ne lit plus, et
+// aucune commande USB ne s'est mêlée à une autre.
+async function verifierArret(t, connexion = derniere) {
+  const lectures = connexion.lectures;
+  t.mock.timers.tick(10 * PAUSE_LECTURE_MS);
+  await attendre();
+  assert.equal(connexion.lectures, lectures, 'la boucle de lecture continue');
+  assert.deepEqual(connexion.chevauchements, []);
 }
 
 // Le lecteur quitte la page : la carte doit être libérée après le délai.
@@ -130,13 +216,17 @@ async function quitter(t, desabonner) {
   t.mock.timers.tick(DELAI_LIBERATION_MS);
   await attendre();
   assert.deepEqual(carte.etat, ETAT_INITIAL);
+  await verifierArret(t);
 }
 
 const bin = async () => new ArrayBuffer(8);
 
+// Le journal sans les lectures série, que la boucle fait à chaque pause.
+const sansLectures = () => journal.filter((entree) => entree !== 'serialRead');
+
 test('connexion : bauds à 115200 et console lancée', async (t) => {
   const desabonner = await demarrer(t);
-  assert.deepEqual(journal, ['connect', 'bauds 115200', 'startSerialRead']);
+  assert.deepEqual(journal, ['connect', 'bauds 115200', 'serialRead']);
   assert.equal(carte.etat.connectee, true);
   assert.equal(carte.etat.occupee, false);
   await quitter(t, desabonner);
@@ -198,10 +288,10 @@ test('libération : après le délai sans composant, pas avant, et annulée par 
   t.mock.timers.tick(DELAI_LIBERATION_MS);
   await attendre();
   assert.equal(carte.etat.connectee, true);
-  assert.deepEqual(journal, []);
+  assert.deepEqual(sansLectures(), []);
 
   await quitter(t, autre);
-  assert.deepEqual(journal, ['stopSerialRead', 'disconnect', 'close']);
+  assert.deepEqual(sansLectures(), ['disconnect', 'close']);
 });
 
 test('libération : jamais pendant un téléversement', async (t) => {
@@ -234,22 +324,34 @@ test("téléversement : la console est arrêtée avant d'être vidée", async (t
   const desabonner = await demarrer(t);
   const ancienne = derniere;
   ancienne.emettre('ancien programme\n');
-  await attendre();
+  await lire(t);
   assert.deepEqual(carte.etat.lignes, ['ancien programme']);
 
   journal = [];
-  await carte.televerser('B', async () => {
-    // L'ancien programme écrit encore pendant le téléchargement.
+  let finirLecture;
+  const televersement = carte.televerser('B', async () => {
+    // L'ancien programme écrit encore pendant le téléchargement, et la boucle
+    // est en train de lire ces octets quand le téléversement l'arrête.
     ancienne.emettre('pendant le téléchargement\n');
+    attenteLecture = new Promise((resolve) => {
+      finirLecture = resolve;
+    });
+    t.mock.timers.tick(PAUSE_LECTURE_MS);
     return new ArrayBuffer(8);
   });
-  assert.deepEqual(journal, ['stopSerialRead', 'flash', 'startSerialRead']);
+  await attendre();
+  // Le flash attend la fin de la lecture en cours.
+  assert.deepEqual(journal, ['serialRead']);
+  attenteLecture = null;
+  finirLecture();
+  await televersement;
+  assert.deepEqual(journal, ['serialRead', 'flash', 'serialRead']);
   assert.deepEqual(carte.etat.lignes, []);
   assert.equal(carte.etat.programmeActif, 'B');
   assert.equal(carte.etat.dernierClic, 'B');
 
   ancienne.emettre('nouveau programme\n');
-  await attendre();
+  await lire(t);
   assert.deepEqual(carte.etat.lignes, ['nouveau programme']);
   await quitter(t, desabonner);
 });
@@ -280,7 +382,7 @@ test('téléversement : erreur de DAP.js traduite, avec le message brut', async 
   );
   assert.equal(carte.etat.programmeActif, null);
   // La lecture série repart quand même.
-  assert.equal(journal.at(-1), 'startSerialRead');
+  assert.equal(journal.at(-1), 'serialRead');
   await quitter(t, desabonner);
 });
 
@@ -312,11 +414,13 @@ test('déconnexion : libère la carte tout de suite, sans erreur restante, puis 
   journal = [];
 
   await carte.deconnecter();
-  assert.deepEqual(journal, ['stopSerialRead', 'disconnect', 'close']);
+  assert.deepEqual(journal, ['disconnect', 'close']);
   assert.equal(compter('disconnect'), 1);
   assert.equal(compter('close'), 1);
   // Chaque composant repasse à « Connecter la carte », sans console ni erreur.
   assert.deepEqual(carte.etat, ETAT_INITIAL);
+  // La console est arrêtée.
+  await verifierArret(t);
 
   // Une deuxième demande ne referme rien.
   await carte.deconnecter();
@@ -326,7 +430,7 @@ test('déconnexion : libère la carte tout de suite, sans erreur restante, puis 
   journal = [];
   await carte.connecter('B');
   assert.equal(choix, 2);
-  assert.deepEqual(journal, ['connect', 'bauds 115200', 'startSerialRead']);
+  assert.deepEqual(journal, ['connect', 'bauds 115200', 'serialRead']);
   assert.equal(carte.etat.connectee, true);
   assert.equal(carte.etat.erreur, null);
   await carte.televerser('B', bin);
@@ -353,7 +457,7 @@ test('déconnexion : refusée pendant un téléversement', async (t) => {
 
   rendre();
   await attendre();
-  assert.deepEqual(journal, ['stopSerialRead', 'flash', 'startSerialRead']);
+  assert.deepEqual(journal, ['flash', 'serialRead']);
   assert.equal(carte.etat.programmeActif, 'A');
   assert.equal(carte.etat.occupee, false);
 
@@ -384,7 +488,7 @@ test('déconnexion : sans effet pendant une connexion', async (t) => {
 
   choisirCarte();
   await connexion;
-  assert.deepEqual(journal, ['connect', 'bauds 115200', 'startSerialRead']);
+  assert.deepEqual(journal, ['connect', 'bauds 115200', 'serialRead']);
   assert.equal(carte.etat.connectee, true);
   choisir = async () => appareil;
   await quitter(t, desabonner);
@@ -406,7 +510,7 @@ test('déconnexion : annule la libération prévue', async (t) => {
   t.mock.timers.tick(DELAI_LIBERATION_MS / 2);
   await attendre();
   assert.equal(carte.etat.connectee, true);
-  assert.deepEqual(journal, ['connect', 'bauds 115200', 'startSerialRead']);
+  assert.deepEqual(journal, ['connect', 'bauds 115200', 'serialRead']);
 
   t.mock.timers.tick(DELAI_LIBERATION_MS / 2);
   await attendre();
@@ -487,31 +591,34 @@ test('activité série : au plus un signal par intervalle, remise à zéro au t�
   const espion = carte.abonner(() => {
     notifications += 1;
   });
-  // Vingt paquets en 95 ms (sans fin de ligne : la console ne change pas).
-  connexion.emettre('a');
-  for (let i = 0; i < 19; i++) {
-    t.mock.timers.tick(5);
+  // Vingt paquets en 95 ms, un par lecture (sans fin de ligne : la console
+  // ne change pas).
+  for (let i = 0; i < 20; i++) {
     connexion.emettre('a');
+    await lire(t);
   }
   assert.equal(carte.etat.activite, 1);
   assert.equal(notifications, 1);
 
-  t.mock.timers.tick(5);
   connexion.emettre('b');
+  await lire(t);
   assert.equal(carte.etat.activite, 2);
-  // Un paquet vide ne compte pas.
+  // Une lecture vide ne compte pas.
   t.mock.timers.tick(200);
   connexion.emettre('');
+  await lire(t);
   assert.equal(carte.etat.activite, 2);
   espion();
 
   // Nouveau programme : le voyant repart de zéro et le premier paquet le
   // signale tout de suite, même moins de 100 ms après le précédent.
   connexion.emettre('c');
+  await lire(t);
   assert.equal(carte.etat.activite, 3);
   await carte.televerser('A', bin);
   assert.equal(carte.etat.activite, 0);
   connexion.emettre('d');
+  await lire(t);
   assert.equal(carte.etat.activite, 1);
   await quitter(t, desabonner);
 });
@@ -521,19 +628,21 @@ test('déconnexion : progression et activité remises à zéro, données suivant
   const connexion = derniere;
   await carte.televerser('A', bin);
   connexion.emettre('x\n');
-  await attendre();
+  await lire(t);
   assert.equal(carte.etat.activite, 1);
 
   await carte.deconnecter();
   assert.deepEqual(carte.etat, ETAT_INITIAL);
   connexion.emettre('y\n');
   connexion.avancer(0.5);
-  await attendre();
+  await lire(t);
   assert.deepEqual(carte.etat, ETAT_INITIAL);
+  await verifierArret(t, connexion);
 
   // Reconnexion : le premier paquet est signalé sans attendre l'intervalle.
   await carte.connecter('A');
   derniere.emettre('z');
+  await lire(t);
   assert.equal(carte.etat.activite, 1);
   await quitter(t, desabonner);
 });
@@ -546,6 +655,7 @@ async function finir(t, desabonner) {
   desabonner();
   t.mock.timers.tick(DELAI_LIBERATION_MS);
   await attendre();
+  await verifierArret(t);
 }
 
 test('carte débranchée au repos : message sous le dernier exemple cliqué, connexion refermée', async (t) => {
@@ -590,7 +700,7 @@ test('carte débranchée pendant le téléchargement du .bin : rien téléversé
   rendre();
   await televersement;
   assert.ok(!journal.includes('flash'), journal.join(', '));
-  assert.ok(!journal.includes('startSerialRead'), journal.join(', '));
+  assert.ok(!journal.includes('serialRead'), journal.join(', '));
   assert.equal(carte.etat.occupee, false);
   assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
   await finir(t, desabonner);
@@ -634,7 +744,337 @@ test("reconnexion après une carte perdue : attend la fermeture de l'ancienne co
   attenteDeconnexion = null;
   finirDeconnexion();
   await reconnexion;
-  assert.deepEqual(journal, ['close', 'connect', 'bauds 115200', 'startSerialRead']);
+  assert.deepEqual(journal, ['close', 'connect', 'bauds 115200', 'serialRead']);
+  assert.equal(carte.etat.connectee, true);
+  await quitter(t, desabonner);
+});
+
+// --- Lecture série brute, écriture, firmware, version du DAPLink ------------
+
+const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
+const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
+
+// Concatène des Uint8Array.
+const concatener = (morceaux) => Uint8Array.from(morceaux.flatMap((morceau) => [...morceau]));
+
+test('console : octets bruts transmis tels quels aux écouteurs, même un caractère UTF-8 coupé entre deux lectures', async (t) => {
+  const desabonner = await demarrer(t);
+  const recus = [];
+  const arreterEcoute = carte.ecouterSerie((octets) => recus.push(octets));
+  // 61 « a » puis « é » (2 octets) : la première lecture (62 octets) coupe le « é ».
+  const texte = `${'a'.repeat(61)}é\n`;
+  derniere.emettre(texte);
+  await lire(t);
+  assert.ok(recus.every((octets) => octets instanceof Uint8Array));
+  assert.deepEqual(
+    recus.map((octets) => octets.length),
+    [62, 2],
+  );
+  assert.equal(recus[0].at(-1), 0xc3);
+  assert.deepEqual(concatener(recus), new TextEncoder().encode(texte));
+  // La console décode en continu : le « é » coupé arrive entier.
+  assert.deepEqual(carte.etat.lignes, [`${'a'.repeat(61)}é`]);
+
+  // Octets non UTF-8 (fenêtre du raw paste) : transmis sans être abîmés.
+  derniere.emettreOctets([0x52, 0x01, 0x80, 0x00]);
+  await lire(t);
+  assert.deepEqual([...recus.at(-1)], [0x52, 0x01, 0x80, 0x00]);
+
+  // Écouteur retiré : plus rien.
+  arreterEcoute();
+  const avant = recus.length;
+  derniere.emettre('encore\n');
+  await lire(t);
+  assert.equal(recus.length, avant);
+  await quitter(t, desabonner);
+});
+
+test('console : texte décodé avec les accents, lu de suite tant que des octets arrivent', async (t) => {
+  const desabonner = await demarrer(t);
+  const lignes = Array.from({ length: 10 }, (_, i) => `Température ${i} : 21,5 °C`);
+  derniere.emettre(lignes.map((ligne) => `${ligne}\n`).join(''));
+  // Plusieurs lectures de 62 octets, sans pause entre elles.
+  await lire(t);
+  assert.deepEqual(carte.etat.lignes, lignes);
+  assert.equal(derniere.enAttente.length, 0);
+  await quitter(t, desabonner);
+});
+
+test('console : lecture série en échec, carte perdue avec un message en français', async (t) => {
+  const desabonner = await demarrer(t);
+  pannes.lecture = 'Bad response for 131 -> 0';
+  await lire(t);
+  assert.equal(carte.etat.connectee, false);
+  assert.match(
+    carte.etat.erreur,
+    /^La lecture de la console série a échoué : .*\(Bad response for 131 -> 0\)$/,
+  );
+  await attendre();
+  assert.ok(journal.includes('close'), journal.join(', '));
+  pannes = {};
+  await finir(t, desabonner);
+});
+
+test('écriture série : transmise à serialWrite, refusée sans carte', async (t) => {
+  // Avant toute connexion.
+  await assert.rejects(carte.ecrireSerie(new Uint8Array([0x03])), {
+    name: 'ErreurLecteur',
+    message: MESSAGE_SANS_CARTE,
+  });
+
+  const desabonner = await demarrer(t);
+  journal = [];
+  // Octets envoyés tels quels, un par caractère pour DAP.js (pas de texte UTF-8).
+  const octets = new Uint8Array([0x01, 0xc3, 0xa9, 0x80, 0x0d]);
+  await carte.ecrireSerie(octets);
+  assert.deepEqual(journal, ['serialWrite 5']);
+  assert.deepEqual(derniere.ecrits, [...octets]);
+
+  // Erreur de DAP.js : message en français, la carte reste connectée.
+  pannes.ecriture = 'Bad status for 8 -> 255';
+  await assert.rejects(carte.ecrireSerie(new Uint8Array([0x41])), (err) => {
+    assert.equal(err.name, 'ErreurLecteur');
+    assert.match(err.message, /^L'envoi à la carte a échoué : .*\(Bad status for 8 -> 255\)$/);
+    return true;
+  });
+  pannes = {};
+  assert.equal(carte.etat.connectee, true);
+
+  // Après la déconnexion : refusée tout de suite.
+  await carte.deconnecter();
+  await assert.rejects(carte.ecrireSerie(new Uint8Array([0x03])), {
+    name: 'ErreurLecteur',
+    message: MESSAGE_SANS_CARTE,
+  });
+  await quitter(t, desabonner);
+});
+
+test('écriture série : découpée en paquets de 62 octets au plus', async (t) => {
+  const desabonner = await demarrer(t);
+  journal = [];
+  const octets = Uint8Array.from({ length: 150 }, (_, i) => i);
+  await carte.ecrireSerie(octets);
+  assert.deepEqual(journal, ['serialWrite 62', 'serialWrite 62', 'serialWrite 26']);
+  assert.deepEqual(derniere.ecrits, [...octets]);
+  await carte.ecrireSerie(new Uint8Array());
+  assert.equal(journal.length, 3);
+  await quitter(t, desabonner);
+});
+
+test('écriture série : carte débranchée pendant une écriture, rejet sans attendre la fin', async (t) => {
+  const desabonner = await demarrer(t);
+  // L'écriture ne finit jamais (transfert USB bloqué).
+  attenteEcriture = new Promise(() => {});
+  const ecriture = carte.ecrireSerie(new Uint8Array([0x41]));
+  await attendre();
+  assert.ok(journal.includes('serialWrite 1'));
+  debrancher();
+  await assert.rejects(ecriture, { name: 'ErreurLecteur', message: MESSAGE_DEBRANCHEE });
+  attenteEcriture = null;
+  await finir(t, desabonner);
+});
+
+test('écriture série : refusée pendant un flash, sans attendre sa fin', async (t) => {
+  const desabonner = await demarrer(t);
+  let finirFlash;
+  attenteFlash = new Promise((resolve) => {
+    finirFlash = resolve;
+  });
+  const televersement = carte.televerser('A', bin);
+  await attendre();
+  assert.ok(journal.includes('flash'));
+  await assert.rejects(carte.ecrireSerie(new Uint8Array([0x41])), {
+    name: 'ErreurLecteur',
+    message: MESSAGE_FLASH_EN_COURS,
+  });
+  assert.ok(!journal.some((entree) => entree.startsWith('serialWrite')));
+  attenteFlash = null;
+  finirFlash();
+  await televersement;
+  await quitter(t, desabonner);
+});
+
+test('une commande USB à la fois : une écriture attend la fin de la lecture en cours', async (t) => {
+  const desabonner = await demarrer(t);
+  let finirLecture;
+  attenteLecture = new Promise((resolve) => {
+    finirLecture = resolve;
+  });
+  derniere.emettre('>>> ');
+  // La boucle commence une lecture, qui reste en cours.
+  t.mock.timers.tick(PAUSE_LECTURE_MS);
+  await attendre();
+  assert.equal(derniere.enCours, 'serialRead');
+  journal = [];
+  const ecriture = carte.ecrireSerie(new Uint8Array([0x03]));
+  await attendre();
+  assert.deepEqual(journal, []);
+
+  attenteLecture = null;
+  finirLecture();
+  await ecriture;
+  assert.ok(journal.includes('serialWrite 1'), journal.join(', '));
+  assert.deepEqual(derniere.chevauchements, []);
+  await quitter(t, desabonner);
+});
+
+// Réponse du DAPLink STeaMi à 0x9F : commande, « STM1 », numéro, date.
+function versionSteami(numero, date) {
+  const vue = new DataView(new ArrayBuffer(13));
+  vue.setUint8(0, 0x9f);
+  [...'STM1'].forEach((lettre, i) => vue.setUint8(1 + i, lettre.charCodeAt(0)));
+  vue.setUint32(5, numero, true);
+  vue.setUint32(9, date, true);
+  return vue;
+}
+
+test('version DAPLink : aucune lecture série pendant send(0x9f), console qui continue après', async (t) => {
+  const desabonner = await demarrer(t);
+  reponseVersion = versionSteami(42, 20261120);
+  let finirLecture;
+  attenteLecture = new Promise((resolve) => {
+    finirLecture = resolve;
+  });
+  t.mock.timers.tick(PAUSE_LECTURE_MS);
+  await attendre();
+  journal = [];
+  const version = carte.lireVersionDaplink();
+  await attendre();
+  // La commande attend la fin de la lecture en cours.
+  assert.deepEqual(journal, []);
+  attenteLecture = null;
+  finirLecture();
+  assert.deepEqual(await version, { numero: 42, date: 20261120 });
+  assert.deepEqual(journal, ['send 0x9f']);
+
+  derniere.emettre('après\n');
+  await lire(t);
+  assert.deepEqual(carte.etat.lignes, ['après']);
+  assert.deepEqual(derniere.chevauchements, []);
+  await quitter(t, desabonner);
+});
+
+test('version DAPLink : null sans carte, sur une erreur, sur une réponse inconnue ou pendant un flash', async (t) => {
+  assert.equal(await carte.lireVersionDaplink(), null);
+  const desabonner = await demarrer(t);
+
+  pannes.send = 'Bad response for 159 -> 0';
+  assert.equal(await carte.lireVersionDaplink(), null);
+  pannes = {};
+  // DAPLink d'origine (pas STeaMi) : réponse sans « STM1 ».
+  reponseVersion = new DataView(new Uint8Array([0x9f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).buffer);
+  assert.equal(await carte.lireVersionDaplink(), null);
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(carte.etat.erreur, null);
+
+  let finirFlash;
+  attenteFlash = new Promise((resolve) => {
+    finirFlash = resolve;
+  });
+  const televersement = carte.televerser('A', bin);
+  await attendre();
+  journal = [];
+  assert.equal(await carte.lireVersionDaplink(), null);
+  assert.deepEqual(journal, []);
+  attenteFlash = null;
+  finirFlash();
+  await televersement;
+  await quitter(t, desabonner);
+});
+
+const URL_FIRMWARE = '/micropython/firmware.bin';
+
+// Remplace fetch le temps du test.
+function servir(t, reponse) {
+  const appels = [];
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    appels.push([url, options]);
+    return reponse();
+  });
+  return appels;
+}
+
+test('flash firmware : progression, puis console relancée, pas de reset()', async (t) => {
+  const desabonner = await demarrer(t);
+  const appels = servir(t, () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }));
+  etapesFlash = [0, 0.5, 1];
+  derniere.emettre('ancien programme\n');
+  await lire(t);
+  journal = [];
+  const { vues, desabonner: fin } = suivre('progression');
+  assert.equal(await carte.flasherFirmware('M', URL_FIRMWARE), true);
+  fin();
+  assert.deepEqual(appels, [[URL_FIRMWARE, { cache: 'no-cache' }]]);
+  assert.deepEqual(vues, [null, 0, 0.5, 1, null]);
+  assert.deepEqual(journal, ['flash', 'serialRead']);
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.erreur, null);
+  assert.equal(carte.etat.dernierClic, 'M');
+  assert.equal(carte.etat.programmeActif, 'M');
+  assert.deepEqual(carte.etat.lignes, []);
+
+  // La console reprend : la bannière de MicroPython arrive.
+  derniere.emettre('MicroPython v1.29\n');
+  await lire(t);
+  assert.deepEqual(carte.etat.lignes, ['MicroPython v1.29']);
+  assert.ok(!journal.includes('reset'));
+  await quitter(t, desabonner);
+});
+
+test('flash firmware : carte débranchée en cours, erreur en français, non connectée', async (t) => {
+  const desabonner = await demarrer(t);
+  servir(t, () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }));
+  let rejeter;
+  attenteFlash = new Promise((_, reject) => {
+    rejeter = reject;
+  });
+  const flash = carte.flasherFirmware('M', URL_FIRMWARE);
+  await attendre();
+  assert.ok(journal.includes('flash'));
+  debrancher();
+  rejeter(new Error('A transfer error has occurred.'));
+  assert.equal(await flash, false);
+  assert.equal(carte.etat.connectee, false);
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.progression, null);
+  assert.equal(carte.etat.erreur, MESSAGE_DEBRANCHEE);
+  attenteFlash = null;
+  await finir(t, desabonner);
+});
+
+test('flash firmware : téléchargement ou flash en échec, message en français et false', async (t) => {
+  const desabonner = await demarrer(t);
+  await carte.televerser('A', bin);
+  servir(t, () => ({ ok: false, status: 404 }));
+  journal = [];
+  assert.equal(await carte.flasherFirmware('M', URL_FIRMWARE), false);
+  assert.match(carte.etat.erreur, /^Firmware MicroPython introuvable sur le wiki \(erreur 404\)/);
+  // Rien n'a été flashé : le programme de A tourne toujours, sa console aussi.
+  assert.deepEqual(sansLectures(), []);
+  assert.equal(carte.etat.programmeActif, 'A');
+  assert.equal(carte.etat.occupee, false);
+
+  t.mock.method(globalThis, 'fetch', async () => ({
+    ok: true,
+    arrayBuffer: async () => new ArrayBuffer(16),
+  }));
+  pannes.flash = 'Flash error';
+  assert.equal(await carte.flasherFirmware('M', URL_FIRMWARE), false);
+  assert.match(carte.etat.erreur, /^Le téléversement a échoué : .*\(Flash error\)$/);
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(journal.at(-1), 'serialRead');
+  // Un flash raté n'est pas retenté.
+  assert.equal(compter('flash'), 1);
+  pannes = {};
+  await quitter(t, desabonner);
+});
+
+test('redémarrer : dap.reset(), refusé sans carte', async (t) => {
+  await assert.rejects(carte.redemarrer(), { name: 'ErreurLecteur', message: MESSAGE_SANS_CARTE });
+  const desabonner = await demarrer(t);
+  journal = [];
+  await carte.redemarrer();
+  assert.deepEqual(journal, ['reset']);
   assert.equal(carte.etat.connectee, true);
   await quitter(t, desabonner);
 });

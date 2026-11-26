@@ -4,6 +4,26 @@
 // que l'onglet. La carte est donc libérée quand plus aucun <EssayerExemple>
 // n'est affiché, pour qu'un Codespace ou l'Arduino IDE puisse s'en servir,
 // ou tout de suite avec le bouton « Déconnecter ».
+//
+// Le composant MicroPython s'en sert aussi : il écrit sur le port série
+// (ecrireSerie), écoute les octets bruts de la carte (ecouterSerie), flashe le
+// firmware (flasherFirmware), lit la version du DAPLink (lireVersionDaplink)
+// et redémarre la carte (redemarrer).
+//
+// Port série : une boucle sur dap.serialRead(), pas startSerialRead() de
+// DAP.js. Mesuré sur la V1c : son événement EVENT_SERIAL_DATA décode lui-même
+// l'UTF-8 (les octets bruts sont perdus) et startSerialRead(10) lit au plus
+// 62 octets toutes les 10 ms, moins vite que l'UART à 115 200 bauds : le
+// DAPLink perd alors des données (« <DAPLink:Overflow> »). La boucle relit
+// tout de suite tant que des octets arrivent et ne fait une pause
+// (PAUSE_LECTURE_MS) que quand rien n'attend.
+//
+// Une commande USB à la fois : DAP.js n'ordonne pas ses commandes entre elles,
+// et une lecture série glissée au milieu d'une écriture ou d'un flash peut
+// désynchroniser le DAPLink. Toutes passent donc par une file (executer) : la
+// boucle de lecture, serialWrite, send(0x9f), reset() et flash(). La boucle
+// est en plus arrêtée pendant un flash : il est long, et la console doit être
+// vidée entre l'ancien programme et le nouveau.
 import {
   ErreurLecteur,
   TamponLignes,
@@ -12,7 +32,9 @@ import {
   peutDeconnecter,
   peutLiberer,
   progressionChangee,
+  telechargerFirmware,
 } from './logique.mjs';
+import { lireVersionSteami } from '../EssayerMicroPython/logique.mjs';
 
 const VENDOR_ID_DAPLINK = 0x0d28;
 const BAUDS = 115200;
@@ -22,6 +44,19 @@ const URL_DAPJS = '/vendor/dapjs-2.3.0/dap.umd.js';
 // passer d'une page d'exemples à une autre démonte les composants puis en
 // monte d'autres, sans qu'il faille se reconnecter.
 export const DELAI_LIBERATION_MS = 1000;
+
+// Pause de la boucle de lecture série quand rien n'arrive.
+export const PAUSE_LECTURE_MS = 5;
+
+// Le DAPLink refuse les écritures série de plus de 62 octets (« Bad status
+// for 8 -> 255 »).
+export const PAQUET_SERIE = 62;
+
+// Commande vendeur du DAPLink STeaMi qui renvoie sa version.
+const COMMANDE_VERSION = 0x9f;
+
+const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
+const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
 
 export const ETAT_INITIAL = Object.freeze({
   connectee: false,
@@ -45,10 +80,17 @@ export const ETAT_INITIAL = Object.freeze({
 
 const tampon = new TamponLignes();
 const abonnes = new Set();
+// Écouteurs des octets bruts du port série (ecouterSerie).
+const ecouteursSerie = new Set();
 
 let dap = null;
 let peripherique = null;
-let boucle = null; // promesse de startSerialRead : ne rejette jamais (erreurs gérées dedans)
+let boucle = null; // lecture série en cours (demarrerSerie), null si arrêtée
+// Fin de la dernière commande USB de la connexion : la suivante l'attend.
+let file = Promise.resolve();
+// Rejetée quand la connexion est perdue ou fermée (voir executerSansAttendre).
+let perte = null;
+let flashEnCours = false;
 let promesseDapjs = null; // partagée : le script n'est injecté qu'une fois
 let ecouteDeconnexion = false;
 let rafPlanifie = false;
@@ -75,10 +117,11 @@ function planifierLignes() {
   });
 }
 
-// Données série reçues : fait clignoter le voyant, au plus une fois par
-// INTERVALLE_ACTIVITE_MS pour ne pas redessiner la page à chaque paquet.
-function signalerActivite(donnees) {
-  if (!donnees) return;
+// Données série reçues (nombre d'octets) : fait clignoter le voyant, au plus
+// une fois par INTERVALLE_ACTIVITE_MS pour ne pas redessiner la page à chaque
+// paquet.
+function signalerActivite(nombre) {
+  if (!nombre) return;
   const maintenant = Date.now();
   if (!activiteASignaler(maintenant, derniereActivite)) return;
   derniereActivite = maintenant;
@@ -130,6 +173,44 @@ function suivreLiberation(promesse) {
   return suivie;
 }
 
+// Promesse rejetée à la perte de la connexion, avec le message à afficher.
+function nouvellePerte() {
+  let rejeter;
+  const promesse = new Promise((_, reject) => {
+    rejeter = reject;
+  });
+  // Personne ne l'attend peut-être : pas de rejet non traité.
+  promesse.catch(() => {});
+  return { promesse, rejeter };
+}
+
+// Fait passer une commande USB après les précédentes de la même connexion.
+// Refusée tout de suite si la connexion n'est plus la courante, y compris
+// quand son tour vient.
+function executer(courant, commande) {
+  if (!courant || dap !== courant) {
+    return Promise.reject(new ErreurLecteur(MESSAGE_SANS_CARTE));
+  }
+  const resultat = file.then(() => {
+    if (dap !== courant) throw new ErreurLecteur(MESSAGE_SANS_CARTE);
+    return commande();
+  });
+  file = resultat.then(
+    () => {},
+    () => {},
+  );
+  return resultat;
+}
+
+// Comme executer, mais rejette dès que la carte est perdue ou déconnectée,
+// sans attendre la fin de la commande ni celles d'avant : l'écriture série ne
+// doit jamais bloquer le composant MicroPython.
+function executerSansAttendre(courant, commande) {
+  const resultat = executer(courant, commande);
+  if (!perte) return resultat;
+  return Promise.race([resultat, perte.promesse]);
+}
+
 // La carte n'est plus utilisable (débranchée, lecture série en erreur) : on
 // repasse à « non connectée », sauf si une autre connexion a déjà pris le relais.
 function perdre(courant, message) {
@@ -137,25 +218,84 @@ function perdre(courant, message) {
   const appareil = peripherique;
   dap = null;
   peripherique = null;
+  // arreterBoucle() ne rejette jamais.
+  if (boucle) void arreterBoucle(boucle);
   boucle = null;
+  perte?.rejeter(new ErreurLecteur(message));
+  perte = null;
   // fermer() ne rejette jamais.
   void suivreLiberation(fermer(courant, appareil));
   oublierActivite();
   changer({ connectee: false, erreur: message, activite: 0 });
 }
 
+// Octets reçus de la carte : voyant d'activité, console (texte décodé en
+// continu, un caractère peut être coupé entre deux lectures) et écouteurs
+// des octets bruts.
+function recevoir(courant, octets, decodeur) {
+  if (dap !== courant) return;
+  signalerActivite(octets.length);
+  const texte = decodeur.decode(octets, { stream: true });
+  if (texte && tampon.ajouter(texte).length) planifierLignes();
+  for (const fn of [...ecouteursSerie]) {
+    // Un écouteur en erreur ne doit pas arrêter la lecture de la console.
+    try {
+      fn(octets);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+// Pause de la boucle, que arreterBoucle() abrège. Arrêt demandé pendant la
+// lecture qui précède : pas de pause du tout.
+function pause(lecture) {
+  return new Promise((resolve) => {
+    if (lecture.arret) {
+      resolve();
+      return;
+    }
+    lecture.reveil = resolve;
+    lecture.minuterie = setTimeout(resolve, PAUSE_LECTURE_MS);
+  });
+}
+
+// Lance la lecture série de la connexion courante : relit tout de suite tant
+// que des octets arrivent, attend PAUSE_LECTURE_MS sinon. Une lecture en
+// erreur fait perdre la carte, avec un message en français.
 function demarrerSerie() {
   const courant = dap;
-  boucle = courant.startSerialRead(10).catch((err) => {
-    perdre(courant, messageFrancais(err, 'console'));
-  });
+  const decodeur = new TextDecoder('utf-8');
+  const lecture = { arret: false, reveil: null, minuterie: null, fin: null };
+  lecture.fin = (async () => {
+    try {
+      while (!lecture.arret && dap === courant) {
+        const donnees = await executer(courant, () => courant.serialRead());
+        const octets = donnees ? new Uint8Array(donnees) : null;
+        if (octets?.length) recevoir(courant, octets, decodeur);
+        else await pause(lecture);
+      }
+    } catch (err) {
+      if (!lecture.arret) perdre(courant, messageFrancais(err, 'console'));
+    }
+  })();
+  boucle = lecture;
+}
+
+// Arrête une boucle de lecture : réveille sa pause, et renvoie la promesse de
+// sa fin (après la lecture en cours, s'il y en a une). Ne rejette jamais.
+function arreterBoucle(lecture) {
+  lecture.arret = true;
+  clearTimeout(lecture.minuterie);
+  lecture.reveil?.();
+  return lecture.fin;
 }
 
 async function arreterSerie() {
   if (!boucle) return;
-  dap.stopSerialRead();
-  await boucle;
-  boucle = null;
+  const lecture = boucle;
+  await arreterBoucle(lecture);
+  if (boucle === lecture) boucle = null;
 }
 
 function ecouterDeconnexion() {
@@ -178,19 +318,19 @@ async function relacher() {
   const courant = dap;
   const appareil = peripherique;
   const boucleCourante = boucle;
-  // Dès maintenant, perdre() et les données série de cette connexion sont ignorées.
+  // Dès maintenant, perdre(), les données série et les commandes de cette
+  // connexion sont ignorées ; les écritures en attente sont refusées.
   dap = null;
   peripherique = null;
   boucle = null;
+  perte?.rejeter(new ErreurLecteur(MESSAGE_SANS_CARTE));
+  perte = null;
   tampon.vider();
   oublierActivite();
   changer(ETAT_INITIAL);
   await suivreLiberation(
     (async () => {
-      if (boucleCourante) {
-        courant.stopSerialRead();
-        await boucleCourante;
-      }
+      if (boucleCourante) await arreterBoucle(boucleCourante);
       await fermer(courant, appareil);
     })(),
   );
@@ -252,11 +392,6 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
     await chargerDapjs(urlDapjs);
     nouvelle = new window.DAPjs.DAPLink(new window.DAPjs.WebUSB(appareil));
     const connexion = nouvelle;
-    nouvelle.on(window.DAPjs.DAPLink.EVENT_SERIAL_DATA, (donnees) => {
-      if (dap !== connexion) return;
-      if (tampon.ajouter(donnees).length) planifierLignes();
-      signalerActivite(donnees);
-    });
     // DAP.js émet l'avancement du flash (de 0 à 1) après chaque paquet, puis
     // 1 à la fin. Ignoré hors téléversement (progression à null).
     nouvelle.on(window.DAPjs.DAPLink.EVENT_PROGRESS, (progression) => {
@@ -265,6 +400,8 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
     });
     await nouvelle.connect();
     await nouvelle.setSerialBaudrate(BAUDS);
+    file = Promise.resolve();
+    perte = nouvellePerte();
     dap = nouvelle;
     peripherique = appareil;
     ecouterDeconnexion();
@@ -280,28 +417,41 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
   }
 }
 
+// Téléverse un .bin : chemin commun à televerser et flasherFirmware.
 // Le bouton est bloqué dès l'appel : obtenirDonnees() (le téléchargement du
 // .bin) se fait pendant que la carte est réservée. Si le téléchargement
 // échoue, l'ancien programme continue et garde sa console. Sinon : arrête la
 // lecture série, puis vide la console (dans cet ordre, pour que rien de
 // l'ancien programme n'y passe), téléverse en suivant la progression, et
 // relance la lecture. Pas de dap.reset() : le DAPLink redémarre déjà la
-// carte à la fin du flash. Ne rejette jamais : l'erreur est dans l'état.
-async function televerser(id, obtenirDonnees) {
-  if (!dap || etat.occupee) return;
+// carte à la fin du flash. Jamais de nouvel essai automatique : après un
+// échec, le DAPLink peut être désynchronisé, le lecteur doit le réinitialiser.
+// Ne rejette jamais : l'erreur est dans l'état. Renvoie true si le flash a
+// réussi.
+async function flasher(id, obtenirDonnees) {
+  if (!dap || etat.occupee) return false;
   const courant = dap;
+  let reussi = false;
   changer({ occupee: true, erreur: null, dernierClic: id });
   try {
     const donnees = await obtenirDonnees();
     // Carte perdue pendant le téléchargement : perdre() a posé le message,
     // il n'y a plus rien à téléverser.
-    if (dap !== courant) return;
+    if (dap !== courant) return false;
     await arreterSerie();
     tampon.vider();
     oublierActivite();
     changer({ programmeActif: null, lignes: [], activite: 0, progression: 0 });
-    await courant.flash(donnees);
-    if (dap === courant) changer({ programmeActif: id });
+    flashEnCours = true;
+    try {
+      await executer(courant, () => courant.flash(donnees));
+    } finally {
+      flashEnCours = false;
+    }
+    if (dap === courant) {
+      changer({ programmeActif: id });
+      reussi = true;
+    }
   } catch (err) {
     // Carte débranchée entre-temps : perdre() a déjà posé le message.
     if (dap === courant) changer({ erreur: messageFrancais(err, 'televersement') });
@@ -309,6 +459,83 @@ async function televerser(id, obtenirDonnees) {
     if (dap === courant && !boucle) demarrerSerie();
     // Réussi ou non, la barre de progression disparaît.
     apresOperation({ progression: null });
+  }
+  return reussi;
+}
+
+// Téléverse le programme d'un exemple Arduino.
+async function televerser(id, obtenirDonnees) {
+  await flasher(id, obtenirDonnees);
+}
+
+// Installe le firmware MicroPython (url : son .bin sur le wiki), depuis le
+// composant id, qui affiche la progression, l'erreur, puis la console.
+// Renvoie true si le flash a réussi.
+function flasherFirmware(id, url) {
+  return flasher(id, () => telechargerFirmware(url));
+}
+
+// Envoie des octets sur le port série de la carte, par paquets de
+// PAQUET_SERIE octets : DAP.js envoie un octet par caractère (son code), on
+// ne lui passe donc jamais de texte UTF-8. Rejette tout de suite, avec une
+// ErreurLecteur en français, sans carte, pendant un flash ou quand la carte
+// est perdue : ne reste jamais bloquée.
+async function ecrireSerie(octets) {
+  const courant = dap;
+  verifierEcriture(courant);
+  for (let debut = 0; debut < octets.length; debut += PAQUET_SERIE) {
+    verifierEcriture(courant);
+    const paquet = octets.subarray(debut, debut + PAQUET_SERIE);
+    try {
+      await executerSansAttendre(courant, () =>
+        courant.serialWrite(String.fromCharCode(...paquet)),
+      );
+    } catch (err) {
+      throw new ErreurLecteur(messageFrancais(err, 'ecriture'));
+    }
+  }
+}
+
+// La carte peut-elle recevoir une écriture série (avant chaque paquet) ?
+function verifierEcriture(courant) {
+  if (!courant || dap !== courant) throw new ErreurLecteur(MESSAGE_SANS_CARTE);
+  if (flashEnCours) throw new ErreurLecteur(MESSAGE_FLASH_EN_COURS);
+}
+
+// fn(octets: Uint8Array) reçoit les octets bruts de la carte, tant que la
+// console est lue. Renvoie la fonction qui retire l'écouteur.
+function ecouterSerie(fn) {
+  ecouteursSerie.add(fn);
+  return () => {
+    ecouteursSerie.delete(fn);
+  };
+}
+
+// Version du DAPLink STeaMi ({ numero, date }), par sa commande vendeur 0x9F.
+// null sans carte, pendant un flash, sur une erreur ou une réponse inconnue
+// (DAPLink d'origine) : ne rejette jamais.
+async function lireVersionDaplink() {
+  const courant = dap;
+  if (!courant || flashEnCours) return null;
+  try {
+    return lireVersionSteami(
+      await executerSansAttendre(courant, () => courant.send(COMMANDE_VERSION)),
+    );
+  } catch {
+    return null;
+  }
+}
+
+// Redémarre la carte (dap.reset()). Rejette avec une ErreurLecteur en
+// français sans carte, pendant un flash ou en cas d'échec.
+async function redemarrer() {
+  const courant = dap;
+  if (!courant) throw new ErreurLecteur(MESSAGE_SANS_CARTE);
+  if (flashEnCours) throw new ErreurLecteur(MESSAGE_FLASH_EN_COURS);
+  try {
+    await executerSansAttendre(courant, () => courant.reset());
+  } catch (err) {
+    throw new ErreurLecteur(messageFrancais(err, 'redemarrage'));
   }
 }
 
@@ -327,6 +554,11 @@ function abonner(fn) {
 export const carte = {
   connecter,
   televerser,
+  flasherFirmware,
+  ecrireSerie,
+  ecouterSerie,
+  lireVersionDaplink,
+  redemarrer,
   deconnecter,
   abonner,
   get etat() {
