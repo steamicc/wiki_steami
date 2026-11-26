@@ -68,6 +68,3 @@ WSEN-HIDS/BasicReader
 WSEN-HIDS/ComfortZone
 WSEN-HIDS/DewPointMonitor
 WSEN-HIDS/HumidityAlert
-WSEN-PADS/altitude
-WSEN-PADS/floor_detector
-WSEN-PADS/read_pressure_temperature
