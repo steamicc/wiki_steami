@@ -15,7 +15,6 @@ BME280/DewPointMonitor
 BME280/WeatherStation
 BQ27441/battery_status
 BQ27441/low_battery_alert
-DAPLINK_FLASH/data_logger
 GC9A01/color_palette
 GC9A01/framebuf_lines
 GC9A01/framebuf_pixels
