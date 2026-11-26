@@ -4,12 +4,7 @@ BLE/BleIndoorMap
 BLE/BleRssiMapper
 BLE/BleRssiProximity
 BLE/BleTrilateration
-BQ27441/battery_status
-BQ27441/low_battery_alert
 DAPLINK_FLASH/data_logger
-ISM330DL/BasicReader
-ISM330DL/Motion
-ISM330DL/Orientation
 MCP23009E/MorseCode
 MCP23009E/MusicPlayer
 MCP23009E/ReactionTimer
@@ -26,4 +21,3 @@ SSD1327/random_pixels
 SSD1327/rotating_3d_cube
 SSD1327/rotation
 SSD1327/shades
-STEAMI_CONFIG/show_config
