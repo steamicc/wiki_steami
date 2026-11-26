@@ -18,7 +18,7 @@ Sur cette page :
 
 La radio est intégrée au microcontrôleur principal, le [STM32WB55](/docs/hardware/main-components/stm32wb55), avec une antenne intégrée au circuit imprimé. Elle est la même sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)). Un seul exemple dépend de la release : **BleBeacon** diffuse la température du capteur WSEN-HIDS, présent seulement sur les V1a et V1b.
 
-Le STM32WB55 a deux cœurs : le programme Arduino tourne sur le premier, le second fait fonctionner la radio avec son propre firmware, la **pile radio** (_wireless stack_). Les exemples ont donc besoin d'une pile Bluetooth installée sur la carte. Elle s'installe depuis le navigateur, comme décrit dans [Installation de la stack radio](/docs/software/daplink#installation-de-la-stack-radio-blethreadzigbee) ; la documentation de la bibliothèque STM32duinoBLE demande le firmware **BLE HCILayer**, que l'outil propose. Quand la radio ne démarre pas, `BLE.begin()` renvoie faux : les exemples écrivent alors `BLE init failed!` et s'arrêtent. Dans ce cas, vérifier d'abord que la pile radio est installée.
+Le STM32WB55 a deux cœurs : le programme Arduino tourne sur le premier, le second fait fonctionner la radio avec son propre firmware, la **pile radio** (_wireless stack_). Les exemples ont donc besoin d'une pile Bluetooth installée sur la carte. Elle s'installe depuis le navigateur, comme décrit dans [Installation de la stack radio](/docs/software/daplink#installation-de-la-stack-radio-blethreadzigbee) ; la documentation de la bibliothèque STM32duinoBLE demande le firmware **BLE HCILayer**, que l'outil propose. Si `BLE.begin()` échoue, il renvoie `0` : les exemples écrivent alors `BLE init failed!` et s'arrêtent. Sans pile radio, ce message n'arrive pas tout de suite : la bibliothèque attend jusqu'à 10 s la réponse du second cœur avant d'abandonner, et certaines de ses attentes n'ont pas de limite, si bien que la console peut aussi rester muette. Quand rien ne s'affiche après une dizaine de secondes, ou que `BLE init failed!` apparaît, vérifier d'abord que la pile radio est installée.
 
 Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → BLE** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent ni l'écran, qui garde l'image laissée par le programme précédent, ni la LED Bluetooth. La section [Bluetooth](../capteurs#bluetooth) de la page Capteurs et écran les présente en une phrase ; ici, chacun est détaillé.
 
@@ -33,11 +33,15 @@ Sauf BleBeacon, tous ces exemples demandent **plusieurs cartes** : des balises q
 | BleTrilateration | récepteur                     | cherche `Beacon_M1` à `Beacon_M3` | 4 : 3 balises + celle-ci            |
 | BleIndoorMap     | récepteur                     | cherche `Beacon_M1` à `Beacon_M3` | 4 : 3 balises + celle-ci            |
 
-Aucun exemple de la bibliothèque n'émet tels quels les noms `Beacon_M1`, `Beacon_M2` et `Beacon_M3`. Pour BleRssiMapper, BleTrilateration et BleIndoorMap, les balises exécutent une copie modifiée de BleBeacon, dans un [Codespace](../codespace) ou dans l'[Arduino IDE](../arduino-ide) : remplacer le nom `STeaMi-Beacon` par `Beacon_M1`, `Beacon_M2` ou `Beacon_M3`, un par balise. La même copie, sans les lignes du capteur WSEN-HIDS, sert de balise sur une V1c.
+Aucun exemple de la bibliothèque n'émet tels quels les noms `Beacon_M1`, `Beacon_M2` et `Beacon_M3`. Pour BleRssiMapper, BleTrilateration et BleIndoorMap, les balises exécutent une copie modifiée de BleBeacon, dans un [Codespace](../codespace) ou dans l'[Arduino IDE](../arduino-ide) : remplacer le nom `STeaMi-Beacon` par `Beacon_M1`, `Beacon_M2` ou `Beacon_M3`, un par balise.
+
+Sur une V1c, la copie doit en plus se passer du capteur WSEN-HIDS : retirer `#include <SteamiWsenHids.h>` et la déclaration de `sensor`, le bloc de `setup()` qui appelle `sensor.begin()` et `setContinuous()`, et, dans `loop()`, la lecture de la température (`temp`, `tempRaw`, `data`) ainsi que les trois lignes `Serial.print()` et `Serial.println()` qui l'affichent. Supprimer aussi l'appel à `setManufacturerData()`, ou lui passer des octets fixes, et afficher à la place une simple ligne, par exemple `Serial.println("Advertising");`. Le nom suffit aux récepteurs, qui ne lisent pas ces données.
+
+Dans une salle où plusieurs groupes travaillent en même temps, toutes les balises d'un même exemple émettent le même nom, et un récepteur mélange alors leurs signaux dans une seule moyenne. Donner à chaque groupe ses propres noms, à la fois dans ses balises et dans son récepteur, puis recompiler : les programmes téléversés depuis cette page gardent les noms d'origine. BleRssiMapper coupe à 15 caractères les noms qu'il écrit dans son CSV.
 
 Pour programmer plusieurs cartes depuis cette page, les brancher une par une : brancher la première, cliquer sur **Connecter la carte**, téléverser, puis la débrancher. La page indique que la carte a été débranchée ; brancher la suivante et cliquer de nouveau sur **Connecter la carte**. Une carte programmée garde son programme : il suffit ensuite de l'alimenter, par sa batterie ou par un câble USB.
 
-BleHotCold, BleRssiMapper et BleIndoorMap attendent des commandes, des caractères envoyés à la carte par la liaison série. La console de cette page ne fait qu'afficher ce que la carte écrit : pour envoyer ces caractères, utiliser un moniteur série, par exemple celui de l'Arduino IDE, à 115200 bauds. Avant de l'ouvrir, quitter cette page pour une page sans exemple à essayer : la page libère alors la carte, et les deux ne la lisent pas en même temps.
+BleHotCold et BleRssiMapper ont besoin de commandes, des caractères envoyés à la carte par la liaison série ; BleIndoorMap fonctionne sans, mais accepte `c` et `h`. La console de cette page ne fait qu'afficher ce que la carte écrit : pour envoyer ces caractères, utiliser un moniteur série, par exemple celui de l'Arduino IDE, à 115200 bauds. Avant de l'ouvrir, quitter cette page pour une page sans exemple à essayer : la page libère alors la carte, et les deux ne la lisent pas en même temps.
 
 ## Le driver en bref
 
@@ -163,9 +167,9 @@ Une balise entendue une fois reste comptée, avec sa dernière moyenne, même qu
 
 - tant que les trois balises n'ont pas été entendues : `Waiting for beacons (2/3 seen)...` ;
 - puis la distance estimée de chaque balise, par exemple `Distances: Beacon_M1=185cm  Beacon_M2=310cm  Beacon_M3=220cm`, et la position estimée de la carte, `Position: X=210cm  Y=140cm` ;
-- environ toutes les deux secondes, une carte de la pièce en caractères, 42 × 28 points, un caractère pour 10 cm : les balises `1` et `3`, et la position estimée `X`. La balise M2, à 420 cm, tombe juste à droite de cette carte, qui s'arrête à 410 cm : le `2` n'y apparaît pas.
+- environ toutes les deux secondes, une carte de la pièce en caractères, 42 × 28 points, un caractère pour 10 cm : les balises `1` et `3`, et la position estimée `X`. La dernière colonne de cette carte correspond à 410-419 cm : la balise M2, à 420 cm, tombe juste à droite, et le `2` n'y apparaît pas.
 
-Quand une balise est trop faible (estimée à plus de 4,30 m), sa distance s'affiche `n/a` et la console écrit `At least one beacon signal too weak — skipping trilateration.`. Quand la position calculée est aberrante, la console écrit `Trilateration failed — aberrant result rejected.`.
+Quand une balise est trop faible (estimée à plus de 4,30 m), sa distance s'affiche `n/acm` (pour « n/a », non disponible) et la console écrit `At least one beacon signal too weak — skipping trilateration.`. Quand la position calculée est aberrante, la console écrit `Trilateration failed — aberrant result rejected.`.
 
 **Matériel** : quatre cartes et un mètre ruban. Trois balises nommées `Beacon_M1`, `Beacon_M2` et `Beacon_M3` (une copie modifiée de BleBeacon, voir le tableau en tête de page), posées aux positions du code : M1 dans un coin, M2 à 4,20 m de M1 le long d'un mur, M3 à 3,30 m le long de ce mur et 2,78 m vers l'intérieur de la pièce. La quatrième carte exécute BleTrilateration et se déplace entre les balises. Pour d'autres positions, ou pour d'autres réglages, modifier les constantes du programme et le recompiler.
 
@@ -181,6 +185,8 @@ Quand une balise est trop faible (estimée à plus de 4,30 m), sa distance s'aff
 
 **Le lissage de la position.** `applyFilter()` mélange chaque nouvelle estimation à la position précédente : 15 % de la nouvelle (`ALPHA`), 85 % de l'ancienne. Il ignore en plus les déplacements de moins de 15 cm (`MIN_MOVE_CM`). Comme le déplacement vaut 15 % de l'écart, la position affichée ne bouge que quand la nouvelle estimation s'en écarte de plus de 1 m : le `X` est stable, mais suit lentement.
 
+Ce lissage a une exception. Le programme marque l'absence de position par une abscisse négative (`filteredX` vaut -1 au départ). Quand la position retenue passe à gauche de M1 (x négatif), ce qui arrive facilement près de cette balise avec des distances bruitées, elle est donc traitée comme « pas encore de position » : la console l'écrit quand même, par exemple `Position: X=-30cm  Y=40cm`, mais le `X` n'apparaît pas sur la carte, et l'estimation suivante est reprise telle quelle, sans lissage.
+
 Une balise entendue une fois reste comptée, avec son dernier RSSI : si elle s'éteint, le calcul continue avec cette ancienne valeur. [BleIndoorMap](#bleindoormap) corrige ce point.
 
 <EssayerExemple id="BLE/BleTrilateration" />
@@ -190,13 +196,13 @@ Une balise entendue une fois reste comptée, avec son dernier RSSI : si elle s'�
 **Ce qu'on observe** : le même calcul que [BleTrilateration](#bletrilateration), présenté sous forme de carte, redessinée toutes les demi-secondes :
 
 - un cadre de 44 × 30 caractères, un caractère pour 10 cm, avec les balises `1`, `2` et `3`, la position estimée `X` et, en `.`, les cinq positions précédentes ;
-- la position, `Position: X=210cm  Y=140cm`, ou `Position: waiting for all 3 beacons...` tant qu'il n'y en a pas ;
-- l'état de chaque balise, par exemple `Beacon_M1: OK  RSSI=-72dBm  dist=185cm  age=0s`, ou `NOT SEEN` ; `dist=-1cm` signale une balise trop faible pour donner une distance ;
+- la position, `Position: X=210cm  Y=140cm`, ou `Position: waiting for all 3 beacons...` tant qu'il n'y en a pas, par exemple juste après `c`, ou quand la position retenue est à gauche de M1 (voir plus bas) ;
+- l'état de chaque balise, par exemple `Beacon_M1: OK  RSSI=-86dBm  dist=188cm  age=0s`, ou `NOT SEEN` ; `dist=-1cm` signale une balise trop faible pour donner une distance ;
 - le rappel des commandes : `c` efface la trace et la position (`Trail cleared.`), `h` réaffiche l'aide et la position des balises.
 
-Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui les comprend (codes ANSI), effacent l'écran et ramènent le curseur en haut : la carte reste alors en place et s'anime. La console de cette page n'interprète pas ces codes : les cartes s'y affichent les unes sous les autres.
+Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui les comprend (codes ANSI), effacent l'écran et ramènent le curseur en haut : la carte reste alors en place et s'anime. La console de cette page n'interprète pas ces codes : les cartes s'y affichent les unes sous les autres. Le moniteur série de l'Arduino IDE ne les interprète pas non plus, à notre connaissance, et empile lui aussi les cartes. Pour une carte animée, utiliser un terminal qui comprend les codes ANSI, comme `pio device monitor` (celui de la fiche d'activité), `screen` ou PuTTY, à 115200 bauds.
 
-**Matériel** : comme pour [BleTrilateration](#bletrilateration), trois balises `Beacon_M1` à `Beacon_M3` aux positions du code et cette carte, avec un moniteur série ou un terminal pour envoyer `c` et `h`. La bibliothèque fournit une fiche d'activité en anglais, [BleIndoorMap.md](https://github.com/steamicc/arduino-steami/blob/v0.36.2/examples/BLE/BleIndoorMap/BleIndoorMap.md) : installation des balises, étalonnage et déroulé d'une séance en classe.
+**Matériel** : comme pour [BleTrilateration](#bletrilateration), trois balises `Beacon_M1` à `Beacon_M3` aux positions du code et cette carte, avec un terminal pour voir la carte animée et envoyer `c` et `h`. La bibliothèque fournit une fiche d'activité en anglais, [BleIndoorMap.md](https://github.com/steamicc/arduino-steami/blob/v0.36.2/examples/BLE/BleIndoorMap/BleIndoorMap.md) : installation des balises, étalonnage et déroulé d'une séance en classe.
 
 ```cpp file=.external/arduino-steami/examples/BLE/BleIndoorMap/BleIndoorMap.ino
 
@@ -204,7 +210,8 @@ Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui l
 
 **Comment ça marche** : le calcul est celui de BleTrilateration, avec les mêmes constantes : moyenne glissante, conversion du RSSI en distance, trilatération, lissage de la position. Les différences portent sur la façon de suivre les balises et sur l'affichage :
 
-- Une balise qui n'a rien envoyé depuis 5 s (`BEACON_TIMEOUT_MS`) passe à `NOT SEEN`, et la position n'est plus recalculée tant qu'elle n'est pas revenue : le `X` reste à sa dernière place.
+- Une balise qui n'a pas été reçue depuis 5 s (`BEACON_TIMEOUT_MS`) passe à `NOT SEEN`, qu'elle soit éteinte ou simplement hors de portée, et la position n'est plus recalculée tant qu'elle n'est pas revenue : le `X` reste à sa dernière place.
+- Comme dans BleTrilateration, une position retenue à gauche de M1 (x négatif) compte comme « pas de position » : elle n'est pas lissée, et la carte affiche `Position: waiting for all 3 beacons...` sans `X`, même si les trois balises sont reçues.
 - Les échecs (balise trop faible, position aberrante) ne sont pas signalés : la carte garde simplement la dernière position.
 - À chaque déplacement du `X`, l'ancienne position est gardée dans un tableau de 5 cases réutilisées en boucle : c'est la trace.
 - La colonne d'un point vaut 1 + x / 10 et sa ligne est comptée à partir du bas ; un point hors du cadre est ramené contre son bord.
