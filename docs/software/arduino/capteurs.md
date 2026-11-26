@@ -154,14 +154,14 @@ Le cap ne tient pas compte de l'inclinaison : une carte penchée donne un cap fa
 
 **Calibrer.** Le magnétomètre mesure aussi le champ magnétique de la carte elle-même, plus fort que celui de la Terre : sans calibration, une V1c a lu 176 µT au total, champ terrestre compris, alors que le champ terrestre seul vaut 25 à 65 µT. Sans calibration, le cap est donc faux. Deux façons de calibrer :
 
-- `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive, n'est pas enregistrée et se perd au redémarrage, à chaque Reset et à chaque téléversement. Le programme ci-dessus et l'exemple **STeaMi → STEAMI_BOARD → Compass** la lancent par un appui sur MENU.
+- `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive, n'est pas enregistrée et se perd au redémarrage, à chaque Reset et à chaque téléversement. Le programme ci-dessus et l'exemple [**STeaMi → STEAMI_BOARD → Compass**](./exemples/steami-board#compass) la lancent par un appui sur MENU.
 - une calibration `cm` enregistrée dans la zone de configuration du DAPLink est appliquée automatiquement au démarrage (voir [Calibrations](./carte#calibrations)).
 
 Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proche de 359° (`N`) et face à l'est d'environ 70° (`E`) : la boussole indique une direction, pas un cap précis au degré. Les objets métalliques, les aimants et les câbles proches faussent aussi la mesure.
 
 **Nord géographique.** Le cap est mesuré par rapport au nord magnétique. `boussole.setDeclination(2.0)` ajoute la déclinaison magnétique du lieu, en degrés, positive vers l'est, pour viser le nord géographique ; elle ne dépasse pas quelques degrés en France métropolitaine. Cet appel peut se faire avant `begin()`.
 
-**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple **STeaMi → STEAMI_BOARD → Magnetometer** affiche le champ et se calibre, lui aussi, par un appui sur MENU. Si le capteur ne répond pas, `read()`, `x()`, `y()`, `z()` et `strength()` renvoient `NAN` (affiché `nan`), et `calibrate()` ne fait rien.
+**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple [**STeaMi → STEAMI_BOARD → Magnetometer**](./exemples/steami-board#magnetometer) affiche le champ et se calibre, lui aussi, par un appui sur MENU. Si le capteur ne répond pas, `read()`, `x()`, `y()`, `z()` et `strength()` renvoient `NAN` (affiché `nan`), et `calibrate()` ne fait rien.
 
 ### Avec le driver LIS2MDL
 
@@ -297,7 +297,7 @@ Chaque appel de `isPressed()`, `wasPressed()` ou `wasReleased()` lit l'état des
 
 Un contact mécanique rebondit : pendant quelques millisecondes, il s'ouvre et se ferme plusieurs fois. La bibliothèque ignore les rebonds des 20 ms qui suivent chaque appui ou relâchement, si bien qu'un appui ne compte qu'une fois.
 
-L'exemple **STeaMi → STEAMI_BOARD → Buttons** affiche chaque appui et chaque relâchement des sept boutons.
+L'exemple [**STeaMi → STEAMI_BOARD → Buttons**](./exemples/steami-board#buttons) affiche chaque appui et chaque relâchement des sept boutons.
 
 ### Avec le driver MCP23009E
 
