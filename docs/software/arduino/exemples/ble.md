@@ -18,7 +18,7 @@ Sur cette page :
 
 La radio est intégrée au microcontrôleur principal, le [STM32WB55](/docs/hardware/main-components/stm32wb55), avec une antenne intégrée au circuit imprimé. Elle est la même sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)). Un seul exemple dépend de la release : **BleBeacon** diffuse la température du capteur WSEN-HIDS, présent seulement sur les V1a et V1b.
 
-Le STM32WB55 a deux cœurs : le programme Arduino tourne sur le premier, le second fait fonctionner la radio avec son propre firmware, la **pile radio** (_wireless stack_). Les exemples ont donc besoin d'une pile Bluetooth installée sur la carte. Elle s'installe depuis le navigateur, comme décrit dans [Installation de la stack radio](/docs/software/daplink#installation-de-la-stack-radio-blethreadzigbee) ; la documentation de la bibliothèque STM32duinoBLE demande le firmware **BLE HCILayer**, que l'outil propose. Si `BLE.begin()` échoue, il renvoie `0` : les exemples écrivent alors `BLE init failed!` et s'arrêtent. Sans pile radio, ce message n'arrive pas tout de suite : la bibliothèque attend jusqu'à 10 s la réponse du second cœur avant d'abandonner, et certaines de ses attentes n'ont pas de limite, si bien que la console peut aussi rester muette. Quand rien ne s'affiche après une dizaine de secondes, ou que `BLE init failed!` apparaît, vérifier d'abord que la pile radio est installée.
+Le STM32WB55 a deux cœurs : le programme Arduino tourne sur le premier, le second fait fonctionner la radio avec son propre firmware, la **pile radio** (_wireless stack_). Les exemples ont donc besoin d'une pile Bluetooth installée sur la carte. Pour les STM32WB, le [README de la bibliothèque STM32duinoBLE](https://github.com/stm32duino/STM32duinoBLE#readme) demande le firmware **BLE HCILayer** (fichier `stm32wbxx_BLE_HCILayer_fw.bin`). Il s'installe depuis le navigateur avec l'outil décrit dans [Installation de la stack radio](/docs/software/daplink#installation-de-la-stack-radio-blethreadzigbee), qui le propose sous le nom « BLE HCILayer ». Sur une V1c où ce firmware était installé (version 1.20.0), `BLE.begin()` a réussi dans tous les exemples qui l'atteignent : la console a continué jusqu'au menu ou jusqu'à la ligne `Scanning...` (`Scanning for beacons...` pour certains). Seul BleBeacon s'est arrêté avant, faute de capteur WSEN-HIDS. Si `BLE.begin()` échoue, il renvoie `0` : les exemples écrivent alors `BLE init failed!` et s'arrêtent. Sans pile radio, ce message n'arrive pas tout de suite : d'après le code de la bibliothèque, elle attend jusqu'à 10 s la réponse du second cœur avant d'abandonner, et certaines de ses attentes n'ont pas de limite, si bien que la console peut aussi rester muette. Quand, après une dizaine de secondes, la console n'est pas allée jusqu'au menu ou jusqu'à cette ligne `Scanning`, ou que `BLE init failed!` apparaît, vérifier d'abord que la pile radio est installée.
 
 Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → BLE** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent ni l'écran, qui garde l'image laissée par le programme précédent, ni la LED Bluetooth. La section [Bluetooth](../capteurs#bluetooth) de la page Capteurs et écran les présente en une phrase ; ici, chacun est détaillé.
 
@@ -74,7 +74,7 @@ Un détail de la bibliothèque explique comment le nom arrive au récepteur. Une
 
 **Ce qu'on observe** : la console écrit `WSEN-HIDS ready.` puis `BLE Beacon ready.`, puis chaque seconde la température diffusée, par exemple `Advertising — T = 23.47 C`. Ce que la carte émet se voit depuis un autre appareil. Dans une application de scan BLE sur téléphone, comme nRF Connect ou LightBlue, une balise nommée `STeaMi-Beacon` apparaît, avec deux octets de données du fabricant, d'identifiant `0x0059`, qui changent avec la température.
 
-Sur une V1c, qui n'a pas de WSEN-HIDS, la console écrit `WSEN-HIDS not detected — check wiring.` et l'exemple s'arrête : il n'y a pas de câblage à vérifier, le capteur est simplement absent.
+Sur une V1c, qui n'a pas de WSEN-HIDS, la console écrit seulement `WSEN-HIDS not detected — check wiring.` et l'exemple s'arrête, avant même de démarrer la radio : il n'y a pas de câblage à vérifier, le capteur est simplement absent. C'est ce qu'affiche une V1c d'essai juste après le téléversement.
 
 **Matériel** : une carte V1a ou V1b. Pour voir les annonces : un téléphone avec une application de scan BLE, ou une deuxième carte avec [BleRssiProximity](#blerssiproximity).
 
@@ -92,7 +92,7 @@ Une annonce transporte peu d'octets. Plutôt qu'un nombre à virgule sur quatre 
 
 ## BleRssiProximity {#blerssiproximity}
 
-**Ce qu'on observe** : après `BLE RSSI Proximity Scanner`, `Looking for: STeaMi-Beacon` et `Scanning...`, la console écrit une ligne à chaque annonce reçue de la balise, plusieurs fois par seconde, sous forme de jauge : `RSSI: -52 dBm | [===========>        ] 63%`. Quand les deux cartes se rapprochent, le RSSI monte vers -30 dBm et la jauge se remplit ; quand elles s'éloignent, ou qu'une main ou un corps passe entre elles, elle se vide. Tant que la balise n'est pas reçue, rien ne s'affiche après `Scanning...`.
+**Ce qu'on observe** : après `BLE RSSI Proximity Scanner`, `Looking for: STeaMi-Beacon` et `Scanning...`, la console écrit une ligne à chaque annonce reçue de la balise, plusieurs fois par seconde, sous forme de jauge : `RSSI: -52 dBm | [===========>        ] 63%`. Quand les deux cartes se rapprochent, le RSSI monte vers -30 dBm et la jauge se remplit ; quand elles s'éloignent, ou qu'une main ou un corps passe entre elles, elle se vide. Tant que la balise n'est pas reçue, rien ne s'affiche après `Scanning...` : c'est ce qu'écrit une carte seule, sans balise à portée, par exemple une V1c d'essai.
 
 **Matériel** : deux cartes. L'une, une V1a ou une V1b, exécute [BleBeacon](#blebeacon) ; l'autre, de n'importe quelle release, exécute BleRssiProximity. Avec seulement des V1c, la balise est une copie de BleBeacon sans le capteur (voir le tableau en tête de page).
 
@@ -110,7 +110,7 @@ Le RSSI varie beaucoup d'un paquet à l'autre, même quand rien ne bouge : le si
 
 ## BleHotCold {#blehotcold}
 
-**Ce qu'on observe** : au démarrage, la console affiche un menu, `=== BLE Hot/Cold ===`, `1 - TREASURE (beacon)`, `2 - SEEKER  (scanner)`, `Enter your choice:`. Envoyer `1` à une carte en fait le trésor : elle écrit `TREASURE mode — advertising as: STeaMi-Treasure`, puis `Broadcasting... (reset to change mode)` toutes les 2 s. Envoyer `2` à l'autre en fait le chercheur : `SEEKER mode — scanning for: STeaMi-Treasure`. Dès qu'il reçoit le trésor, le buzzer du chercheur bipe, plus aigu et plus vite à mesure qu'il s'en approche, et sa console écrit quatre fois par seconde la zone, le RSSI moyen et la jauge : `HOT | RSSI: -52 dBm | [===========>        ] 63%`.
+**Ce qu'on observe** : au démarrage, la console affiche un menu, `=== BLE Hot/Cold ===`, `1 - TREASURE (beacon)`, `2 - SEEKER  (scanner)`, `Enter your choice:`. Le menu n'apparaît qu'une fois la radio démarrée par `BLE.begin()` ; une V1c d'essai, seule, l'affiche juste après le téléversement, puis attend un caractère sans rien écrire d'autre. Envoyer `1` à une carte en fait le trésor : elle écrit `TREASURE mode — advertising as: STeaMi-Treasure`, puis `Broadcasting... (reset to change mode)` toutes les 2 s. Envoyer `2` à l'autre en fait le chercheur : `SEEKER mode — scanning for: STeaMi-Treasure`. Dès qu'il reçoit le trésor, le buzzer du chercheur bipe, plus aigu et plus vite à mesure qu'il s'en approche, et sa console écrit quatre fois par seconde la zone, le RSSI moyen et la jauge : `HOT | RSSI: -52 dBm | [===========>        ] 63%`.
 
 | Zone       | Proximité     | RSSI moyen       | Son                                       |
 | ---------- | ------------- | ---------------- | ----------------------------------------- |
@@ -141,7 +141,7 @@ La difficulté est de biper sans cesser d'écouter. Un `delay()` entre deux bips
 
 ## BleRssiMapper {#blerssimapper}
 
-**Ce qu'on observe** : la console affiche l'aide (`=== BLE RSSI Room Mapper ===`, `r → record current point`, `s → stop and print CSV`, `h → help`), puis `Scanning for beacons...`. Toutes les 2 s, elle donne le RSSI moyen de chaque balise entendue, par exemple `Point #1 | Beacons: Beacon_M1=-67dBm  Beacon_M3=-80dBm`, où `#1` est le numéro du prochain point.
+**Ce qu'on observe** : la console affiche l'aide (`=== BLE RSSI Room Mapper ===`, `r → record current point`, `s → stop and print CSV`, `h → help`), puis `Scanning for beacons...`. Toutes les 2 s, elle donne le RSSI moyen de chaque balise entendue, par exemple `Point #1 | Beacons: Beacon_M1=-67dBm  Beacon_M3=-80dBm`, où `#1` est le numéro du prochain point. Tant qu'aucune balise n'a été entendue, la ligne s'arrête après `Beacons:` : une V1c d'essai, seule, écrit `Point #1 | Beacons:` toutes les 2 s.
 
 En chaque endroit de la pièce où l'on veut une mesure, envoyer `r` : le programme enregistre un point, `Recording point #1 (2 beacons)`, suivi d'une ligne par balise, `Beacon_M1, -67`. Si aucune balise n'a encore été entendue, il écrit `No beacon seen — move closer and retry.`. Envoyer `s` termine : l'écoute s'arrête et la console écrit toutes les mesures au format CSV, entre `=== CSV OUTPUT — copy and save as rssi_map.csv ===` et `=== END OF CSV ===`, puis le total, par exemple `Total: 5 points, 12 rows.`. `h` réaffiche l'aide ; tout autre caractère fait écrire `Unknown command. Send 'h' for help.`.
 
@@ -165,7 +165,7 @@ Une balise entendue une fois reste comptée, avec sa dernière moyenne, même qu
 
 **Ce qu'on observe** : au démarrage, la console écrit `BLE Trilateration Indoor Positioning` et la position des balises en centimètres, `Beacon_M1 = (0, 0)`, `Beacon_M2 = (420, 0)`, `Beacon_M3 = (330, 278)`, puis `Scanning...`. Ensuite, toutes les demi-secondes :
 
-- tant que les trois balises n'ont pas été entendues : `Waiting for beacons (2/3 seen)...` ;
+- tant que les trois balises n'ont pas été entendues : `Waiting for beacons (2/3 seen)...`, avec le nombre de balises déjà entendues ; une carte seule, sans balise à portée, écrit `Waiting for beacons (0/3 seen)...` deux fois par seconde ;
 - puis la distance estimée de chaque balise, par exemple `Distances: Beacon_M1=185cm  Beacon_M2=310cm  Beacon_M3=220cm`, et la position estimée de la carte, `Position: X=210cm  Y=140cm` ;
 - environ toutes les deux secondes, une carte de la pièce en caractères, 42 × 28 points, un caractère pour 10 cm : les balises `1` et `3`, et la position estimée `X`. La dernière colonne de cette carte correspond à 410-419 cm : la balise M2, à 420 cm, tombe juste à droite, et le `2` n'y apparaît pas.
 
@@ -193,12 +193,14 @@ Une balise entendue une fois reste comptée, avec son dernier RSSI : si elle s'�
 
 ## BleIndoorMap {#bleindoormap}
 
-**Ce qu'on observe** : le même calcul que [BleTrilateration](#bletrilateration), présenté sous forme de carte, redessinée toutes les demi-secondes :
+**Ce qu'on observe** : au démarrage, la console écrit l'aide, `=== BLE Indoor Map ===`, `c → clear trail and reset position`, `h → help`, puis la position des balises en centimètres, `Beacon layout (cm):`, `M1 = (0, 0)`, `M2 = (420, 0)`, `M3 = (330, 278)`, et enfin `Scanning for beacons...`. Vient ensuite le même calcul que [BleTrilateration](#bletrilateration), présenté sous forme de carte, redessinée toutes les demi-secondes, sous le titre `+------ BLE Indoor Map ------+` :
 
 - un cadre de 44 × 30 caractères, un caractère pour 10 cm, avec les balises `1`, `2` et `3`, la position estimée `X` et, en `.`, les cinq positions précédentes ;
 - la position, `Position: X=210cm  Y=140cm`, ou `Position: waiting for all 3 beacons...` tant qu'il n'y en a pas, par exemple juste après `c`, ou quand la position retenue est à gauche de M1 (voir plus bas) ;
 - l'état de chaque balise, par exemple `Beacon_M1: OK  RSSI=-86dBm  dist=188cm  age=0s`, ou `NOT SEEN` ; `dist=-1cm` signale une balise trop faible pour donner une distance ;
 - le rappel des commandes : `c` efface la trace et la position (`Trail cleared.`), `h` réaffiche l'aide et la position des balises.
+
+Une carte seule, sans balise à portée, dessine un cadre vide, avec seulement les balises `1`, `2` et `3`, et écrit `Position: waiting for all 3 beacons...` puis `Beacon_M1: NOT SEEN` et de même pour les deux autres balises. Lors d'un essai sur une V1c, la première carte est arrivée incomplète, coupée par la marque `<DAPLink:Overflow>` : le programme écrit chaque carte d'un seul coup, plus de 1500 caractères, et l'interface USB de la carte (DAPLink), qui relaie la liaison série, a perdu une partie de ces caractères. Une carte tronquée de cette façon ne signale pas une erreur du calcul.
 
 Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui les comprend (codes ANSI), effacent l'écran et ramènent le curseur en haut : la carte reste alors en place et s'anime. La console de cette page n'interprète pas ces codes : les cartes s'y affichent les unes sous les autres. Le moniteur série de l'Arduino IDE ne les interprète pas non plus, à notre connaissance, et empile lui aussi les cartes. Pour une carte animée, utiliser un terminal qui comprend les codes ANSI, comme `pio device monitor` (celui de la fiche d'activité), `screen` ou PuTTY, à 115200 bauds.
 
