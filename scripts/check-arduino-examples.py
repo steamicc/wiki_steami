@@ -42,7 +42,11 @@ def _ids_de_page(texte):
             continue
         m = TITRE.match(ligne)
         if m:
-            titre = m.group(2)
+            niveau = len(m.group(1))
+            if niveau == 1:
+                titre = None
+            elif niveau == 2:
+                titre = m.group(2)
             continue
         for b in BALISE.finditer(ligne):
             resultat.append((b.group(1) or b.group(2), titre))

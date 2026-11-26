@@ -53,6 +53,18 @@ class TestVerifier(unittest.TestCase):
         texte = page().replace(f'"{ID}"', f"'{ID}'")
         self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
 
+    def test_subheading_inside_section_ok(self):
+        texte = (
+            "## GestureDetection {#gesturedetection}\n\n### Comment ça marche\n\n"
+            f'Texte.\n\n<EssayerExemple id="{ID}" />\n'
+        )
+        self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
+
+    def test_anchor_on_wrong_level(self):
+        texte = page(titre="### GestureDetection {#gesturedetection}")
+        erreurs = verifier({ID}, {PAGE: texte}, [])
+        self.assertTrue(any(ID in e for e in erreurs))
+
 
 if __name__ == "__main__":
     unittest.main()
