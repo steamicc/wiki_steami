@@ -64,11 +64,6 @@ STEAMI_BOARD/Magnetometer
 STEAMI_BOARD/Pressure
 STEAMI_BOARD/Temperature
 STEAMI_CONFIG/show_config
-VL53L1X/BasicDistance
-VL53L1X/GestureDetection
-VL53L1X/ObjectCounter
-VL53L1X/ParkingSensor
-VL53L1X/ProximityAlarm
 WSEN-HIDS/BasicReader
 WSEN-HIDS/ComfortZone
 WSEN-HIDS/DewPointMonitor
