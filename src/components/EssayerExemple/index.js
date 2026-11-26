@@ -31,6 +31,10 @@ function Controles({ id, href }) {
   );
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const consoleRef = useRef(null);
+  const connecterRef = useRef(null);
+  // Après « Déconnecter », le bouton cliqué disparaît : le focus passe à
+  // « Connecter la carte », qui le remplace, au lieu de retomber sur la page.
+  const refocaliserRef = useRef(false);
   // Le lecteur était-il en bas de la console à son dernier défilement ?
   const colleRef = useRef(true);
 
@@ -49,12 +53,23 @@ function Controles({ id, href }) {
     if (colleRef.current) pre.scrollTop = pre.scrollHeight;
   }, [etat.lignes, montrerConsole]);
 
+  useLayoutEffect(() => {
+    if (etat.connectee || !refocaliserRef.current) return;
+    refocaliserRef.current = false;
+    connecterRef.current?.focus();
+  }, [etat.connectee]);
+
   function televerser() {
     carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
     carte.connecter(id, urlDapjs);
+  }
+
+  function deconnecter() {
+    refocaliserRef.current = true;
+    carte.deconnecter();
   }
 
   let statut = null;
@@ -65,20 +80,40 @@ function Controles({ id, href }) {
 
   return (
     <div className={styles.controles}>
-      {etat.connectee ? (
-        <button
-          type="button"
-          className={styles.bouton}
-          disabled={etat.occupee}
-          onClick={televerser}
-        >
-          Téléverser
-        </button>
-      ) : (
-        <button type="button" className={styles.bouton} disabled={etat.occupee} onClick={connecter}>
-          Connecter la carte
-        </button>
-      )}
+      <div className={styles.boutons}>
+        {etat.connectee ? (
+          <>
+            <button
+              type="button"
+              className={styles.bouton}
+              disabled={etat.occupee}
+              onClick={televerser}
+            >
+              Téléverser
+            </button>
+            {/* Libère la carte tout de suite, pour un Codespace ou l'Arduino
+                IDE ; grisé pendant un téléversement, qu'il ne faut pas couper. */}
+            <button
+              type="button"
+              className={styles.boutonSecondaire}
+              disabled={etat.occupee}
+              onClick={deconnecter}
+            >
+              Déconnecter
+            </button>
+          </>
+        ) : (
+          <button
+            ref={connecterRef}
+            type="button"
+            className={styles.bouton}
+            disabled={etat.occupee}
+            onClick={connecter}
+          >
+            Connecter la carte
+          </button>
+        )}
+      </div>
       <div className={styles.messages} aria-live="polite">
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}

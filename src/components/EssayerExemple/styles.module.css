@@ -31,9 +31,36 @@
   background: var(--ifm-color-primary-dark);
 }
 
-.bouton:disabled {
+.bouton:disabled,
+.boutonSecondaire:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Même forme que .bouton, sans fond : action secondaire. Texte à la couleur
+   du thème, lisible en clair comme en sombre. */
+.boutonSecondaire {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--ifm-color-primary-darkest);
+  border-radius: var(--ifm-global-radius);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  font: inherit;
+  cursor: pointer;
+}
+
+[data-theme='dark'] .boutonSecondaire {
+  border-color: var(--ifm-color-primary);
+}
+
+.boutonSecondaire:hover:not(:disabled) {
+  background: var(--ifm-color-emphasis-100);
 }
 
 .messages {

@@ -96,7 +96,14 @@ export function estEnBas({ scrollTop, clientHeight, scrollHeight }, marge = 4) {
 // La carte se libère quand plus aucun composant n'est affiché, jamais pendant
 // une connexion ou un téléversement.
 export function peutLiberer({ abonnes, occupee, connectee }) {
-  return abonnes === 0 && !occupee && connectee;
+  return abonnes === 0 && peutDeconnecter({ occupee, connectee });
+}
+
+// Le bouton « Déconnecter » ne sert que carte connectée, et jamais pendant
+// une connexion ou un téléversement : un flash interrompu peut laisser la
+// carte inutilisable.
+export function peutDeconnecter({ occupee, connectee }) {
+  return !occupee && connectee;
 }
 
 // Tampon de lignes pour la console série : le flux arrive par morceaux

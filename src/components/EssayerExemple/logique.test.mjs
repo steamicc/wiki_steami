@@ -12,6 +12,7 @@ import {
   messageErreur,
   messageFrancais,
   nomFichier,
+  peutDeconnecter,
   peutLiberer,
   telechargerExemple,
   urlBin,
@@ -182,4 +183,11 @@ test('peutLiberer : seulement sans composant affiché, carte connectée et libre
   assert.equal(peutLiberer({ abonnes: 1, occupee: false, connectee: true }), false);
   assert.equal(peutLiberer({ abonnes: 0, occupee: true, connectee: true }), false);
   assert.equal(peutLiberer({ abonnes: 0, occupee: false, connectee: false }), false);
+});
+
+test('peutDeconnecter : seulement carte connectée et libre', () => {
+  assert.equal(peutDeconnecter({ occupee: false, connectee: true }), true);
+  assert.equal(peutDeconnecter({ occupee: true, connectee: true }), false);
+  assert.equal(peutDeconnecter({ occupee: false, connectee: false }), false);
+  assert.equal(peutDeconnecter({ occupee: true, connectee: false }), false);
 });

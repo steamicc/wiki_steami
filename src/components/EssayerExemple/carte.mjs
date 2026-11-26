@@ -2,8 +2,15 @@
 // DAP.js (global DAPjs) n'est chargé qu'au premier clic sur « Connecter la carte ».
 // Le wiki est une application d'une seule page : ce module vit aussi longtemps
 // que l'onglet. La carte est donc libérée quand plus aucun <EssayerExemple>
-// n'est affiché, pour qu'un Codespace ou l'Arduino IDE puisse s'en servir.
-import { ErreurLecteur, TamponLignes, messageFrancais, peutLiberer } from './logique.mjs';
+// n'est affiché, pour qu'un Codespace ou l'Arduino IDE puisse s'en servir,
+// ou tout de suite avec le bouton « Déconnecter ».
+import {
+  ErreurLecteur,
+  TamponLignes,
+  messageFrancais,
+  peutDeconnecter,
+  peutLiberer,
+} from './logique.mjs';
 
 const VENDOR_ID_DAPLINK = 0x0d28;
 const BAUDS = 115200;
@@ -125,14 +132,10 @@ function ecouterDeconnexion() {
   });
 }
 
-// Plus aucun composant affiché depuis DELAI_LIBERATION_MS : arrête la console,
-// déconnecte la carte et repart de l'état initial. Pendant une connexion ou un
-// téléversement, ne fait rien : la fin de l'opération replanifie la libération.
-async function liberer() {
-  minuterieLiberation = null;
-  if (!peutLiberer({ abonnes: abonnes.size, occupee: etat.occupee, connectee: dap !== null })) {
-    return;
-  }
+// Arrête la console, déconnecte la carte et repart de l'état initial (plus
+// de console, de statut ni d'erreur). L'appelant vérifie avant que la carte
+// est connectée et libre : jamais pendant une connexion ou un téléversement.
+async function relacher() {
   const courant = dap;
   const appareil = peripherique;
   const boucleCourante = boucle;
@@ -151,6 +154,27 @@ async function liberer() {
   })();
   await liberation;
   liberation = null;
+}
+
+// Plus aucun composant affiché depuis DELAI_LIBERATION_MS : libère la carte.
+// Pendant une connexion ou un téléversement, ne fait rien : la fin de
+// l'opération replanifie la libération.
+async function liberer() {
+  minuterieLiberation = null;
+  if (!peutLiberer({ abonnes: abonnes.size, occupee: etat.occupee, connectee: dap !== null })) {
+    return;
+  }
+  await relacher();
+}
+
+// Bouton « Déconnecter » : libère la carte tout de suite, pour un Codespace
+// ou l'Arduino IDE. Refusé pendant une connexion ou un téléversement : un
+// flash interrompu peut laisser la carte inutilisable jusqu'au redémarrage
+// de son DAPLink.
+async function deconnecter() {
+  if (!peutDeconnecter({ occupee: etat.occupee, connectee: dap !== null })) return;
+  annulerLiberation();
+  await relacher();
 }
 
 function planifierLiberation() {
@@ -249,6 +273,7 @@ function abonner(fn) {
 export const carte = {
   connecter,
   televerser,
+  deconnecter,
   abonner,
   get etat() {
     return etat;
