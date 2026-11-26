@@ -27,10 +27,6 @@ SSD1327/rotating_3d_cube
 SSD1327/rotation
 SSD1327/shades
 STEAMI_CONFIG/show_config
-WSEN-HIDS/BasicReader
-WSEN-HIDS/ComfortZone
-WSEN-HIDS/DewPointMonitor
-WSEN-HIDS/HumidityAlert
 WSEN-PADS/altitude
 WSEN-PADS/floor_detector
 WSEN-PADS/read_pressure_temperature
