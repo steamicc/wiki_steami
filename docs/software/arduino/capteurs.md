@@ -20,7 +20,7 @@ Une seconde partie, nommée d'après le composant (par exemple **Avec le driver 
 
 L'écran, le fichier du disque USB et le Bluetooth n'ont pas de classe par fonction : leur section donne directement le driver.
 
-Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD**.
+Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets, rangés par composant dans **Fichier → Exemples → STeaMi**. La page [Exemples à essayer](./exemples/) les reprend un par un, avec un bouton pour les envoyer sur la carte ; chaque section ci-dessous renvoie aux exemples de son composant. Les exemples des classes par fonction sont dans **STeaMi → STEAMI_BOARD** (voir [Exemples STEAMI_BOARD](./exemples/steami-board)).
 
 ## Mouvement : accéléromètre et gyroscope
 
@@ -99,6 +99,8 @@ Les méthodes de lecture de ce driver remplissent une variable passée en param�
 
 Ce driver, créé dans le programme, ne reçoit pas la calibration `ca` : pour une accélération calibrée, utiliser `SteamiAccelerometer`.
 
+Exemples à essayer sur la carte : [Exemples ISM330DL](./exemples/ism330dl).
+
 ## Boussole : magnétomètre
 
 ```cpp
@@ -152,14 +154,14 @@ Le cap ne tient pas compte de l'inclinaison : une carte penchée donne un cap fa
 
 **Calibrer.** Le magnétomètre mesure aussi le champ magnétique de la carte elle-même, plus fort que celui de la Terre : sans calibration, une V1c a lu 176 µT au total, champ terrestre compris, alors que le champ terrestre seul vaut 25 à 65 µT. Sans calibration, le cap est donc faux. Deux façons de calibrer :
 
-- `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive, n'est pas enregistrée et se perd au redémarrage, à chaque Reset et à chaque téléversement. Le programme ci-dessus et l'exemple **STeaMi → STEAMI_BOARD → Compass** la lancent par un appui sur MENU.
+- `boussole.calibrate(12)` mesure pendant 12 secondes : tourner lentement la carte dans tous les sens pendant ce temps. La calibration reste en mémoire vive, n'est pas enregistrée et se perd au redémarrage, à chaque Reset et à chaque téléversement. Le programme ci-dessus et l'exemple [**STeaMi → STEAMI_BOARD → Compass**](./exemples/steami-board#compass) la lancent par un appui sur MENU.
 - une calibration `cm` enregistrée dans la zone de configuration du DAPLink est appliquée automatiquement au démarrage (voir [Calibrations](./carte#calibrations)).
 
 Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proche de 359° (`N`) et face à l'est d'environ 70° (`E`) : la boussole indique une direction, pas un cap précis au degré. Les objets métalliques, les aimants et les câbles proches faussent aussi la mesure.
 
 **Nord géographique.** Le cap est mesuré par rapport au nord magnétique. `boussole.setDeclination(2.0)` ajoute la déclinaison magnétique du lieu, en degrés, positive vers l'est, pour viser le nord géographique ; elle ne dépasse pas quelques degrés en France métropolitaine. Cet appel peut se faire avant `begin()`.
 
-**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple **STeaMi → STEAMI_BOARD → Magnetometer** affiche le champ et se calibre, lui aussi, par un appui sur MENU. Si le capteur ne répond pas, `read()`, `x()`, `y()`, `z()` et `strength()` renvoient `NAN` (affiché `nan`), et `calibrate()` ne fait rien.
+**Le magnétomètre.** `SteamiMagnetometer` donne le champ magnétique sur les trois axes, en µT, et `strength()` son intensité. Avant toute calibration, ces valeurs contiennent le champ propre de la carte et peuvent dépasser de loin le champ terrestre. Après une calibration (`cm` dans la zone de configuration, ou `calibrate()` comme pour la boussole), ce décalage est retiré : loin des aimants et du métal, `strength()` vaut alors environ 25 à 65 µT. `SteamiMagnetometer` et `SteamiCompass` partagent le même LIS2MDL : une calibration faite par l'une sert à l'autre. L'exemple [**STeaMi → STEAMI_BOARD → Magnetometer**](./exemples/steami-board#magnetometer) affiche le champ et se calibre, lui aussi, par un appui sur MENU. Si le capteur ne répond pas, `read()`, `x()`, `y()`, `z()` et `strength()` renvoient `NAN` (affiché `nan`), et `calibrate()` ne fait rien.
 
 ### Avec le driver LIS2MDL
 
@@ -195,6 +197,8 @@ Depuis la version 0.34.0 de la bibliothèque, le cap vaut 0° quand le haut de l
 Le cap n'est fiable qu'après une calibration et loin des objets métalliques : sans calibration, le capteur mesure aussi le champ magnétique de la carte elle-même. L'exemple **STeaMi → LIS2MDL → MagneticCalibration** montre comment calibrer la boussole. `headingWithTiltCompensation()`, qui corrige l'inclinaison avec l'accéléromètre, ne suit pas encore cette convention : même carte à plat, son 0° et son sens de rotation peuvent différer de ceux de `headingFlatOnly()`. Cette fonction n'a pas été vérifiée sur une carte. Utiliser `headingFlatOnly()` et tenir la carte à plat.
 
 La classe `SteamiCompass` calcule le même cap, avec `headingFlatOnly()` du driver partagé, et lui applique d'elle-même la calibration `cm` de la zone de configuration du DAPLink. Un driver créé dans le programme, comme ci-dessus, ne reçoit pas cette calibration.
+
+Exemples à essayer sur la carte : [Exemples LIS2MDL](./exemples/lis2mdl).
 
 ## Distance : capteur de temps de vol
 
@@ -249,6 +253,8 @@ void loop() {
 
 Les exemples **STeaMi → VL53L1X** montrent aussi un radar de recul (**ParkingSensor**), une alarme de proximité (**ProximityAlarm**), un compteur de passages (**ObjectCounter**) et un geste de la main devant le capteur qui allume ou éteint la LED (**GestureDetection**).
 
+Exemples à essayer sur la carte : [Exemples VL53L1X](./exemples/vl53l1x).
+
 ## Boutons et D-PAD
 
 ```cpp
@@ -291,7 +297,7 @@ Chaque appel de `isPressed()`, `wasPressed()` ou `wasReleased()` lit l'état des
 
 Un contact mécanique rebondit : pendant quelques millisecondes, il s'ouvre et se ferme plusieurs fois. La bibliothèque ignore les rebonds des 20 ms qui suivent chaque appui ou relâchement, si bien qu'un appui ne compte qu'une fois.
 
-L'exemple **STeaMi → STEAMI_BOARD → Buttons** affiche chaque appui et chaque relâchement des sept boutons.
+L'exemple [**STeaMi → STEAMI_BOARD → Buttons**](./exemples/steami-board#buttons) affiche chaque appui et chaque relâchement des sept boutons.
 
 ### Avec le driver MCP23009E
 
@@ -327,6 +333,8 @@ void loop() {
 Ce programme lit le niveau des broches : il affiche le nom d'un bouton tant qu'il reste enfoncé, sans anti-rebond. Pour compter chaque appui une seule fois, utiliser `SteamiButtons`.
 
 La bibliothèque fournit aussi des jeux prêts à téléverser, dans **STeaMi → MCP23009E** : **SimonGame**, **ReactionTimer**, **MorseCode** et **MusicPlayer**.
+
+Exemples à essayer sur la carte : [Exemples MCP23009E](./exemples/mcp23009e).
 
 ## Batterie
 
@@ -385,6 +393,8 @@ void loop() {
 ```
 
 Sans batterie branchée, la jauge ne répond pas et ce programme affiche « BQ27441 non détecté ». Brancher la batterie, puis appuyer sur le bouton Reset de la carte.
+
+Exemples à essayer sur la carte : [Exemples BQ27441](./exemples/bq27441).
 
 ## Pression, humidité et température
 
@@ -459,6 +469,8 @@ void loop() {
 }
 ```
 
+Exemples à essayer sur la carte : [Exemples WSEN-PADS](./exemples/wsen-pads) et [Exemples WSEN-HIDS](./exemples/wsen-hids).
+
 </Release>
 <Release releases="v1c">
 
@@ -492,6 +504,8 @@ void loop() {
 ```
 
 Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le point de rosée (**DewPointMonitor**) et le confort d'une pièce (**ComfortZone**).
+
+Exemples à essayer sur la carte : [Exemples BME280](./exemples/bme280).
 
 </Release>
 </ReleaseTabs>
@@ -596,6 +610,8 @@ La valeur est un nombre brut du capteur, sans unité, qui augmente avec la lumi�
 
 Les exemples **STeaMi → APDS9960** montrent aussi la proximité (**proximity**) et la reconnaissance de gestes (**gesture**). La proximité n'a pas de classe par fonction : elle se lit avec ce driver.
 
+Exemples à essayer sur la carte : [Exemples APDS9960](./exemples/apds9960).
+
 </Release>
 <Release releases="v1c">
 
@@ -627,6 +643,8 @@ void loop() {}
 ```
 
 Le dessin se fait en mémoire (`fill`, `pixel`, `line`, `fillRect`, `text`) ; rien n'apparaît avant l'appel à `show()`. Les couleurs vont de `0` (noir) à `15` (blanc).
+
+Exemples à essayer sur la carte : [Exemples SSD1327](./exemples/ssd1327).
 
 </Release>
 <Release releases="v1c">
@@ -662,6 +680,8 @@ L'écran est rond : les coins de l'image ne s'affichent pas. Le plus grand carr�
 L'image occupe 115 200 octets de mémoire vive, plus de la moitié de celle disponible pour un programme. Cette mémoire est réservée par `begin()` pendant l'exécution : le rapport de compilation de l'IDE ne la compte pas. Si l'écran reste noir dans un programme plus gros, c'est que la mémoire manque.
 
 Les exemples **STeaMi → GC9A01** reprennent ceux de l'écran des V1a et V1b, en couleur (**color_palette**, **rotating_3d_cube**…).
+
+Exemples à essayer sur la carte : [Exemples GC9A01](./exemples/gc9a01).
 
 </Release>
 </ReleaseTabs>
@@ -710,11 +730,15 @@ L'exemple **STeaMi → DAPLINK_FLASH → data_logger** relit aussi le fichier de
 
 La zone de configuration du DAPLink (nom de la carte, calibrations des capteurs) se lit avec le driver `SteamiConfig` : voir l'exemple **STeaMi → STEAMI_CONFIG → show_config**. Sur une carte dont le firmware DAPLink n'a pas de zone de configuration, `SteamiConfig::begin()` renvoie `false` ; là aussi, mettre à jour le firmware.
 
+Exemples à essayer sur la carte : [Exemples DAPLINK_FLASH](./exemples/daplink-flash) et [Exemples STEAMI_CONFIG](./exemples/steami-config).
+
 ## Bluetooth
 
 Le Bluetooth Low Energy s'utilise avec la bibliothèque **STM32duinoBLE**, proposée automatiquement à l'installation de STeaMi. Les exemples propres à la STeaMi sont dans **Fichier → Exemples → STeaMi → BLE** : jeu du chaud-froid (**BleHotCold**), estimation de distance par la force du signal (**BleRssiProximity**)… L'exemple **BleBeacon** diffuse la mesure du capteur WSEN-HIDS : il ne fonctionne que sur V1a et V1b.
 
 Le Bluetooth demande une pile radio, installée à part sur le second cœur du STM32WB55. Si `BLE.begin()` renvoie `0`, vérifier la pile et l'installer au besoin : voir [Pile radio Bluetooth](../pile-radio).
+
+Exemples à essayer sur la carte : [Exemples BLE](./exemples/ble).
 
 ## Composants non pris en charge
 

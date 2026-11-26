@@ -34,31 +34,31 @@ Pour modifier un exemple, l'ouvrir dans un [Codespace](../codespace), où la bib
 
 ## Les composants
 
-Les composants dépendent de la release de la carte (voir [Révisions de la carte](/docs/hardware/revisions)). Les pages d'exemples sont rédigées une à une ; les composants sans lien n'ont pas encore la leur.
+Les composants dépendent de la release de la carte (voir [Révisions de la carte](/docs/hardware/revisions)).
 
 ### Sur la V1c
 
 La V1c est la carte diffusée aujourd'hui. Elle a les composants communs aux trois releases, plus le BME280 et l'écran GC9A01.
 
-| Composant            | Ce que montrent les exemples                                                      | Cartes                                                |
-| -------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [VL53L1X](./vl53l1x) | distance par temps de vol                                                         | V1a, V1b, V1c                                         |
-| [BME280](./bme280)   | pression, humidité et température                                                 | V1c                                                   |
-| GC9A01               | écran TFT rond, couleur, 240 × 240                                                | V1c                                                   |
-| STEAMI_BOARD         | classes par fonction, qui choisissent le composant présent sur la carte           | V1a, V1b, V1c (lumière, couleur et gestes : V1a, V1b) |
-| ISM330DL             | accéléromètre et gyroscope                                                        | V1a, V1b, V1c                                         |
-| LIS2MDL              | magnétomètre et boussole                                                          | V1a, V1b, V1c                                         |
-| BQ27441              | jauge de batterie                                                                 | V1a, V1b, V1c                                         |
-| MCP23009E            | D-PAD (boutons directionnels)                                                     | V1a, V1b, V1c                                         |
-| BLE                  | Bluetooth Low Energy                                                              | V1a, V1b, V1c                                         |
-| DAPLINK_FLASH        | fichier gardé par le DAPLink dans sa mémoire flash, visible sur le lecteur STEAMI | V1a, V1b, V1c                                         |
-| STEAMI_CONFIG        | zone de configuration du DAPLink (révision, calibrations)                         | V1a, V1b, V1c                                         |
+| Composant                        | Ce que montrent les exemples                                                      | Cartes                                                |
+| -------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [VL53L1X](./vl53l1x)             | distance par temps de vol                                                         | V1a, V1b, V1c                                         |
+| [BME280](./bme280)               | pression, humidité et température                                                 | V1c                                                   |
+| [GC9A01](./gc9a01)               | écran TFT rond, couleur, 240 × 240                                                | V1c                                                   |
+| [STEAMI_BOARD](./steami-board)   | classes par fonction, qui choisissent le composant présent sur la carte           | V1a, V1b, V1c (lumière, couleur et gestes : V1a, V1b) |
+| [ISM330DL](./ism330dl)           | accéléromètre et gyroscope                                                        | V1a, V1b, V1c                                         |
+| [LIS2MDL](./lis2mdl)             | magnétomètre et boussole                                                          | V1a, V1b, V1c                                         |
+| [BQ27441](./bq27441)             | jauge de batterie                                                                 | V1a, V1b, V1c                                         |
+| [MCP23009E](./mcp23009e)         | D-PAD (boutons directionnels)                                                     | V1a, V1b, V1c                                         |
+| [BLE](./ble)                     | Bluetooth Low Energy                                                              | V1a, V1b, V1c                                         |
+| [DAPLINK_FLASH](./daplink-flash) | fichier gardé par le DAPLink dans sa mémoire flash, visible sur le lecteur STEAMI | V1a, V1b, V1c                                         |
+| [STEAMI_CONFIG](./steami-config) | zone de configuration du DAPLink (révision, calibrations)                         | V1a, V1b, V1c                                         |
 
 ### Sur les V1a et V1b seulement
 
-| Composant | Ce que montrent les exemples                   | Cartes   |
-| --------- | ---------------------------------------------- | -------- |
-| SSD1327   | écran OLED rond, 16 niveaux de gris, 128 × 128 | V1a, V1b |
-| APDS9960  | lumière, couleur, proximité et gestes          | V1a, V1b |
-| WSEN-HIDS | humidité et température                        | V1a, V1b |
-| WSEN-PADS | pression                                       | V1a, V1b |
+| Composant                | Ce que montrent les exemples                   | Cartes   |
+| ------------------------ | ---------------------------------------------- | -------- |
+| [SSD1327](./ssd1327)     | écran OLED rond, 16 niveaux de gris, 128 × 128 | V1a, V1b |
+| [APDS9960](./apds9960)   | lumière, couleur, proximité et gestes          | V1a, V1b |
+| [WSEN-HIDS](./wsen-hids) | humidité et température                        | V1a, V1b |
+| [WSEN-PADS](./wsen-pads) | pression                                       | V1a, V1b |
