@@ -34,7 +34,8 @@ if ! (cd "$TMP/dl" && echo "${SHA256}  ${ZIP}" | sha256sum -c --status -); then
   exit 1
 fi
 
-if unzip -Z1 "$TMP/dl/$ZIP" | grep -qE '(^/|(^|/)\.\.(/|$))'; then
+LISTE=$(unzip -Z1 "$TMP/dl/$ZIP")
+if grep -qE '(^/|(^|/)\.\.(/|$))' <<<"$LISTE"; then
   echo "Erreur : l'archive contient des chemins hors du dossier d'extraction" >&2
   exit 1
 fi
