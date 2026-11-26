@@ -34,6 +34,6 @@ module.exports = [
     },
   },
   {
-    ignores: ['build/**', '.docusaurus/**', 'node_modules/**'],
+    ignores: ['static/vendor/**', 'build/**', '.docusaurus/**', 'node_modules/**'],
   },
 ];

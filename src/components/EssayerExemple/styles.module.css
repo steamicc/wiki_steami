@@ -1,0 +1,64 @@
+.essayer {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+}
+
+.telechargement {
+  margin: 0;
+}
+
+.controles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.bouton {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+  font: inherit;
+  cursor: pointer;
+}
+
+.bouton:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+}
+
+.bouton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.messages {
+  width: 100%;
+}
+
+.statut,
+.erreur {
+  margin: 0;
+}
+
+.erreur {
+  color: var(--ifm-color-danger);
+}
+
+.console {
+  width: 100%;
+  max-height: 16rem;
+  margin: 0;
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85rem;
+}

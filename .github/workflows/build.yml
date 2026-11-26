@@ -46,6 +46,9 @@ jobs:
       - name: Lint JavaScript
         run: npm run lint:js
 
+      - name: Test JavaScript
+        run: npm run test:js
+
       - name: Build site
         run: |
           set -o pipefail
