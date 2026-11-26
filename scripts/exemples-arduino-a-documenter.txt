@@ -1,12 +1,1 @@
 DAPLINK_FLASH/data_logger
-SSD1327/framebuf_lines
-SSD1327/framebuf_pixels
-SSD1327/framebuf_rects
-SSD1327/framebuf_scroll
-SSD1327/framebuf_text
-SSD1327/illusion
-SSD1327/invert
-SSD1327/random_pixels
-SSD1327/rotating_3d_cube
-SSD1327/rotation
-SSD1327/shades
