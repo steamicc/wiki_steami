@@ -122,15 +122,18 @@ async function connecter(urlDapjs = URL_DAPJS) {
   }
 }
 
-// Arrête la lecture série en cours, téléverse, puis relance la lecture.
-// Pas de dap.reset() : le DAPLink redémarre déjà la carte à la fin du flash.
-// Ne rejette jamais : l'erreur est dans l'état.
-async function televerser(id, donnees) {
+// Le bouton est bloqué dès l'appel : obtenirDonnees() (le téléchargement du
+// .bin) se fait pendant que la carte est réservée. Arrête ensuite la lecture
+// série, téléverse, puis relance la lecture. Pas de dap.reset() : le DAPLink
+// redémarre déjà la carte à la fin du flash. Ne rejette jamais : l'erreur est
+// dans l'état.
+async function televerser(id, obtenirDonnees) {
   if (!dap || etat.occupee) return;
   const courant = dap;
   tampon.vider();
   changer({ occupee: true, erreur: null, exempleActif: id, lignes: [] });
   try {
+    const donnees = await obtenirDonnees();
     await arreterSerie();
     await courant.flash(donnees);
   } catch (err) {

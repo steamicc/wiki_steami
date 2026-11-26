@@ -22,7 +22,7 @@
   border: 1px solid var(--ifm-color-primary);
   border-radius: var(--ifm-global-radius);
   background: var(--ifm-color-primary);
-  color: var(--ifm-color-white);
+  color: var(--ifm-color-black);
   font: inherit;
   cursor: pointer;
 }

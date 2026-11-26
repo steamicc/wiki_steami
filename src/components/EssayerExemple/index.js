@@ -2,7 +2,7 @@ import React, { useState, useSyncExternalStore } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { carte } from './carte';
-import { etatWebUSB, idValide, messageErreur, nomFichier, urlBin } from './logique.mjs';
+import { etatWebUSB, idValide, nomFichier, urlBin } from './logique.mjs';
 import styles from './styles.module.css';
 
 const ETAT_SERVEUR = Object.freeze({
@@ -32,33 +32,22 @@ function Controles({ id, href }) {
   );
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const [aClique, setAClique] = useState(false);
-  const [chargement, setChargement] = useState(false);
-  const [erreurLocale, setErreurLocale] = useState(null);
 
   const actif = etat.exempleActif === id;
-  const occupe = etat.occupee || chargement;
   // Une erreur de connexion n'appartient à aucun exemple : seul l'exemple cliqué l'affiche.
-  const erreur =
-    erreurLocale || (actif || (etat.exempleActif === null && aClique) ? etat.erreur : null);
+  const erreur = actif || (etat.exempleActif === null && aClique) ? etat.erreur : null;
 
-  async function televerser() {
+  function televerser() {
     setAClique(true);
-    setErreurLocale(null);
-    setChargement(true);
-    try {
+    carte.televerser(id, async () => {
       const reponse = await fetch(href);
       if (!reponse.ok) throw new Error(`Exemple introuvable (${reponse.status}).`);
-      await carte.televerser(id, await reponse.arrayBuffer());
-    } catch (err) {
-      setErreurLocale(messageErreur(err));
-    } finally {
-      setChargement(false);
-    }
+      return reponse.arrayBuffer();
+    });
   }
 
   function connecter() {
     setAClique(true);
-    setErreurLocale(null);
     carte.connecter(urlDapjs);
   }
 
@@ -69,11 +58,16 @@ function Controles({ id, href }) {
   return (
     <div className={styles.controles}>
       {etat.connectee ? (
-        <button type="button" className={styles.bouton} disabled={occupe} onClick={televerser}>
+        <button
+          type="button"
+          className={styles.bouton}
+          disabled={etat.occupee}
+          onClick={televerser}
+        >
           Téléverser
         </button>
       ) : (
-        <button type="button" className={styles.bouton} disabled={occupe} onClick={connecter}>
+        <button type="button" className={styles.bouton} disabled={etat.occupee} onClick={connecter}>
           Connecter la carte
         </button>
       )}
