@@ -17,7 +17,7 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 
 | Langage                           | Maturité  | Description                                        |
 | --------------------------------- | --------- | -------------------------------------------------- |
-| [**MicroPython**](./micropython/) | Complète  | 15 drivers, 52 exemples, framework de test         |
+| [**MicroPython**](./micropython/) | Complète  | 16 drivers, 111 exemples, framework de test        |
 | [**CODAL**](./codal/)             | Partielle | Runtime C++ avec support des principaux composants |
 | [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 15 drivers STeaMi        |
 
@@ -35,7 +35,7 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 
 ## Ressources
 
-- [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython (15 drivers, 52 exemples)
+- [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) — Drivers MicroPython (16 drivers, 111 exemples)
 - [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) — Drivers Arduino
 - [DAPLink](https://github.com/steamicc/DAPLink) — Firmware du STM32F103 (branche `release_letssteam`)
 - [MicroPython](https://docs.micropython.org/en/latest/) — Documentation officielle MicroPython
