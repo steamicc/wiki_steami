@@ -43,7 +43,7 @@ Le programme tourne dans la mémoire vive (RAM) de la carte, sans être enregist
 
 Certains programmes ont besoin de fichiers annexes, par exemple un `pins.py` qui décrit les broches utilisées. Ces fichiers sont écrits dans un disque en RAM (`/ram`), jamais dans la mémoire flash de la carte : ils disparaissent avec le programme.
 
-**Arrêter** interrompt le programme et redémarre MicroPython sans exécuter le `main.py` de la carte : l'essai suivant part de zéro. Le premier programme lancé après une connexion part aussi de zéro, même si la carte exécutait autre chose avant. Si la carte ne répond plus, appuyer sur le bouton **RESET** de la carte, puis réessayer.
+**Arrêter** interrompt le programme et redémarre MicroPython sans exécuter le `main.py` de la carte : l'essai suivant part de zéro. Le premier programme lancé après une connexion part aussi de zéro, même si la carte exécutait autre chose avant. Si la carte ne répond plus, appuyer sur le bouton **Reset** de la carte, puis réessayer.
 
 ## Vérifications avant le lancement
 
@@ -56,11 +56,11 @@ Si le DAPLink de la carte est plus ancien que la version retenue par le wiki, un
 Le DAPLink ne peut pas se mettre à jour lui-même : **Mettre à jour…** affiche les étapes à suivre à la main, les mêmes que [dans le Codespace](../arduino/codespace#mettre-à-jour-le-daplink-depuis-la-page) :
 
 1. Cliquer sur **Télécharger le firmware** : le fichier `stm32f103xb_steami32_if_crc.bin` arrive dans le dossier des téléchargements.
-2. Créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre et un lecteur **MAINTENANCE** apparaît à la place. La page indique alors que la carte a été déconnectée : c'est normal, les étapes restent affichées.
+2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton. Dès le débranchement, la page indique que la carte a été déconnectée : c'est normal, les étapes restent affichées.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 4. Cliquer de nouveau sur **Essayer sur la carte**, puis choisir la carte si la fenêtre de connexion s'ouvre.
 
-Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la page, sans lancer le programme : cliquer ensuite de nouveau sur **Essayer sur la carte**. Si le lecteur MAINTENANCE n'apparaît pas, voir [le dépannage du Codespace](../arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
+Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la page, sans lancer le programme : cliquer ensuite de nouveau sur **Essayer sur la carte**. Si le lecteur **MAINTENANCE** n'apparaît pas, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Voir aussi [le dépannage du Codespace](../arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
 ### Installation de MicroPython
 
@@ -82,7 +82,7 @@ Si un autre outil utilise déjà la carte (Thonny, `mpremote`) ou si un programm
 - si MicroPython démarre sans répondre, le wiki signale que la carte est occupée, sans proposer d'installation ;
 - avec un DAPLink trop ancien, ce redémarrage n'est pas possible : l'encart d'installation peut alors apparaître même si MicroPython est installé, et il le rappelle (« Si MicroPython est déjà installé… »).
 
-Quand la carte est signalée occupée, ou quand l'encart d'installation apparaît alors que MicroPython est déjà installé, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
+Quand la carte est signalée occupée, ou quand l'encart d'installation apparaît alors que MicroPython est déjà installé, ne pas installer : fermer l'outil, ou appuyer sur **Reset**, puis réessayer.
 
 ## Programmes qui modifient la carte
 

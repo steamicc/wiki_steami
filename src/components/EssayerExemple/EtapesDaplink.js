@@ -1,7 +1,7 @@
-// Mise à jour du DAPLink, guidée à la main comme dans le Codespace : le
-// DAPLink ne peut pas se flasher lui-même. Partagée par le bouton « Essayer
-// sur la carte » (EssayerMicroPython) et par « Vérifier la pile radio »
-// (PileRadio). Le focus y passe à l'affichage, comme pour une question, pour
+// Mise à jour du DAPLink, guidée à la main : le DAPLink ne peut pas se
+// flasher lui-même. Partagée par « Essayer sur la carte » (EssayerMicroPython),
+// « Téléverser » (EssayerExemple) et « Vérifier la pile radio » (PileRadio).
+// Le focus y passe à l'affichage, comme pour une question, pour
 // que les étapes soient lues.
 //
 // release : la release épinglée du DAPLink ; href : son firmware sur le wiki ;
@@ -46,9 +46,9 @@ export default function EtapesDaplink({
           téléchargements.
         </li>
         <li>
-          Créer un fichier vide nommé <code>START_BL.ACT</code> sur le lecteur de la carte (
-          <strong>STEAMI</strong>) : la carte redémarre et un lecteur <strong>MAINTENANCE</strong>{' '}
-          apparaît à la place.
+          Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton{' '}
+          <strong>Reset</strong> enfoncé : un lecteur <strong>MAINTENANCE</strong> apparaît à la
+          place du lecteur de la carte (<strong>STEAMI</strong>). Relâcher alors le bouton.
         </li>
         <li>
           Copier le fichier téléchargé sur le lecteur <strong>MAINTENANCE</strong>, puis attendre
@@ -57,9 +57,13 @@ export default function EtapesDaplink({
         <li>{derniereEtape}</li>
       </ol>
       <p>
+        Si le lecteur <strong>MAINTENANCE</strong> n&apos;apparaît pas, créer un fichier vide nommé{' '}
+        <code>START_BL.ACT</code> sur le lecteur de la carte (<strong>STEAMI</strong>) : la carte
+        redémarre sur le lecteur <strong>MAINTENANCE</strong> (
         <Link to="/docs/software/arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas">
-          Si le lecteur MAINTENANCE n&apos;apparaît pas
+          voir le dépannage
         </Link>
+        ).
       </p>
       <button type="button" className={styles.boutonSecondaire} onClick={surPlusTard}>
         Plus tard
