@@ -389,6 +389,8 @@ describe('contenuEncart', () => {
     assert.match(textes, /Aucune pile radio/);
     assert.match(textes, /BLE HCI Layer 1\.20\.0/);
     assert.ok(textes.includes(TEXTE_DUREE_PILE));
+    // Durée mesurée dans Chrome sur la V1c (2026-11-27) : 94 s du clic à la fin.
+    assert.match(TEXTE_DUREE_PILE, /une minute et demie/);
     assert.ok(textes.includes(TEXTE_CONSIGNES_PILE));
     assert.doesNotMatch(textes, /effacée/);
     assert.deepEqual(

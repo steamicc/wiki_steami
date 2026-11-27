@@ -5,10 +5,10 @@ import { LIBELLE_RENVOI, TEXTE_PLUS_TARD, estOccupee } from './deroulement.mjs';
 
 // --- Textes (ton neutre) ----------------------------------------------------
 
-// Durée estimée d'après l'essai préalable (operator 11,5 s, puis lectures,
-// installation de 416 ko de .hex, 5 s, UPGRADE et une minute d'attente) ; à
-// corriger après la mesure de l'essai complet.
-export const TEXTE_DUREE_PILE = "L'installation dure environ deux minutes.";
+// Durée mesurée dans Chrome 158 sur la V1c (2026-11-27), du clic sur
+// « Installer la pile radio » à la pile relue : 94 s (effacement, écriture de
+// 416 ko de .hex en 17 s, UPGRADE, une minute d'attente, relecture).
+export const TEXTE_DUREE_PILE = "L'installation dure environ une minute et demie.";
 
 export const TEXTE_CONSIGNES_PILE =
   "Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page.";
