@@ -26,7 +26,7 @@
 //   travail : fin sans START) ; puis, si le FUS annonce une pile installée
 //   (restée arrêtée par un parcours interrompu), START, une attente et un
 //   nouveau VERSION ; s'il répond encore depuis le FUS, rien n'est proposé et
-//   le message conseille RESET ;
+//   le message renvoie vers EasyFlash ;
 // - une réinitialisation ne relance pas la pile : dès le double STATUS envoyé
 //   et tant que DELETE ne l'a pas été, toute fin du parcours (à jour, refus du
 //   FUS, DAPLink non épinglé, Annuler, Plus tard, erreur) envoie START ;
@@ -99,10 +99,12 @@ export const TEXTE_ANNULE =
 export const TEXTE_PLUS_TARD =
   "Installation de la pile radio reportée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
 
-// La pile est installée mais ne redémarre pas avec START : le FUS répond
-// toujours. Rien n'est proposé.
-export const TEXTE_PILE_ARRETEE =
-  'La pile radio de la carte est arrêtée et ne redémarre pas : appuyer sur le bouton RESET de la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+// La pile est annoncée par le FUS mais ne redémarre pas avec START : le FUS
+// répond toujours. Une réinitialisation ne relance pas la pile, et une nouvelle
+// vérification refait le même chemin (conception, « Résultats de l'essai
+// préalable ») : renvoi vers EasyFlash pour la réinstaller. Le bouton ne
+// propose pas l'installation dans ce cas (à trancher par l'utilisateur).
+export const TEXTE_PILE_ARRETEE = `La pile radio de la carte est arrêtée et ne redémarre pas. ${RENVOI_EASYFLASH} Téléverser ensuite l'exemple.`;
 
 export const TEXTE_DAPLINK_GUIDE =
   'Suivre les étapes ci-dessous pour mettre à jour le DAPLink, puis cliquer de nouveau sur « Vérifier la pile radio ».';

@@ -345,7 +345,7 @@ describe('pile restée arrêtée', () => {
     assert.deepEqual(p.parcours.etat.versions.pile, { version: '1.20.0', secteurs: 20 });
   });
 
-  it('second VERSION encore depuis le FUS : conseil de RESET, rien n est proposé', async () => {
+  it('second VERSION encore depuis le FUS : renvoi vers EasyFlash, rien n est proposé', async () => {
     const p = preparer({ operateur: { version: [VERSION_FUS, VERSION_FUS] } });
     const vues = new Set();
     p.parcours.abonner((etat) => vues.add(etat.etape));
@@ -360,8 +360,11 @@ describe('pile restée arrêtée', () => {
     ]);
     assert.equal(p.parcours.etat.etape, 'erreur');
     assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ARRETEE);
-    assert.match(TEXTE_PILE_ARRETEE, /RESET/);
-    assert.match(TEXTE_PILE_ARRETEE, /Vérifier la pile radio/);
+    // Une réinitialisation ne relance pas la pile et une nouvelle vérification
+    // refait le même chemin : ni RESET ni nouvel essai, renvoi vers EasyFlash.
+    assert.doesNotMatch(TEXTE_PILE_ARRETEE, /RESET/);
+    assert.doesNotMatch(TEXTE_PILE_ARRETEE, /Vérifier la pile radio/);
+    assert.match(TEXTE_PILE_ARRETEE, /EasyFlash/);
     assert.ok(!vues.has('proposition'));
     assert.ok(!vues.has('daplink'));
   });
