@@ -1,0 +1,233 @@
+# =====================================================================
+# croquis-vers-sample.yml : robot qui ajoute à arduino-steami-sample les
+# croquis Arduino écrits en ligne dans les pages du wiki et marqués
+# `sample=GROUPE/Nom` (voir scripts/check-inline-sketches.py).
+#
+# Après chaque fusion sur main qui touche docs/ (et à la demande), le
+# workflow clone steamicc/arduino-steami-sample, puis
+# scripts/croquis-vers-sample.py prépare la branche `wiki/croquis` : un
+# commit `feat(<groupe>): Add <Nom> from the wiki.` par croquis en attente
+# (absent du sample au tag épinglé et absent de main du sample), fichier
+# examples/<GROUPE>/<Nom>/<Nom>.ino = en-tête qui nomme la page + code du
+# bloc. Le workflow pousse la branche et ouvre l'unique PR du robot, titrée
+# « feat(examples): Add the wiki sketches. » (fusion squash : c'est ce titre
+# que lit semantic-release). La CI du sample compile les croquis ; un humain
+# relit et fusionne : le robot ne fusionne jamais.
+#
+# Rejeu : si la PR du robot est déjà ouverte, la branche distante est
+# reprise (--reprendre) : un croquis déjà présent n'est pas rajouté, un
+# croquis dont la page a changé reçoit un commit `Update`, un croquis
+# corrigé à la main dans la PR est gardé tant que sa page ne change pas ;
+# le push est une avance rapide. Le corps de la PR est mis à jour même sans
+# nouveau commit : un croquis passé en norun ou retiré de sa page n'ajoute
+# rien à la branche, mais le corps le signale au relecteur. Sans
+# PR ouverte (PR précédente fusionnée ou fermée, ou ouverture échouée), la
+# branche repart de main et remplace l'ancienne (--force-with-lease sur le
+# commit vu au clonage).
+#
+# Ensuite, la PR d'épinglage de suivre-croquis-sample.yml, à la release
+# suivante du sample, remplace chaque bloc en ligne par l'inclusion du
+# croquis publié (tâche 14).
+#
+# Jeton : celui de la GitHub App de l'organisation (secrets RELEASE_APP_ID et
+# RELEASE_APP_SECRET, comme suivre-croquis-sample.yml), limité au dépôt
+# arduino-steami-sample : une PR ouverte avec ce jeton déclenche la CI du
+# sample, contrairement à GITHUB_TOKEN, qui ne sert qu'à lire le wiki.
+#
+# Prérequis :
+# - secrets RELEASE_APP_ID et RELEASE_APP_SECRET visibles de ce dépôt ;
+# - App installée sur steamicc/arduino-steami-sample, avec Contents et Pull
+#   requests en écriture.
+#
+# Essai à blanc : Actions > croquis-vers-sample > Run workflow, case
+# « essai » cochée : la branche est préparée et affichée, rien n'est poussé.
+# Seul l'essai à blanc peut partir d'une autre branche que main : sans lui,
+# le robot porterait dans le sample des pages ni relues ni fusionnées, et le
+# job est sauté.
+#
+# Neutralisé dans les forks.
+# =====================================================================
+name: croquis-vers-sample
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: 'Essai à blanc : préparer la branche sans pousser ni ouvrir de PR'
+        type: boolean
+        default: false
+
+# GITHUB_TOKEN ne sert qu'à lire le wiki : tout le reste passe par le jeton de l'App.
+permissions:
+  contents: read
+
+# Une seule exécution à la fois : deux lancements simultanés pousseraient la même branche.
+concurrency:
+  group: croquis-vers-sample
+  cancel-in-progress: false
+
+jobs:
+  croquis:
+    name: croquis en ligne à ajouter au sample ?
+    # Ne pas tourner dans les forks. Hors de main, seulement l'essai à blanc :
+    # le robot ne pousse que des pages fusionnées.
+    if: github.repository == 'steamicc/wiki_steami' && (github.ref == 'refs/heads/main' || inputs.essai)
+    runs-on: ubuntu-latest
+    env:
+      SAMPLE: arduino-steami-sample
+      DEPOT_SAMPLE: steamicc/arduino-steami-sample
+      BRANCHE: wiki/croquis
+    steps:
+      - name: Vérifie les secrets de la GitHub App
+        env:
+          APP_ID: ${{ secrets.RELEASE_APP_ID }}
+          APP_SECRET: ${{ secrets.RELEASE_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          manquants=()
+          [ -n "$APP_ID" ] || manquants+=(RELEASE_APP_ID)
+          [ -n "$APP_SECRET" ] || manquants+=(RELEASE_APP_SECRET)
+          if [ "${#manquants[@]}" -gt 0 ]; then
+            echo "::error::Secret(s) manquant(s) : ${manquants[*]}. Rendre visibles à ce dépôt les secrets d'organisation RELEASE_APP_ID et RELEASE_APP_SECRET de la GitHub App, ou les ajouter dans ce dépôt (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - name: Crée le jeton de la GitHub App
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_SECRET }}
+          # Jeton limité au dépôt sample.
+          owner: ${{ github.repository_owner }}
+          repositories: arduino-steami-sample
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Explique l'échec du jeton
+        if: failure() && steps.app.outcome == 'failure'
+        run: |
+          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/arduino-steami-sample avec les droits Contents et Pull requests en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
+          exit 1
+
+      # Le wiki (pages et exemples-arduino-sample.json), lu avec GITHUB_TOKEN.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      # Le sample, avec tout l'historique et les tags (tag épinglé, origin/main,
+      # branche du robot) ; le jeton de l'App reste dans sa .git/config pour git push.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: steamicc/arduino-steami-sample
+          path: arduino-steami-sample
+          token: ${{ steps.app.outputs.token }}
+          fetch-depth: 0
+
+      - name: Cherche la PR ouverte du robot
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          # Toutes les branches distantes, pour voir origin/wiki/croquis si elle existe.
+          git -C "$SAMPLE" fetch --quiet --prune --tags origin '+refs/heads/*:refs/remotes/origin/*'
+          # --head filtre sur le seul nom de branche : on écarte les PR venues d'un fork.
+          prs=$(gh pr list --repo "$DEPOT_SAMPLE" --head "$BRANCHE" --state open \
+            --json number,isCrossRepository,author \
+            --jq '[.[] | select(.isCrossRepository | not)]')
+          ouverte=$(jq -c 'first(.[]) // empty' <<<"$prs")
+          reprendre=false
+          pr=""
+          if [ -n "$ouverte" ]; then
+            pr=$(jq -r .number <<<"$ouverte")
+            auteur=$(jq -r .author.login <<<"$ouverte")
+            if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+              echo "::error::La PR #$pr de $DEPOT_SAMPLE ($BRANCHE) a été ouverte par $auteur, pas par le robot : le robot ne touche pas à sa branche. La fusionner ou la fermer, ou renommer sa branche."
+              exit 1
+            fi
+            echo "PR du robot déjà ouverte : https://github.com/$DEPOT_SAMPLE/pull/$pr (mise à jour)."
+            reprendre=true
+          else
+            echo "Aucune PR du robot ouverte : la branche $BRANCHE repartira de main."
+          fi
+          # Commit de la branche distante vu ici (vide si absente), pour --force-with-lease.
+          distante=$(git -C "$SAMPLE" rev-parse -q --verify "refs/remotes/origin/$BRANCHE" || true)
+          {
+            echo "pr=$pr"
+            echo "reprendre=$reprendre"
+            echo "distante=$distante"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Prépare la branche wiki/croquis
+        id: preparation
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          REPRENDRE: ${{ steps.pr.outputs.reprendre }}
+        run: |
+          set -euo pipefail
+          # Commits au nom du compte robot de l'App (<slug>[bot]).
+          bot_id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
+          git -C "$SAMPLE" config user.name "${APP_SLUG}[bot]"
+          git -C "$SAMPLE" config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          options=()
+          if [ "$REPRENDRE" = true ]; then
+            options+=(--reprendre)
+          fi
+          python3 scripts/croquis-vers-sample.py --sample "$SAMPLE" "${options[@]}" \
+            --sortie-github "$GITHUB_OUTPUT" --corps "$RUNNER_TEMP/corps.md"
+          git -C "$SAMPLE" log --oneline origin/main..HEAD
+
+      - name: Affiche l'essai à blanc
+        if: inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '')
+        run: |
+          set -euo pipefail
+          echo "Essai à blanc : rien n'est poussé. Corps de la PR :"
+          cat "$RUNNER_TEMP/corps.md"
+          git -C "$SAMPLE" diff --stat origin/main HEAD
+
+      - name: Pousse la branche
+        if: ${{ !inputs.essai && steps.preparation.outputs.pousser == 'true' }}
+        env:
+          REPRENDRE: ${{ steps.pr.outputs.reprendre }}
+          DISTANTE: ${{ steps.pr.outputs.distante }}
+        run: |
+          set -euo pipefail
+          if [ "$REPRENDRE" = true ]; then
+            # PR ouverte : avance rapide seulement (refusée si quelqu'un a poussé entre-temps).
+            git -C "$SAMPLE" push origin "HEAD:refs/heads/$BRANCHE"
+          else
+            # Branche neuve depuis main : remplace l'ancienne branche, seulement si
+            # elle n'a pas bougé depuis le clonage (absente si DISTANTE est vide).
+            git -C "$SAMPLE" push --force-with-lease="refs/heads/$BRANCHE:$DISTANTE" \
+              origin "HEAD:refs/heads/$BRANCHE"
+          fi
+
+      # Aussi sans commit à pousser quand la PR est ouverte : son corps peut
+      # avoir changé (croquis qui n'est plus marqué sample= dans le wiki).
+      - name: Ouvre ou met à jour la PR
+        if: ${{ !inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '') }}
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ steps.pr.outputs.pr }}
+        run: |
+          set -euo pipefail
+          if [ -n "$PR" ]; then
+            actuel=$(gh pr view "$PR" --repo steamicc/arduino-steami-sample --json body --jq .body)
+            if [ "$actuel" = "$(cat "$RUNNER_TEMP/corps.md")" ]; then
+              echo "PR inchangée : https://github.com/$DEPOT_SAMPLE/pull/$PR"
+            else
+              gh pr edit "$PR" --repo steamicc/arduino-steami-sample --body-file "$RUNNER_TEMP/corps.md"
+              echo "PR mise à jour : https://github.com/$DEPOT_SAMPLE/pull/$PR"
+            fi
+          else
+            url=$(gh pr create --repo steamicc/arduino-steami-sample --base main --head "$BRANCHE" \
+              --title "feat(examples): Add the wiki sketches." \
+              --body-file "$RUNNER_TEMP/corps.md")
+            echo "PR ouverte : $url"
+          fi

@@ -97,7 +97,7 @@ Ce fichier décrit la carte : microcontrôleur, mémoire, variante du core STM32
 
 Les programmes des pages [Capteurs](./capteurs) et [Écran](./ecran) fonctionnent tels quels, avec une différence : un fichier `.cpp` doit commencer par `#include <Arduino.h>`, que l'Arduino IDE ajoute en coulisses.
 
-```cpp
+```cpp norun
 #include <Arduino.h>
 
 void setup() {

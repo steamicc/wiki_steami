@@ -83,12 +83,13 @@ class TestSuivreCroquisSample(unittest.TestCase):
         self.assertNotIn("# Garde-fou", code())
         self.assertIn("isCrossRepository", code())
 
-    def test_point_d_extension_avant_le_commit(self):
-        t = texte()
-        marque = "point d'extension : conversion des croquis en ligne (tâche 14)"
-        self.assertIn(marque, t)
-        self.assertLess(t.index(marque), t.index("git commit -m"))
-        self.assertGreater(t.index(marque), t.index("> exemples-arduino-sample.json"))
+    def test_conversion_des_croquis_avant_le_commit(self):
+        # Ancien point d'extension de la tâche 9, rempli par la tâche 14
+        # (détails dans test_croquis_en_ligne.TestFluxConversion).
+        t = code()
+        conversion = t.index("python3 scripts/convertir-croquis.py")
+        self.assertLess(conversion, t.index("git commit -m"))
+        self.assertGreater(conversion, t.index("> exemples-arduino-sample.json"))
 
     def test_memes_controles_que_le_jumeau(self):
         t = code()

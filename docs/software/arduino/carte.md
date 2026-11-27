@@ -15,6 +15,8 @@ Les releases V1a, V1b et V1c de la STeaMi n'ont pas les mêmes capteurs d'enviro
 
 Depuis la version 0.32.0, des classes par fonction s'appuient sur cet objet : `SteamiTemperature`, par exemple, lit la température avec le capteur de la carte, quelle que soit sa release. La version 0.34.0 ajoute les classes du mouvement, de la boussole, de la lumière et des boutons, la version 0.37.0 la classe de l'écran, `SteamiDisplay`, la version 0.38.0 `SteamiScreen`, qui met en page titres et valeurs sur cet écran, la version 0.40.0 ses widgets ronds (jauge, boussole, montre, visages) et la police Spleen du texte sur la V1c, et la version 0.41.0 son graphe, avec `SteamiHistory`, et son menu. Un même programme peut ainsi tourner sur toutes les cartes. Les pages [Capteurs](./capteurs) et [Écran](./ecran) donnent le programme de chaque classe ; cette page-ci décrit ce qu'elles ont en commun, la reconnaissance de la carte, les calibrations et les messages.
 
+Les croquis de cette page qui tournent seuls sur la carte sont repris dans le dépôt [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample), qui les compile pour la STeaMi et les republie sous licence GPL-3.0.
+
 :::note Version de la bibliothèque
 L'objet `Steami` demande la version 0.31.0 de la bibliothèque STeaMi. Ses méthodes `calibrate()` et `calibrated()`, ainsi que les cinq premières classes par fonction (`SteamiTemperature`, `SteamiHumidity`, `SteamiPressure`, `SteamiDistance` et `SteamiBattery`), demandent la version 0.32.0. Les classes du mouvement, de la boussole, de la lumière et des boutons (`SteamiAccelerometer`, `SteamiCompass`, `SteamiButtons`…) demandent la version 0.34.0, `SteamiDisplay` la version 0.37.0, et `SteamiScreen` la version 0.38.0. Les widgets ronds de `SteamiScreen` (`gauge()`, `compass()`, `watch()`, `face()`), ainsi que `textHeight()`, demandent la version 0.40.0 ; `graph()`, `SteamiHistory` et `menu()` la version 0.41.0. Si la compilation s'arrête sur `SteamiBoard.h: No such file or directory`, sur `SteamiTemperature.h: No such file or directory`, sur `SteamiCompass.h: No such file or directory` (ou l'en-tête d'une autre classe), sur `has no member named 'calibrate'`, sur `has no member named 'gauge'` (ou le nom d'une autre fonction) ou sur `'SteamiHistory' was not declared in this scope`, la bibliothèque STeaMi installée est trop ancienne :
 
@@ -27,7 +29,7 @@ L'objet `Steami` demande la version 0.31.0 de la bibliothèque STeaMi. Ses méth
 
 L'exemple **Fichier → Exemples → STeaMi → STEAMI_BOARD → BoardInfo** affiche la release reconnue et l'état de chaque composant I²C de cette release. Le programme minimal est le suivant :
 
-```cpp
+```cpp norun
 #include <SteamiBoard.h>
 
 void setup() {
@@ -89,7 +91,7 @@ Un code de révision d'indice 0 ajoute `, prototype` : `(read from the board con
 
 Treize classes lisent une fonction de la carte sans qu'il faille choisir le capteur : `SteamiTemperature`, `SteamiHumidity`, `SteamiPressure`, `SteamiDistance`, `SteamiBattery`, `SteamiAccelerometer`, `SteamiGyroscope`, `SteamiMagnetometer`, `SteamiCompass`, `SteamiLight`, `SteamiColor`, `SteamiGesture` et `SteamiButtons`. Chacune prend le composant qui sert cette fonction sur la release de la carte, et partage le driver que `Steami` a déjà créé. `SteamiDisplay` fait de même pour l'écran : elle dessine sur le SSD1327 d'une V1a ou d'une V1b, ou sur le GC9A01 d'une V1c ; `SteamiScreen`, qui en hérite, y place titres, valeurs et widgets (voir [Écran](./ecran)). Ce programme affiche chaque seconde la température, la pression, l'altitude et la distance, sur une V1a, une V1b ou une V1c :
 
-```cpp
+```cpp sample=CARTE/ToutesLesCartes
 #include <SteamiTemperature.h>
 #include <SteamiPressure.h>
 #include <SteamiDistance.h>
@@ -210,7 +212,7 @@ Les classes par fonction couvrent l'usage courant. Pour une mesure ou un réglag
 
 Ce programme fait à la main ce que fait `SteamiTemperature` : il affiche la température chaque seconde, avec le BME280 sur une V1c et le WSEN-HIDS sur une V1a ou une V1b :
 
-```cpp
+```cpp sample=CARTE/DriversPartages
 #include <SteamiBoard.h>
 
 void setup() {
@@ -296,7 +298,7 @@ Les messages `E01` et `E03` disent de placer le `#define` avant `#include <STeaM
 
 Certains composants ne sont partagés ni par une classe ni par `Steami`, comme le [fichier du disque USB](./capteurs#fichier-sur-le-disque-usb). Leur driver se crée dans le programme, sur le bus de la carte, `Steami.wire()`. Ce driver peut être une variable globale : `Steami.wire()` crée et démarre le bus I²C interne à son premier appel. Ce programme affiche chaque seconde le nom du fichier du disque USB, sans le modifier :
 
-```cpp
+```cpp sample=CARTE/MesDrivers
 #include <SteamiBoard.h>
 #include <SteamiDaplinkBridge.h>
 #include <SteamiDaplinkFlash.h>
@@ -370,7 +372,7 @@ Dans `E11`, la source vaut `forced by Steami.begin()`, `forced by #define` ou `r
 
 Le code de révision s'écrit une seule fois, par exemple par l'enseignant. Choisir le code de la carte dans le tableau [Identifier sa version](/docs/hardware/revisions#identifier-sa-version) (`111`, `121` ou `131` pour une carte de série), puis téléverser une fois ce programme :
 
-```cpp
+```cpp norun
 #include <SteamiBoard.h>
 
 void setup() {

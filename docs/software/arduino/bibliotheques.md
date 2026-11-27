@@ -96,7 +96,7 @@ La carte possède **deux bus I²C** :
 
 L'objet `Wire` des exemples Arduino classiques ne voit **pas** les capteurs de la carte. Le bus interne est fourni par la bibliothèque STeaMi : `Steami.wire()`, déclaré dans `<SteamiBoard.h>`. Chaque programme qui utilise un capteur interne commence donc ainsi :
 
-```cpp
+```cpp norun
 #include <SteamiBoard.h>
 #include <SteamiISM330DL.h>
 

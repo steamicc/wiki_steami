@@ -76,6 +76,14 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome != 'skipped' }}
         run: npm run lint:micropython-blocks
 
+      # Croquis Arduino complets écrits en ligne : chacun porte sample=GROUPE/Nom
+      # (repris par le robot dans arduino-steami-sample) ou norun. Lancé même si
+      # le build échoue ; le prebuild a cloné le sample au tag épinglé, ce qui
+      # permet de refuser un sample= déjà publié.
+      - name: Check inline Arduino sketches
+        if: ${{ !cancelled() && steps.build.outcome != 'skipped' }}
+        run: npm run lint:inline-sketches
+
       - name: Validate code examples
         run: npm run lint:examples
 
