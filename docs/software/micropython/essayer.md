@@ -70,7 +70,7 @@ Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa ver
 
 :::warning
 
-L'installation de MicroPython efface les fichiers enregistrés sur la carte (système de fichiers de MicroPython, avec son `main.py`) : le firmware est écrit après un effacement de toute la mémoire du programme. Seule la [pile radio Bluetooth](../pile-radio) reste en place. Les copier sur l'ordinateur avant de cliquer sur **Installer MicroPython**, avec [Thonny](./thonny#gérer-les-fichiers) ou [mpremote](./mpremote#copier-des-fichiers-sur-la-carte).
+L'installation de MicroPython efface les fichiers enregistrés sur la carte (système de fichiers de MicroPython, avec son `main.py`) : avant d'écrire le firmware, elle efface toute la mémoire flash de la carte. Seule la [pile radio Bluetooth](../pile-radio) reste en place. Copier ces fichiers sur l'ordinateur avant de cliquer sur **Installer MicroPython**, avec [Thonny](./thonny#gérer-les-fichiers) ou [mpremote](./mpremote#copier-des-fichiers-sur-la-carte).
 
 :::
 
