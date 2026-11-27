@@ -1,7 +1,7 @@
-// Mise à jour du DAPLink, guidée à la main comme dans le Codespace : le
-// DAPLink ne peut pas se flasher lui-même. Partagée par le bouton « Essayer
-// sur la carte » (EssayerMicroPython) et par « Vérifier la pile radio »
-// (PileRadio). Le focus y passe à l'affichage, comme pour une question, pour
+// Mise à jour du DAPLink, guidée à la main : le DAPLink ne peut pas se
+// flasher lui-même. Partagée par « Essayer sur la carte » (EssayerMicroPython),
+// « Téléverser » (EssayerExemple) et « Vérifier la pile radio » (PileRadio).
+// Le focus y passe à l'affichage, comme pour une question, pour
 // que les étapes soient lues.
 //
 // release : la release épinglée du DAPLink ; href : son firmware sur le wiki ;

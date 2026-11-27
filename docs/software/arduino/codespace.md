@@ -170,9 +170,11 @@ Depuis la version 2026.11.8 de l'image, la page Téléverser vérifie à la conn
 Cliquer sur **Mettre à jour…** affiche les étapes :
 
 1. Cliquer sur **Télécharger le firmware** : le fichier `stm32f103xb_steami32_if_crc.bin` arrive dans le dossier des téléchargements.
-2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton. La page indique que la carte a été débranchée, l'encart reste affiché.
+2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton. Dès le débranchement, la page indique que la carte a été débranchée ; l'encart reste affiché.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 4. Cliquer sur **Connecter la carte** : si la mise à jour a réussi, l'encart disparaît.
+
+Jusqu'à la version 2026.11.11 de l'image, la page propose plutôt à l'étape 2 de créer un fichier vide `START_BL.ACT`, comme sur la capture ci-dessous : cette méthode fonctionne aussi.
 
 ![Page Téléverser pendant la mise à jour : encart « Une mise à jour du DAPLink de cette carte est disponible (release 2026-11-25.3) » avec le bouton Plus tard, les quatre étapes (Télécharger le firmware, START_BL.ACT, copie sur MAINTENANCE, reconnexion) et le lien « Si le lecteur MAINTENANCE n'apparaît pas », sous l'état « Carte non connectée »](/img/software/arduino/codespace-15-mise-a-jour-daplink.png)
 
