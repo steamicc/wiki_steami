@@ -42,6 +42,8 @@ Le navigateur ouvre une fenêtre qui liste les cartes branchées. Cliquer sur **
 
 Une fois la carte connectée, chaque bouton **Connecter la carte** de la page devient **Téléverser**, à côté d'un bouton **Déconnecter**. La carte n'est choisie qu'une fois : ensuite, même après un rechargement de la page, la carte déjà autorisée est reprise sans la fenêtre de choix, tant qu'elle est la seule STeaMi autorisée qui est branchée. Pour essayer une autre carte, débrancher d'abord celle-ci : sinon, **Téléverser** remplacerait le programme de la carte reprise.
 
+Si le DAPLink de la carte (son firmware d'interface USB) est plus ancien que celui retenu par le wiki, un encart sous les boutons propose de le mettre à jour, avec les mêmes étapes que [dans le Codespace](../codespace#mettre-à-jour-le-daplink-depuis-la-page) ; cette mise à jour peut attendre : **Plus tard** masque l'encart jusqu'au rechargement de la page, et **Téléverser** reste possible.
+
 Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, « Carte : connexion… » (pastille grise) tant que la fenêtre de choix est ouverte et que la page se connecte, puis « Carte : connectée ». Sous l'exemple qui a servi à connecter la carte, le message « Carte connectée. » s'affiche, et le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données. Ce voyant n'apparaît que sous un seul exemple : celui dont le programme tourne, ou, avant le premier téléversement, celui qui a servi à connecter la carte.
 
 ## 3. Téléverser l'exemple
