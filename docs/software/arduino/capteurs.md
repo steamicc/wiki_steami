@@ -4,12 +4,15 @@ sidebar_position: 5
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+import EssayerExemple from '@site/src/components/EssayerExemple';
 
 <!-- cspell:ignore Dbfs dbfs -->
 
 # Capteurs
 
 Cette page donne un programme minimal pour chaque fonction de la carte. Chaque programme affiche ses mesures dans le moniteur série, à 115200 bauds.
+
+Les croquis de cette page viennent du dépôt [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample), où chacun est compilé pour la STeaMi. Ils y sont republiés sous licence GPL-3.0. Le bouton **Téléverser** sous un croquis envoie sur la carte le programme compilé.
 
 Avant de commencer :
 
@@ -26,37 +29,11 @@ Pour aller plus loin, la bibliothèque STeaMi fournit des exemples plus complets
 
 ## Mouvement : accéléromètre et gyroscope
 
-```cpp
-#include <SteamiAccelerometer.h>
-#include <SteamiGyroscope.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/MouvementImu/MouvementImu.ino
 
-SteamiAccelerometer acceleration;
-SteamiGyroscope rotation;
-
-void setup() {
-  Serial.begin(115200);
-  acceleration.begin();
-  rotation.begin();
-}
-
-void loop() {
-  SteamiVector a = acceleration.read();  // les trois axes, en g
-  Serial.print("x=");
-  Serial.print(a.x);
-  Serial.print(" g  y=");
-  Serial.print(a.y);
-  Serial.print(" g  z=");
-  Serial.print(a.z);
-  Serial.print(" g  rotation autour de z : ");
-  Serial.print(rotation.z());
-  Serial.print(" deg/s");
-  if (acceleration.isShaken()) {
-    Serial.print("  secousse !");
-  }
-  Serial.println();
-  delay(200);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/MouvementImu" source="sample" />
 
 `SteamiAccelerometer` donne l'accélération en g, et `SteamiGyroscope` la vitesse de rotation autour de chaque axe, en degrés par seconde. `read()` renvoie les trois axes dans un `SteamiVector` (`a.x`, `a.y` et `a.z`), et `x()`, `y()`, `z()` un seul axe. Carte posée à plat, écran vers le haut, z vaut environ −1 g et la rotation reste proche de 0.
 
@@ -66,34 +43,11 @@ void loop() {
 
 Composant ISM330DL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiISM330DL.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/MouvementDriverIsm330dl/MouvementDriverIsm330dl.ino
 
-SteamiISM330DL imu(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!imu.begin()) {
-    Serial.println("ISM330DL non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  SteamiISM330DL::Vector3 a;
-  if (imu.accelerationG(a)) {
-    Serial.print("x=");
-    Serial.print(a.x);
-    Serial.print(" g  y=");
-    Serial.print(a.y);
-    Serial.print(" g  z=");
-    Serial.print(a.z);
-    Serial.println(" g");
-  }
-  delay(200);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/MouvementDriverIsm330dl" source="sample" />
 
 Carte posée à plat, écran vers le haut, l'axe z mesure environ −1 g (la pesanteur) et les axes x et y environ 0 g. `imu.gyroscopeDps(v)` donne de la même façon la vitesse de rotation en degrés par seconde.
 
@@ -105,45 +59,11 @@ Exemples à essayer sur la carte : [Exemples ISM330DL](./exemples/ism330dl).
 
 ## Boussole : magnétomètre
 
-```cpp
-#include <SteamiCompass.h>
-#include <SteamiButtons.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Boussole/Boussole.ino
 
-SteamiCompass boussole;
-SteamiButtons boutons;
-
-unsigned long dernierAffichage = 0;
-
-void setup() {
-  Serial.begin(115200);
-  boussole.begin();
-  boutons.begin();
-}
-
-void loop() {
-  // lire les boutons souvent : une tape brève dure environ 100 ms
-  if (boutons.wasPressed(SteamiButton::MENU)) {
-    Serial.println("Calibration : tourner la carte dans tous les sens pendant 12 s");
-    boussole.calibrate(12);
-    Serial.println("Calibration terminée");
-  }
-
-  if (millis() - dernierAffichage >= 500) {  // affichage deux fois par seconde
-    dernierAffichage = millis();
-    float cap = boussole.heading();
-    Serial.print("Cap : ");
-    if (isnan(cap)) {
-      Serial.print("nan");
-    } else {
-      Serial.print(lroundf(cap) % 360);  // arrondi au degré : 359,6 s'affiche 0, jamais 360
-    }
-    Serial.print(" deg (");
-    Serial.print(boussole.direction());
-    Serial.println(")");
-  }
-  delay(5);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Boussole" source="sample" />
 
 Au démarrage, sauf si une calibration `cm` est enregistrée sur la carte (voir [Calibrations](./carte#calibrations)), la boussole n'est pas calibrée et le cap affiché est faux : appuyer sur MENU, tourner lentement la carte dans tous les sens pendant les 12 secondes, puis la reposer à plat. Le programme ne s'endort pas une demi-seconde entre deux affichages : il lit les boutons toutes les 5 ms environ, sinon une tape brève sur MENU serait manquée (voir [Boutons et D-PAD](#boutons-et-d-pad)).
 
@@ -169,30 +89,11 @@ Sur une V1c calibrée avec l'exemple Compass, le cap lu face au nord était proc
 
 Composant LIS2MDL, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiLIS2MDL.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/BoussoleDriverLis2mdl/BoussoleDriverLis2mdl.ino
 
-SteamiLIS2MDL mag(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!mag.begin()) {
-    Serial.println("LIS2MDL non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  float cap = mag.headingFlatOnly();  // carte posée à plat
-  Serial.print("Cap : ");
-  Serial.print(lroundf(cap) % 360);  // arrondi au degré, jamais 360
-  Serial.print(" deg (");
-  Serial.print(mag.directionLabel(cap));
-  Serial.println(")");
-  delay(500);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/BoussoleDriverLis2mdl" source="sample" />
 
 Depuis la version 0.34.0 de la bibliothèque, le cap vaut 0° quand le haut de l'écran (le côté opposé au connecteur USB) pointe vers le nord, et augmente dans le sens des aiguilles d'une montre : 90° à l'est, 180° au sud, 270° à l'ouest, jamais 360°. `directionLabel()` renvoie l'une des huit directions (`N`, `NE`, `E`…), chacune centrée sur sa valeur : `N` va de 337,5° à 22,5°. Avec une version plus ancienne, le cap et les directions étaient comptés autrement : un programme qui comparait le cap à des valeurs fixes doit être revérifié.
 
@@ -204,23 +105,11 @@ Exemples à essayer sur la carte : [Exemples LIS2MDL](./exemples/lis2mdl).
 
 ## Distance : capteur de temps de vol
 
-```cpp
-#include <SteamiDistance.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Distance/Distance.ino
 
-SteamiDistance distance;
-
-void setup() {
-  Serial.begin(115200);
-  distance.begin();
-}
-
-void loop() {
-  Serial.print("Distance : ");
-  Serial.print(distance.read());
-  Serial.println(" mm");
-  delay(500);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Distance" source="sample" />
 
 `read()` donne la distance en millimètres, et `cm()` en centimètres. `read()` renvoie `-1`, et `cm()` renvoie `NAN`, quand le capteur ne répond pas ou ne donne pas de résultat à temps. Le capteur ne signale pas une cible hors de portée : `read()` renvoie quand même un nombre de millimètres, qui n'est pas une mesure fiable. Une vraie distance de 0 mm se lit aussi `-1`.
 
@@ -228,30 +117,11 @@ void loop() {
 
 Composant VL53L1X, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiVL53L1X.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/DistanceDriverVl53l1x/DistanceDriverVl53l1x.ino
 
-SteamiVL53L1X tof(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!tof.begin()) {
-    Serial.println("VL53L1X non détecté");
-    while (true) {}
-  }
-  tof.startRanging();
-}
-
-void loop() {
-  if (tof.dataReady()) {
-    Serial.print("Distance : ");
-    Serial.print(tof.distanceMm());
-    Serial.println(" mm");
-  }
-  delay(50);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/DistanceDriverVl53l1x" source="sample" />
 
 Les exemples **STeaMi → VL53L1X** montrent aussi un radar de recul (**ParkingSensor**), une alarme de proximité (**ProximityAlarm**), un compteur de passages (**ObjectCounter**) et un geste de la main devant le capteur qui allume ou éteint la LED (**GestureDetection**).
 
@@ -259,30 +129,11 @@ Exemples à essayer sur la carte : [Exemples VL53L1X](./exemples/vl53l1x).
 
 ## Boutons et D-PAD
 
-```cpp
-#include <SteamiButtons.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Boutons/Boutons.ino
 
-SteamiButtons boutons;
-
-const SteamiButton liste[] = {SteamiButton::A, SteamiButton::B, SteamiButton::MENU,
-                              SteamiButton::UP, SteamiButton::DOWN,
-                              SteamiButton::LEFT, SteamiButton::RIGHT};
-const char* noms[] = {"A", "B", "MENU", "HAUT", "BAS", "GAUCHE", "DROITE"};
-
-void setup() {
-  Serial.begin(115200);
-  boutons.begin();
-}
-
-void loop() {
-  for (uint8_t i = 0; i < 7; i++) {
-    if (boutons.wasPressed(liste[i])) {  // une seule fois par appui
-      Serial.println(noms[i]);
-    }
-  }
-  delay(5);  // lire les boutons souvent : une tape brève dure environ 100 ms
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Boutons" source="sample" />
 
 `SteamiButtons` lit les sept boutons de la carte : `SteamiButton::A`, `B` et `MENU`, reliés au microcontrôleur, et les quatre flèches du D-PAD, `UP`, `DOWN`, `LEFT` et `RIGHT`, reliées à l'extenseur MCP23009E.
 
@@ -305,32 +156,11 @@ L'exemple [**STeaMi → STEAMI_BOARD → Buttons**](./exemples/steami-board#butt
 
 Les boutons A, B et MENU se lisent aussi avec `digitalRead()`, sans bibliothèque (voir [Premiers programmes](./premiers-programmes)). Les quatre boutons directionnels passent par le circuit d'extension MCP23009E, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiMCP23009E.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/BoutonsDriverMcp23009e/BoutonsDriverMcp23009e.ino
 
-SteamiMCP23009E dpad(Steami.wire(), RST_EXPANDER, MCP23009_I2C_ADDR, INT_EXPANDER);
-
-const uint8_t boutons[] = {MCP23009_BTN_UP, MCP23009_BTN_DOWN, MCP23009_BTN_LEFT, MCP23009_BTN_RIGHT};
-const char* noms[] = {"HAUT", "BAS", "GAUCHE", "DROITE"};
-
-void setup() {
-  Serial.begin(115200);
-  dpad.begin();
-  for (uint8_t i = 0; i < 4; i++) {
-    dpad.setup(boutons[i], MCP23009_DIR_INPUT, MCP23009_PULLUP);
-  }
-}
-
-void loop() {
-  for (uint8_t i = 0; i < 4; i++) {
-    if (dpad.getLevel(boutons[i]) == MCP23009_LOGIC_LOW) {  // appuyé = niveau bas
-      Serial.println(noms[i]);
-    }
-  }
-  delay(100);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/BoutonsDriverMcp23009e" source="sample" />
 
 Ce programme lit le niveau des broches : il affiche le nom d'un bouton tant qu'il reste enfoncé, sans anti-rebond. Pour compter chaque appui une seule fois, utiliser `SteamiButtons`.
 
@@ -340,27 +170,11 @@ Exemples à essayer sur la carte : [Exemples MCP23009E](./exemples/mcp23009e).
 
 ## Batterie
 
-```cpp
-#include <SteamiBattery.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Batterie/Batterie.ino
 
-SteamiBattery batterie;
-
-void setup() {
-  Serial.begin(115200);
-  batterie.begin();
-}
-
-void loop() {
-  Serial.print("Charge : ");
-  Serial.print(batterie.percent());
-  Serial.print(" %  Tension : ");
-  Serial.print(batterie.voltage());
-  Serial.print(" V  Courant : ");
-  Serial.print(batterie.current());
-  Serial.println(batterie.isCharging() ? " mA (en charge)" : " mA");
-  delay(2000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Batterie" source="sample" />
 
 `percent()` donne la charge en %, `voltage()` la tension en volts et `current()` le courant en mA. `isCharging()` vaut `true` quand `current()` est positif, c'est-à-dire pendant la charge.
 
@@ -370,29 +184,11 @@ La jauge est alimentée par la batterie : sans batterie (carte alimentée par l'
 
 Composant BQ27441, présent sur toutes les releases. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiBQ27441.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/BatterieDriverBq27441/BatterieDriverBq27441.ino
 
-SteamiBQ27441 batterie(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!batterie.begin()) {
-    Serial.println("BQ27441 non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  Serial.print("Charge : ");
-  Serial.print(batterie.stateOfCharge());
-  Serial.print(" %  Tension : ");
-  Serial.print(batterie.voltageMv());
-  Serial.println(" mV");
-  delay(2000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/BatterieDriverBq27441" source="sample" />
 
 Sans batterie branchée, la jauge ne répond pas et ce programme affiche « BQ27441 non détecté ». Brancher la batterie, puis appuyer sur le bouton Reset de la carte.
 
@@ -400,35 +196,11 @@ Exemples à essayer sur la carte : [Exemples BQ27441](./exemples/bq27441).
 
 ## Pression, humidité et température
 
-```cpp
-#include <SteamiTemperature.h>
-#include <SteamiHumidity.h>
-#include <SteamiPressure.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Meteo/Meteo.ino
 
-SteamiTemperature temperature;
-SteamiHumidity humidite;
-SteamiPressure pression;
-
-void setup() {
-  Serial.begin(115200);
-  temperature.begin();
-  humidite.begin();
-  pression.begin();
-}
-
-void loop() {
-  Serial.print("Température : ");
-  Serial.print(temperature.read());
-  Serial.print(" °C  Humidité : ");
-  Serial.print(humidite.read());
-  Serial.print(" %  Pression : ");
-  Serial.print(pression.read());
-  Serial.print(" hPa  Altitude : ");
-  Serial.print(pression.altitude());
-  Serial.println(" m");
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Meteo" source="sample" />
 
 `SteamiTemperature` donne la température en °C, `SteamiHumidity` l'humidité relative en % et `SteamiPressure` la pression en hPa. Sur une V1c, les trois classes utilisent le BME280 ; sur une V1a ou une V1b, la température vient du WSEN-HIDS (sinon du WSEN-PADS), l'humidité du WSEN-HIDS et la pression du WSEN-PADS. `chip()` indique le composant utilisé, par exemple `"BME280"`. Si le capteur ne répond pas, les lectures renvoient `NAN` (affiché `nan`).
 
@@ -443,33 +215,11 @@ La calibration de la température enregistrée dans la zone de configuration du 
 
 Deux capteurs Würth : WSEN-PADS (pression) et WSEN-HIDS (humidité). Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiWsenPads.h>
-#include <SteamiWsenHids.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/MeteoDriverWsen/MeteoDriverWsen.ino
 
-SteamiWsenPads pression(Steami.wire());
-SteamiWsenHids humidite(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!pression.begin() || !humidite.begin()) {
-    Serial.println("Capteur non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  Serial.print("Pression : ");
-  Serial.print(pression.pressureHpa());
-  Serial.print(" hPa  Humidité : ");
-  Serial.print(humidite.humidity());
-  Serial.print(" %  Température : ");
-  Serial.print(humidite.temperature());
-  Serial.println(" °C");
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/MeteoDriverWsen" source="sample" />
 
 Exemples à essayer sur la carte : [Exemples WSEN-PADS](./exemples/wsen-pads) et [Exemples WSEN-HIDS](./exemples/wsen-hids).
 
@@ -478,32 +228,11 @@ Exemples à essayer sur la carte : [Exemples WSEN-PADS](./exemples/wsen-pads) et
 
 Un seul capteur, le BME280, à l'adresse `0x76`. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiBME280.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/MeteoDriverBme280/MeteoDriverBme280.ino
 
-SteamiBME280 bme(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!bme.begin()) {
-    Serial.println("BME280 non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  auto mesure = bme.read();  // les trois grandeurs d'une même mesure
-  Serial.print("Température : ");
-  Serial.print(mesure.temperature);
-  Serial.print(" °C  Humidité : ");
-  Serial.print(mesure.humidity);
-  Serial.print(" %  Pression : ");
-  Serial.print(mesure.pressure);
-  Serial.println(" hPa");
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/MeteoDriverBme280" source="sample" />
 
 Les exemples **STeaMi → BME280** estiment aussi l'altitude (**Altitude**), le point de rosée (**DewPointMonitor**) et le confort d'une pièce (**ComfortZone**).
 
@@ -518,57 +247,21 @@ Ces programmes créent leur propre driver : ils lisent la mesure du capteur sans
 
 Ces mesures demandent le capteur APDS-9960, présent sur la V1a et la V1b seulement : la V1c n'a pas de capteur de lumière, de couleur ni de gestes. Sur une V1c, les programmes ci-dessous se téléversent, puis affichent le message `E20` et des mesures à 0 (voir plus bas).
 
-```cpp
-#include <SteamiLight.h>
-#include <SteamiColor.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/LumiereCouleur/LumiereCouleur.ino
 
-SteamiLight lumiere;
-SteamiColor couleur;
-
-void setup() {
-  Serial.begin(115200);
-  lumiere.begin();
-  couleur.begin();
-}
-
-void loop() {
-  uint16_t rouge, vert, bleu;
-  Serial.print("Lumière : ");
-  Serial.print(lumiere.read());
-  if (couleur.read(rouge, vert, bleu)) {
-    Serial.print("  rouge=");
-    Serial.print(rouge);
-    Serial.print(" vert=");
-    Serial.print(vert);
-    Serial.print(" bleu=");
-    Serial.print(bleu);
-  }
-  Serial.println();
-  delay(500);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/LumiereCouleur" source="sample" />
 
 `SteamiLight` et `SteamiColor` donnent des nombres bruts du capteur, sans unité, qui augmentent avec la lumière ; pas de lux ni de couleur prête à afficher. `couleur.read(rouge, vert, bleu)` remplit les trois composantes et renvoie `false` si la mesure manque ; `red()`, `green()` et `blue()` en lisent une seule.
 
 Les gestes de la main se lisent avec `SteamiGesture`. Leur décodage n'a pas encore été vérifié sur une carte.
 
-```cpp
-#include <SteamiGesture.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Gestes/Gestes.ino
 
-SteamiGesture geste;
-
-void setup() {
-  Serial.begin(115200);
-  geste.begin();
-}
-
-void loop() {
-  SteamiGesture::Direction direction = geste.read(200);  // NONE tout de suite si aucune main
-  if (direction != SteamiGesture::NONE) {
-    Serial.println(SteamiGesture::name(direction));
-  }
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Gestes" source="sample" />
 
 `read()` renvoie `LEFT`, `RIGHT`, `UP`, `DOWN`, `NEAR`, `FAR` ou `NONE` (de la forme `SteamiGesture::LEFT`), et `SteamiGesture::name(direction)` son nom en texte. `read(200)` lit le geste en cours pendant 200 ms au plus. S'il n'y a pas de main au-dessus du capteur, `read()` renvoie `NONE` tout de suite, quel que soit le délai : il n'attend pas qu'un geste commence. On l'appelle donc à chaque tour de `loop()`, comme ce programme et l'exemple **Gesture** avec `read(200)`. Sans délai, `read()` ne lit que ce que le capteur a déjà enregistré et peut couper un geste en cours.
 
@@ -583,30 +276,11 @@ Sur une V1c, les trois classes affichent le message `E20` (voir [Les messages](.
 
 Composant APDS-9960. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiAPDS9960.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/LumiereDriverApds9960/LumiereDriverApds9960.ino
 
-SteamiAPDS9960 lumiere(Steami.wire());
-
-void setup() {
-  Serial.begin(115200);
-  if (!lumiere.begin()) {
-    Serial.println("APDS-9960 non détecté");
-    while (true) {}
-  }
-  lumiere.enableLightSensor();
-}
-
-void loop() {
-  uint16_t clair;
-  if (lumiere.ambientLight(clair)) {
-    Serial.print("Lumière ambiante (nombre brut) : ");
-    Serial.println(clair);
-  }
-  delay(500);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/LumiereDriverApds9960" source="sample" />
 
 La valeur est un nombre brut du capteur, sans unité, qui augmente avec la lumière (pas des lux).
 
@@ -626,28 +300,11 @@ La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a �
 
 Le microphone IMP34DT05, présent sur toutes les releases, mesure le son en continu. Il n'a pas de classe par fonction : le programme utilise directement son driver, `SteamiIMP34DT05`, de la bibliothèque STeaMi, version 0.39.0 ou plus récente. Le microphone n'est pas sur le bus I²C : le driver se crée sans `Steami.wire()`.
 
-```cpp
-#include <SteamiIMP34DT05.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/Microphone/Microphone.ino
 
-SteamiIMP34DT05 micro;
-
-void setup() {
-  Serial.begin(115200);
-  if (!micro.begin()) {
-    Serial.println("Microphone non détecté");
-    while (true) {}
-  }
-  micro.setLevelWindowMs(200);            // un niveau toutes les 200 ms
-}
-
-void loop() {
-  if (micro.levelReady()) {
-    Serial.print("Niveau : ");
-    Serial.print(micro.levelDbfs(), 1);
-    Serial.println(" dBFS");
-  }
-}
 ```
+
+<EssayerExemple id="CAPTEURS/Microphone" source="sample" />
 
 Le driver mesure le niveau sonore sur une **fenêtre** de temps, 100 ms par défaut, réglée ici à 200 ms. `levelReady()` indique qu'une nouvelle fenêtre est terminée, et `levelDbfs()` donne son niveau en dBFS : 0 dBFS correspond au son le plus fort que le microphone peut coder, et une pièce calme donne autour de −60 dBFS. `level()` donne d'un coup la valeur efficace (`rms`), le plus fort échantillon (`peak`), le niveau en dBFS (`dbfs`) et une estimation en dB SPL (`dbSpl`), non étalonnée. Avant la fin de la première fenêtre, `rms`, `dbfs` et `dbSpl` valent `NAN`, et `peak` vaut 0. `dominantFrequencyHz()` enregistre 32 ms de son et renvoie sa fréquence la plus forte, en hertz.
 
@@ -659,34 +316,11 @@ Exemples à essayer sur la carte : [Exemples IMP34DT05](./exemples/imp34dt05), q
 
 Le DAPLink, le second microcontrôleur de la carte qui fait apparaître le disque USB **STeaMi**, garde un seul fichier dans la mémoire flash externe de 8 Mo. Un programme peut y ajouter des lignes de texte, par exemple un relevé de mesures au format CSV, que l'ordinateur ouvre ensuite comme un fichier ordinaire. Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiBoard.h>
-#include <SteamiDaplinkBridge.h>
-#include <SteamiDaplinkFlash.h>
+```cpp file=.external/arduino-steami-sample/examples/CAPTEURS/FichierDisqueUsb/FichierDisqueUsb.ino
 
-SteamiDaplinkBridge pont(Steami.wire());
-SteamiDaplinkFlash fichier(pont);
-
-void setup() {
-  Serial.begin(115200);
-  if (!fichier.begin()) {
-    Serial.println("DAPLink non détecté");
-    while (true) {}
-  }
-  if (!fichier.setFilename("MESURES", "CSV")) {
-    Serial.println("Nom refusé");
-  }
-  fichier.writeLine("secondes");          // en-tête : repère chaque démarrage
-}
-
-void loop() {
-  char ligne[16];
-  snprintf(ligne, sizeof(ligne), "%lu", millis() / 1000);
-  fichier.writeLine(ligne);               // ajoute une ligne à la fin du fichier
-  Serial.println(ligne);
-  delay(10000);
-}
 ```
+
+<EssayerExemple id="CAPTEURS/FichierDisqueUsb" source="sample" />
 
 Ce qu'il faut savoir sur ce fichier :
 
