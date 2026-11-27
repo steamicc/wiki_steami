@@ -1,0 +1,373 @@
+// Tests de ce qu'affiche le bouton « Vérifier la pile radio » : visibilité,
+// état du bouton, textes des encarts, messages, et suivi du parcours. Sans
+// DOM ni carte : le parcours et la carte sont simulés.
+// Lancer : node --test src/components/PileRadio/affichage.test.mjs
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import {
+  CLE_FORCER,
+  TEXTE_CONSIGNES_PILE,
+  TEXTE_DUREE_PILE,
+  boutonPileActif,
+  contenuEncart,
+  creerSuiviOperateur,
+  doitAbandonner,
+  lireForcer,
+  messageEtape,
+  operateurSurCarte,
+  pileRadioVisible,
+  retenirCarte,
+  retenirFermeture,
+  texteDecompte,
+} from './affichage.mjs';
+import { ETAT_INITIAL_PILE, TEXTE_CONFIRMATION_VERIFICATION } from './deroulement.mjs';
+
+const ID = 'BLE/BleBeacon';
+const CARTE_LIBRE = { connectee: true, occupee: false, programmeActif: null };
+
+function pile(partie) {
+  return { ...ETAT_INITIAL_PILE, ...partie };
+}
+
+// Parcours simulé : même interface d'abonnement que creerParcoursPile.
+function fauxParcours() {
+  let etat = ETAT_INITIAL_PILE;
+  const abonnes = new Set();
+  return {
+    get etat() {
+      return etat;
+    },
+    abonner(fn) {
+      abonnes.add(fn);
+      return () => abonnes.delete(fn);
+    },
+    poser(partie) {
+      etat = { ...etat, ...partie };
+      for (const fn of [...abonnes]) fn(etat);
+    },
+  };
+}
+
+const DONNEES = {
+  id: ID,
+  decision: 'absente',
+  trouvee: null,
+  epinglee: '1.20.0',
+  pile: 'BLE HCI Layer',
+};
+
+describe('pileRadioVisible', () => {
+  it('seulement pour les ids BLE/…', () => {
+    assert.equal(pileRadioVisible('BLE/BleBeacon'), true);
+    assert.equal(pileRadioVisible('BLE/BleIndoorMap'), true);
+    assert.equal(pileRadioVisible('VL53L1X/GestureDetection'), false);
+    assert.equal(pileRadioVisible('BLEX/Truc'), false);
+    assert.equal(pileRadioVisible('ble/BleBeacon'), false);
+    assert.equal(pileRadioVisible(undefined), false);
+  });
+});
+
+describe('boutonPileActif', () => {
+  it('actif carte connectée et libre, parcours au repos', () => {
+    assert.equal(boutonPileActif(CARTE_LIBRE, pile({})), true);
+  });
+
+  it('inactif sans carte, pendant un flash ou une connexion', () => {
+    assert.equal(boutonPileActif({ ...CARTE_LIBRE, connectee: false }, pile({})), false);
+    assert.equal(boutonPileActif({ ...CARTE_LIBRE, occupee: true }, pile({})), false);
+  });
+
+  it('inactif pendant le parcours, première question comprise', () => {
+    for (const etape of [
+      'confirmation-verification',
+      'operateur',
+      'lecture',
+      'proposition',
+      'daplink',
+      'suppression',
+      'ecriture',
+      'upgrade',
+      'attente',
+      'relecture',
+    ]) {
+      assert.equal(boutonPileActif(CARTE_LIBRE, pile({ etape })), false, etape);
+    }
+  });
+
+  it('de nouveau actif après une fin de parcours', () => {
+    for (const etape of ['repos', 'a-jour', 'fini', 'erreur']) {
+      assert.equal(boutonPileActif(CARTE_LIBRE, pile({ etape })), true, etape);
+    }
+  });
+});
+
+describe('retenirFermeture', () => {
+  it('de la suppression à la relecture seulement', () => {
+    const retenues = ['suppression', 'ecriture', 'upgrade', 'attente', 'relecture'];
+    for (const etape of retenues) assert.equal(retenirFermeture(pile({ etape })), true, etape);
+    for (const etape of [
+      'repos',
+      'confirmation-verification',
+      'operateur',
+      'lecture',
+      'proposition',
+      'daplink',
+      'a-jour',
+      'fini',
+      'erreur',
+    ]) {
+      assert.equal(retenirFermeture(pile({ etape })), false, etape);
+    }
+  });
+});
+
+describe('doitAbandonner', () => {
+  it('vrai quand une question du bloc attend une réponse', () => {
+    const encart = { type: 'proposition', donnees: DONNEES };
+    assert.equal(doitAbandonner(pile({ id: ID, etape: 'proposition', encart }), ID), true);
+  });
+
+  it("faux sans question, ou pour la question d'un autre bloc", () => {
+    const encart = { type: 'proposition', donnees: DONNEES };
+    assert.equal(doitAbandonner(pile({ id: ID, etape: 'lecture' }), ID), false);
+    assert.equal(
+      doitAbandonner(pile({ id: ID, etape: 'proposition', encart }), 'BLE/Autre'),
+      false,
+    );
+  });
+});
+
+describe('messageEtape', () => {
+  it('dit ce qui se passe pendant chaque étape occupée', () => {
+    for (const etape of [
+      'operateur',
+      'lecture',
+      'suppression',
+      'ecriture',
+      'upgrade',
+      'attente',
+      'relecture',
+    ]) {
+      const texte = messageEtape(pile({ etape }));
+      assert.equal(typeof texte, 'string', etape);
+      assert.ok(texte.length > 0, etape);
+    }
+  });
+
+  it("pendant l'attente : les consignes, sans le décompte (annoncé une seule fois)", () => {
+    const texte = messageEtape(pile({ etape: 'attente', decompte: 42 }));
+    assert.match(texte, /ne pas débrancher/);
+    assert.match(texte, /RESET/);
+    assert.match(texte, /fermer la page/);
+    assert.doesNotMatch(texte, /42/);
+  });
+
+  it('sinon, le message du parcours, ou rien', () => {
+    assert.equal(messageEtape(pile({ etape: 'fini', message: 'Fin.' })), 'Fin.');
+    assert.equal(messageEtape(pile({ etape: 'repos' })), null);
+    assert.equal(messageEtape(pile({ etape: 'proposition', encart: {} })), null);
+  });
+});
+
+describe('texteDecompte', () => {
+  it('donne les secondes restantes', () => {
+    assert.equal(texteDecompte(60), 'Temps restant : 60\u00a0s');
+    assert.equal(texteDecompte(1), 'Temps restant : 1\u00a0s');
+  });
+});
+
+describe('contenuEncart', () => {
+  it('première confirmation : le texte du parcours, Continuer ou Annuler', () => {
+    const contenu = contenuEncart({
+      type: 'confirmation-verification',
+      donnees: { id: ID, texte: TEXTE_CONFIRMATION_VERIFICATION },
+    });
+    assert.ok(contenu.paragraphes.some((p) => p.texte === TEXTE_CONFIRMATION_VERIFICATION));
+    assert.deepEqual(
+      contenu.boutons.map((b) => [b.valeur, b.libelle, b.principal]),
+      [
+        ['continuer', 'Continuer', true],
+        ['annuler', 'Annuler', false],
+      ],
+    );
+  });
+
+  it('proposition, pile absente : aucune pile, version à installer, durée et consignes', () => {
+    const contenu = contenuEncart({ type: 'proposition', donnees: DONNEES });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /Aucune pile radio/);
+    assert.match(textes, /BLE HCI Layer 1\.20\.0/);
+    assert.ok(textes.includes(TEXTE_DUREE_PILE));
+    assert.ok(textes.includes(TEXTE_CONSIGNES_PILE));
+    assert.doesNotMatch(textes, /effacée/);
+    assert.deepEqual(
+      contenu.boutons.map((b) => [b.valeur, b.libelle, b.principal]),
+      [
+        ['installer', 'Installer la pile radio', true],
+        ['annuler', 'Annuler', false],
+      ],
+    );
+  });
+
+  it("proposition, pile ancienne : la version trouvée, et l'effacement de l'ancienne", () => {
+    const contenu = contenuEncart({
+      type: 'proposition',
+      donnees: { ...DONNEES, decision: 'ancienne', trouvee: '1.13.0' },
+    });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /1\.13\.0/);
+    assert.match(textes, /plus ancienne/);
+    assert.match(textes, /effacée/);
+  });
+
+  it("proposition, pile d'un autre type", () => {
+    const contenu = contenuEncart({
+      type: 'proposition',
+      donnees: { ...DONNEES, decision: 'autre', trouvee: '1.20.0' },
+    });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /autre type/);
+    assert.match(textes, /effacée/);
+  });
+
+  it("proposition, pile plus récente : signalée, l'installation n'est pas mise en avant", () => {
+    const contenu = contenuEncart({
+      type: 'proposition',
+      donnees: { ...DONNEES, decision: 'plus-recente', trouvee: '1.21.0' },
+    });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /plus récente que celle du wiki/);
+    assert.deepEqual(
+      contenu.boutons.map((b) => [b.valeur, b.principal]),
+      [
+        ['annuler', true],
+        ['installer', false],
+      ],
+    );
+  });
+
+  it('proposition, pile à jour (réinstallation forcée) : le dire', () => {
+    const contenu = contenuEncart({
+      type: 'proposition',
+      donnees: { ...DONNEES, decision: 'a-jour', trouvee: '1.20.0' },
+    });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /déjà/);
+  });
+
+  it('DAPLink à mettre à jour : pas de bouton Installer, la mise à jour guidée ou Plus tard', () => {
+    const contenu = contenuEncart({
+      type: 'daplink',
+      donnees: { ...DONNEES, release: '2026-11-25.3' },
+    });
+    const textes = contenu.paragraphes.map((p) => p.texte).join('\n');
+    assert.match(textes, /Aucune pile radio/);
+    assert.match(textes, /DAPLink/);
+    assert.match(textes, /2026-11-25\.3/);
+    assert.deepEqual(
+      contenu.boutons.map((b) => b.valeur),
+      ['mettre-a-jour', 'plus-tard'],
+    );
+  });
+
+  it('DAPLink du wiki illisible : seulement Plus tard', () => {
+    const contenu = contenuEncart({ type: 'daplink', donnees: { ...DONNEES, release: null } });
+    assert.deepEqual(
+      contenu.boutons.map((b) => b.valeur),
+      ['plus-tard'],
+    );
+  });
+});
+
+describe('lireForcer', () => {
+  it("vrai seulement si l'indicateur vaut '1'", () => {
+    const stockage = (valeur) => () => ({ getItem: (cle) => (cle === CLE_FORCER ? valeur : null) });
+    assert.equal(CLE_FORCER, 'steami-pile-radio-forcer');
+    assert.equal(lireForcer(stockage('1')), true);
+    assert.equal(lireForcer(stockage('0')), false);
+    assert.equal(lireForcer(stockage(null)), false);
+  });
+
+  it('faux si le stockage est absent ou interdit', () => {
+    assert.equal(
+      lireForcer(() => undefined),
+      false,
+    );
+    assert.equal(
+      lireForcer(() => {
+        throw new Error('SecurityError');
+      }),
+      false,
+    );
+    assert.equal(
+      lireForcer(() => ({
+        getItem() {
+          throw new Error('SecurityError');
+        },
+      })),
+      false,
+    );
+  });
+});
+
+describe('creerSuiviOperateur et operateurSurCarte', () => {
+  it("retient l'exemple dont le parcours a flashé l'operator", () => {
+    const parcours = fauxParcours();
+    const suivi = creerSuiviOperateur(parcours);
+    const vus = [];
+    suivi.abonner(() => vus.push(suivi.id));
+    assert.equal(suivi.id, null);
+    parcours.poser({ etape: 'confirmation-verification', id: ID });
+    parcours.poser({ etape: 'operateur' });
+    assert.equal(suivi.id, null);
+    parcours.poser({ etape: 'lecture' });
+    assert.equal(suivi.id, ID);
+    parcours.poser({ etape: 'a-jour' });
+    assert.equal(suivi.id, ID);
+    assert.deepEqual(vus, [ID]);
+  });
+
+  it('oublier : un téléversement a remplacé le programme', () => {
+    const parcours = fauxParcours();
+    const suivi = creerSuiviOperateur(parcours);
+    parcours.poser({ etape: 'lecture', id: ID });
+    suivi.oublier();
+    assert.equal(suivi.id, null);
+  });
+
+  it("l'operator n'est sur la carte que si le dernier programme flashé vient de cet exemple", () => {
+    assert.equal(operateurSurCarte({ ...CARTE_LIBRE, programmeActif: ID }, ID), true);
+    assert.equal(operateurSurCarte({ ...CARTE_LIBRE, programmeActif: 'BLE/Autre' }, ID), false);
+    assert.equal(operateurSurCarte({ ...CARTE_LIBRE, programmeActif: null }, ID), false);
+    assert.equal(operateurSurCarte({ ...CARTE_LIBRE, programmeActif: null }, null), false);
+  });
+});
+
+describe('retenirCarte', () => {
+  it('garde la carte abonnée pendant le parcours, même si aucun bloc ne reste affiché', () => {
+    const parcours = fauxParcours();
+    let abonnements = 0;
+    const carte = {
+      abonner() {
+        abonnements += 1;
+        return () => {
+          abonnements -= 1;
+        };
+      },
+    };
+    retenirCarte(parcours, carte);
+    parcours.poser({ etape: 'confirmation-verification', id: ID });
+    assert.equal(abonnements, 0);
+    parcours.poser({ etape: 'operateur' });
+    assert.equal(abonnements, 1);
+    parcours.poser({ etape: 'lecture' });
+    parcours.poser({ etape: 'attente', decompte: 3 });
+    assert.equal(abonnements, 1);
+    parcours.poser({ etape: 'fini' });
+    assert.equal(abonnements, 0);
+    parcours.poser({ etape: 'operateur' });
+    parcours.poser({ etape: 'erreur' });
+    assert.equal(abonnements, 0);
+  });
+});
