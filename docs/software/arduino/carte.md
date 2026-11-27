@@ -3,6 +3,8 @@ title: Reconnaître la carte
 sidebar_position: 4.5
 ---
 
+import EssayerExemple from '@site/src/components/EssayerExemple';
+
 <!-- cspell:ignore colour -->
 
 # Reconnaître la carte
@@ -91,38 +93,11 @@ Un code de révision d'indice 0 ajoute `, prototype` : `(read from the board con
 
 Treize classes lisent une fonction de la carte sans qu'il faille choisir le capteur : `SteamiTemperature`, `SteamiHumidity`, `SteamiPressure`, `SteamiDistance`, `SteamiBattery`, `SteamiAccelerometer`, `SteamiGyroscope`, `SteamiMagnetometer`, `SteamiCompass`, `SteamiLight`, `SteamiColor`, `SteamiGesture` et `SteamiButtons`. Chacune prend le composant qui sert cette fonction sur la release de la carte, et partage le driver que `Steami` a déjà créé. `SteamiDisplay` fait de même pour l'écran : elle dessine sur le SSD1327 d'une V1a ou d'une V1b, ou sur le GC9A01 d'une V1c ; `SteamiScreen`, qui en hérite, y place titres, valeurs et widgets (voir [Écran](./ecran)). Ce programme affiche chaque seconde la température, la pression, l'altitude et la distance, sur une V1a, une V1b ou une V1c :
 
-```cpp sample=CARTE/ToutesLesCartes
-#include <SteamiTemperature.h>
-#include <SteamiPressure.h>
-#include <SteamiDistance.h>
+```cpp file=.external/arduino-steami-sample/examples/CARTE/ToutesLesCartes/ToutesLesCartes.ino
 
-SteamiTemperature temperature;
-SteamiPressure pression;
-SteamiDistance distance;
-
-void setup() {
-  Serial.begin(115200);
-  if (temperature.begin()) {
-    Serial.print("Capteur de température : ");
-    Serial.println(temperature.chip());  // BME280 sur une V1c
-  }
-  pression.begin();
-  distance.begin();
-}
-
-void loop() {
-  Serial.print("Température : ");
-  Serial.print(temperature.read());
-  Serial.print(" °C  Pression : ");
-  Serial.print(pression.read());
-  Serial.print(" hPa  Altitude : ");
-  Serial.print(pression.altitude());
-  Serial.print(" m  Distance : ");
-  Serial.print(distance.read());
-  Serial.println(" mm");
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CARTE/ToutesLesCartes" source="sample" />
 
 Le programme n'appelle pas `Steami.begin()` : la première classe démarrée reconnaît la carte.
 
@@ -212,33 +187,11 @@ Les classes par fonction couvrent l'usage courant. Pour une mesure ou un réglag
 
 Ce programme fait à la main ce que fait `SteamiTemperature` : il affiche la température chaque seconde, avec le BME280 sur une V1c et le WSEN-HIDS sur une V1a ou une V1b :
 
-```cpp sample=CARTE/DriversPartages
-#include <SteamiBoard.h>
+```cpp file=.external/arduino-steami-sample/examples/CARTE/DriversPartages/DriversPartages.ino
 
-void setup() {
-  Serial.begin(115200);
-  Steami.begin();
-  if (!Steami.has(SteamiFunction::LIGHT)) {
-    Serial.println("Pas de capteur de lumière sur cette carte");
-  }
-}
-
-void loop() {
-  float temperature = NAN;
-  if (Steami.isV1c()) {
-    if (Steami.claim(SteamiChip::BME280) == SteamiStatus::OK) {
-      temperature = Steami.bme280()->temperature();
-    }
-  } else if (Steami.claim(SteamiChip::WSEN_HIDS) == SteamiStatus::OK) {
-    temperature = Steami.wsenHids()->temperature();
-  }
-
-  Serial.print("Température : ");
-  Serial.print(temperature);
-  Serial.println(" °C");
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CARTE/DriversPartages" source="sample" />
 
 Si le capteur ne répond pas, ou si une lecture échoue, la ligne affiche `nan` au lieu d'une température : l'exemple BoardInfo indique alors quel composant ne répond pas.
 
@@ -298,33 +251,11 @@ Les messages `E01` et `E03` disent de placer le `#define` avant `#include <STeaM
 
 Certains composants ne sont partagés ni par une classe ni par `Steami`, comme le [fichier du disque USB](./capteurs#fichier-sur-le-disque-usb). Leur driver se crée dans le programme, sur le bus de la carte, `Steami.wire()`. Ce driver peut être une variable globale : `Steami.wire()` crée et démarre le bus I²C interne à son premier appel. Ce programme affiche chaque seconde le nom du fichier du disque USB, sans le modifier :
 
-```cpp sample=CARTE/MesDrivers
-#include <SteamiBoard.h>
-#include <SteamiDaplinkBridge.h>
-#include <SteamiDaplinkFlash.h>
+```cpp file=.external/arduino-steami-sample/examples/CARTE/MesDrivers/MesDrivers.ino
 
-SteamiDaplinkBridge pont(Steami.wire());  // le bus interne de la carte
-SteamiDaplinkFlash fichier(pont);
-
-void setup() {
-  Serial.begin(115200);
-  if (!fichier.begin()) {
-    Serial.println("DAPLink non détecté");
-    while (true) {}
-  }
-}
-
-void loop() {
-  SteamiDaplinkFlash::Filename nom;
-  if (fichier.getFilename(nom)) {
-    Serial.print("Fichier du disque USB : ");
-    Serial.print(nom.name);
-    Serial.print('.');
-    Serial.println(nom.ext);
-  }
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="CARTE/MesDrivers" source="sample" />
 
 Tous les drivers I²C de la bibliothèque se créent de la même façon, et tous ses exemples qui utilisent le bus interne passent par `Steami.wire()` (voir [Le bus I²C interne](./bibliotheques#le-bus-ic-interne)).
 
