@@ -507,9 +507,24 @@ test('ecrireFichierRam : erreur de la carte et nom invalide', async () => {
         : {},
   });
   const { repl } = replSur(carte);
-  await assert.rejects(repl.ecrireFichierRam('gros.py', 'x'), /plein/);
+  // Le lecteur ne peut rien y faire : le message dit à qui le signaler.
+  await assert.rejects(repl.ecrireFichierRam('gros.py', 'x'), /plein.*Signaler le problème/);
   await assert.rejects(repl.ecrireFichierRam('../main.py', 'x'), ErreurLecteur);
   await assert.rejects(repl.ecrireFichierRam("a'b.py", 'x'), ErreurLecteur);
+});
+
+test('ecrireFichierRam : autre erreur de la carte → message qui dit quoi faire', async () => {
+  const carte = fausseCarte({
+    programme: (code) =>
+      code.includes('a2b_base64')
+        ? { erreur: 'Traceback (most recent call last):\r\nMemoryError: \r\n' }
+        : {},
+  });
+  const { repl } = replSur(carte);
+  await assert.rejects(
+    repl.ecrireFichierRam('pins.py', 'x'),
+    /Impossible d'écrire pins\.py sur la carte \(MemoryError:\)\. Signaler le problème/,
+  );
 });
 
 test('ecrireFichierRam : arrêtée pendant l’écriture (KeyboardInterrupt) → ArretDemande', async () => {

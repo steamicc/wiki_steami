@@ -224,6 +224,9 @@ _version()
 del _version
 `;
 
+const SIGNALER =
+  'Signaler le problème sur le dépôt du wiki : https://github.com/steamicc/wiki_steami/issues.';
+
 function derniereLigne(texte) {
   const lignes = texte.trim().split(/\r?\n/);
   return lignes[lignes.length - 1];
@@ -506,12 +509,15 @@ export function creerRepl({
     );
     if (erreur) {
       const ligne = derniereLigne(erreur);
+      const impossible = /^[aeéiou]/i.test(quoi) ? `Impossible d'${quoi}` : `Impossible de ${quoi}`;
+      // Le lecteur n'y peut rien (bloc trop gros pour le disque en RAM,
+      // commande du wiki refusée) : le message dit à qui le signaler.
       if (/OSError: (28|\[Errno 28\])/.test(ligne)) {
         throw new ErreurLecteur(
-          `Impossible de ${quoi} : le disque en RAM de la carte est plein (${BLOCS_RAM / 2} ko).`,
+          `${impossible} : le disque en RAM de la carte est plein (${BLOCS_RAM / 2} ko). ${SIGNALER}`,
         );
       }
-      throw new ErreurLecteur(`Impossible de ${quoi} sur la carte (${ligne}).`);
+      throw new ErreurLecteur(`${impossible} sur la carte (${ligne}). ${SIGNALER}`);
     }
     return sortie;
   }
