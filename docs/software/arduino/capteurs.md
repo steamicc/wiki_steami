@@ -622,10 +622,6 @@ La V1c n'a pas de capteur de lumière, de couleur ni de gestes : l'APDS-9960 a �
 </Release>
 </ReleaseTabs>
 
-## Écran
-
-L'écran a sa propre page : [Écran](./ecran). Elle donne les programmes de ses deux classes, `SteamiDisplay`, qui dessine formes et texte, et `SteamiScreen`, qui place titres, valeurs, jauges, boussole, montre, visages, graphe et menu sur l'écran rond, puis ceux des drivers [SSD1327 et GC9A01](./ecran#avec-les-drivers-ssd1327-et-gc9a01).
-
 ## Microphone
 
 Le microphone IMP34DT05, présent sur toutes les releases, mesure le son en continu. Il n'a pas de classe par fonction : le programme utilise directement son driver, `SteamiIMP34DT05`, de la bibliothèque STeaMi, version 0.39.0 ou plus récente. Le microphone n'est pas sur le bus I²C : le driver se crée sans `Steami.wire()`.

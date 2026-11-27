@@ -1,6 +1,6 @@
 ---
 title: Écran
-sidebar_position: 5.5
+sidebar_position: 5.2
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
@@ -10,14 +10,14 @@ import TOCInline from '@theme/TOCInline';
 
 # Écran
 
-L'écran rond de la STeaMi change avec la release (voir [Écran](/docs/hardware/main-components/display) et [Révisions](/docs/hardware/revisions)) : un OLED de 128 × 128 pixels en 16 niveaux de gris (contrôleur SSD1327) sur une V1a ou une V1b, un TFT couleur de 240 × 240 pixels (contrôleur GC9A01) sur une V1c. La bibliothèque STeaMi le pilote avec deux classes, qui choisissent elles-mêmes l'écran de la release : le même programme dessine la même image sur les trois cartes.
+L'écran rond de la STeaMi change avec la release (voir [Les écrans de la carte](/docs/hardware/main-components/display) et [Révisions](/docs/hardware/revisions)) : un OLED de 128 × 128 pixels en 16 niveaux de gris (contrôleur SSD1327) sur une V1a ou une V1b, un TFT couleur de 240 × 240 pixels (contrôleur GC9A01) sur une V1c. La bibliothèque STeaMi le pilote avec deux classes, qui choisissent elles-mêmes l'écran de la release : le même programme dessine la même image sur les trois cartes.
 
 - `SteamiDisplay` dessine des formes et du texte, en pixels (version 0.37.0 de la bibliothèque).
 - `SteamiScreen` est une `SteamiDisplay` qui place elle-même titres, valeurs et barres sur l'écran rond (version 0.38.0). La version 0.40.0 y ajoute les widgets ronds : jauge, boussole, montre et visages ; la version 0.41.0 le graphe, avec `SteamiHistory`, et le menu.
 
 Depuis la version 0.40.0, le texte de l'écran de la V1c s'écrit dans la police Spleen : des caractères de 8 pixels de large et 16 de haut, avec les lettres accentuées.
 
-Avant de commencer, installer la bibliothèque **STeaMi**, version 0.41.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Avec une version plus ancienne, la compilation s'arrête sur `SteamiScreen.h: No such file or directory` ou sur `has no member named 'gauge'` (ou le nom d'une autre fonction) : l'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte) donne la version demandée par chaque fonction et la façon de mettre à jour. Les programmes affichent leurs messages d'erreur dans le moniteur série, à 115200 bauds.
+Avant de commencer, installer la bibliothèque **STeaMi**, version 0.41.0 ou plus récente, depuis le gestionnaire de bibliothèques (voir [Bibliothèques STeaMi](./bibliotheques)). Avec une version plus ancienne, la compilation s'arrête sur `SteamiScreen.h: No such file or directory` ou sur `has no member named 'gauge'` (ou le nom d'une autre fonction), ou encore sur `'SteamiHistory' was not declared in this scope` : l'encart « Version de la bibliothèque » de [Reconnaître la carte](./carte) donne la version demandée par chaque fonction et la façon de mettre à jour. Les programmes affichent leurs messages d'erreur dans le moniteur série, à 115200 bauds.
 
 Les exemples de la bibliothèque qui utilisent ces classes sont dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** : la page [Exemples STEAMI_BOARD](./exemples/steami-board) les explique un par un, avec une photo de l'écran et un bouton pour les envoyer sur la carte.
 
@@ -60,7 +60,7 @@ Le dessin se fait dans une image en mémoire, et rien n'apparaît avant l'appel 
 - `arc(cx, cy, r, début, étendue, couleur, épaisseur)` trace un morceau d'anneau : les angles sont en degrés, 0 en haut comme midi sur une montre, en tournant dans le sens des aiguilles ; `r` est le bord extérieur, et l'épaisseur va vers l'intérieur ;
 - `text(texte, x, y, couleur)` écrit un texte (voir [Le texte](#le-texte)).
 
-`show()` prend au moins 58 ms environ sur une V1c, dont l'image fait 115 200 octets, et une dizaine de millisecondes sur une V1a ou une V1b, dont l'image est 14 fois plus petite : c'est ce qui limite la vitesse d'une animation. `rotate(true)` retourne l'image de 180°, `invert(true)` inverse l'écran, `powerOff()` et `powerOn()` l'éteignent et le rallument.
+`show()` prend au moins 58 ms environ sur une V1c, dont l'image fait 115 200 octets, et 8,2 ms environ sur une V1a ou une V1b, dont l'image est 14 fois plus petite : c'est ce qui limite la vitesse d'une animation. `rotate(true)` retourne l'image de 180°, `invert(true)` inverse l'écran, `powerOff()` et `powerOn()` l'éteignent et le rallument.
 
 L'exemple [Drawing](./exemples/steami-board#drawing) dessine une galerie de formes avec cette classe.
 
@@ -158,11 +158,11 @@ Positions et marges sont données pour l'écran de 128 pixels et agrandies dans 
 
 Les exemples [ScreenTemperature](./exemples/steami-board#screentemperature), [ScreenBattery](./exemples/steami-board#screenbattery) et [ScreenComfort](./exemples/steami-board#screencomfort) affichent ainsi une température, la charge de la batterie avec une barre, et deux valeurs côte à côte.
 
-## Les widgets ronds
+## Les widgets
 
-Depuis la version 0.40.0 de la bibliothèque, `SteamiScreen` dessine des widgets à la mesure de l'écran rond : une jauge, une boussole, une montre et des visages. Ils se dessinent eux aussi entre `clear()` et `show()`, dans l'ordre des appels.
+Depuis la version 0.40.0 de la bibliothèque, `SteamiScreen` dessine des widgets à la mesure de l'écran rond : une jauge, une boussole, une montre et des visages. La version 0.41.0 y ajoute un graphe et un menu. Ils se dessinent eux aussi entre `clear()` et `show()`, dans l'ordre des appels.
 
-### Jauge : gauge()
+### Jauge
 
 ```cpp
 #include <SteamiScreen.h>
@@ -192,7 +192,7 @@ void loop() {
 
 `gauge()` n'écrit ni la valeur ni son unité : appeler `value()` après lui, pour que le texte passe par-dessus l'anneau. Exemple à essayer : [ScreenGauge](./exemples/steami-board#screengauge).
 
-### Boussole : compass()
+### Boussole
 
 ```cpp
 ecran.clear();
@@ -204,7 +204,7 @@ ecran.show();
 
 Le cap n'est juste qu'avec un magnétomètre calibré et une carte tenue à plat (voir [Calibrations](./carte#calibrations)). Exemple à essayer : [ScreenCompass](./exemples/steami-board#screencompass).
 
-### Montre : watch()
+### Montre
 
 ```cpp
 const uint32_t DEPART = 14 * 3600UL + 30 * 60;   // 14:30:00, l'heure du démarrage
@@ -220,7 +220,7 @@ void loop() {
 
 `watch(h, m, s)` dessine une montre à aiguilles : un cadran à douze graduations, les chiffres 12, 3, 6 et 9, les aiguilles des heures et des minutes, gris clair par défaut, et une trotteuse grise. Les heures vont de 0 à 23, les minutes et les secondes de 0 à 59. La carte n'a pas d'horloge qui garde l'heure : le programme part d'une heure écrite à la main et compte les secondes avec `millis()`, depuis le démarrage de la carte. Exemple à essayer : [ScreenWatch](./exemples/steami-board#screenwatch).
 
-### Visages : face()
+### Visages
 
 ```cpp
 const uint8_t SOURIRE[8] = {0x00, 0x24, 0x24, 0x00, 0x00, 0x42, 0x3C, 0x00};
@@ -233,7 +233,7 @@ ecran.show();
 
 `face()` dessine un visage en pixel art, centré : une grille de 8 × 8 carrés pleins, gris clair (`STEAMI_LIGHT`) par défaut. `SteamiFace` nomme six visages intégrés : `HAPPY`, `SAD`, `SURPRISED`, `SLEEPING`, `ANGRY` et `LOVE` (un cœur). Un dessin personnel est un tableau de 8 octets, un par ligne de haut en bas, dont chaque bit allume un carré, le bit de poids fort (`0x80`) à gauche : `SOURIRE` ci-dessus est le visage `HAPPY`. Avec `true` en second argument, `face(SteamiFace::HAPPY, true)` dessine un visage plus petit et un peu remonté, qui laisse la place à un titre et à un sous-titre. Exemple à essayer : [ScreenFaces](./exemples/steami-board#screenfaces).
 
-## Le graphe : graph() et SteamiHistory
+### Graphe et historique
 
 Depuis la version 0.41.0 de la bibliothèque, `graph()` trace la courbe des dernières mesures. Ce programme montre la pression des 30 dernières secondes :
 
@@ -268,7 +268,7 @@ void loop() {
 
 Exemples à essayer : [ScreenGraph](./exemples/steami-board#screengraph), et la page Pressure de [WeatherStation](./exemples/steami-board#weatherstation).
 
-## Le menu : menu()
+### Menu
 
 Depuis la version 0.41.0 de la bibliothèque, `menu()` affiche une liste dans laquelle le D-PAD déplace la sélection :
 
@@ -311,12 +311,12 @@ Le programme ne teste pas les bornes : `menu()` ramène l'indice dans la liste e
 
 ## De MicroPython à Arduino
 
-Les widgets de `SteamiScreen` reprennent ceux de la bibliothèque MicroPython de la STeaMi, avec les mêmes noms et les mêmes rôles. Seule l'écriture change :
+Les widgets de `SteamiScreen` reprennent ceux de la [bibliothèque MicroPython de la STeaMi](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen), avec les mêmes noms et les mêmes rôles. Seule l'écriture change :
 
 | MicroPython                                                | Arduino                                                                 |
 | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `screen = Screen(display)`                                 | `SteamiScreen screen;` puis `screen.begin();` au début de `setup()`     |
-| `screen.value(v, unit="C", at="W", label="TEMP", color=C)` | `screen.value(v, "°C", SteamiAt::W, "TEMP", C)`                         |
+| `screen.value(v, unit="%", at="W", label="HUM", color=C)`  | `screen.value(v, "%", SteamiAt::W, "HUM", C)`                           |
 | `screen.subtitle("a", "b", color=C)`                       | `screen.subtitle("a", "b", C)` (trois lignes au plus)                   |
 | `screen.bar(v, max_val=100, color=C)`                      | `screen.bar(v, 100, C)`                                                 |
 | `screen.text("x", at="NE", scale=2)`                       | `screen.text("x", SteamiAt::NE, STEAMI_WHITE, 2)`                       |
@@ -400,4 +400,4 @@ Exemples à essayer sur la carte : [Exemples GC9A01](./exemples/gc9a01).
 - [Capteurs](./capteurs) : un programme minimal pour chaque capteur de la carte.
 - [Reconnaître la carte](./carte) : la reconnaissance de la release, les calibrations et les messages.
 - [Exemples STEAMI_BOARD](./exemples/steami-board) : les exemples de `SteamiDisplay` et `SteamiScreen`, avec une photo de l'écran.
-- [Écran](/docs/hardware/main-components/display) : le matériel des deux écrans.
+- [Les écrans de la carte](/docs/hardware/main-components/display) : le matériel des deux écrans.
