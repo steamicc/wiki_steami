@@ -21,6 +21,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).resolve().parents[1] / "fetch-arduino-examples.sh"
 VERSION = "v9.8.7"
 REPO_URL = "https://github.com/steamicc/arduino-steami.git"
+SAMPLE_URL = "https://github.com/steamicc/arduino-steami-sample.git"
 REAL_GIT = shutil.which("git")
 
 FAUX_CURL = """#!/bin/bash
@@ -41,10 +42,12 @@ FAUX_GIT = """#!/bin/bash
 # Enveloppe de git : clone le dépôt local à la place de GitHub.
 args=()
 for a in "$@"; do
-  if [ "$a" = "%s" ]; then args+=("$FAUX_GIT_DEPOT"); else args+=("$a"); fi
+  if [ "$a" = "%s" ]; then args+=("$FAUX_GIT_DEPOT")
+  elif [ "$a" = "%s" ]; then args+=("$FAUX_GIT_DEPOT_SAMPLE")
+  else args+=("$a"); fi
 done
 exec "%s" "${args[@]}"
-""" % (REPO_URL, REAL_GIT)
+""" % (REPO_URL, SAMPLE_URL, REAL_GIT)
 
 
 def archive_de_test():
@@ -67,18 +70,16 @@ class TestFetchArduinoExamples(unittest.TestCase):
         data = archive_de_test()
         self.archive = self.tmp / "archive.zip"
         self.archive.write_bytes(data)
+        self.sha = hashlib.sha256(data).hexdigest()
         (self.work / "exemples-arduino.json").write_text(
-            json.dumps({"version": VERSION, "sha256": hashlib.sha256(data).hexdigest()})
+            json.dumps({"version": VERSION, "sha256": self.sha})
+        )
+        (self.work / "exemples-arduino-sample.json").write_text(
+            json.dumps({"version": VERSION, "sha256": self.sha})
         )
 
-        self.depot = self.tmp / "depot"
-        self.depot.mkdir()
-        (self.depot / "README.md").write_text("arduino-steami de test\n")
-        git = [REAL_GIT, "-C", str(self.depot), "-c", "user.name=t", "-c", "user.email=t@t"]
-        subprocess.run([REAL_GIT, "init", "-q", str(self.depot)], check=True)
-        subprocess.run(git + ["add", "."], check=True)
-        subprocess.run(git + ["commit", "-q", "-m", "init"], check=True)
-        subprocess.run(git + ["tag", VERSION], check=True)
+        self.depot = self.creer_depot("depot", "arduino-steami de test\n")
+        self.depot_sample = self.creer_depot("depot-sample", "arduino-steami-sample de test\n")
 
         self.bin = self.tmp / "bin"
         self.bin.mkdir()
@@ -87,6 +88,17 @@ class TestFetchArduinoExamples(unittest.TestCase):
             (self.bin / nom).chmod(0o755)
         self.journal = self.tmp / "curl.log"
 
+    def creer_depot(self, nom, readme):
+        depot = self.tmp / nom
+        depot.mkdir()
+        (depot / "README.md").write_text(readme)
+        git = [REAL_GIT, "-C", str(depot), "-c", "user.name=t", "-c", "user.email=t@t"]
+        subprocess.run([REAL_GIT, "init", "-q", str(depot)], check=True)
+        subprocess.run(git + ["add", "."], check=True)
+        subprocess.run(git + ["commit", "-q", "-m", "init"], check=True)
+        subprocess.run(git + ["tag", VERSION], check=True)
+        return depot
+
     def env(self, **extra):
         return dict(
             os.environ,
@@ -94,12 +106,13 @@ class TestFetchArduinoExamples(unittest.TestCase):
             FAUX_CURL_JOURNAL=str(self.journal),
             FAUX_CURL_ARCHIVE=str(self.archive),
             FAUX_GIT_DEPOT=f"file://{self.depot}",
+            FAUX_GIT_DEPOT_SAMPLE=f"file://{self.depot_sample}",
             **extra,
         )
 
-    def lancer(self, **extra):
+    def lancer(self, *args, **extra):
         return subprocess.Popen(
-            ["bash", f"scripts/{SCRIPT.name}"],
+            ["bash", f"scripts/{SCRIPT.name}", *args],
             cwd=self.work,
             env=self.env(**extra),
             stdout=subprocess.PIPE,
@@ -107,8 +120,8 @@ class TestFetchArduinoExamples(unittest.TestCase):
             text=True,
         )
 
-    def executer(self, **extra):
-        p = self.lancer(**extra)
+    def executer(self, *args, **extra):
+        p = self.lancer(*args, **extra)
         out, err = p.communicate(timeout=60)
         return p.returncode, out, err
 
@@ -172,6 +185,74 @@ class TestFetchArduinoExamples(unittest.TestCase):
         self.assertLess(time.monotonic() - debut, 30)
         self.assertEqual(self.telechargements(), 0)
         self.assertFalse((self.work / "static/exemples-arduino").exists())
+
+    # --- source « sample » (arduino-steami-sample) ---
+
+    def test_sample_installe_puis_deja_present(self):
+        code, out, err = self.executer("sample")
+        self.assertEqual(code, 0, err)
+        self.assertIn("arduino-steami-sample", out)
+        dest = self.work / "static/exemples-arduino-sample"
+        self.assertEqual(sorted(os.listdir(dest)), [".sha256", "exemple", "index.json"])
+        self.assertEqual(json.loads((dest / "index.json").read_text())["version"], VERSION)
+        src = self.work / ".external/arduino-steami-sample"
+        self.assertEqual(
+            (src / "README.md").read_text(), "arduino-steami-sample de test\n"
+        )
+        tag = subprocess.run(
+            [REAL_GIT, "-C", str(src), "describe", "--tags", "--exact-match"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertEqual(tag, VERSION)
+        self.assertFalse((self.work / "static/exemples-arduino").exists())
+        code, out, err = self.executer("sample")
+        self.assertEqual(code, 0, err)
+        self.assertIn("déjà présents", out)
+        self.assertEqual(self.telechargements(), 1)
+
+    def test_sample_sha256_different_laisse_l_existant_intact(self):
+        self.assertEqual(self.executer("sample")[0], 0)
+        dest = self.work / "static/exemples-arduino-sample"
+        avant = (dest / "index.json").read_text()
+        (self.work / "exemples-arduino-sample.json").write_text(
+            json.dumps({"version": VERSION, "sha256": "0" * 64})
+        )
+        code, _, err = self.executer("sample", FORCER_EXEMPLES_ARDUINO="1")
+        self.assertEqual(code, 1)
+        self.assertIn("sha256", err)
+        self.assertIn("exemples-arduino-sample.json", err)
+        self.assertEqual((dest / "index.json").read_text(), avant)
+        self.assertTrue((self.work / ".external/arduino-steami-sample/README.md").exists())
+
+    def test_sample_sha256_different_sans_installation_prealable(self):
+        (self.work / "exemples-arduino-sample.json").write_text(
+            json.dumps({"version": VERSION, "sha256": "0" * 64})
+        )
+        code, _, err = self.executer("sample")
+        self.assertEqual(code, 1)
+        self.assertFalse((self.work / "static/exemples-arduino-sample").exists())
+        self.assertFalse((self.work / ".external/arduino-steami-sample").exists())
+
+    def test_les_deux_sources_ne_s_ecrasent_pas(self):
+        self.assertEqual(self.executer()[0], 0)
+        self.assertEqual(self.executer("sample")[0], 0)
+        self.verifier_installation()
+        self.assertTrue((self.work / "static/exemples-arduino-sample/index.json").exists())
+        self.assertEqual(
+            (self.work / ".external/arduino-steami-sample/README.md").read_text(),
+            "arduino-steami-sample de test\n",
+        )
+        # Chaque source reste à jour sans retélécharger l'autre.
+        for args in ((), ("sample",)):
+            code, out, err = self.executer(*args)
+            self.assertEqual(code, 0, err)
+            self.assertIn("déjà présents", out)
+        self.assertEqual(self.telechargements(), 2)
+
+    def test_source_inconnue(self):
+        code, _, err = self.executer("autre")
+        self.assertEqual(code, 2)
+        self.assertIn("Usage", err)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "npm run prebuild && docusaurus start",
-    "prebuild": "bash scripts/fetch-examples.sh && bash scripts/fetch-arduino-examples.sh && bash scripts/fetch-firmwares.sh",
+    "prebuild": "bash scripts/fetch-examples.sh && bash scripts/fetch-arduino-examples.sh && bash scripts/fetch-arduino-examples.sh sample && bash scripts/fetch-firmwares.sh",
     "build": "npm run prebuild && docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
