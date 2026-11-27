@@ -1,6 +1,8 @@
 """Contrôles du workflow suivre-croquis-sample.yml (jumeau de suivre-exemples-arduino.yml)."""
 
 import re
+import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -9,7 +11,7 @@ import yaml
 RACINE = Path(__file__).resolve().parents[2]
 FLUX = RACINE / ".github" / "workflows" / "suivre-croquis-sample.yml"
 JUMEAU = RACINE / ".github" / "workflows" / "suivre-exemples-arduino.yml"
-BRANCHE_OK = re.compile(r"^(chore|feat|fix|docs|ci|refactor)\/([a-z0-9]+-)*[a-z0-9]+$")
+NOMS_BRANCHE = RACINE / ".validate-branch-namerc.js"
 
 
 def texte():
@@ -18,6 +20,33 @@ def texte():
 
 def flux():
     return yaml.safe_load(texte())
+
+
+def code():
+    """Scripts (run), conditions (if) et paramètres (with) des étapes, sans les
+    commentaires YAML ni les lignes de commentaire shell : une garde ne compte
+    que si elle est exécutée, pas si elle est seulement citée dans un commentaire."""
+    job = flux()["jobs"]["suivre"]
+    morceaux = [str(job.get("if", ""))]
+    for etape in job["steps"]:
+        morceaux.append(str(etape.get("if", "")))
+        morceaux.append(str(etape.get("with", "")))
+        for ligne in etape.get("run", "").splitlines():
+            if not ligne.lstrip().startswith("#"):
+                morceaux.append(ligne)
+    return "\n".join(morceaux)
+
+
+def regle_de_branche():
+    """Motif de .validate-branch-namerc.js, lu par node (None sans node)."""
+    node = shutil.which("node")
+    if node is None:
+        return None
+    sortie = subprocess.run(
+        [node, "-e", "process.stdout.write(require(process.argv[1]).pattern)", str(NOMS_BRANCHE)],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    return re.compile(sortie)
 
 
 class TestSuivreCroquisSample(unittest.TestCase):
@@ -38,12 +67,21 @@ class TestSuivreCroquisSample(unittest.TestCase):
     def test_branche_conforme_a_la_regle_du_depot(self):
         t = texte()
         self.assertIn('branche="chore/croquis-sample-${derniere//./-}"', t)
-        self.assertTrue(BRANCHE_OK.match("chore/croquis-sample-v1-2-3"))
+        regle = regle_de_branche()
+        if regle is None:
+            self.skipTest("node absent : règle de .validate-branch-namerc.js non lue")
+        self.assertTrue(regle.match("chore/croquis-sample-v1-2-3"))
+        self.assertFalse(regle.match("chore/croquis-sample-v1.2.3"))
 
     def test_titres_et_commit_en_francais_conventionnel(self):
         t = texte()
         self.assertIn("chore(configs): croquis du sample $DERNIERE", t)
         self.assertNotIn("exemples Arduino $DERNIERE", t)
+
+    def test_les_gardes_en_commentaire_ne_comptent_pas(self):
+        # code() ignore les commentaires : la garde doit y figurer hors commentaire.
+        self.assertNotIn("# Garde-fou", code())
+        self.assertIn("isCrossRepository", code())
 
     def test_point_d_extension_avant_le_commit(self):
         t = texte()
@@ -53,7 +91,7 @@ class TestSuivreCroquisSample(unittest.TestCase):
         self.assertGreater(t.index(marque), t.index("> exemples-arduino-sample.json"))
 
     def test_memes_controles_que_le_jumeau(self):
-        t = texte()
+        t = code()
         for garde in (
             "isCrossRepository",
             "sha256:$sha",

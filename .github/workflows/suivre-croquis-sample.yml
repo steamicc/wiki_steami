@@ -23,6 +23,10 @@
 # Point d'extension : la conversion des croquis en pages du wiki (tâche 14)
 # s'insérera dans l'étape « Crée la branche et épingle la nouvelle
 # archive », entre l'écriture de exemples-arduino-sample.json et le commit.
+# Elle devra d'abord cloner arduino-steami-sample au tag $DERNIERE dans
+# .external/ (comme scripts/fetch-examples.sh) pour lire les .ino, puis
+# ajouter ses fichiers avec git add : le commit n'est plus limité à
+# exemples-arduino-sample.json, et le corps de la PR devra le dire.
 #
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
@@ -81,7 +85,7 @@ jobs:
           [ -n "$APP_ID" ] || manquants+=(RELEASE_APP_ID)
           [ -n "$APP_SECRET" ] || manquants+=(RELEASE_APP_SECRET)
           if [ "${#manquants[@]}" -gt 0 ]; then
-            echo "::error::Secret(s) manquant(s) : ${manquants[*]}. Ajouter dans ce dépôt (Settings > Secrets and variables > Actions) les secrets RELEASE_APP_ID et RELEASE_APP_SECRET de la GitHub App de l'organisation (ceux de steamicc/arduino-steami-lib), et installer l'App sur steamicc/wiki_steami."
+            echo "::error::Secret(s) manquant(s) : ${manquants[*]}. Rendre visibles à ce dépôt les secrets d'organisation RELEASE_APP_ID et RELEASE_APP_SECRET de la GitHub App (ceux de steamicc/arduino-steami-lib), ou les ajouter dans ce dépôt (Settings > Secrets and variables > Actions), et installer l'App sur steamicc/wiki_steami."
             exit 1
           fi
 
@@ -247,7 +251,7 @@ jobs:
           Le dépôt des croquis Arduino du wiki a une nouvelle release : \`$DERNIERE\` (le wiki épingle \`$ACTUEL\`).
           https://github.com/steamicc/arduino-steami-sample/releases/tag/$DERNIERE
 
-          Cette PR change seulement \`exemples-arduino-sample.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
+          Cette PR met à jour \`exemples-arduino-sample.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
 
           La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
 
