@@ -91,19 +91,25 @@ export const TEXTE_EPINGLAGE_PILE_ILLISIBLE =
   'Impossible de lire la version de la pile radio proposée par le wiki : vérifier la connexion à Internet, puis recharger la page.';
 
 export const TEXTE_CARTE_PERDUE_PILE =
-  'La carte a été déconnectée : la rebrancher, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+  'La carte a été déconnectée : la rebrancher, cliquer sur « Connecter la carte », puis de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_ECHEC_OPERATEUR =
   "Le programme de lecture de la pile radio n'a pas pu être écrit sur la carte : cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_OPERATEUR_MUET =
-  'Le programme de lecture de la pile radio ne répond pas : débrancher puis rebrancher la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+  'Le programme de lecture de la pile radio ne répond pas : débrancher puis rebrancher la carte, cliquer sur « Connecter la carte », puis de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_TELECHARGEMENT_PILE =
   "Impossible de télécharger la pile radio depuis le wiki : rien n'a été effacé sur la carte. Vérifier la connexion à Internet, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_ANNULE =
   "Vérification arrêtée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
+
+// « Annuler » sur la proposition d'installation (ou annulation pendant le
+// téléchargement qui la suit) : la vérification a eu lieu, rien n'a été
+// installé, mais le programme de lecture occupe toujours la carte.
+export const TEXTE_INSTALLATION_ANNULEE =
+  "Aucune installation n'a eu lieu : la pile radio de la carte n'a pas changé. Le programme de lecture occupe encore la carte : téléverser l'exemple pour l'essayer.";
 
 export const TEXTE_PLUS_TARD =
   "Installation de la pile radio reportée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
@@ -342,10 +348,11 @@ export function creerParcoursPile() {
 
     // Fin sur annuler() après l'écriture de l'operator. L'interface l'appelle
     // aussi quand la carte disparaît pendant une question : le dire alors,
-    // plutôt que « Vérification arrêtée ».
-    const annulee = () =>
+    // plutôt que « Vérification arrêtée ». texte : message de la fin annulée
+    // (TEXTE_INSTALLATION_ANNULEE à partir de la proposition).
+    const annulee = (texte = TEXTE_ANNULE) =>
       carte.etat.connectee
-        ? ['annule', { etape: 'repos', message: TEXTE_ANNULE }]
+        ? ['annule', { etape: 'repos', message: texte }]
         : ['erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE }];
     // Avant l'écriture de l'operator, rien n'a changé : retour au repos, sauf
     // carte perdue.
@@ -505,7 +512,7 @@ export function creerParcoursPile() {
       // Seconde confirmation : « Installer la pile radio ».
       const choixInstallation = await demander('proposition', donnees);
       if (choixInstallation !== 'installer' || annulation) {
-        return finir(...annulee());
+        return finir(...annulee(TEXTE_INSTALLATION_ANNULEE));
       }
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
@@ -517,7 +524,7 @@ export function creerParcoursPile() {
       if (!installation) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
       }
-      if (annulation) return finir(...annulee());
+      if (annulation) return finir(...annulee(TEXTE_INSTALLATION_ANNULEE));
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
       }

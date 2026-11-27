@@ -48,7 +48,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    ![Fin de la vérification : « La pile radio est à jour (BLE HCI Layer 1.20.0). Téléverser l'exemple pour l'essayer. », suivi des réponses du programme de lecture dans la console](/img/software/pile-radio-wiki-03-a-jour.png)
 
-3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, ou sur **Annuler**.
+3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, ou sur **Annuler**. **Annuler** n'installe rien et ne change pas la pile radio, mais le programme de lecture occupe encore la carte : téléverser l'exemple pour l'essayer.
 
    ![Seconde question : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée ; l'installation dure environ une minute et demie ; consigne de ne pas débrancher la carte, de ne pas appuyer sur RESET et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
 
@@ -80,6 +80,8 @@ Dans les deux cas suivants, le bouton n'installe rien et renvoie vers DapLink-Ea
 - une pile radio arrêtée qui ne redémarre pas.
 
 Si l'installation échoue, ou si la pile relue n'est pas celle attendue ou manque, le bouton le signale et renvoie aussi vers DapLink-EasyFlash. Si cela survient après l'effacement de l'ancienne pile, la carte peut se retrouver sans pile radio.
+
+Si la carte est débranchée avant l'effacement de l'ancienne pile, rien n'est installé : la rebrancher, cliquer sur **Connecter la carte**, puis de nouveau sur **Vérifier la pile radio**.
 
 Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
 

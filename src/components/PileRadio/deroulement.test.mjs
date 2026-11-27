@@ -12,6 +12,8 @@ import {
   TEXTE_CONFIRMATION_VERIFICATION,
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
+  TEXTE_INSTALLATION_ANNULEE,
+  TEXTE_OPERATEUR_MUET,
   TEXTE_PILE_ABSENTE_APRES,
   TEXTE_PILE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
@@ -482,7 +484,27 @@ describe('fins de parcours avant DELETE', () => {
     assert.ok(!p.journal.includes('DELETE'));
     assert.equal(p.parcours.etat.etape, 'repos');
     assert.equal(p.parcours.etat.encart, null);
-    assert.match(p.parcours.etat.message, /[Tt]éléverser l'exemple/);
+    assert.equal(p.parcours.etat.message, TEXTE_INSTALLATION_ANNULEE);
+  });
+
+  it('proposition, bouton « Annuler » : aucune installation, pas « Vérification arrêtée »', async () => {
+    const p = preparer({ operateur: sansPile });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('annuler');
+    assert.deepEqual(await fin, { fin: 'annule' });
+    assert.equal(p.journal.at(-1), 'START');
+    assert.equal(p.parcours.etat.etape, 'repos');
+    assert.equal(p.parcours.etat.message, TEXTE_INSTALLATION_ANNULEE);
+    assert.notEqual(p.parcours.etat.message, TEXTE_ANNULE);
+  });
+
+  it('TEXTE_INSTALLATION_ANNULEE : rien installé, pile inchangée, exemple à téléverser', () => {
+    assert.match(TEXTE_INSTALLATION_ANNULEE, /[Aa]ucune installation/);
+    assert.match(TEXTE_INSTALLATION_ANNULEE, /pile radio de la carte n'a pas changé/);
+    assert.match(TEXTE_INSTALLATION_ANNULEE, /programme de lecture/);
+    assert.match(TEXTE_INSTALLATION_ANNULEE, /[Tt]éléverser l'exemple/);
+    assert.doesNotMatch(TEXTE_INSTALLATION_ANNULEE, /Vérification arrêtée/);
   });
 
   for (const [nom, daplink] of [
@@ -1117,6 +1139,7 @@ describe('téléchargement avant DELETE', () => {
     assert.deepEqual(await fin, { fin: 'annule' });
     assert.ok(!p.journal.includes('DELETE'));
     assert.equal(p.journal.at(-1), 'START');
+    assert.equal(p.parcours.etat.message, TEXTE_INSTALLATION_ANNULEE);
   });
 });
 
@@ -1159,13 +1182,36 @@ describe('carte perdue pendant une question', () => {
     });
   }
 
-  it('carte toujours là : annuler() garde le message « annulé »', async () => {
+  it('carte toujours là : annuler() sur la proposition dit qu aucune installation n a eu lieu', async () => {
     const p = preparer({ operateur: sansPile });
     const fin = verifierConfirme(p);
     await etape(p.parcours, 'proposition');
     p.parcours.annuler();
     await fin;
+    assert.equal(p.parcours.etat.message, TEXTE_INSTALLATION_ANNULEE);
+  });
+
+  it('carte toujours là : annuler() pendant une lecture garde « Vérification arrêtée »', async () => {
+    const p = preparer({ operateur: sansPile, carte: { daplink: null } });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'daplink');
+    p.parcours.annuler();
+    await fin;
     assert.equal(p.parcours.etat.message, TEXTE_ANNULE);
+  });
+
+  it('TEXTE_CARTE_PERDUE_PILE : rebrancher, « Connecter la carte », puis vérifier', () => {
+    assert.match(
+      TEXTE_CARTE_PERDUE_PILE,
+      /rebrancher.*« Connecter la carte ».*« Vérifier la pile radio »/,
+    );
+  });
+
+  it('TEXTE_OPERATEUR_MUET : rebrancher, « Connecter la carte », puis vérifier', () => {
+    assert.match(
+      TEXTE_OPERATEUR_MUET,
+      /rebrancher.*« Connecter la carte ».*« Vérifier la pile radio »/,
+    );
   });
 });
 
