@@ -143,6 +143,12 @@ describe('texteErreurFus', () => {
       assert.match(texteErreurFus(Number(code)), motif, `code ${code}`);
     }
   });
+  it('accorde le texte du code 0x01 (en-tête ou mémoire flash : corrompus)', () => {
+    assert.equal(
+      texteErreurFus(0x01),
+      "Image introuvable : l'en-tête ou la mémoire flash sont corrompus.",
+    );
+  });
   it('donne le texte générique pour une valeur qui n est pas un entier', () => {
     for (const valeur of [undefined, null, 'abc', '4', 1.5, NaN]) {
       assert.match(texteErreurFus(valeur), /inconnue/i);

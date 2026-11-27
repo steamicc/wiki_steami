@@ -14,7 +14,12 @@
 // - recuperer : fetch, injectable (lecture de index.json et de firmware.json,
 //   téléchargement du .hex d'installation avant DELETE) ;
 // - attendre(ms) : l'attente, injectable ; creerOperateur : operateur.mjs ;
+// - empreinte(octets) : sha256 en hexadécimal du .hex d'installation,
+//   injectable (par défaut crypto.subtle.digest('SHA-256')) ;
 // - delais : remplace tout ou partie de DELAIS_PILE ;
+// - microPythonOccupe() : un essai MicroPython se prépare sur la page
+//   (EssayerMicroPython, sessionMicroPython) ; la vérification est alors
+//   refusée, comme quand la carte est occupée ;
 // - forcer : propose l'installation même quand la pile est à jour. Seule
 //   l'interface le lit, dans localStorage['steami-pile-radio-forcer'] === '1'
 //   (indicateur de développement, pour l'essai complet sur la carte).
@@ -33,15 +38,23 @@
 //   FUS, DAPLink non épinglé, Annuler, Plus tard, erreur) envoie START ;
 // - l'installation exige le DAPLink épinglé (illisible : non épinglé) et un
 //   second « oui » (« Installer la pile radio ») ;
-// - le .hex d'installation est téléchargé avant DELETE : s'il manque, DELETE
-//   ne part pas (START, rien n'est effacé) ; ses octets sont écrits tels
-//   quels après DELETE, sans nouvelle requête ;
+// - le .hex d'installation est téléchargé avant DELETE : s'il manque, ou si
+//   son sha256 n'est pas sha256Installation de index.json (écrit au
+//   prebuild ; clé absente comprise), DELETE ne part pas (START, rien n'est
+//   effacé) ; ses octets sont écrits tels quels après DELETE, sans nouvelle
+//   requête ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
 //   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F) ;
+// - UPGRADE muet 10 s : la commande est écrite, le parcours continue vers
+//   l'attente et la relecture, qui décide (une ligne d'erreur du FUS reste
+//   un échec immédiat) ;
 // - relecture après UPGRADE : double STATUS (attente tant que le FUS
-//   travaille), puis toujours VERSION et START ; la pile relue décide (pile
-//   épinglée : réussite, même si last_fus_status ou last_ws_status est non
-//   nul ; sinon échec, avec le texte du code s'il est non nul).
+//   travaille), puis toujours VERSION et START (START tenté aussi si VERSION
+//   ne répond pas) ; la pile relue décide (pile épinglée : réussite, même si
+//   last_fus_status ou last_ws_status est non nul ; sinon échec, avec le
+//   texte du code s'il est non nul). Double STATUS parti sans réponse : pas
+//   de START (le FUS travaille peut-être), mais une invitation à relancer la
+//   pile par une nouvelle vérification.
 import {
   decisionFus,
   decisionPile,
@@ -52,6 +65,7 @@ import {
   texteErreurFus,
 } from './logique.mjs';
 import { DELAIS_OPERATEUR, ErreurDelaiOperateur, ErreurFus, creerOperateur } from './operateur.mjs';
+import { ETAT_INITIAL_PILE, estOccupee } from './etat.mjs';
 import { decisionMiseAJour, lireFirmwareEpingle } from '../EssayerMicroPython/logique.mjs';
 import { MESSAGE_FLASH_EN_COURS, messageFrancais } from '../EssayerExemple/logique.mjs';
 
@@ -91,19 +105,30 @@ export const TEXTE_EPINGLAGE_PILE_ILLISIBLE =
   'Impossible de lire la version de la pile radio proposée par le wiki : vérifier la connexion à Internet, puis recharger la page.';
 
 export const TEXTE_CARTE_PERDUE_PILE =
-  'La carte a été déconnectée : la rebrancher, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+  'La carte a été déconnectée : la rebrancher, cliquer sur « Connecter la carte », puis de nouveau sur « Vérifier la pile radio ».';
+
+export const TEXTE_MICROPYTHON_OCCUPE =
+  'Un programme MicroPython se prépare sur la carte depuis cette page : attendre la fin de sa préparation, puis cliquer de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_ECHEC_OPERATEUR =
   "Le programme de lecture de la pile radio n'a pas pu être écrit sur la carte : cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_OPERATEUR_MUET =
-  'Le programme de lecture de la pile radio ne répond pas : débrancher puis rebrancher la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+  'Le programme de lecture de la pile radio ne répond pas : débrancher puis rebrancher la carte, cliquer sur « Connecter la carte », puis de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_TELECHARGEMENT_PILE =
   "Impossible de télécharger la pile radio depuis le wiki : rien n'a été effacé sur la carte. Vérifier la connexion à Internet, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
+export const TEXTE_EMPREINTE_PILE = `La pile radio téléchargée depuis le wiki n'est pas celle attendue : rien n'a été effacé sur la carte. Recharger la page, puis cliquer de nouveau sur « Vérifier la pile radio », ou : ${RENVOI_EASYFLASH}`;
+
 export const TEXTE_ANNULE =
   "Vérification arrêtée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
+
+// « Annuler » sur la proposition d'installation (ou annulation pendant le
+// téléchargement qui la suit) : la vérification a eu lieu, rien n'a été
+// installé, mais le programme de lecture occupe toujours la carte.
+export const TEXTE_INSTALLATION_ANNULEE =
+  "Aucune installation n'a eu lieu : la pile radio de la carte n'a pas changé. Le programme de lecture occupe encore la carte : téléverser l'exemple pour l'essayer.";
 
 export const TEXTE_PLUS_TARD =
   "Installation de la pile radio reportée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
@@ -127,6 +152,11 @@ export const TEXTE_FUS_TRAVAILLE =
   "Le FUS de la carte travaille encore après l'installation : ne pas débrancher la carte, attendre quelques minutes, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_PILE_PEUT_ETRE_EFFACEE = `L'installation s'est interrompue après l'effacement de l'ancienne pile : la pile radio est peut-être effacée. ${RENVOI_EASYFLASH}`;
+
+// Installation peut-être faite, mais pile peut-être arrêtée par le double
+// STATUS de la relecture, sans START réussi : une nouvelle vérification la
+// relance, ou propose de la réinstaller.
+export const TEXTE_PILE_PEUT_ETRE_ARRETEE = `L'installation s'est interrompue après l'effacement de l'ancienne pile : la pile radio est peut-être effacée, ou en place mais arrêtée. Cliquer de nouveau sur « Vérifier la pile radio » pour la relancer ou la réinstaller, ou : ${RENVOI_EASYFLASH}`;
 
 export const TEXTE_SANS_REPONSE =
   "Le programme de lecture ne répond plus après l'installation, ce qui ne veut pas dire qu'elle a échoué. Téléverser l'exemple : s'il démarre le BLE, la pile radio est en place.";
@@ -173,54 +203,47 @@ export function texteAutrePile(relue, attendue) {
 //   'proposition', 'daplink' (questions, la pile est arrêtée),
 //   'telechargement' (le .hex d'installation, avant DELETE), 'suppression',
 //   'ecriture', 'upgrade', 'attente' (décompte), 'relecture' : la carte est
-//   prise, Téléverser et Déconnecter restent inactifs.
-const OCCUPEES = new Set([
-  'operateur',
-  'lecture',
-  'proposition',
-  'daplink',
-  'telechargement',
-  'suppression',
-  'ecriture',
-  'upgrade',
-  'attente',
-  'relecture',
-]);
-
-export function estOccupee(etat) {
-  return OCCUPEES.has(etat.etape);
-}
-
-export const ETAT_INITIAL_PILE = Object.freeze({
-  etape: 'repos',
-  // Bloc d'où vient la vérification : lui seul affiche encarts et messages.
-  id: null,
-  // Question en attente : { type, donnees } ; type 'confirmation-verification'
-  // (choix 'continuer'), 'proposition' ('installer') ou 'daplink'
-  // ('mettre-a-jour', 'plus-tard').
-  encart: null,
-  message: null,
-  erreur: null,
-  // Secondes restantes pendant 'attente', null sinon.
-  decompte: null,
-  // { pile: { version, secteurs }, fus: { majeur, mineur, sous },
-  //   epinglee: { pile, version, secteurs }, relue } une fois lues.
-  versions: null,
-  // Mise à jour guidée du DAPLink à afficher : { release }.
-  daplink: null,
-});
+//   prise, Téléverser et Déconnecter restent inactifs (estOccupee).
+// État initial et étapes occupées sont dans etat.mjs, module léger lu par
+// EssayerExemple et EssayerMicroPython sans charger ce déroulement.
+export { ETAT_INITIAL_PILE, estOccupee };
 
 // Pile épinglée par le wiki (/pile-radio/index.json), null si illisible.
+// sha256Installation : empreinte du .hex d'installation en minuscules, null
+// si elle manque ou n'est pas un sha256 (l'installation est alors refusée,
+// la lecture reste possible).
 export function lirePileEpinglee(json) {
   if (!json || typeof json.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(json.version)) {
     return null;
   }
   if (!Number.isInteger(json.secteurs) || json.secteurs <= 0) return null;
+  const empreinte = json.sha256Installation;
   return {
     pile: typeof json.pile === 'string' ? json.pile : '',
     version: json.version,
     secteurs: json.secteurs,
+    sha256Installation:
+      typeof empreinte === 'string' && /^[0-9a-f]{64}$/i.test(empreinte)
+        ? empreinte.toLowerCase()
+        : null,
   };
+}
+
+// sha256 des octets (ArrayBuffer), en hexadécimal minuscule.
+async function sha256Hex(donnees) {
+  const condense = await globalThis.crypto.subtle.digest('SHA-256', donnees);
+  return [...new Uint8Array(condense)].map((o) => o.toString(16).padStart(2, '0')).join('');
+}
+
+// Le .hex téléchargé est-il celui du build ? false si l'index n'a pas
+// d'empreinte ou si le calcul échoue.
+async function empreinteConforme(donnees, attendue, empreinte) {
+  if (!attendue) return false;
+  try {
+    return (await empreinte(donnees)) === attendue;
+  } catch {
+    return false;
+  }
 }
 
 // Télécharge le .hex d'installation en entier (corps compris) : ses octets
@@ -337,15 +360,17 @@ export function creerParcoursPile() {
     const attendre = deps.attendre ?? dormir;
     const recuperer = deps.recuperer ?? ((...args) => fetch(...args));
     const fabriquer = deps.creerOperateur ?? creerOperateur;
+    const empreinte = deps.empreinte ?? sha256Hex;
 
     poser({ ...ETAT_INITIAL_PILE, id });
 
     // Fin sur annuler() après l'écriture de l'operator. L'interface l'appelle
     // aussi quand la carte disparaît pendant une question : le dire alors,
-    // plutôt que « Vérification arrêtée ».
-    const annulee = () =>
+    // plutôt que « Vérification arrêtée ». texte : message de la fin annulée
+    // (TEXTE_INSTALLATION_ANNULEE à partir de la proposition).
+    const annulee = (texte = TEXTE_ANNULE) =>
       carte.etat.connectee
-        ? ['annule', { etape: 'repos', message: TEXTE_ANNULE }]
+        ? ['annule', { etape: 'repos', message: texte }]
         : ['erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE }];
     // Avant l'écriture de l'operator, rien n'a changé : retour au repos, sauf
     // carte perdue.
@@ -371,6 +396,10 @@ export function creerParcoursPile() {
     }
     if (carte.etat.occupee) {
       poser({ etape: 'erreur', erreur: MESSAGE_FLASH_EN_COURS });
+      return { fin: 'erreur' };
+    }
+    if (deps.microPythonOccupe?.()) {
+      poser({ etape: 'erreur', erreur: TEXTE_MICROPYTHON_OCCUPE });
       return { fin: 'erreur' };
     }
     const epinglee = lirePileEpinglee(await lireJson(urls.index, recuperer));
@@ -505,7 +534,7 @@ export function creerParcoursPile() {
       // Seconde confirmation : « Installer la pile radio ».
       const choixInstallation = await demander('proposition', donnees);
       if (choixInstallation !== 'installer' || annulation) {
-        return finir(...annulee());
+        return finir(...annulee(TEXTE_INSTALLATION_ANNULEE));
       }
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
@@ -517,7 +546,12 @@ export function creerParcoursPile() {
       if (!installation) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
       }
-      if (annulation) return finir(...annulee());
+      // Empreinte du .hex avant DELETE : un fichier servi qui n'est pas celui
+      // du build ne doit rien effacer.
+      if (!(await empreinteConforme(installation, epinglee.sha256Installation, empreinte))) {
+        return finir('erreur', { etape: 'erreur', erreur: TEXTE_EMPREINTE_PILE });
+      }
+      if (annulation) return finir(...annulee(TEXTE_INSTALLATION_ANNULEE));
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
       }
@@ -526,13 +560,29 @@ export function creerParcoursPile() {
     }
 
     // 4. Installation. À partir d'ici, plus d'annulation ni de START sur une
-    // erreur : la pile est peut-être effacée.
+    // erreur (sauf après le double STATUS de la relecture, qui a arrêté la
+    // pile) : la pile est peut-être effacée.
     supprimee = true;
-    const perdue = () => {
-      poser({ etape: 'erreur', decompte: null, erreur: TEXTE_PILE_PEUT_ETRE_EFFACEE });
+    // arretee : la pile est peut-être arrêtée par le double STATUS de la
+    // relecture, sans START réussi ; le texte invite à relancer la pile.
+    const perdue = (arretee = false) => {
+      const erreur = arretee ? TEXTE_PILE_PEUT_ETRE_ARRETEE : TEXTE_PILE_PEUT_ETRE_EFFACEE;
+      poser({ etape: 'erreur', decompte: null, erreur });
       return { fin: 'erreur' };
     };
     let relecture = false;
+    // UPGRADE resté muet 10 s : la commande est écrite, le FUS travaille
+    // peut-être. Le parcours continue vers l'attente et la relecture, qui
+    // décide ; si la relecture reste muette elle aussi, rien ne dit que
+    // l'installation a eu lieu.
+    let upgradeMuet = false;
+    // Double STATUS de la relecture envoyé : il a peut-être arrêté la pile,
+    // même sans réponse (le second STATUS fait basculer le cœur radio et ne
+    // répond souvent qu'à un essai suivant).
+    let statusEnvoyeRelecture = false;
+    // Double STATUS de la relecture lu : la pile est arrêtée, START est tenté
+    // même si le VERSION qui suit ne répond pas.
+    let statusRelu = false;
     try {
       poser({ etape: 'suppression' });
       await operateur.supprimer();
@@ -542,7 +592,13 @@ export function creerParcoursPile() {
       // les octets téléchargés avant DELETE.
       if (!(await carte.flasherDonnees(id, installation))) return perdue();
       poser({ etape: 'upgrade' });
-      await operateur.upgrade({ surLigne: () => {} });
+      try {
+        await operateur.upgrade({ surLigne: () => {} });
+      } catch (err) {
+        // Un code d'erreur du FUS (ErreurFus) reste un échec immédiat.
+        if (!(err instanceof ErreurDelaiOperateur)) throw err;
+        upgradeMuet = true;
+      }
 
       // 5. Une minute sans rien envoyer, avec un décompte.
       for (let reste = delais.attenteApresUpgrade; reste > 0; ) {
@@ -560,6 +616,7 @@ export function creerParcoursPile() {
       poser({ etape: 'relecture', decompte: null });
       let statut;
       for (let ecoule = 0; ; ecoule += delais.pasRelecture) {
+        statusEnvoyeRelecture = true;
         statut = await operateur.statusDouble();
         if (!fusAuTravail(statut?.status)) break;
         if (ecoule + delais.pasRelecture > delais.relectureMax) {
@@ -569,6 +626,7 @@ export function creerParcoursPile() {
         await attendre(delais.pasRelecture);
         if (!carte.etat.connectee) return perdue();
       }
+      statusRelu = true;
       // Code de la dernière opération du FUS ou de la pile (second STATUS,
       // avec last_fus_status). Son sens après une installation réussie n'a
       // jamais été relevé sur la carte (essai préalable : 0, pile en
@@ -606,10 +664,31 @@ export function creerParcoursPile() {
         poser({ etape: 'erreur', decompte: null, erreur: texteEchecInstallation(err.code) });
         return { fin: 'erreur' };
       }
-      // Operator muet après l'installation, carte toujours là : ne pas
-      // conclure à un échec.
+      // Operator muet après l'installation, carte toujours là.
       if (relecture && err instanceof ErreurDelaiOperateur && carte.etat.connectee) {
-        poser({ etape: 'fini', message: TEXTE_SANS_REPONSE });
+        // VERSION muet après le double STATUS, qui a arrêté la pile : START
+        // avant de conclure.
+        let relancee = true;
+        if (statusRelu) {
+          try {
+            await operateur.relancer();
+          } catch {
+            relancee = false;
+          }
+        } else if (statusEnvoyeRelecture) {
+          // Double STATUS parti sans réponse : la pile est peut-être arrêtée,
+          // mais le FUS travaille peut-être encore et START pourrait
+          // l'interrompre. Pas de START : une nouvelle vérification relancera
+          // la pile (VERSION depuis le FUS, puis STATUS et START).
+          relancee = false;
+        }
+        // UPGRADE muet aussi : rien ne dit que l'installation a eu lieu.
+        if (upgradeMuet) return perdue(!relancee);
+        // Sinon, ne pas conclure à un échec.
+        poser({
+          etape: 'fini',
+          message: relancee ? TEXTE_SANS_REPONSE : `${TEXTE_SANS_REPONSE} ${TEXTE_RELANCE_RATEE}`,
+        });
         return { fin: 'sans-reponse' };
       }
       return perdue();
@@ -632,7 +711,9 @@ export function creerParcoursPile() {
     // 'a-jour', 'daplink', 'plus-tard', 'fini', 'fus-travaille',
     // 'sans-reponse'.
     async verifier(id, deps) {
-      if (enCours || deps.carte.etat.occupee) return { fin: 'occupe' };
+      if (enCours || deps.carte.etat.occupee || deps.microPythonOccupe?.()) {
+        return { fin: 'occupe' };
+      }
       if (!deps.carte.etat.connectee) return { fin: 'deconnectee' };
       enCours = true;
       annulation = false;

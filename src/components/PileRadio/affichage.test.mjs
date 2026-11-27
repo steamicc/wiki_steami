@@ -122,6 +122,11 @@ describe('boutonPileActif', () => {
       assert.equal(boutonPileActif(CARTE_LIBRE, pile({ etape })), true, etape);
     }
   });
+
+  it('inactif pendant un essai MicroPython occupé sur la page', () => {
+    assert.equal(boutonPileActif(CARTE_LIBRE, pile({}), true), false);
+    assert.equal(boutonPileActif(CARTE_LIBRE, pile({}), false), true);
+  });
 });
 
 describe('retenirFermeture', () => {

@@ -538,6 +538,12 @@ async function sonder(
   return diagnosticSansInvite({ banniereVue }) === 'occupee' ? 'occupee' : 'muette';
 }
 
+// Session de la page, au niveau du module comme parcoursPile (PileRadio) : le
+// wiki est une application d'une seule page, elle vit aussi longtemps que
+// l'onglet (« Plus tard » est retenu jusqu'au rechargement). « Vérifier la
+// pile radio » lit son état occupé.
+export const sessionMicroPython = creerSession();
+
 // Remet MicroPython à zéro (repl.arreter) ; false : il faut appuyer sur RESET.
 async function remettreAZero(repl, session, changer) {
   changer({ etape: 'arret' });

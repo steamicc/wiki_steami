@@ -23,25 +23,25 @@ import {
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
 import { suivreDefilement } from './defilement.mjs';
-import { controlesOccupes } from '../PileRadio/affichage.mjs';
 import {
   ETAT_INITIAL_PILE,
+  controlesOccupes,
   estOccupee as estOccupeePile,
-  parcoursPile,
-} from '../PileRadio/deroulement.mjs';
+  relaisPile,
+} from '../PileRadio/etat.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
   abandonnerBloc,
   arreter,
   chargerEpingles,
-  creerSession,
   erreurCarteAffichee,
   essayer,
   estOccupee,
   lireFichiers,
   messageSession,
   peutArreter,
+  sessionMicroPython,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
@@ -49,9 +49,9 @@ import {
 import communs from '../EssayerExemple/styles.module.css';
 import styles from './styles.module.css';
 
-// Le wiki est une application d'une seule page : la session vit aussi
-// longtemps que l'onglet (« Plus tard » est retenu jusqu'au rechargement).
-const session = creerSession();
+// Session de la page (deroulement.mjs) : elle vit aussi longtemps que
+// l'onglet ; PileRadio lit son état occupé.
+const session = sessionMicroPython;
 
 const nouveauRepl = () =>
   creerRepl({
@@ -217,8 +217,8 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
   // FUS, Essayer et Déconnecter sont inactifs ici aussi (une navigation vers
   // une page MicroPython ne l'arrête pas une fois DELETE envoyé).
   const etatPile = useSyncExternalStore(
-    parcoursPile.abonner,
-    () => parcoursPile.etat,
+    relaisPile.abonner,
+    () => relaisPile.etat,
     () => ETAT_INITIAL_PILE,
   );
   const actif = etat.actif === id;
@@ -271,7 +271,7 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         epingles: () => epingles(urls),
         urls: { dapjs: urls.dapjs, firmware: urls.firmware },
         // Relu au moment d'agir : le clic peut partir avant le rendu.
-        pileOccupee: () => estOccupeePile(parcoursPile.etat),
+        pileOccupee: () => estOccupeePile(relaisPile.etat),
       },
     );
   }

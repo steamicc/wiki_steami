@@ -1,7 +1,19 @@
 // Ce qu'affiche le bouton « Vérifier la pile radio » (PileRadio/index.js) :
 // fonctions pures et petits suivis du parcours, sans DOM ni WebUSB, testés
 // par affichage.test.mjs. Le déroulement lui-même est dans deroulement.mjs.
-import { LIBELLE_RENVOI, TEXTE_PLUS_TARD, estOccupee } from './deroulement.mjs';
+import { LIBELLE_RENVOI, TEXTE_PLUS_TARD } from './deroulement.mjs';
+import {
+  controlesOccupes,
+  erreurCarteVisible,
+  estOccupee,
+  operateurSurCarte,
+  pileRadioVisible,
+} from './etat.mjs';
+
+// Règles lues aussi par EssayerExemple et EssayerMicroPython : elles vivent
+// dans etat.mjs, module léger, pour ne pas charger PileRadio hors des
+// exemples BLE.
+export { controlesOccupes, erreurCarteVisible, operateurSurCarte, pileRadioVisible };
 
 // --- Textes (ton neutre) ----------------------------------------------------
 
@@ -137,17 +149,16 @@ export function texteDecompte(secondes) {
 
 // --- État du bouton ---------------------------------------------------------
 
-// Le bouton n'existe que sous les exemples BLE.
-export function pileRadioVisible(id) {
-  return typeof id === 'string' && id.startsWith('BLE/');
-}
-
 // Actif carte connectée et libre, hors parcours. Pendant la première
 // question, rien n'est envoyé mais une autre vérification serait refusée.
-export function boutonPileActif(etatCarte, etatPile) {
+// microPythonOccupe : un essai MicroPython se prépare dans un bloc de la page
+// (estOccupee de sessionMicroPython) ; il tient la carte entre deux
+// commandes sans que etatCarte.occupee le dise.
+export function boutonPileActif(etatCarte, etatPile, microPythonOccupe = false) {
   return (
     etatCarte.connectee &&
     !etatCarte.occupee &&
+    !microPythonOccupe &&
     !estOccupee(etatPile) &&
     etatPile.etape !== 'confirmation-verification'
   );
@@ -168,20 +179,6 @@ export function issueFocus({ libre, question, etat }) {
   if (libre) return 'focaliser';
   if (estOccupee(etat) || etat.etape === 'confirmation-verification') return 'attendre';
   return 'oublier';
-}
-
-// Téléverser et Déconnecter (EssayerExemple), sous tous les exemples : grisés
-// pendant une opération de la carte et pendant toute étape occupée de la
-// vérification, qui tient la carte.
-export function controlesOccupes(etatCarte, etatPile) {
-  return etatCarte.occupee || estOccupee(etatPile);
-}
-
-// Erreur de carte.mjs sous le bloc id : masquée tant que sa vérification est
-// en erreur. Celle du parcours dit déjà ce qui s'est passé, alors que celle
-// de carte.mjs (flash de l'operator raté) parle de MicroPython.
-export function erreurCarteVisible(etatPile, id) {
-  return !(etatPile.id === id && etatPile.etape === 'erreur');
 }
 
 // Fermer ou recharger la page couperait l'installation : de DELETE à la
@@ -254,13 +251,6 @@ export function creerSuiviOperateur(parcours) {
       };
     },
   };
-}
-
-// Le programme de la carte est-il l'operator écrit depuis l'exemple id ?
-// Un flash depuis un autre bloc change programmeActif, une déconnexion le
-// remet à null.
-export function operateurSurCarte(etatCarte, id) {
-  return id !== null && etatCarte.programmeActif === id;
 }
 
 // La carte se libère une seconde après la disparition du dernier bloc
