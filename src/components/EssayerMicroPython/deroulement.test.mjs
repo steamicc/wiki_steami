@@ -624,6 +624,39 @@ test('pendant la préparation, un autre clic est ignoré', async () => {
   reponse.resoudre('non');
 });
 
+test('vérification de la pile radio en cours : rien n est envoyé, pas de redémarrage', async () => {
+  const { journal, dependances, session } = preparer({ banniere: true });
+  dependances.pileOccupee = () => true;
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'occupe');
+  assert.deepEqual(journal, []);
+  assert.equal(session.etat.etape, 'repos');
+});
+
+test('pile radio prise pendant la confirmation : rien ne part après « Lancer quand même »', async () => {
+  let pile = false;
+  const { journal, dependances } = preparer({
+    banniere: true,
+    demander: async (type) => {
+      journal.push(`demander ${type}`);
+      pile = true;
+      return 'oui';
+    },
+  });
+  dependances.pileOccupee = () => pile;
+  const r = await essayer({ ...BLOC, confirmation: 'Modifie la carte.' }, dependances);
+  assert.equal(r.fin, 'occupe');
+  assert.deepEqual(journal, ['demander confirmation']);
+});
+
+test('pile radio libre : l essai se déroule normalement', async () => {
+  const { journal, dependances } = preparer({ banniere: true });
+  dependances.pileOccupee = () => false;
+  const r = await essayer(BLOC, dependances);
+  assert.notEqual(r.fin, 'occupe');
+  assert.ok(journal.includes('executer print(1+1)'));
+});
+
 // --- Session et fonctions pures ---------------------------------------------
 
 test('session.demander : encart affiché, puis réponse', async () => {

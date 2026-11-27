@@ -23,6 +23,12 @@ import {
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
 import { suivreDefilement } from './defilement.mjs';
+import { controlesOccupes } from '../PileRadio/affichage.mjs';
+import {
+  ETAT_INITIAL_PILE,
+  estOccupee as estOccupeePile,
+  parcoursPile,
+} from '../PileRadio/deroulement.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
@@ -206,6 +212,15 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     () => session.etat,
     () => SESSION_INITIALE,
   );
+  // Vérification de la pile radio (exemples BLE), une seule par page : tant
+  // qu'elle tient la carte, même entre deux commandes et pendant l'attente du
+  // FUS, Essayer et Déconnecter sont inactifs ici aussi (une navigation vers
+  // une page MicroPython ne l'arrête pas une fois DELETE envoyé).
+  const etatPile = useSyncExternalStore(
+    parcoursPile.abonner,
+    () => parcoursPile.etat,
+    () => ETAT_INITIAL_PILE,
+  );
   const actif = etat.actif === id;
   const essayerRef = useRef(null);
   // Le bouton cliqué (Essayer grisé, réponse d'un encart, Arrêter,
@@ -255,11 +270,13 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         demander: session.demander,
         epingles: () => epingles(urls),
         urls: { dapjs: urls.dapjs, firmware: urls.firmware },
+        // Relu au moment d'agir : le clic peut partir avant le rendu.
+        pileOccupee: () => estOccupeePile(parcoursPile.etat),
       },
     );
   }
 
-  const occupee = estOccupee(etat) || etatCarte.occupee;
+  const occupee = estOccupee(etat) || controlesOccupes(etatCarte, etatPile);
   // 'televersement' : la carte est réservée par l'installation de MicroPython.
   const statut = statutPastille(etatCarte, etat, id);
   const message = actif ? messageSession(etat) : null;
