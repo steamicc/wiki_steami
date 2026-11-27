@@ -21,6 +21,7 @@ import {
   texteMiseAJourDaplink,
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
+import { suivreDefilement } from './defilement.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
@@ -78,11 +79,22 @@ function SansWebUSB() {
 // Question en attente sous le bloc : le focus y passe, pour que les lecteurs
 // d'écran la lisent ; jamais sur le bouton d'action, qu'une touche Entrée de
 // trop validerait. surReponse : le bouton cliqué va disparaître, le bloc
-// reprend le focus ensuite.
+// reprend le focus ensuite. Le focus fait défiler la page pour montrer
+// l'encart : à sa fermeture, la page revient où elle était, sauf si la
+// personne l'a fait défiler entre-temps (defilement.mjs). Effet de mise en
+// page : la position revient avant que la page ne s'affiche sans l'encart.
 function Encart({ encart, surReponse }) {
   const ref = useRef(null);
-  useEffect(() => {
-    ref.current?.focus();
+  useLayoutEffect(() => {
+    const suivi = suivreDefilement(() => window.scrollY);
+    suivi.ouvrir(() => ref.current?.focus());
+    const surDefilement = () => suivi.surDefilement();
+    window.addEventListener('scroll', surDefilement, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', surDefilement);
+      const position = suivi.fermer();
+      if (position !== null) window.scrollTo(window.scrollX, position);
+    };
   }, [encart]);
   const { type, donnees } = encart;
   const repondre = (valeur) => () => {
@@ -316,7 +328,8 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     focaliserApresRef.current = false;
     const actuel = document.activeElement;
     if (actuel && actuel !== document.body) return;
-    essayerRef.current?.focus();
+    // Sans défilement : la page est déjà revenue à sa position (Encart).
+    essayerRef.current?.focus({ preventScroll: true });
   }, [occupee, encart, etapesDaplink, etat.etape, etatCarte.connectee]);
   const montrerConsole =
     actif && (etat.sortie !== '' || etat.traceback !== null || etat.etape === 'programme');
