@@ -125,6 +125,26 @@ if [ "$VERSION_ARCHIVE" != "$VERSION" ]; then
   echo "Erreur : index.json de l'archive annonce la version '${VERSION_ARCHIVE:-?}' au lieu de ${VERSION} (version illisible ou différente du tag épinglé dans ${PIN})" >&2
   exit 1
 fi
+# Chaque entrée de l'index doit avoir un id conforme, un champ bin égal à
+# <id>.bin et ce binaire dans l'archive : sinon les boutons du wiki
+# demanderaient des .bin introuvables (404 en production).
+if ! ERREUR_INDEX=$(node -e '
+const fs = require("fs");
+const [fichier, dossier] = process.argv.slice(1);
+const index = JSON.parse(fs.readFileSync(fichier, "utf8"));
+if (!Array.isArray(index.exemples)) { console.log("exemples n'"'"'est pas une liste"); process.exit(1); }
+const motif = /^[A-Z0-9_-]+\/[A-Za-z0-9_]+$/;
+for (const e of index.exemples) {
+  const id = e && e.id;
+  if (typeof id !== "string" || !motif.test(id)) { console.log("id non conforme : " + JSON.stringify(id)); process.exit(1); }
+  if (e.bin !== id + ".bin") { console.log("bin de " + id + " vaut " + JSON.stringify(e.bin) + " au lieu de " + id + ".bin"); process.exit(1); }
+  const chemin = dossier + "/" + e.bin;
+  if (!fs.existsSync(chemin) || !fs.statSync(chemin).isFile()) { console.log("binaire absent de l'"'"'archive : " + e.bin); process.exit(1); }
+}
+' "$TMP/out/index.json" "$TMP/out" 2>&1); then
+  echo "Erreur : index.json de l'archive incompatible : ${ERREUR_INDEX}" >&2
+  exit 1
+fi
 # Empreinte de l'archive vérifiée : permet de sauter le téléchargement la fois suivante.
 printf '%s\n' "$SHA256" > "$TMP/out/.sha256"
 

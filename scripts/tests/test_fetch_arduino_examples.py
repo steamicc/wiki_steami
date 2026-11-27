@@ -50,7 +50,7 @@ exec "%s" "${args[@]}"
 """ % (REPO_URL, SAMPLE_URL, REAL_GIT)
 
 
-def archive_de_test(index=None):
+def archive_de_test(index=None, fichiers=("exemple/exemple.ino.bin",)):
     """Archive de test ; index=None omet index.json, sinon son contenu."""
     if index is ...:
         index = {"version": VERSION, "exemples": []}
@@ -58,7 +58,8 @@ def archive_de_test(index=None):
     with zipfile.ZipFile(buf, "w") as z:
         if index is not None:
             z.writestr("index.json", json.dumps(index))
-        z.writestr("exemple/exemple.ino.bin", b"binaire")
+        for nom in fichiers:
+            z.writestr(nom, b"binaire")
     return buf.getvalue()
 
 
@@ -83,7 +84,9 @@ class TestFetchArduinoExamples(unittest.TestCase):
         )
 
         self.depot = self.creer_depot("depot", "arduino-steami de test\n")
-        self.depot_sample = self.creer_depot("depot-sample", "arduino-steami-sample de test\n")
+        self.depot_sample = self.creer_depot(
+            "depot-sample", "arduino-steami-sample de test\n"
+        )
 
         self.bin = self.tmp / "bin"
         self.bin.mkdir()
@@ -134,20 +137,28 @@ class TestFetchArduinoExamples(unittest.TestCase):
         return [(p, *p.communicate(timeout=60)) for p in procs]
 
     def telechargements(self):
-        return len(self.journal.read_text().splitlines()) if self.journal.exists() else 0
+        return (
+            len(self.journal.read_text().splitlines()) if self.journal.exists() else 0
+        )
 
     def verifier_installation(self):
         dest = self.work / "static/exemples-arduino"
         self.assertEqual(sorted(os.listdir(dest)), [".sha256", "exemple", "index.json"])
-        self.assertEqual(json.loads((dest / "index.json").read_text())["version"], VERSION)
+        self.assertEqual(
+            json.loads((dest / "index.json").read_text())["version"], VERSION
+        )
         src = self.work / ".external/arduino-steami"
         tag = subprocess.run(
             [REAL_GIT, "-C", str(src), "describe", "--tags", "--exact-match"],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
         self.assertEqual(tag, VERSION)
         self.assertEqual(sorted(os.listdir(src)), [".git", "README.md"])
-        restes = [n for n in os.listdir(self.work / ".external") if n.startswith(".fetch-")]
+        restes = [
+            n for n in os.listdir(self.work / ".external") if n.startswith(".fetch-")
+        ]
         self.assertEqual(restes, [])
 
     def test_installe_puis_deja_present(self):
@@ -198,14 +209,18 @@ class TestFetchArduinoExamples(unittest.TestCase):
         self.assertIn("arduino-steami-sample", out)
         dest = self.work / "static/exemples-arduino-sample"
         self.assertEqual(sorted(os.listdir(dest)), [".sha256", "exemple", "index.json"])
-        self.assertEqual(json.loads((dest / "index.json").read_text())["version"], VERSION)
+        self.assertEqual(
+            json.loads((dest / "index.json").read_text())["version"], VERSION
+        )
         src = self.work / ".external/arduino-steami-sample"
         self.assertEqual(
             (src / "README.md").read_text(), "arduino-steami-sample de test\n"
         )
         tag = subprocess.run(
             [REAL_GIT, "-C", str(src), "describe", "--tags", "--exact-match"],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
         self.assertEqual(tag, VERSION)
         self.assertFalse((self.work / "static/exemples-arduino").exists())
@@ -226,7 +241,9 @@ class TestFetchArduinoExamples(unittest.TestCase):
         self.assertIn("sha256", err)
         self.assertIn("exemples-arduino-sample.json", err)
         self.assertEqual((dest / "index.json").read_text(), avant)
-        self.assertTrue((self.work / ".external/arduino-steami-sample/README.md").exists())
+        self.assertTrue(
+            (self.work / ".external/arduino-steami-sample/README.md").exists()
+        )
 
     def test_sample_sha256_different_sans_installation_prealable(self):
         (self.work / "exemples-arduino-sample.json").write_text(
@@ -241,7 +258,9 @@ class TestFetchArduinoExamples(unittest.TestCase):
         self.assertEqual(self.executer()[0], 0)
         self.assertEqual(self.executer("sample")[0], 0)
         self.verifier_installation()
-        self.assertTrue((self.work / "static/exemples-arduino-sample/index.json").exists())
+        self.assertTrue(
+            (self.work / "static/exemples-arduino-sample/index.json").exists()
+        )
         self.assertEqual(
             (self.work / ".external/arduino-steami-sample/README.md").read_text(),
             "arduino-steami-sample de test\n",
@@ -253,21 +272,29 @@ class TestFetchArduinoExamples(unittest.TestCase):
             self.assertIn("déjà présents", out)
         self.assertEqual(self.telechargements(), 2)
 
-    def epingler_archive(self, source, index):
+    def epingler_archive(self, source, index, fichiers=("exemple/exemple.ino.bin",)):
         """Remplace l'archive servie par le faux curl et l'épingle pour `source`."""
-        data = archive_de_test(index)
+        data = archive_de_test(index, fichiers)
         self.archive.write_bytes(data)
-        pin = "exemples-arduino-sample.json" if source == "sample" else "exemples-arduino.json"
+        pin = (
+            "exemples-arduino-sample.json"
+            if source == "sample"
+            else "exemples-arduino.json"
+        )
         (self.work / pin).write_text(
             json.dumps({"version": VERSION, "sha256": hashlib.sha256(data).hexdigest()})
         )
 
-    def verifier_archive_refusee(self, source, index, message):
-        self.epingler_archive(source, index)
+    def verifier_archive_refusee(
+        self, source, index, message, fichiers=("exemple/exemple.ino.bin",)
+    ):
+        self.epingler_archive(source, index, fichiers)
         code, _, err = self.executer(*([source] if source == "sample" else []))
         self.assertEqual(code, 1)
         self.assertIn(message, err)
-        dossier = "exemples-arduino-sample" if source == "sample" else "exemples-arduino"
+        dossier = (
+            "exemples-arduino-sample" if source == "sample" else "exemples-arduino"
+        )
         depot = "arduino-steami-sample" if source == "sample" else "arduino-steami"
         self.assertFalse((self.work / "static" / dossier).exists())
         self.assertFalse((self.work / ".external" / depot).exists())
@@ -288,6 +315,58 @@ class TestFetchArduinoExamples(unittest.TestCase):
         for source in ("bibliotheque", "sample"):
             with self.subTest(source=source):
                 self.verifier_archive_refusee(source, [1, 2], "version")
+
+    def test_archive_dont_les_chemins_ne_correspondent_pas_a_index_refusee(self):
+        def entree(id="CAPTEURS/Distance", bin="CAPTEURS/Distance.bin"):
+            return {"version": VERSION, "exemples": [{"id": id, "bin": bin}]}
+
+        cas = [
+            (
+                "id non conforme",
+                entree("capteurs/distance", "capteurs/distance.bin"),
+                ("capteurs/distance.bin",),
+                "id non conforme",
+            ),
+            (
+                "id avec ..",
+                entree("../X/Y", "../X/Y.bin"),
+                ("X/Y.bin",),
+                "id non conforme",
+            ),
+            (
+                "bin différent de id.bin",
+                entree(bin="CAPTEURS/Distance/Distance.bin"),
+                ("CAPTEURS/Distance/Distance.bin",),
+                "au lieu de CAPTEURS/Distance.bin",
+            ),
+            (
+                "bin absent de l'archive",
+                entree(),
+                ("exemples/CAPTEURS/Distance.bin",),
+                "binaire absent",
+            ),
+            (
+                "exemples pas une liste",
+                {"version": VERSION, "exemples": {}},
+                (),
+                "pas une liste",
+            ),
+        ]
+        for source in ("bibliotheque", "sample"):
+            for nom, index, fichiers, message in cas:
+                with self.subTest(source=source, cas=nom):
+                    self.verifier_archive_refusee(source, index, message, fichiers)
+
+    def test_archive_aux_chemins_conformes_acceptee(self):
+        index = {
+            "version": VERSION,
+            "exemples": [{"id": "CAPTEURS/Distance", "bin": "CAPTEURS/Distance.bin"}],
+        }
+        for source in ("bibliotheque", "sample"):
+            with self.subTest(source=source):
+                self.epingler_archive(source, index, ("CAPTEURS/Distance.bin",))
+                code, _, err = self.executer(*([source] if source == "sample" else []))
+                self.assertEqual(code, 0, err)
 
     def test_source_inconnue(self):
         code, _, err = self.executer("autre")
