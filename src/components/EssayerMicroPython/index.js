@@ -23,12 +23,12 @@ import {
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
 import { suivreDefilement } from './defilement.mjs';
-import { controlesOccupes } from '../PileRadio/affichage.mjs';
 import {
   ETAT_INITIAL_PILE,
+  controlesOccupes,
   estOccupee as estOccupeePile,
-  parcoursPile,
-} from '../PileRadio/deroulement.mjs';
+  relaisPile,
+} from '../PileRadio/etat.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
@@ -217,8 +217,8 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
   // FUS, Essayer et Déconnecter sont inactifs ici aussi (une navigation vers
   // une page MicroPython ne l'arrête pas une fois DELETE envoyé).
   const etatPile = useSyncExternalStore(
-    parcoursPile.abonner,
-    () => parcoursPile.etat,
+    relaisPile.abonner,
+    () => relaisPile.etat,
     () => ETAT_INITIAL_PILE,
   );
   const actif = etat.actif === id;
@@ -271,7 +271,7 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         epingles: () => epingles(urls),
         urls: { dapjs: urls.dapjs, firmware: urls.firmware },
         // Relu au moment d'agir : le clic peut partir avant le rendu.
-        pileOccupee: () => estOccupeePile(parcoursPile.etat),
+        pileOccupee: () => estOccupeePile(relaisPile.etat),
       },
     );
   }

@@ -24,15 +24,19 @@ import {
   texteDecompte,
 } from './affichage.mjs';
 import { ETAT_INITIAL_PILE, parcoursPile } from './deroulement.mjs';
+import { relaisPile } from './etat.mjs';
 import communs from '../EssayerExemple/styles.module.css';
 
 // Une seule vérification par page (parcoursPile, comme la carte) : la carte
 // reste retenue pendant le parcours, l'onglet aussi pendant l'installation
 // (même si le bloc a disparu), et l'operator écrit est suivi pour l'état
-// affiché sous l'exemple (voir affichage.mjs).
+// affiché sous l'exemple (voir affichage.mjs). Ce module n'est chargé que
+// sous un exemple BLE (import dynamique d'EssayerExemple) : il branche alors
+// le parcours et le suivi sur relaisPile, que lisent tous les blocs.
 retenirCarte(parcoursPile, carte);
 if (typeof window !== 'undefined') retenirOnglet(parcoursPile, window);
 export const suiviOperateur = creerSuiviOperateur(parcoursPile);
+relaisPile.brancher(parcoursPile, suiviOperateur);
 
 const lireStockage = () => window.localStorage;
 

@@ -60,6 +60,7 @@ import {
   texteErreurFus,
 } from './logique.mjs';
 import { DELAIS_OPERATEUR, ErreurDelaiOperateur, ErreurFus, creerOperateur } from './operateur.mjs';
+import { ETAT_INITIAL_PILE, estOccupee } from './etat.mjs';
 import { decisionMiseAJour, lireFirmwareEpingle } from '../EssayerMicroPython/logique.mjs';
 import { MESSAGE_FLASH_EN_COURS, messageFrancais } from '../EssayerExemple/logique.mjs';
 
@@ -189,42 +190,10 @@ export function texteAutrePile(relue, attendue) {
 //   'proposition', 'daplink' (questions, la pile est arrêtée),
 //   'telechargement' (le .hex d'installation, avant DELETE), 'suppression',
 //   'ecriture', 'upgrade', 'attente' (décompte), 'relecture' : la carte est
-//   prise, Téléverser et Déconnecter restent inactifs.
-const OCCUPEES = new Set([
-  'operateur',
-  'lecture',
-  'proposition',
-  'daplink',
-  'telechargement',
-  'suppression',
-  'ecriture',
-  'upgrade',
-  'attente',
-  'relecture',
-]);
-
-export function estOccupee(etat) {
-  return OCCUPEES.has(etat.etape);
-}
-
-export const ETAT_INITIAL_PILE = Object.freeze({
-  etape: 'repos',
-  // Bloc d'où vient la vérification : lui seul affiche encarts et messages.
-  id: null,
-  // Question en attente : { type, donnees } ; type 'confirmation-verification'
-  // (choix 'continuer'), 'proposition' ('installer') ou 'daplink'
-  // ('mettre-a-jour', 'plus-tard').
-  encart: null,
-  message: null,
-  erreur: null,
-  // Secondes restantes pendant 'attente', null sinon.
-  decompte: null,
-  // { pile: { version, secteurs }, fus: { majeur, mineur, sous },
-  //   epinglee: { pile, version, secteurs }, relue } une fois lues.
-  versions: null,
-  // Mise à jour guidée du DAPLink à afficher : { release }.
-  daplink: null,
-});
+//   prise, Téléverser et Déconnecter restent inactifs (estOccupee).
+// État initial et étapes occupées sont dans etat.mjs, module léger lu par
+// EssayerExemple et EssayerMicroPython sans charger ce déroulement.
+export { ETAT_INITIAL_PILE, estOccupee };
 
 // Pile épinglée par le wiki (/pile-radio/index.json), null si illisible.
 // sha256Installation : empreinte du .hex d'installation en minuscules, null

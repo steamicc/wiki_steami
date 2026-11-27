@@ -1,15 +1,16 @@
-import React, { useLayoutEffect, useRef, useSyncExternalStore } from 'react';
+import React, { Suspense, lazy, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
-import PileRadio, { suiviOperateur } from '../PileRadio';
 import {
+  ETAT_INITIAL_PILE,
   controlesOccupes,
   erreurCarteVisible,
+  estOccupee,
   operateurSurCarte,
   pileRadioVisible,
-} from '../PileRadio/affichage.mjs';
-import { ETAT_INITIAL_PILE, estOccupee, parcoursPile } from '../PileRadio/deroulement.mjs';
+  relaisPile,
+} from '../PileRadio/etat.mjs';
 import {
   LIBELLES_STATUT,
   affichageProgression,
@@ -24,6 +25,13 @@ import {
   voyantVisible,
 } from './logique.mjs';
 import styles from './styles.module.css';
+
+// Bouton « Vérifier la pile radio » : chargé à la demande, seulement sous un
+// exemple BLE/… (pileRadioVisible). Les autres pages n'en chargent ni le
+// code ni les effets de module (retenue de la carte et de l'onglet). Une
+// fois chargé, il branche son parcours sur relaisPile (etat.mjs), que lisent
+// les blocs de la page.
+const PileRadio = lazy(() => import('../PileRadio'));
 
 function Telechargement({ id, href }) {
   return (
@@ -95,17 +103,18 @@ function Controles({ id, href }) {
     () => carte.etat,
     () => ETAT_INITIAL,
   );
-  // Vérification de la pile radio (exemples BLE) : une seule par page. Tant
+  // Vérification de la pile radio (exemples BLE) : une seule par page, lue
+  // par le relais (état initial tant que PileRadio n'est pas chargé). Tant
   // qu'elle tient la carte, Téléverser et Déconnecter sont inactifs sous
   // tous les exemples.
   const etatPile = useSyncExternalStore(
-    parcoursPile.abonner,
-    () => parcoursPile.etat,
+    relaisPile.abonner,
+    () => relaisPile.etat,
     () => ETAT_INITIAL_PILE,
   );
   const idOperateur = useSyncExternalStore(
-    suiviOperateur.abonner,
-    () => suiviOperateur.id,
+    relaisPile.abonner,
+    () => relaisPile.idOperateur,
     () => null,
   );
   const pileOccupee = estOccupee(etatPile);
@@ -180,14 +189,14 @@ function Controles({ id, href }) {
     // Le programme de lecture de la pile radio va être remplacé. Une
     // vérification finie en erreur s'efface : l'erreur éventuelle du
     // téléversement doit se voir.
-    suiviOperateur.oublier();
-    parcoursPile.oublierErreur();
+    relaisPile.oublierOperateur();
+    relaisPile.oublierErreur();
     carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
     focaliserApresRef.current = true;
-    parcoursPile.oublierErreur();
+    relaisPile.oublierErreur();
     carte.connecter(id, urlDapjs);
   }
 
@@ -256,7 +265,11 @@ function Controles({ id, href }) {
       {/* WebUSB peut exister mais être inutilisable (poste géré, Linux sans
           règle udev) : après une erreur, le .bin reste accessible. */}
       {erreur && <Telechargement id={id} href={href} />}
-      {pileRadioVisible(id) && <PileRadio id={id} />}
+      {pileRadioVisible(id) && (
+        <Suspense fallback={null}>
+          <PileRadio id={id} />
+        </Suspense>
+      )}
       {montrerConsole && (
         // Région nommée et accessible au clavier pour défiler ; pas role="log",
         // qui ferait lire cinq lignes par seconde.
