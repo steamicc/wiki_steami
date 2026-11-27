@@ -120,6 +120,11 @@ export const TEXTE_PILE_PEUT_ETRE_EFFACEE = `L'installation s'est interrompue ap
 export const TEXTE_SANS_REPONSE =
   "Le programme de lecture ne répond plus après l'installation, ce qui ne veut pas dire qu'elle a échoué. Téléverser l'exemple : s'il démarre le BLE, la pile radio est en place.";
 
+// START raté après une installation réussie : la pile est peut-être restée
+// arrêtée ; une nouvelle vérification la relance.
+export const TEXTE_RELANCE_RATEE =
+  "Si l'exemple ne démarre pas le BLE, cliquer de nouveau sur « Vérifier la pile radio » pour relancer la pile.";
+
 export const TEXTE_PILE_ABSENTE_APRES = `Aucune pile radio n'est lue après l'installation. Cliquer de nouveau sur « Vérifier la pile radio » pour la réinstaller, ou : ${RENVOI_EASYFLASH}`;
 
 function texteVersion({ majeur, mineur, sous }) {
@@ -234,6 +239,15 @@ const dormir = (ms) => new Promise((resoudre) => setTimeout(resoudre, ms));
 // Le FUS modifie une pile, lui-même ou un service (0x10 à 0x3F).
 function fusAuTravail(status) {
   return ['pile', 'fus', 'service'].includes(etatFus(status));
+}
+
+// Code d'erreur non nul de la relecture (last_fus_status, puis
+// last_ws_status), null si aucun.
+function codeEchec(statut) {
+  for (const code of [statut?.last_fus_status, statut?.last_ws_status]) {
+    if (Number.isInteger(code) && code !== 0) return code;
+  }
+  return null;
 }
 
 // Message d'une erreur de lecture, avant DELETE.
@@ -500,8 +514,11 @@ export function creerParcoursPile() {
         await attendre(delais.pasRelecture);
         if (!carte.etat.connectee) return perdue();
       }
-      if (Number.isInteger(statut?.error) && statut.error !== 0) {
-        poser({ etape: 'erreur', erreur: texteEchecInstallation(statut.error) });
+      // Erreur de la dernière opération du FUS ou de la pile (forme de
+      // réponse du second STATUS, avec last_fus_status).
+      const code = codeEchec(statut);
+      if (code !== null) {
+        poser({ etape: 'erreur', erreur: texteEchecInstallation(code) });
         return { fin: 'erreur' };
       }
       // Sur le FUS, copro_fw_version donne la pile installée.
@@ -511,13 +528,21 @@ export function creerParcoursPile() {
         poser({ etape: 'erreur', erreur: TEXTE_PILE_ABSENTE_APRES });
         return { fin: 'erreur' };
       }
-      await operateur.relancer();
+      // La pile est relue en place : un START raté ne doit jamais faire
+      // conclure « pile peut-être effacée ».
+      let relancee = true;
+      try {
+        await operateur.relancer();
+      } catch {
+        relancee = false;
+      }
       if (relue !== epinglee.version) {
         poser({ etape: 'erreur', erreur: texteAutrePile(relue, epinglee.version) });
         return { fin: 'erreur' };
       }
       // 6. Fin : invitation à téléverser l'exemple.
-      poser({ etape: 'fini', message: texteFini(epinglee, relue) });
+      const fini = texteFini(epinglee, relue);
+      poser({ etape: 'fini', message: relancee ? fini : `${fini} ${TEXTE_RELANCE_RATEE}` });
       return { fin: 'fini' };
     } catch (err) {
       if (err instanceof ErreurFus) {

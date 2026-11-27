@@ -467,6 +467,7 @@ describe('fins de parcours avant DELETE', () => {
   for (const [nom, daplink] of [
     ['non épinglé', { numero: 2, date: 20261001 }],
     ['illisible (null)', null],
+    ['de développement (numéro 0)', { numero: 0, date: 20261126 }],
   ]) {
     it(`DAPLink ${nom} : étape daplink sans installation, « Plus tard » revient au repos avec START`, async () => {
       const p = preparer({ operateur: sansPile, carte: { daplink } });
@@ -743,6 +744,96 @@ describe('installation', () => {
     });
     p.parcours.confirmer('installer');
     assert.deepEqual(await fin, { fin: 'fini' });
+  });
+});
+
+describe('relecture après UPGRADE', () => {
+  for (const [champ, code] of [
+    ['last_fus_status', 0x03],
+    ['last_ws_status', 0x11],
+  ]) {
+    it(`${champ} non nul : échec affiché avec le texte du code, ni VERSION ni START`, async () => {
+      const p = preparer({
+        operateur: {
+          ...sansPile,
+          status: [STATUS_REPOS, STATUS_REPOS, { ...STATUS_REPOS, [champ]: code }],
+        },
+      });
+      const fin = verifierConfirme(p);
+      await etape(p.parcours, 'proposition');
+      p.parcours.confirmer('installer');
+      assert.deepEqual(await fin, { fin: 'erreur' });
+      assert.equal(p.parcours.etat.etape, 'erreur');
+      assert.ok(p.parcours.etat.erreur.includes(texteErreurFus(code)));
+      assert.match(p.parcours.etat.erreur, /EasyFlash/);
+      assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS']);
+    });
+  }
+
+  it('un champ error dans la réponse de la relecture n est plus lu', async () => {
+    const p = preparer({
+      operateur: {
+        version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS],
+        status: [STATUS_REPOS, STATUS_REPOS, { ...STATUS_REPOS, error: 254 }],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+  });
+
+  it('START raté après une pile relue en place : fin normale, jamais « peut-être effacée »', async () => {
+    const p = preparer({
+      operateur: {
+        version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS],
+        relancer: [new ErreurLecteur(MESSAGE_SANS_CARTE)],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    const etat = p.parcours.etat;
+    assert.equal(etat.etape, 'fini');
+    assert.equal(etat.erreur, null);
+    assert.notEqual(etat.message, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+    assert.match(etat.message, /1\.20\.0/);
+    // La pile n'a peut-être pas redémarré : une nouvelle vérification la relance.
+    assert.match(etat.message, /Vérifier la pile radio/);
+    assert.equal(apres(p.journal, 'UPGRADE').at(-1), 'START');
+  });
+
+  it('START raté après une autre pile relue : message de l autre pile', async () => {
+    const p = preparer({
+      operateur: {
+        version: [
+          VERSION_SANS_PILE,
+          VERSION_SANS_PILE,
+          { ...VERSION_FUS, copro_fw_version: '1.19.0' },
+        ],
+        relancer: [new ErreurLecteur(MESSAGE_SANS_CARTE)],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.notEqual(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+    assert.match(p.parcours.etat.erreur, /1\.19\.0/);
+  });
+
+  it('ErreurDelaiOperateur pendant l upgrade : pile peut-être effacée, un seul DELETE', async () => {
+    const p = preparer({
+      operateur: { ...sansPile, upgrade: [new ErreurDelaiOperateur('UPGRADE')] },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), []);
   });
 });
 
