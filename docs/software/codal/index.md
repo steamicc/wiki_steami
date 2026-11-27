@@ -26,7 +26,7 @@ Le support CODAL est partiel. Les principaux composants sont supportés mais cer
 | Flash (DAPLink)                       |    ❌    |
 | Config persistante                    |    ❌    |
 
-Les composants propres à la V1c, le capteur BME280 et l'écran TFT GC9A01, ne figurent pas encore dans ce tableau. En MicroPython, le driver [bme280](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bme280) est disponible et le driver gc9a01 est en cours de développement ([issue #10](https://github.com/steamicc/micropython-steami-lib/issues/10)). Voir [Révisions](/docs/hardware/revisions).
+Les composants propres à la V1c, le capteur BME280 et l'écran TFT GC9A01, ne figurent pas encore dans ce tableau. En MicroPython, le driver [bme280](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bme280) est disponible et l'écran GC9A01 est géré depuis la v0.30.0 du firmware, par le driver [gc9a01](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/gc9a01) et par `steami.Screen` ([steami_screen](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen)), qui dessine le même programme sur l'écran de chaque release. Voir [Révisions](/docs/hardware/revisions).
 
 ## À venir
 

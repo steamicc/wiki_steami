@@ -121,7 +121,8 @@ Le schéma indice C (feuille FP8, page 9/16) n'est pas encore publié dans le d�
 </Release>
 <Release releases="v1c">
 
-- Driver MicroPython gc9a01 : en cours de développement ([issue #10](https://github.com/steamicc/micropython-steami-lib/issues/10))
+- [Driver MicroPython — gc9a01](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/gc9a01), dans le firmware depuis la v0.30.0
+- [steami_screen](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen) — `steami.Screen`, le même programme sur les écrans des trois releases
 
 </Release>
 </ReleaseTabs>
