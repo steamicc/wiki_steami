@@ -7,6 +7,7 @@ import { describe, it } from 'node:test';
 
 import {
   DELAIS_PILE,
+  ETAT_INITIAL_PILE,
   LIBELLE_RENVOI,
   TEXTE_ANNULE,
   TEXTE_CARTE_PERDUE_PILE,
@@ -15,6 +16,7 @@ import {
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
   TEXTE_INSTALLATION_ANNULEE,
+  TEXTE_MICROPYTHON_OCCUPE,
   TEXTE_OPERATEUR_MUET,
   TEXTE_PILE_ABSENTE_APRES,
   TEXTE_PILE_ARRETEE,
@@ -1534,6 +1536,33 @@ describe('occupation', () => {
     assert.deepEqual(await p.parcours.verifier('BLE/Autre', p.deps), { fin: 'occupe' });
     p.parcours.annuler();
     await fin;
+  });
+
+  it('refusée pendant un essai MicroPython occupé : rien ne change', async () => {
+    const p = preparer();
+    let occupe = true;
+    p.deps.microPythonOccupe = () => occupe;
+    assert.deepEqual(await p.parcours.verifier(ID, p.deps), { fin: 'occupe' });
+    assert.equal(p.parcours.etat, ETAT_INITIAL_PILE);
+    assert.deepEqual(p.journal, []);
+    occupe = false;
+    const fin = p.parcours.verifier(ID, p.deps);
+    await etape(p.parcours, 'confirmation-verification');
+    p.parcours.annuler();
+    assert.deepEqual(await fin, { fin: 'annule' });
+  });
+
+  it('essai MicroPython lancé pendant la première question : arrêt avant l operator', async () => {
+    const p = preparer();
+    let occupe = false;
+    p.deps.microPythonOccupe = () => occupe;
+    const fin = p.parcours.verifier(ID, p.deps);
+    await etape(p.parcours, 'confirmation-verification');
+    occupe = true;
+    p.parcours.confirmer('continuer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.deepEqual(p.journal, []);
+    assert.equal(p.parcours.etat.erreur, TEXTE_MICROPYTHON_OCCUPE);
   });
 
   it('refusée aussi quand la carte est occupée ou absente', async () => {

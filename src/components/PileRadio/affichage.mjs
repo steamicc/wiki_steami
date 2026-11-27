@@ -151,10 +151,14 @@ export function texteDecompte(secondes) {
 
 // Actif carte connectée et libre, hors parcours. Pendant la première
 // question, rien n'est envoyé mais une autre vérification serait refusée.
-export function boutonPileActif(etatCarte, etatPile) {
+// microPythonOccupe : un essai MicroPython se prépare dans un bloc de la page
+// (estOccupee de sessionMicroPython) ; il tient la carte entre deux
+// commandes sans que etatCarte.occupee le dise.
+export function boutonPileActif(etatCarte, etatPile, microPythonOccupe = false) {
   return (
     etatCarte.connectee &&
     !etatCarte.occupee &&
+    !microPythonOccupe &&
     !estOccupee(etatPile) &&
     etatPile.etape !== 'confirmation-verification'
   );

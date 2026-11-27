@@ -25,6 +25,10 @@ import {
 } from './affichage.mjs';
 import { ETAT_INITIAL_PILE, parcoursPile } from './deroulement.mjs';
 import { relaisPile } from './etat.mjs';
+import {
+  estOccupee as estOccupeeMicroPython,
+  sessionMicroPython,
+} from '../EssayerMicroPython/deroulement.mjs';
 import communs from '../EssayerExemple/styles.module.css';
 
 // Une seule vérification par page (parcoursPile, comme la carte) : la carte
@@ -39,6 +43,10 @@ export const suiviOperateur = creerSuiviOperateur(parcoursPile);
 relaisPile.brancher(parcoursPile, suiviOperateur);
 
 const lireStockage = () => window.localStorage;
+
+// Un essai MicroPython se prépare dans un bloc de la page : il tient la carte
+// entre deux commandes, la vérification attend.
+const microPythonOccupe = () => estOccupeeMicroPython(sessionMicroPython.etat);
 
 // Question en attente sous le bloc : le focus y passe, pour que les lecteurs
 // d'écran la lisent ; jamais sur le bouton d'action, qu'une touche Entrée de
@@ -106,6 +114,11 @@ export default function PileRadio({ id }) {
     index: useBaseUrl('/pile-radio/index.json'),
     daplink: useBaseUrl('/daplink/firmware.json'),
   };
+  const essaiMicroPython = useSyncExternalStore(
+    sessionMicroPython.abonner,
+    microPythonOccupe,
+    () => false,
+  );
   const urlDaplinkBin = useBaseUrl('/daplink/firmware.bin');
   const boutonRef = useRef(null);
   // Le bouton cliqué (Vérifier grisé, réponse d'un encart, Plus tard)
@@ -123,7 +136,7 @@ export default function PileRadio({ id }) {
   const actif = etat.id === id;
   const encart = actif ? etat.encart : null;
   const etapesDaplink = actif && etat.daplink !== null && etat.daplink !== daplinkFerme;
-  const libre = boutonPileActif(etatCarte, etat);
+  const libre = boutonPileActif(etatCarte, etat, essaiMicroPython);
 
   // Bloc quitté (navigation) : sa vérification, question en attente ou
   // étape occupée, ne doit pas bloquer les boutons des autres pages. Lu au
@@ -155,7 +168,12 @@ export default function PileRadio({ id }) {
 
   function verifier() {
     focaliserApres();
-    void parcoursPile.verifier(id, { carte, urls, forcer: lireForcer(lireStockage) });
+    void parcoursPile.verifier(id, {
+      carte,
+      urls,
+      microPythonOccupe,
+      forcer: lireForcer(lireStockage),
+    });
   }
 
   // Étapes du DAPLink fermées : leur message (« Suivre les étapes

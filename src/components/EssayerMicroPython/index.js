@@ -35,13 +35,13 @@ import {
   abandonnerBloc,
   arreter,
   chargerEpingles,
-  creerSession,
   erreurCarteAffichee,
   essayer,
   estOccupee,
   lireFichiers,
   messageSession,
   peutArreter,
+  sessionMicroPython,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
@@ -49,9 +49,9 @@ import {
 import communs from '../EssayerExemple/styles.module.css';
 import styles from './styles.module.css';
 
-// Le wiki est une application d'une seule page : la session vit aussi
-// longtemps que l'onglet (« Plus tard » est retenu jusqu'au rechargement).
-const session = creerSession();
+// Session de la page (deroulement.mjs) : elle vit aussi longtemps que
+// l'onglet ; PileRadio lit son état occupé.
+const session = sessionMicroPython;
 
 const nouveauRepl = () =>
   creerRepl({

@@ -3,6 +3,7 @@
 // Lancer : node --test src/components/EssayerMicroPython/deroulement.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   TEXTE_ACCES_REFUSE_MICROPYTHON,
@@ -19,6 +20,7 @@ import {
   estOccupee,
   lireFichiers,
   messageSession,
+  sessionMicroPython,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
@@ -1204,4 +1206,18 @@ test('messageSession : l’installation dure moins d’une minute', () => {
   const texte = messageSession({ etape: 'installation', message: null });
   assert.match(texte, /moins d'une minute/);
   assert.doesNotMatch(texte, /environ/);
+});
+
+// La session de la page vit au niveau du module, comme parcoursPile côté pile
+// radio : « Vérifier la pile radio » (PileRadio) lit son état occupé.
+test('sessionMicroPython : une session de page, au repos au chargement', () => {
+  assert.equal(typeof sessionMicroPython.abonner, 'function');
+  assert.equal(sessionMicroPython.etat.etape, 'repos');
+  assert.equal(estOccupee(sessionMicroPython.etat), false);
+});
+
+test('EssayerMicroPython/index.js utilise la session du module', () => {
+  const source = readFileSync(new URL('./index.js', import.meta.url), 'utf8');
+  assert.match(source, /const session = sessionMicroPython;/);
+  assert.doesNotMatch(source, /creerSession\(/);
 });

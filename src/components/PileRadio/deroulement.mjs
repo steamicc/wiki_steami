@@ -17,6 +17,9 @@
 // - empreinte(octets) : sha256 en hexadécimal du .hex d'installation,
 //   injectable (par défaut crypto.subtle.digest('SHA-256')) ;
 // - delais : remplace tout ou partie de DELAIS_PILE ;
+// - microPythonOccupe() : un essai MicroPython se prépare sur la page
+//   (EssayerMicroPython, sessionMicroPython) ; la vérification est alors
+//   refusée, comme quand la carte est occupée ;
 // - forcer : propose l'installation même quand la pile est à jour. Seule
 //   l'interface le lit, dans localStorage['steami-pile-radio-forcer'] === '1'
 //   (indicateur de développement, pour l'essai complet sur la carte).
@@ -101,6 +104,9 @@ export const TEXTE_EPINGLAGE_PILE_ILLISIBLE =
 
 export const TEXTE_CARTE_PERDUE_PILE =
   'La carte a été déconnectée : la rebrancher, cliquer sur « Connecter la carte », puis de nouveau sur « Vérifier la pile radio ».';
+
+export const TEXTE_MICROPYTHON_OCCUPE =
+  'Un programme MicroPython se prépare sur la carte depuis cette page : attendre la fin de sa préparation, puis cliquer de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_ECHEC_OPERATEUR =
   "Le programme de lecture de la pile radio n'a pas pu être écrit sur la carte : cliquer de nouveau sur « Vérifier la pile radio ».";
@@ -383,6 +389,10 @@ export function creerParcoursPile() {
     }
     if (carte.etat.occupee) {
       poser({ etape: 'erreur', erreur: MESSAGE_FLASH_EN_COURS });
+      return { fin: 'erreur' };
+    }
+    if (deps.microPythonOccupe?.()) {
+      poser({ etape: 'erreur', erreur: TEXTE_MICROPYTHON_OCCUPE });
       return { fin: 'erreur' };
     }
     const epinglee = lirePileEpinglee(await lireJson(urls.index, recuperer));
@@ -680,7 +690,9 @@ export function creerParcoursPile() {
     // 'a-jour', 'daplink', 'plus-tard', 'fini', 'fus-travaille',
     // 'sans-reponse'.
     async verifier(id, deps) {
-      if (enCours || deps.carte.etat.occupee) return { fin: 'occupe' };
+      if (enCours || deps.carte.etat.occupee || deps.microPythonOccupe?.()) {
+        return { fin: 'occupe' };
+      }
       if (!deps.carte.etat.connectee) return { fin: 'deconnectee' };
       enCours = true;
       annulation = false;
