@@ -74,8 +74,11 @@ const PAS_DECOMPTE_MS = 1000;
 
 // --- Textes (ton neutre) ----------------------------------------------------
 
-const RENVOI_EASYFLASH =
-  'Installer la pile radio avec EasyFlash (voir la page « Pile radio » du wiki).';
+// Renvoi vers la procédure EasyFlash du wiki. L'interface fait de
+// LIBELLE_RENVOI un lien vers la section (affichage.mjs, morceauxTexte).
+export const LIBELLE_RENVOI = 'la page « Pile radio Bluetooth », section « Installer la pile »';
+
+const RENVOI_EASYFLASH = `Installer la pile radio avec DapLink-EasyFlash : voir ${LIBELLE_RENVOI}.`;
 
 export const TEXTE_CONFIRMATION_VERIFICATION =
   "La vérification remplace le programme de la carte par un programme de lecture, et efface toute la mémoire du programme : MicroPython et ses fichiers compris. La pile radio n'est pas touchée. Après la vérification, téléverser de nouveau l'exemple.";

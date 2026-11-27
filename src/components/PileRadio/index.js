@@ -4,6 +4,7 @@
 // l'installer. Le déroulement est dans deroulement.mjs, les textes et les
 // règles d'affichage dans affichage.mjs ; ce fichier ne fait que l'afficher.
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from '../EssayerExemple/carte.mjs';
 import EtapesDaplink from '../EssayerExemple/EtapesDaplink';
@@ -16,6 +17,7 @@ import {
   issueFocus,
   lireForcer,
   messageEtape,
+  morceauxTexte,
   questionEnAttente,
   retenirCarte,
   retenirOnglet,
@@ -65,6 +67,21 @@ function Encart({ encart, surReponse }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// Message ou erreur du parcours : le renvoi vers EasyFlash est un lien vers
+// la section « Installer la pile » de la page « Pile radio Bluetooth ». Les
+// morceaux d'un texte ne changent pas d'ordre : la clé est leur rang.
+function Texte({ texte }) {
+  return morceauxTexte(texte).map(({ texte: morceau, lien }, i) =>
+    lien ? (
+      <Link key={i} to={lien}>
+        {morceau}
+      </Link>
+    ) : (
+      <React.Fragment key={i}>{morceau}</React.Fragment>
+    ),
   );
 }
 
@@ -161,8 +178,16 @@ export default function PileRadio({ id }) {
       {/* Messages avant les étapes du DAPLink : leur guide dit « Suivre les
           étapes ci-dessous ». */}
       <div className={communs.messages} aria-live="polite">
-        {message && <p className={communs.statut}>{message}</p>}
-        {erreur && <p className={communs.erreur}>{erreur}</p>}
+        {message && (
+          <p className={communs.statut}>
+            <Texte texte={message} />
+          </p>
+        )}
+        {erreur && (
+          <p className={communs.erreur}>
+            <Texte texte={erreur} />
+          </p>
+        )}
       </div>
       {/* role="timer" : pas d'annonce à chaque seconde. */}
       {decompte !== null && (

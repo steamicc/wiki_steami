@@ -1,7 +1,7 @@
 // Ce qu'affiche le bouton « Vérifier la pile radio » (PileRadio/index.js) :
 // fonctions pures et petits suivis du parcours, sans DOM ni WebUSB, testés
 // par affichage.test.mjs. Le déroulement lui-même est dans deroulement.mjs.
-import { TEXTE_PLUS_TARD, estOccupee } from './deroulement.mjs';
+import { LIBELLE_RENVOI, TEXTE_PLUS_TARD, estOccupee } from './deroulement.mjs';
 
 // --- Textes (ton neutre) ----------------------------------------------------
 
@@ -112,6 +112,23 @@ export function contenuEncart({ type, donnees }) {
 export function messageEtape(etat, daplinkReporte = false) {
   if (daplinkReporte) return TEXTE_PLUS_TARD;
   return MESSAGES_ETAPES[etat.etape] ?? etat.message ?? null;
+}
+
+// Section de la procédure EasyFlash (docs/software/pile-radio.md), cible du
+// renvoi des fins sans issue.
+export const CIBLE_RENVOI = '/docs/software/pile-radio#installer-la-pile';
+
+// Découpe un message ou une erreur du parcours en morceaux { texte, lien } :
+// le renvoi vers EasyFlash (LIBELLE_RENVOI) devient un lien vers
+// CIBLE_RENVOI, le reste du texte est rendu tel quel (lien null).
+export function morceauxTexte(texte) {
+  if (!texte) return [];
+  const morceaux = [];
+  texte.split(LIBELLE_RENVOI).forEach((partie, i) => {
+    if (i > 0) morceaux.push({ texte: LIBELLE_RENVOI, lien: CIBLE_RENVOI });
+    if (partie) morceaux.push({ texte: partie, lien: null });
+  });
+  return morceaux;
 }
 
 export function texteDecompte(secondes) {

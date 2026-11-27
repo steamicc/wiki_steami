@@ -3,9 +3,11 @@
 // DOM ni carte : le parcours et la carte sont simulés.
 // Lancer : node --test src/components/PileRadio/affichage.test.mjs
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
 import {
+  CIBLE_RENVOI,
   CLE_FORCER,
   TEXTE_CONSIGNES_PILE,
   TEXTE_DUREE_PILE,
@@ -18,6 +20,7 @@ import {
   issueFocus,
   lireForcer,
   messageEtape,
+  morceauxTexte,
   operateurSurCarte,
   pileRadioVisible,
   questionEnAttente,
@@ -28,9 +31,17 @@ import {
 } from './affichage.mjs';
 import {
   ETAT_INITIAL_PILE,
+  LIBELLE_RENVOI,
+  TEXTE_ANNULE,
   TEXTE_CONFIRMATION_VERIFICATION,
   TEXTE_DAPLINK_GUIDE,
+  TEXTE_PILE_ABSENTE_APRES,
+  TEXTE_PILE_ARRETEE,
+  TEXTE_PILE_PEUT_ETRE_EFFACEE,
   TEXTE_PLUS_TARD,
+  texteAutrePile,
+  texteEchecInstallation,
+  texteFusRefuse,
 } from './deroulement.mjs';
 
 const ID = 'BLE/BleBeacon';
@@ -289,6 +300,46 @@ describe('issueFocus', () => {
         etape,
       );
     }
+  });
+});
+
+describe('morceauxTexte (renvoi vers EasyFlash)', () => {
+  it('un texte sans renvoi reste d un seul morceau', () => {
+    assert.deepEqual(morceauxTexte(TEXTE_ANNULE), [{ texte: TEXTE_ANNULE, lien: null }]);
+  });
+
+  it('chaque fin sans issue porte un lien vers la section « Installer la pile »', () => {
+    const textes = [
+      texteFusRefuse({ majeur: 1, mineur: 1, sous: 0 }, 'ancien'),
+      texteFusRefuse({ majeur: 2, mineur: 0, sous: 0 }, 'inconnu'),
+      TEXTE_PILE_ARRETEE,
+      TEXTE_PILE_PEUT_ETRE_EFFACEE,
+      TEXTE_PILE_ABSENTE_APRES,
+      texteEchecInstallation(3),
+      texteAutrePile('1.19.0', '1.20.0'),
+    ];
+    for (const texte of textes) {
+      const morceaux = morceauxTexte(texte);
+      const liens = morceaux.filter((m) => m.lien);
+      assert.deepEqual(liens, [{ texte: LIBELLE_RENVOI, lien: CIBLE_RENVOI }], texte);
+      assert.equal(morceaux.map((m) => m.texte).join(''), texte);
+    }
+  });
+
+  it('le lien cite le titre exact de la page et vise une section qui existe', () => {
+    const page = readFileSync(
+      new URL('../../../docs/software/pile-radio.md', import.meta.url),
+      'utf8',
+    );
+    const titre = page.match(/^title: (.+)$/m)[1];
+    assert.ok(LIBELLE_RENVOI.includes(`« ${titre} »`), LIBELLE_RENVOI);
+    assert.match(page, /^## Installer la pile$/m);
+    assert.ok(LIBELLE_RENVOI.includes('« Installer la pile »'));
+    assert.equal(CIBLE_RENVOI, '/docs/software/pile-radio#installer-la-pile');
+  });
+
+  it('texte absent : aucun morceau', () => {
+    assert.deepEqual(morceauxTexte(null), []);
   });
 });
 
