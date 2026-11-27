@@ -36,11 +36,11 @@ Une pile radio en `(0, 0, 0, 0, 0)` signifie qu'aucune pile n'est installée.
 
 ## Depuis le wiki
 
-Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît à côté de **Téléverser**, dans un navigateur compatible WebUSB (Chrome ou Edge), et il est actif une fois la carte connectée avec **Connecter la carte**.
+Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît sous les boutons **Téléverser** et **Connecter la carte**, dans un navigateur compatible WebUSB (Chrome ou Edge), grisé tant que la carte n'est pas connectée avec **Connecter la carte**.
 
 1. Cliquer sur **Vérifier la pile radio**. Une première question prévient que la vérification remplace le programme de la carte par un programme de lecture, et qu'elle efface toute la mémoire du programme : MicroPython et ses fichiers compris. La pile radio, elle, n'est pas touchée. Cliquer sur **Continuer**, ou sur **Annuler** pour ne rien changer.
 2. Le bouton lit les versions du FUS et de la pile radio. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple.
-3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne. Cliquer sur **Installer la pile radio** pour lancer l'installation, qui prend quelques minutes, ou sur **Annuler**. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page : un décompte indique le temps restant pendant l'attente de la fin du travail du second cœur.
+3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, qui prend quelques minutes, ou sur **Annuler**. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page : un décompte indique le temps restant pendant l'attente de la fin du travail du second cœur.
 4. Une fois la pile relue, le bouton affiche qu'elle est installée. **Téléverser ensuite l'exemple** : le programme de lecture occupe encore la carte, et l'exemple le remplace.
 
 Si la carte a déjà une pile plus récente que celle du wiki, la seconde question le signale et met en avant **Annuler** : le FUS peut refuser de revenir à une version plus ancienne.
@@ -51,12 +51,14 @@ L'installation exige que la carte ait le DAPLink proposé par le wiki, car une i
 
 ### Limites
 
-Le bouton n'installe que la pile BLE HCI Layer 1.20.0. Dans les cas suivants, il n'installe rien et renvoie vers [DapLink-EasyFlash](#installer-la-pile) :
+Le bouton n'installe que la pile BLE HCI Layer 1.20.0. Les autres piles (Full, extended, Thread, Zigbee…) ne sont pas proposées : elles passent par [DapLink-EasyFlash](#installer-la-pile). Une pile d'un autre type n'est remplacée par BLE HCI Layer que sur confirmation.
+
+Dans les deux cas suivants, le bouton n'installe rien et renvoie vers DapLink-EasyFlash :
 
 - un FUS antérieur à la version 1.2, ou de version majeure 2 et plus : le bouton ne met **jamais** le FUS à jour ;
-- une autre pile voulue que BLE HCI Layer 1.20.0 (Full, extended, Thread, Zigbee…) : le bouton ne les propose pas, et remplace une pile d'un autre type par BLE HCI Layer seulement sur confirmation ;
-- une pile radio arrêtée qui ne redémarre pas ;
-- une installation qui échoue ou s'interrompt après l'effacement de l'ancienne pile.
+- une pile radio arrêtée qui ne redémarre pas.
+
+Si l'installation échoue ou s'interrompt après l'effacement de l'ancienne pile, la carte peut se retrouver sans pile radio : le bouton le signale et renvoie aussi vers DapLink-EasyFlash.
 
 Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
 
