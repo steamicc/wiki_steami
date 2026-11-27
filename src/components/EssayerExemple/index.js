@@ -220,6 +220,13 @@ function Controles({ id, href }) {
     });
   }
 
+  // « Plus tard » retire l'encart, qui avait le focus : il revient sur le
+  // bouton principal (Téléverser, ou Connecter la carte), comme pour PileRadio.
+  function reporterDaplink() {
+    verificationDaplink.reporter();
+    (carte.etat.connectee ? televerserRef : connecterRef).current?.focus();
+  }
+
   function deconnecter() {
     refocaliserRef.current = true;
     carte.deconnecter();
@@ -286,7 +293,7 @@ function Controles({ id, href }) {
         <EtapesDaplink
           release={etatDaplink.release}
           href={urlFirmwareBin}
-          surPlusTard={verificationDaplink.reporter}
+          surPlusTard={reporterDaplink}
           derniereEtape="Cliquer sur « Connecter la carte », puis sur « Téléverser »."
         />
       )}
