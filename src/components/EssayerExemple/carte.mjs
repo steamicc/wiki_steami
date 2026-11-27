@@ -379,6 +379,22 @@ function apresOperation(partie = {}) {
   if (abonnes.size === 0) planifierLiberation();
 }
 
+// Carte déjà autorisée pour le site (sur cette page, ou avant un
+// rechargement) : reprise sans la fenêtre de choix si c'est la seule STeaMi
+// autorisée. null s'il n'y en a aucune, s'il y en a plusieurs (le lecteur
+// choisit), ou si getDevices est absent ou échoue. getDevices ne consomme pas
+// l'activation du clic et répond vite : requestDevice, s'il le faut, suit
+// toujours de près le clic.
+async function carteAutorisee() {
+  try {
+    const appareils = (await navigator.usb.getDevices?.()) ?? [];
+    const steami = appareils.filter((appareil) => appareil?.vendorId === VENDOR_ID_DAPLINK);
+    return steami.length === 1 ? steami[0] : null;
+  } catch {
+    return null;
+  }
+}
+
 // id : l'exemple sous lequel on a cliqué, qui affichera une éventuelle erreur.
 async function connecter(id, urlDapjs = URL_DAPJS) {
   if (dap || etat.occupee) return;
@@ -390,10 +406,13 @@ async function connecter(id, urlDapjs = URL_DAPJS) {
   let appareil = null;
   let nouvelle = null;
   try {
-    // requestDevice d'abord : il doit suivre de près le clic de l'utilisateur.
-    appareil = await navigator.usb.requestDevice({
-      filters: [{ vendorId: VENDOR_ID_DAPLINK }],
-    });
+    // Choix de la carte d'abord : requestDevice doit suivre de près le clic
+    // de l'utilisateur.
+    appareil =
+      (await carteAutorisee()) ??
+      (await navigator.usb.requestDevice({
+        filters: [{ vendorId: VENDOR_ID_DAPLINK }],
+      }));
     // Une libération pas encore finie garde l'interface USB : on l'attend.
     await liberation;
     await chargerDapjs(urlDapjs);

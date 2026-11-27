@@ -40,7 +40,7 @@ Le navigateur ouvre une fenêtre qui liste les cartes branchées. Cliquer sur **
 
 ![Fenêtre du navigateur « … souhaite se connecter » (ici pendant un essai en local) : la liste contient STeaMi CMSIS-DAP, avec les boutons Annuler et Connexion](/img/software/arduino/essayer-exemple-02-choix-carte.png)
 
-Une fois la carte connectée, chaque bouton **Connecter la carte** de la page devient **Téléverser**, à côté d'un bouton **Déconnecter**. La carte ne s'autorise qu'une fois par page.
+Une fois la carte connectée, chaque bouton **Connecter la carte** de la page devient **Téléverser**, à côté d'un bouton **Déconnecter**. La carte n'est choisie qu'une fois : ensuite, même après un rechargement de la page, la carte déjà autorisée est reprise sans la fenêtre de choix, tant qu'elle est la seule STeaMi autorisée.
 
 Sous les boutons de chaque exemple, une pastille de couleur et son libellé indiquent l'état de la carte : « Carte : déconnectée » (pastille creuse) avant la connexion, « Carte : connexion… » (pastille grise) tant que la fenêtre de choix est ouverte et que la page se connecte, puis « Carte : connectée ». Sous l'exemple qui a servi à connecter la carte, le message « Carte connectée. » s'affiche, et le voyant « Réception série » s'allume brièvement chaque fois que la carte envoie des données ; son libellé passe de « en attente » à « données reçues » dès les premières données. Ce voyant n'apparaît que sous un seul exemple : celui dont le programme tourne, ou, avant le premier téléversement, celui qui a servi à connecter la carte.
 
@@ -66,7 +66,7 @@ L'écran de la carte ne change pas : les exemples VL53L1X ne s'en servent pas, e
 
 Les autres exemples de la page se téléversent directement avec leur bouton **Téléverser**, sans reconnecter la carte. La console de l'exemple précédent disparaît, et celle du nouvel exemple s'ouvre sous lui.
 
-En quittant les pages d'exemples, la carte est libérée au bout d'une seconde environ. Pour la libérer tout de suite, cliquer sur **Déconnecter**, grisé pendant un téléversement pour ne pas l'interrompre : chaque bouton de la page redevient **Connecter la carte**, et l'état « Carte : déconnectée ». Une fois la carte libérée, un [Codespace](../codespace) ou l'[Arduino IDE](../arduino-ide) peut s'en servir, sans fermer l'onglet du wiki. Pour essayer de nouveau un exemple, cliquer sur **Connecter la carte** et choisir la carte comme à l'étape 2.
+En quittant les pages d'exemples, la carte est libérée au bout d'une seconde environ. Pour la libérer tout de suite, cliquer sur **Déconnecter**, grisé pendant un téléversement pour ne pas l'interrompre : chaque bouton de la page redevient **Connecter la carte**, et l'état « Carte : déconnectée ». Une fois la carte libérée, un [Codespace](../codespace) ou l'[Arduino IDE](../arduino-ide) peut s'en servir, sans fermer l'onglet du wiki. Pour essayer de nouveau un exemple, cliquer sur **Connecter la carte** : la carte déjà autorisée est reprise directement, sinon la fenêtre de l'étape 2 s'ouvre pour la choisir.
 
 ## En cas d'erreur
 

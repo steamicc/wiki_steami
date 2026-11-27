@@ -179,7 +179,10 @@ function EtapesDaplink({ release, href, surPlusTard }) {
           Copier le fichier téléchargé sur le lecteur <strong>MAINTENANCE</strong>, puis attendre
           que le lecteur de la carte revienne.
         </li>
-        <li>Cliquer de nouveau sur « Essayer sur la carte », puis choisir la carte.</li>
+        <li>
+          Cliquer de nouveau sur « Essayer sur la carte », puis choisir la carte si la fenêtre de
+          connexion s&apos;ouvre.
+        </li>
       </ol>
       <p>
         <Link to="/docs/software/arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas">

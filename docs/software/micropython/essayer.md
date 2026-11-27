@@ -29,7 +29,7 @@ Le bouton passe par WebUSB : il est prévu pour **Chrome** ou **Edge** sur un or
 
 1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
 2. Fermer Thonny ou `mpremote` s'ils sont ouverts : ils occupent la carte.
-3. Sous le programme, cliquer sur **Essayer sur la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. Tant que la carte reste connectée, les autres programmes s'essaient sans repasser par cette fenêtre. Elle revient après un clic sur **Déconnecter**, un débranchement de la carte, ou un passage par une page sans bouton d'essai. La connexion redémarre la carte : le programme qu'elle exécutait, par exemple son `main.py`, repart de zéro, puis le wiki l'interrompt.
+3. Sous le programme, cliquer sur **Essayer sur la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. La carte n'est choisie qu'une fois : ensuite, même après un clic sur **Déconnecter** ou un rechargement de la page, la carte déjà autorisée est reprise sans cette fenêtre, tant qu'elle est la seule STeaMi autorisée. Pour essayer une autre carte, débrancher d'abord celle-ci. La connexion redémarre la carte : le programme qu'elle exécutait, par exemple son `main.py`, repart de zéro, puis le wiki l'interrompt.
 4. Le wiki vérifie la carte (voir [Vérifications avant le lancement](#vérifications-avant-le-lancement)), puis lance le programme. La console s'ouvre sous le programme et affiche ce qu'il écrit avec `print()`. Une erreur Python (_traceback_) y est mise en évidence.
 5. Cliquer sur **Arrêter** pour interrompre le programme. Lancer un autre programme de la page arrête d'abord celui qui tourne.
 
@@ -56,7 +56,7 @@ Le DAPLink ne peut pas se mettre à jour lui-même : **Mettre à jour…** affic
 1. Cliquer sur **Télécharger le firmware** : le fichier `stm32f103xb_steami32_if_crc.bin` arrive dans le dossier des téléchargements.
 2. Créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre et un lecteur **MAINTENANCE** apparaît à la place. La page indique alors que la carte a été déconnectée : c'est normal, les étapes restent affichées.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
-4. Cliquer de nouveau sur **Essayer sur la carte**, puis choisir la carte.
+4. Cliquer de nouveau sur **Essayer sur la carte**, puis choisir la carte si la fenêtre de connexion s'ouvre.
 
 Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la page, sans lancer le programme : cliquer ensuite de nouveau sur **Essayer sur la carte**. Si le lecteur MAINTENANCE n'apparaît pas, voir [le dépannage du Codespace](../arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
@@ -115,7 +115,7 @@ Une seule page à la fois peut se connecter à la carte. Cliquer sur **Déconnec
 
 ### La carte a été déconnectée
 
-La carte a été débranchée, ou elle a redémarré sur son lecteur **MAINTENANCE** (mise à jour du DAPLink). La rebrancher si besoin, puis cliquer de nouveau sur **Essayer sur la carte** : le navigateur demande de choisir la carte une nouvelle fois.
+La carte a été débranchée, ou elle a redémarré sur son lecteur **MAINTENANCE** (mise à jour du DAPLink). La rebrancher si besoin, puis cliquer de nouveau sur **Essayer sur la carte** : si la fenêtre de connexion s'ouvre, choisir la carte une nouvelle fois.
 
 ### En dernier recours
 
