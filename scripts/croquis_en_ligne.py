@@ -31,6 +31,32 @@ CLOTURE = re.compile(r"^(`{3,}|~{3,})(.*)$")
 JETON = re.compile(r"""([\w-]+)=(?:"([^"]*)"|'([^']*)'|(\S*))|"[^"]*"|'[^']*'|(\S+)""")
 SETUP = re.compile(r"\bsetup\s*\(")
 LOOP = re.compile(r"\bloop\s*\(")
+# En-tête des croquis du wiki dans le sample, comme dans plugins/remark-code-file.js.
+ENTETE_SAMPLE = re.compile(r"^// Croquis de la page du wiki[^\n]*\n(?://[^\n]*\n)*\n*")
+
+
+def code_sans_entete(texte):
+    """Code d'un croquis du sample sans son en-tête « // Croquis de la page du
+    wiki … », fins de ligne en \\n : comparable au `code` d'un Bloc."""
+    return ENTETE_SAMPLE.sub("", texte.replace("\r\n", "\n"), count=1)
+
+
+def meme_code(publie, code):
+    """Le croquis publié (en-tête compris) a-t-il le code du bloc ?"""
+    return code_sans_entete(publie).strip("\n") == code.strip("\n")
+
+
+def meta_sans_sample(meta):
+    """Meta d'un bloc sans ses jetons `sample=…`, le reste (title=, {1-3},
+    showLineNumbers…) tel quel, une seule espace à la place de chaque jeton."""
+    morceaux = []
+    debut = 0
+    for m in JETON.finditer(meta):
+        if m.group(1) == "sample":
+            morceaux.append(meta[debut : m.start()].strip())
+            debut = m.end()
+    morceaux.append(meta[debut:].strip())
+    return " ".join(m for m in morceaux if m)
 
 
 @dataclass(frozen=True)

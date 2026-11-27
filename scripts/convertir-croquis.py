@@ -17,7 +17,8 @@ devient :
 
 avec l'indentation du délimiteur ouvrant (bloc dans un onglet <Release>) et les
 fins de ligne de la page (CRLF gardé), suivi d'une ligne vide si du texte
-suivait directement le bloc. Une page convertie reçoit, si elle ne l'a pas,
+suivait directement le bloc. Le reste de la meta du bloc (title="…",
+showLineNumbers, {1-3}…) est recopié après `file=`, sans le jeton `sample=`. Une page convertie reçoit, si elle ne l'a pas,
 l'import d'EssayerExemple : à la fin du groupe d'imports qui suit le
 frontmatter, sinon juste après le frontmatter, sinon en tête de page.
 
@@ -28,17 +29,22 @@ haut (doublon : check-inline-sketches.py le signale). Un deuxième passage ne
 change rien : un bloc converti a `file=` et n'est plus un croquis en ligne.
 
 Si le croquis publié (sans son en-tête « // Croquis de la page du wiki … »)
-diffère du code du bloc, parce qu'il a été corrigé dans la PR du sample ou
-qu'un autre croquis porte déjà ce nom, le bloc est converti quand même et un
-avertissement le signale (annotation sous GitHub Actions) : la page affiche
-désormais le croquis publié.
+diffère du code du bloc, le bloc est converti quand même et un avertissement
+le signale (annotation sous GitHub Actions) : la page affiche désormais le
+croquis publié. Trois causes possibles : croquis corrigé dans la PR du sample
+(voulu), bloc modifié dans le wiki après la fusion de cette PR (le robot ne
+reporte pas la modification : elle serait perdue), ou nom déjà pris par un
+autre croquis. L'id est aussi écrit dans la sortie `differents=` : le workflow
+le cite dans le corps de la PR et l'ouvre en brouillon, sans fusion
+automatique, pour qu'un humain vérifie le diff.
 
 Un id converti est retiré de scripts/exemples-arduino-sample-a-documenter.txt
 s'il y figure (check-arduino-examples.py refuse un croquis à la fois utilisé
 et en attente) ; les autres lignes de la liste restent telles quelles.
 
---sortie-github (en général $GITHUB_OUTPUT) reçoit `convertis=<ids>`, séparés
-par des espaces, vide si rien n'est converti.
+--sortie-github (en général $GITHUB_OUTPUT) reçoit `convertis=<ids>` et
+`differents=<ids>` (convertis dont le croquis publié diffère du bloc), séparés
+par des espaces, vides s'il n'y en a pas.
 
 Usage :
     python3 scripts/convertir-croquis.py SAMPLE [--pages DIR]
@@ -53,7 +59,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from croquis_en_ligne import CLOTURE, GROUPES, MOTIF_ID, blocs_de_texte, lister_pages
+from croquis_en_ligne import (
+    CLOTURE,
+    GROUPES,
+    MOTIF_ID,
+    blocs_de_texte,
+    lister_pages,
+    meme_code,
+    meta_sans_sample,
+)
 
 RACINE = Path(__file__).resolve().parent.parent
 PAGES_DEFAUT = RACINE / "docs"
@@ -62,8 +76,6 @@ DOSSIER_INCLUSION = ".external/arduino-steami-sample/examples"
 IMPORT = "import EssayerExemple from '@site/src/components/EssayerExemple';"
 DEJA_IMPORTE = re.compile(r"^import\s.*\bEssayerExemple\b")
 FIN_DE_LIGNE = re.compile(r"(\r\n|\r|\n)$")
-# En-tête des croquis du wiki dans le sample, comme dans plugins/remark-code-file.js.
-ENTETE_SAMPLE = re.compile(r"^// Croquis de la page du wiki[^\n]*\n(?://[^\n]*\n)*\n*")
 
 
 def fin_de_ligne(ligne, defaut="\n"):
@@ -107,13 +119,17 @@ def _ferme(lignes, bloc):
     )
 
 
-def _inclusion(ident, ouvrant, fermant, suivante):
-    """Lignes qui remplacent le bloc. `suivante` : ligne après le bloc, ou None."""
+def _inclusion(ident, meta, ouvrant, fermant, suivante):
+    """Lignes qui remplacent le bloc. `meta` : meta du bloc ; `suivante` :
+    ligne après le bloc, ou None."""
     groupe, nom = ident.split("/")
     indent = ouvrant[: len(ouvrant) - len(ouvrant.lstrip())]
     eol = fin_de_ligne(ouvrant)
+    # title=, showLineNumbers… : remark-code-file.js les garde après file=.
+    reste = meta_sans_sample(meta)
+    reste = f" {reste}" if reste else ""
     lignes = [
-        f"{indent}```cpp file={DOSSIER_INCLUSION}/{groupe}/{nom}/{nom}.ino{eol}",
+        f"{indent}```cpp file={DOSSIER_INCLUSION}/{groupe}/{nom}/{nom}.ino{reste}{eol}",
         eol,
         f"{indent}```{eol}",
         eol,
@@ -190,7 +206,7 @@ def convertir_texte(texte, publies, deja_convertis=None, avertir=None):
     for b in reversed(a_convertir):
         suivante = lignes[b.ligne_fin] if b.ligne_fin < len(lignes) else None
         remplacement = _inclusion(
-            b.id_sample, lignes[b.ligne_debut - 1], lignes[b.ligne_fin - 1], suivante
+            b.id_sample, b.meta, lignes[b.ligne_debut - 1], lignes[b.ligne_fin - 1], suivante
         )
         lignes[b.ligne_debut - 1 : b.ligne_fin] = remplacement
     lignes = _ajouter_import(lignes)
@@ -213,11 +229,10 @@ def _affiche(chemin):
         return chemin
 
 
-def code_publie(sample, ident):
-    """Code du croquis publié, sans son en-tête, fins de ligne en \\n."""
+def fichier_publie(sample, ident):
+    """Texte du croquis publié, en-tête compris."""
     groupe, nom = ident.split("/")
-    texte = _lire(Path(sample) / "examples" / groupe / nom / f"{nom}.ino")
-    return ENTETE_SAMPLE.sub("", texte.replace("\r\n", "\n"), count=1)
+    return _lire(Path(sample) / "examples" / groupe / nom / f"{nom}.ino")
 
 
 def retirer_de_l_attente(chemin, ids):
@@ -251,6 +266,7 @@ def main(argv=None):
     publies = ids_publies(args.sample)
 
     convertis = []
+    differents = []
     deja = set()
     for page in lister_pages(args.pages):
         affiche = _affiche(page)
@@ -262,13 +278,17 @@ def main(argv=None):
         avant = {b.id_sample: b for b in reversed(blocs_de_texte(texte, affiche))}
         nouveau, ids = convertir_texte(texte, publies, deja, avertir)
         for ident in ids:
-            # Croquis corrigé dans la PR du sample, ou nom déjà pris par un autre
-            # croquis : converti quand même, mais signalé pour la relecture.
+            # Croquis corrigé dans la PR du sample, bloc modifié dans le wiki
+            # après la fusion de cette PR, ou nom déjà pris par un autre croquis :
+            # converti quand même, mais signalé pour la relecture.
             b = avant[ident]
-            if code_publie(args.sample, ident).strip("\n") != b.code.strip("\n"):
+            if not meme_code(fichier_publie(args.sample, ident), b.code):
+                differents.append(ident)
                 message = (
                     f"le croquis publié {ident} diffère du bloc de la page : "
-                    "la page affiche désormais celui du sample, vérifier le diff"
+                    "la page affiche désormais celui du sample, vérifier le diff "
+                    "(une modification faite dans la page après la fusion de la PR "
+                    "du sample est perdue : la reporter dans arduino-steami-sample)"
                 )
                 avertir(b, message)
                 if actions:
@@ -289,6 +309,7 @@ def main(argv=None):
     if args.sortie_github:
         with args.sortie_github.open("a", encoding="utf-8") as sortie:
             sortie.write(f"convertis={' '.join(convertis)}\n")
+            sortie.write(f"differents={' '.join(differents)}\n")
     return 0
 
 

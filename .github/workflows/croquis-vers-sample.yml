@@ -41,6 +41,9 @@
 #
 # Essai à blanc : Actions > croquis-vers-sample > Run workflow, case
 # « essai » cochée : la branche est préparée et affichée, rien n'est poussé.
+# Seul l'essai à blanc peut partir d'une autre branche que main : sans lui,
+# le robot porterait dans le sample des pages ni relues ni fusionnées, et le
+# job est sauté.
 #
 # Neutralisé dans les forks.
 # =====================================================================
@@ -69,8 +72,9 @@ concurrency:
 jobs:
   croquis:
     name: croquis en ligne à ajouter au sample ?
-    # Ne pas tourner dans les forks.
-    if: github.repository == 'steamicc/wiki_steami'
+    # Ne pas tourner dans les forks. Hors de main, seulement l'essai à blanc :
+    # le robot ne pousse que des pages fusionnées.
+    if: github.repository == 'steamicc/wiki_steami' && (github.ref == 'refs/heads/main' || inputs.essai)
     runs-on: ubuntu-latest
     env:
       SAMPLE: arduino-steami-sample

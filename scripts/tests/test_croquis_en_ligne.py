@@ -77,6 +77,22 @@ class TestReperage(unittest.TestCase):
         self.assertFalse(b.norun)
         self.assertEqual(b.meta, 'title="Mon croquis" sample=PREMIERS/ClignoterLed')
 
+    def test_meta_without_sample_keeps_the_rest(self):
+        m = croquis_en_ligne.meta_sans_sample
+        self.assertEqual(m("sample=PREMIERS/A"), "")
+        self.assertEqual(
+            m('title="Mon croquis" showLineNumbers sample=PREMIERS/A {1-3}'),
+            'title="Mon croquis" showLineNumbers {1-3}',
+        )
+        self.assertEqual(m('sample="PREMIERS/A" title="sample=X/Y"'), 'title="sample=X/Y"')
+        self.assertEqual(m('title="a  b"'), 'title="a  b"')
+
+    def test_same_code_ignores_the_sample_header_and_line_endings(self):
+        entete_sample = "// Croquis de la page du wiki « T (docs/p.md) ».\n\n"
+        self.assertTrue(croquis_en_ligne.meme_code(entete_sample + CROQUIS, CROQUIS))
+        self.assertTrue(croquis_en_ligne.meme_code(CROQUIS.replace("\n", "\r\n"), CROQUIS))
+        self.assertFalse(croquis_en_ligne.meme_code(entete_sample + "// corrigé\n" + CROQUIS, CROQUIS))
+
     def test_meta_norun(self):
         (b,) = blocs(bloc_md(meta="norun"))
         self.assertTrue(b.norun)
@@ -515,6 +531,42 @@ class TestRobotSample(unittest.TestCase):
         # Le croquis de main n'est pas remplacé.
         self.assertEqual(self.fichier(clone, "PREMIERS/ClignoterLed"), "// corrigé\n" + CROQUIS)
 
+    def test_block_changed_after_merge_into_sample_main_is_reported(self):
+        # PR du robot fusionnée dans le sample, pas encore publiée ; le bloc du
+        # wiki change ensuite : le robot ne remplace pas le croquis de main,
+        # mais signale l'écart (sinon la PR d'épinglage efface la modification).
+        self.ecrire(self.graine, "examples/PREMIERS/ClignoterLed/ClignoterLed.ino", entete() + CROQUIS)
+        git(self.graine, "add", ".")
+        git(self.graine, "commit", "-q", "-m", "feat(examples): Add the wiki sketches. (#9)")
+        git(self.graine, "push", "-q", "origin", "HEAD:refs/heads/main")
+        self.page(bloc_md("sample=PREMIERS/ClignoterLed", CROQUIS.replace("500", "250")))
+        clone = self.cloner()
+        code, out, err, sorties = self.lancer(clone)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(sorties["pousser"], "false")
+        (avertissement,) = [l for l in out.splitlines() if l.startswith("Attention")]
+        self.assertIn("PREMIERS/ClignoterLed", avertissement)
+        self.assertIn(f"{PAGE_ROBOT}:", avertissement)
+        self.assertIn("arduino-steami-sample", avertissement)
+        # Sous GitHub Actions : annotation.
+        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}):
+            out2 = io.StringIO()
+            with contextlib.redirect_stdout(out2), contextlib.redirect_stderr(io.StringIO()):
+                self.robot.main(["--pages", str(self.docs), "--sample", str(self.cloner()),
+                                 "--epingle-sample", str(self.epingle)])
+        self.assertIn("::warning::", out2.getvalue())
+        self.assertIn("PREMIERS/ClignoterLed", out2.getvalue())
+
+    def test_same_block_on_sample_main_is_not_reported(self):
+        self.ecrire(self.graine, "examples/PREMIERS/ClignoterLed/ClignoterLed.ino", entete() + CROQUIS)
+        git(self.graine, "add", ".")
+        git(self.graine, "commit", "-q", "-m", "x")
+        git(self.graine, "push", "-q", "origin", "HEAD:refs/heads/main")
+        self.page(bloc_md("sample=PREMIERS/ClignoterLed"))
+        code, out, err, _ = self.lancer(self.cloner())
+        self.assertEqual(code, 0, err)
+        self.assertNotIn("Attention", out)
+
     def test_all_on_main_means_nothing_to_push(self):
         self.ecrire(self.graine, "examples/PREMIERS/ClignoterLed/ClignoterLed.ino", CROQUIS)
         git(self.graine, "add", ".")
@@ -729,6 +781,12 @@ class TestFluxRobot(unittest.TestCase):
         self.assertIn("github.repository == 'steamicc/wiki_steami'", str(f["jobs"]["croquis"]["if"]))
         self.assertIs(f["concurrency"]["cancel-in-progress"], False)
 
+    def test_outside_main_only_the_dry_run(self):
+        # Lancé à la main depuis une autre branche, essai décoché : le robot
+        # porterait dans le sample des pages ni relues ni fusionnées.
+        condition = str(flux_robot()["jobs"]["croquis"]["if"])
+        self.assertIn("&& (github.ref == 'refs/heads/main' || inputs.essai)", condition)
+
 
 IMPORT_ESSAYER = "import EssayerExemple from '@site/src/components/EssayerExemple';"
 ENTETE_PAGE = "---\ntitle: Premiers programmes\nsidebar_position: 3\n---\n\n"
@@ -746,11 +804,12 @@ def charger_conversion():
     return module
 
 
-def inclusion(ident, indent="", eol="\n"):
+def inclusion(ident, indent="", eol="\n", meta=""):
     """Bloc converti attendu : inclusion du croquis, puis bouton Téléverser."""
     groupe, nom = ident.split("/")
+    reste = f" {meta}" if meta else ""
     return (
-        f"{indent}```cpp file=.external/arduino-steami-sample/examples/{groupe}/{nom}/{nom}.ino{eol}"
+        f"{indent}```cpp file=.external/arduino-steami-sample/examples/{groupe}/{nom}/{nom}.ino{reste}{eol}"
         f"{eol}"
         f"{indent}```{eol}"
         f"{eol}"
@@ -937,7 +996,22 @@ class TestConversion(unittest.TestCase):
         quatre = bloc_md('title="Mon croquis" sample=CARTE/B', cloture="````")
         texte = "# T\n\n" + tilde + "\n" + quatre
         nouveau, _ = self.convertir(texte, {"CARTE/A", "CARTE/B"})
-        self.assertEqual(nouveau, IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A") + "\n" + inclusion("CARTE/B"))
+        self.assertEqual(
+            nouveau,
+            IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A") + "\n"
+            + inclusion("CARTE/B", meta='title="Mon croquis"'),
+        )
+
+    def test_title_line_numbers_and_highlights_kept_after_file(self):
+        # La marque sample= ne change pas l'affichage : la conversion non plus.
+        meta = 'title="Clignoter" showLineNumbers {1-3}'
+        texte = "# T\n\n" + bloc_md('title="Clignoter" showLineNumbers sample=PREMIERS/Clignoter {1-3}')
+        nouveau, _ = self.convertir(texte, {"PREMIERS/Clignoter"})
+        self.assertEqual(nouveau, IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("PREMIERS/Clignoter", meta=meta))
+        # remark-code-file.js lit file= puis garde le reste de la meta.
+        (ligne,) = [l for l in nouveau.splitlines() if "file=" in l]
+        self.assertTrue(ligne.startswith("```cpp file=.external/arduino-steami-sample/examples/PREMIERS/"))
+        self.assertTrue(ligne.endswith(" " + meta))
 
     def test_converted_page_passes_both_lints(self):
         texte = (
@@ -1000,7 +1074,9 @@ class TestConversionFichiers(unittest.TestCase):
         self.assertTrue(page.read_bytes().startswith(ENTETE_PAGE.encode("utf-8")))
         self.assertEqual(autre.read_bytes(), autre_octets)
         self.assertEqual(self.attente.read_bytes(), b"BOUTONS/LedsBoutons\r\nBUZZER/Melodie\r\n")
-        self.assertEqual(self.sortie.read_text(encoding="utf-8"), "convertis=PREMIERS/ClignoterLed\n")
+        self.assertEqual(
+            self.sortie.read_text(encoding="utf-8"), "convertis=PREMIERS/ClignoterLed\ndifferents=\n"
+        )
         self.assertIn("PREMIERS/ClignoterLed", sortie)
         self.assertIn("premiers.md", sortie)
         # Deuxième passage : aucun changement.
@@ -1009,7 +1085,7 @@ class TestConversionFichiers(unittest.TestCase):
         code, _ = self.lancer()
         self.assertEqual(code, 0)
         self.assertEqual(page.read_bytes(), octets)
-        self.assertEqual(self.sortie.read_text(encoding="utf-8"), "convertis=\n")
+        self.assertEqual(self.sortie.read_text(encoding="utf-8"), "convertis=\ndifferents=\n")
 
     def test_waiting_list_untouched_when_not_listed_or_absent(self):
         (self.pages / "arduino" / "p.md").write_text("# P\n\n" + bloc_md("sample=CAPTEURS/Distance"), encoding="utf-8")
@@ -1056,6 +1132,25 @@ class TestConversionFichiers(unittest.TestCase):
         avertissements = [l for l in sortie.splitlines() if "diffère" in l]
         self.assertEqual(len(avertissements), 2)  # texte et annotation, pour Distance seulement
         self.assertTrue(all("CAPTEURS/Distance" in l for l in avertissements))
+        # Écrit aussi pour le workflow, qui ouvre alors la PR en brouillon.
+        self.assertEqual(
+            self.sortie.read_text(encoding="utf-8"),
+            "convertis=PREMIERS/ClignoterLed CAPTEURS/Distance\ndifferents=CAPTEURS/Distance\n",
+        )
+
+    def test_page_edited_after_the_sample_merge_is_reported(self):
+        # Bloc modifié dans le wiki après la fusion de la PR du robot dans le
+        # sample : la conversion remet le croquis publié, l'écart est nommé.
+        page = self.pages / "arduino" / "p.md"
+        page.write_text(
+            "# P\n\n" + bloc_md("sample=PREMIERS/ClignoterLed", code="// commentaire corrigé\n" + CROQUIS),
+            encoding="utf-8",
+        )
+        code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertIn("differents=PREMIERS/ClignoterLed\n", self.sortie.read_text(encoding="utf-8"))
+        self.assertNotIn("commentaire corrigé", page.read_text(encoding="utf-8"))
+        self.assertIn("perdue", sortie)
 
     def test_command_line_runs(self):
         (self.pages / "arduino" / "p.md").write_text("# P\n\n" + bloc_md("sample=CAPTEURS/Distance"), encoding="utf-8")
@@ -1118,6 +1213,71 @@ class TestFluxConversion(unittest.TestCase):
         self.assertIn("--sortie-github", self.code())
         self.assertIn("sample=G/N", texte)
         self.assertNotIn("point d'extension", texte)
+
+    def ouvrir_pr(self, convertis="", differents="", pousse="true"):
+        """Lance le script de l'étape « Ouvre la PR » avec un faux gh ; renvoie
+        (arguments de gh pr create, corps de la PR)."""
+        etapes = yaml.safe_load(FLUX_EPINGLAGE.read_text(encoding="utf-8"))["jobs"]["suivre"]["steps"]
+        (etape,) = [e for e in etapes if e.get("name") == "Ouvre la PR"]
+        self.assertEqual(etape["env"]["DIFFERENTS"], "${{ steps.epinglage.outputs.differents }}")
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "bin").mkdir()
+            gh = d / "bin" / "gh"
+            # Faux gh : note ses arguments et recopie le corps de la PR.
+            gh.write_text(
+                '#!/bin/bash\nprintf "%s\\n" "$@" > "$RUNNER_TEMP/args"\n'
+                'while [ $# -gt 0 ]; do [ "$1" = --body-file ] && cp "$2" "$RUNNER_TEMP/corps-pr"; shift; done\n'
+                'echo https://github.com/steamicc/wiki_steami/pull/42\n',
+                encoding="utf-8",
+            )
+            gh.chmod(0o755)
+            env = {
+                "PATH": f"{d / 'bin'}:{os.environ['PATH']}",
+                "RUNNER_TEMP": str(d),
+                "GITHUB_OUTPUT": str(d / "sortie"),
+                "ACTUEL": "v1.0.1", "DERNIERE": "v1.1.0", "ARCHIVE": "steami-exemples-v1.1.0.zip",
+                "BRANCHE": "chore/croquis-sample-v1-1-0", "POUSSE": pousse,
+                "CONVERTIS": convertis, "DIFFERENTS": differents,
+            }
+            r = subprocess.run(["bash", "-e", "-c", etape["run"]], env=env,
+                               capture_output=True, text=True, check=False)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertEqual((d / "sortie").read_text(encoding="utf-8"), "pr=42\n")
+            return (d / "args").read_text(encoding="utf-8").splitlines(), (d / "corps-pr").read_text(encoding="utf-8")
+
+    def test_pr_without_difference_is_not_a_draft(self):
+        args, corps = self.ouvrir_pr(convertis="PREMIERS/LireBoutons")
+        self.assertNotIn("--draft", args)
+        self.assertIn("`PREMIERS/LireBoutons`", corps)
+        self.assertNotIn("À vérifier", corps)
+        self.assertIn("La fusion automatique (squash) est activée", corps)
+
+    def test_published_sketch_different_from_page_opens_a_draft(self):
+        # Modification faite dans le wiki après la fusion de la PR du sample :
+        # la PR la nomme et n'est pas fusionnée automatiquement.
+        args, corps = self.ouvrir_pr(
+            convertis="PREMIERS/ClignoterLed PREMIERS/LireBoutons", differents="PREMIERS/LireBoutons"
+        )
+        self.assertIn("--draft", args)
+        (ecart,) = [l for l in corps.splitlines() if l.startswith("**À vérifier")]
+        self.assertIn("`PREMIERS/LireBoutons`", ecart)
+        self.assertNotIn("ClignoterLed", ecart)
+        self.assertIn("modification du wiki est perdue", ecart)
+        self.assertIn("n'est pas activée tant que la PR est en brouillon", corps)
+        self.assertNotIn("La fusion automatique (squash) est activée", corps)
+
+    def test_branch_from_a_previous_run_opens_a_draft(self):
+        # Écarts de la conversion inconnus : un humain lit le diff d'abord.
+        args, corps = self.ouvrir_pr(pousse="false")
+        self.assertIn("--draft", args)
+        self.assertIn("exécution précédente", corps)
+
+    def test_auto_merge_skipped_for_a_draft(self):
+        etapes = yaml.safe_load(FLUX_EPINGLAGE.read_text(encoding="utf-8"))["jobs"]["suivre"]["steps"]
+        (etape,) = [e for e in etapes if e.get("name") == "Active la fusion automatique"]
+        run = etape["run"]
+        self.assertLess(run.index("jq -e .isDraft"), run.index('gh pr merge "$PR" --auto --squash'))
 
 
 if __name__ == "__main__":

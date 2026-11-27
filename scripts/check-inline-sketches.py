@@ -214,7 +214,9 @@ def main(argv=None):
                     b.ligne_debut,
                     f"Croquis sample={b.id_sample} : le robot l'ajoutera à "
                     "arduino-steami-sample après la fusion, puis la PR d'épinglage "
-                    "le remplacera par son inclusion.",
+                    "le remplacera par son inclusion. S'il est déjà sur main du "
+                    "sample (non publié), le robot ne le remplace pas et signale "
+                    "un écart : reporter alors la modification dans le sample.",
                 )
             )
 

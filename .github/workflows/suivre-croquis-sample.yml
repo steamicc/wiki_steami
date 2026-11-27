@@ -30,7 +30,11 @@
 # source="sample" />, et G/N quitte la liste d'attente
 # scripts/exemples-arduino-sample-a-documenter.txt s'il y figurait. Le
 # commit d'épinglage emporte aussi ces pages et cette liste, et le corps de
-# la PR nomme les croquis convertis.
+# la PR nomme les croquis convertis. Si un croquis publié diffère du bloc de
+# la page (corrigé dans la PR du sample, ou bloc modifié dans le wiki après
+# sa fusion, modification que la conversion efface), le corps le nomme et la
+# PR est ouverte en brouillon, donc sans fusion automatique, jusqu'à ce
+# qu'un humain ait lu le diff et l'ait passée en « Ready for review ».
 #
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
@@ -253,15 +257,39 @@ jobs:
           DERNIERE: ${{ steps.comparaison.outputs.derniere }}
           ARCHIVE: ${{ steps.comparaison.outputs.archive }}
           BRANCHE: ${{ steps.comparaison.outputs.branche }}
-          # Vide si la branche existait déjà (conversion faite lors d'une exécution précédente).
+          POUSSE: ${{ steps.comparaison.outputs.pousser }}
+          # Vides si la branche existait déjà (conversion faite lors d'une exécution précédente).
           CONVERTIS: ${{ steps.epinglage.outputs.convertis }}
+          DIFFERENTS: ${{ steps.epinglage.outputs.differents }}
         run: |
           set -euo pipefail
           conversion=""
+          ecarts=""
+          brouillon=()
           if [ -n "$CONVERTIS" ]; then
             read -ra ids <<<"$CONVERTIS"
             liste=$(printf '`%s`, ' "${ids[@]}")
             conversion="Elle remplace aussi chaque croquis écrit en ligne dans une page du wiki, marqué \`sample=G/N\` et publié par cette release (${liste%, }), par son inclusion depuis le sample (bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\`) suivie du bouton \`<EssayerExemple id=\"G/N\" source=\"sample\" />\`, et le retire de \`scripts/exemples-arduino-sample-a-documenter.txt\` s'il y figurait (\`scripts/convertir-croquis.py\`). Le croquis affiché est désormais celui de la release : vérifier le diff des pages."
+          fi
+          # Croquis publié différent du bloc de la page : correction voulue dans la
+          # PR du sample, ou modification faite dans le wiki après sa fusion, que
+          # la conversion efface. Un humain tranche : PR en brouillon, donc sans
+          # fusion automatique (l'étape suivante la saute tant qu'elle l'est).
+          if [ -n "$DIFFERENTS" ]; then
+            read -ra ids <<<"$DIFFERENTS"
+            liste=$(printf '`%s`, ' "${ids[@]}")
+            ecarts="**À vérifier avant de fusionner :** pour ${liste%, }, le croquis publié diffère du bloc qui était dans la page. Soit il a été corrigé dans la PR d'arduino-steami-sample (rien à faire), soit le bloc a été modifié dans le wiki après la fusion de cette PR, soit un autre croquis porte déjà ce nom : la page affiche maintenant le croquis publié et la modification du wiki est perdue. Lire le diff de chaque page et reporter dans arduino-steami-sample une modification à garder. La PR est ouverte en brouillon : la passer en « Ready for review » une fois vérifiée, et le robot active la fusion automatique à son passage suivant."
+            brouillon=(--draft)
+          elif [ "$POUSSE" != "true" ]; then
+            # Branche poussée par une exécution précédente : les écarts éventuels
+            # de sa conversion ne sont plus connus.
+            ecarts="**À vérifier avant de fusionner :** la branche a été préparée par une exécution précédente du robot, qui n'a pas pu ouvrir la PR : les croquis convertis et leurs écarts éventuels avec les pages ne sont plus connus. Lire le diff des pages, puis passer la PR en « Ready for review » : le robot active la fusion automatique à son passage suivant."
+            brouillon=(--draft)
+          fi
+          if [ "${#brouillon[@]}" -gt 0 ]; then
+            fusion="La fusion automatique (squash) n'est pas activée tant que la PR est en brouillon. Une fois la PR passée en « Ready for review », le robot l'active à son passage suivant : la PR est alors fusionnée dès que le CI est vert."
+          else
+            fusion="La fusion automatique (squash) est activée : la PR est fusionnée dès que le CI est vert, y compris après des commits ajoutés sur la branche. Pour l'éviter, passer la PR en brouillon : désactiver seulement la fusion automatique ne suffit pas, le robot la réactive à son passage suivant."
           fi
           corps="$RUNNER_TEMP/corps.md"
           cat > "$corps" <<EOT
@@ -272,11 +300,13 @@ jobs:
 
           $conversion
 
+          $ecarts
+
           La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
 
-          La fusion automatique (squash) est activée : la PR est fusionnée dès que le CI est vert, y compris après des commits ajoutés sur la branche. Pour l'éviter, passer la PR en brouillon : désactiver seulement la fusion automatique ne suffit pas, le robot la réactive à son passage suivant.
+          $fusion
           EOT
-          url=$(gh pr create --base main --head "$BRANCHE" \
+          url=$(gh pr create --base main --head "$BRANCHE" "${brouillon[@]}" \
             --title "chore(configs): croquis du sample $DERNIERE" \
             --body-file "$corps")
           echo "PR ouverte : $url"

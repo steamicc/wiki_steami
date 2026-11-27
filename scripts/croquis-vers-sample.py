@@ -20,7 +20,11 @@ le workflow la pousse et ouvre (ou met à jour) l'unique PR du robot.
    examples/<GROUPE>/<Nom>/<Nom>.ino = en-tête « // Croquis de la page du
    wiki « <titre> (<page>) ». », ligne vide, code du bloc :
    - croquis déjà sur origin/main du sample (fusionné, en attente de release) :
-     ignoré, jamais remplacé ;
+     ignoré, jamais remplacé ; si son code diffère du bloc (bloc modifié dans
+     le wiki après la fusion de la PR du robot, ou nom pris par un autre
+     croquis), avertissement : la PR d'épinglage remplacera le bloc par le
+     croquis de main, la modification de la page est à reporter à la main
+     dans arduino-steami-sample ;
    - fichier absent de la branche : un commit `feat(<groupe>): Add <Nom> from
      the wiki.` ;
    - fichier identique : rien (rejeu sans doublon) ;
@@ -53,7 +57,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from croquis_en_ligne import CLOTURE, blocs
+from croquis_en_ligne import CLOTURE, blocs, meme_code
 
 RACINE = Path(__file__).resolve().parent.parent
 PAGES_DEFAUT = RACINE / "docs"
@@ -302,6 +306,16 @@ def preparer(depot, liste_blocs, version, reprendre, racine, actions=False):
         pages[ident] = (page, titres[page])
         if ident in ids_main:
             print(f"{ident} : déjà sur main d'arduino-steami-sample (publié à la prochaine release), ignoré.")
+            if not meme_code(contenu_a(depot, MAIN, chemin_croquis(ident)) or "", b.code):
+                _avertir(
+                    f"{page}:{b.ligne_debut} : le bloc sample={ident} diffère du croquis "
+                    "déjà sur main d'arduino-steami-sample (bloc modifié après la fusion "
+                    "de la PR du robot, ou nom pris par un autre croquis). Le robot ne le "
+                    "remplace pas : la PR d'épinglage de la prochaine release remettra "
+                    "dans la page le croquis de main. Reporter la modification par une PR "
+                    "dans arduino-steami-sample, ou choisir un autre nom.",
+                    actions,
+                )
         else:
             print(f"{ident} : {_ecrire(depot, ident, entete(titres[page], page) + b.code)}")
 
