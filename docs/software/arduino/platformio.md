@@ -43,7 +43,7 @@ board = steami
 framework = arduino
 monitor_speed = 115200
 lib_deps =
-  https://github.com/steamicc/arduino-steami.git#v0.39.0
+  https://github.com/steamicc/arduino-steami.git#v0.41.0
 ```
 
 - `platform_packages` choisit la version 3.1.0 du core STM32duino, celle qu'installe l'Arduino IDE : un programme se compile de la même façon dans les deux outils.
@@ -95,7 +95,7 @@ Ce fichier décrit la carte : microcontrôleur, mémoire, variante du core STM32
 
 ### src/main.cpp
 
-Les programmes de la [page Capteurs et écran](./capteurs) fonctionnent tels quels, avec une différence : un fichier `.cpp` doit commencer par `#include <Arduino.h>`, que l'Arduino IDE ajoute en coulisses.
+Les programmes des pages [Capteurs](./capteurs) et [Écran](./ecran) fonctionnent tels quels, avec une différence : un fichier `.cpp` doit commencer par `#include <Arduino.h>`, que l'Arduino IDE ajoute en coulisses.
 
 ```cpp
 #include <Arduino.h>
@@ -177,6 +177,7 @@ Vérifier `monitor_speed = 115200` dans `platformio.ini`. Les messages écrits d
 ## Voir aussi
 
 - [Bibliothèques STeaMi](./bibliotheques) : les drivers de chaque composant et le bus I²C interne.
-- [Capteurs et écran](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
+- [Capteurs](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
+- [Écran](./ecran) : dessiner sur l'écran rond, avec `SteamiDisplay`, `SteamiScreen` et ses widgets, ou avec le driver de l'écran.
 - [Développer les drivers](./contribuer) : pour modifier la bibliothèque STeaMi elle-même.
 - [Documentation PlatformIO](https://docs.platformio.org/) : référence de `platformio.ini` et des commandes.

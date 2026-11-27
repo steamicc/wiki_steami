@@ -18,7 +18,7 @@ Sa portée va jusqu'à 4 m dans de bonnes conditions. Elle diminue avec un objet
 
 Le VL53L1X est monté sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)) : les cinq exemples de cette page marchent sur toutes les cartes. Il se trouve sur la face avant, sur le bord de la partie ronde, juste à droite de l'écran : c'est le petit boîtier à deux fenêtres marqué U11, l'une pour l'émetteur, l'autre pour le récepteur. À travers une webcam, on voit son émetteur infrarouge briller pendant les mesures, alors qu'il reste invisible à l'œil nu.
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → VL53L1X** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#distance--capteur-de-temps-de-vol) donne la façon la plus simple de lire la distance, avec la classe `SteamiDistance` ; ici, les exemples utilisent directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → VL53L1X** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs](../capteurs#distance--capteur-de-temps-de-vol) donne la façon la plus simple de lire la distance, avec la classe `SteamiDistance` ; ici, les exemples utilisent directement le driver du composant.
 
 ## Le driver en bref
 

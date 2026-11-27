@@ -18,7 +18,7 @@ Un accéléromètre immobile ne mesure pas 0 : il ressent le support qui l'empê
 
 Le composant monté sur la carte est l'ISM330DLC de STMicroelectronics (référence ISM330DLCTR) ; la bibliothèque l'appelle ISM330DL. Il est monté sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)) : les trois exemples de cette page marchent sur toutes les cartes. Ses caractéristiques, sa fiche technique et son schéma sont sur la page [Accéléromètre / Gyroscope — ISM330DLC](/docs/hardware/main-components/sensors/ism330dlc).
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → ISM330DL** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#mouvement--accéléromètre-et-gyroscope) donne la façon la plus simple de lire le mouvement, avec les classes `SteamiAccelerometer` et `SteamiGyroscope` ; ici, les exemples utilisent directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → ISM330DL** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs](../capteurs#mouvement--accéléromètre-et-gyroscope) donne la façon la plus simple de lire le mouvement, avec les classes `SteamiAccelerometer` et `SteamiGyroscope` ; ici, les exemples utilisent directement le driver du composant.
 
 ## Le driver en bref
 
@@ -36,7 +36,7 @@ Toutes ces fonctions de lecture renvoient `true` si la lecture a réussi, et `fa
 Deux points du driver comptent pour comprendre les exemples :
 
 - Une lecture n'attend pas de nouvelle mesure : elle lit la dernière que le composant a rangée dans ses registres. À 104 mesures par seconde, il en arrive une nouvelle toutes les 10 ms environ : avec les pauses de 100 ou 300 ms des exemples, chaque lecture est récente. En revanche, ce qui se passe entre deux lectures n'est pas vu.
-- Le driver créé dans le programme garde la plage de ±2 g et ne reçoit pas la calibration `ca` de la zone de configuration du DAPLink. La classe `SteamiAccelerometer`, elle, règle l'accéléromètre sur ±8 g et applique cette calibration (voir [Capteurs et écran](../capteurs#mouvement--accéléromètre-et-gyroscope)).
+- Le driver créé dans le programme garde la plage de ±2 g et ne reçoit pas la calibration `ca` de la zone de configuration du DAPLink. La classe `SteamiAccelerometer`, elle, règle l'accéléromètre sur ±8 g et applique cette calibration (voir [Capteurs](../capteurs#mouvement--accéléromètre-et-gyroscope)).
 
 Le composant peut aussi signaler ses mesures sur une ligne d'interruption reliée au microcontrôleur (`INT_ACC`, broche PC13). Le driver ne s'en sert pas : tout passe par le bus I²C.
 

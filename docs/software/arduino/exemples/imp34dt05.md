@@ -20,7 +20,7 @@ Le microphone est omnidirectionnel : il capte le son de toutes les directions. S
 
 L'IMP34DT05 est monté sur les trois releases de la carte, **V1a, V1b et V1c** (voir [Révisions de la carte](/docs/hardware/revisions)) : les quatre exemples de cette page marchent sur toutes les cartes.
 
-Ces exemples sont ceux de la bibliothèque STeaMi, à partir de sa version 0.39.0. Dans l'Arduino IDE, ils sont rangés dans **Fichier → Exemples → STeaMi → IM34DT05**, sans le P : le dossier du driver a gardé ce nom pour des raisons historiques, mais l'en-tête, la classe et les constantes portent le vrai nom du composant (`SteamiIMP34DT05.h`, `SteamiIMP34DT05`, `IMP34DT05_…`). Les exemples écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#microphone) donne un programme minimal avec le même driver.
+Ces exemples sont ceux de la bibliothèque STeaMi, à partir de sa version 0.39.0. Dans l'Arduino IDE, ils sont rangés dans **Fichier → Exemples → STeaMi → IM34DT05**, sans le P : le dossier du driver a gardé ce nom pour des raisons historiques, mais l'en-tête, la classe et les constantes portent le vrai nom du composant (`SteamiIMP34DT05.h`, `SteamiIMP34DT05`, `IMP34DT05_…`). Les exemples écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs](../capteurs#microphone) donne un programme minimal avec le même driver.
 
 ## Le driver en bref
 
