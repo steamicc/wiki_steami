@@ -118,6 +118,13 @@ if [ -n "$(find "$TMP/out" -type l)" ]; then
   exit 1
 fi
 [ -f "$TMP/out/index.json" ] || { echo "Erreur : index.json absent de l'archive" >&2; exit 1; }
+# La version annoncée par index.json doit être le tag épinglé : sinon l'archive
+# est incompatible (et le saut « déjà présent » échouerait à chaque exécution).
+VERSION_ARCHIVE=$(node -p "const i = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); i && i.version" "$TMP/out/index.json" 2>/dev/null || true)
+if [ "$VERSION_ARCHIVE" != "$VERSION" ]; then
+  echo "Erreur : index.json de l'archive annonce la version '${VERSION_ARCHIVE:-?}' au lieu de ${VERSION} (version illisible ou différente du tag épinglé dans ${PIN})" >&2
+  exit 1
+fi
 # Empreinte de l'archive vérifiée : permet de sauter le téléchargement la fois suivante.
 printf '%s\n' "$SHA256" > "$TMP/out/.sha256"
 

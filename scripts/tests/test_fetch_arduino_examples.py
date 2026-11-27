@@ -50,10 +50,14 @@ exec "%s" "${args[@]}"
 """ % (REPO_URL, SAMPLE_URL, REAL_GIT)
 
 
-def archive_de_test():
+def archive_de_test(index=None):
+    """Archive de test ; index=None omet index.json, sinon son contenu."""
+    if index is ...:
+        index = {"version": VERSION, "exemples": []}
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
-        z.writestr("index.json", json.dumps({"version": VERSION, "exemples": []}))
+        if index is not None:
+            z.writestr("index.json", json.dumps(index))
         z.writestr("exemple/exemple.ino.bin", b"binaire")
     return buf.getvalue()
 
@@ -67,7 +71,7 @@ class TestFetchArduinoExamples(unittest.TestCase):
         (self.work / "scripts").mkdir(parents=True)
         shutil.copy(SCRIPT, self.work / "scripts" / SCRIPT.name)
 
-        data = archive_de_test()
+        data = archive_de_test(...)
         self.archive = self.tmp / "archive.zip"
         self.archive.write_bytes(data)
         self.sha = hashlib.sha256(data).hexdigest()
@@ -248,6 +252,42 @@ class TestFetchArduinoExamples(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("déjà présents", out)
         self.assertEqual(self.telechargements(), 2)
+
+    def epingler_archive(self, source, index):
+        """Remplace l'archive servie par le faux curl et l'épingle pour `source`."""
+        data = archive_de_test(index)
+        self.archive.write_bytes(data)
+        pin = "exemples-arduino-sample.json" if source == "sample" else "exemples-arduino.json"
+        (self.work / pin).write_text(
+            json.dumps({"version": VERSION, "sha256": hashlib.sha256(data).hexdigest()})
+        )
+
+    def verifier_archive_refusee(self, source, index, message):
+        self.epingler_archive(source, index)
+        code, _, err = self.executer(*([source] if source == "sample" else []))
+        self.assertEqual(code, 1)
+        self.assertIn(message, err)
+        dossier = "exemples-arduino-sample" if source == "sample" else "exemples-arduino"
+        depot = "arduino-steami-sample" if source == "sample" else "arduino-steami"
+        self.assertFalse((self.work / "static" / dossier).exists())
+        self.assertFalse((self.work / ".external" / depot).exists())
+
+    def test_archive_sans_index_refusee(self):
+        for source in ("bibliotheque", "sample"):
+            with self.subTest(source=source):
+                self.verifier_archive_refusee(source, None, "index.json absent")
+
+    def test_archive_dont_version_differe_du_tag_refusee(self):
+        for source in ("bibliotheque", "sample"):
+            with self.subTest(source=source):
+                self.verifier_archive_refusee(
+                    source, {"version": "v0.0.1", "exemples": []}, "v0.0.1"
+                )
+
+    def test_archive_avec_index_illisible_refusee(self):
+        for source in ("bibliotheque", "sample"):
+            with self.subTest(source=source):
+                self.verifier_archive_refusee(source, [1, 2], "version")
 
     def test_source_inconnue(self):
         code, _, err = self.executer("autre")
