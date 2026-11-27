@@ -20,13 +20,17 @@
 # ignorées), et la fusion automatique n'est activée que pour une PR
 # ouverte par l'App.
 #
-# Point d'extension : la conversion des croquis en pages du wiki (tâche 14)
-# s'insérera dans l'étape « Crée la branche et épingle la nouvelle
-# archive », entre l'écriture de exemples-arduino-sample.json et le commit.
-# Elle devra d'abord cloner arduino-steami-sample au tag $DERNIERE dans
-# .external/ (comme scripts/fetch-examples.sh) pour lire les .ino, puis
-# ajouter ses fichiers avec git add : le commit n'est plus limité à
-# exemples-arduino-sample.json, et le corps de la PR devra le dire.
+# Conversion des croquis écrits en ligne : dans la même étape, entre
+# l'écriture de exemples-arduino-sample.json et le commit, le workflow
+# clone arduino-steami-sample au tag de la release dans $RUNNER_TEMP (hors
+# du dépôt du wiki, que git add ne voit donc pas), puis lance
+# scripts/convertir-croquis.py sur ce clone : chaque bloc `sample=G/N` d'une
+# page de docs/ dont examples/G/N/N.ino est dans la release devient
+# l'inclusion du croquis (file=) suivie de <EssayerExemple id="G/N"
+# source="sample" />, et G/N quitte la liste d'attente
+# scripts/exemples-arduino-sample-a-documenter.txt s'il y figurait. Le
+# commit d'épinglage emporte aussi ces pages et cette liste, et le corps de
+# la PR nomme les croquis convertis.
 #
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
@@ -200,6 +204,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Crée la branche et épingle la nouvelle archive
+        id: epinglage
         if: steps.comparaison.outputs.nouvelle == 'true' && steps.comparaison.outputs.pousser == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
@@ -224,14 +229,18 @@ jobs:
           fi
           # Même forme que le fichier actuel (indentation 2, saut de ligne final) : Prettier l'accepte.
           jq -n --arg v "$DERNIERE" --arg s "$sha" '{version: $v, sha256: $s}' > exemples-arduino-sample.json
-          # point d'extension : conversion des croquis en ligne (tâche 14)
-          # (insérer ici, avant le commit : la conversion écrit ses fichiers puis les ajoute avec git add)
+          # Croquis écrits en ligne publiés par cette release : remplacés dans les pages
+          # par leur inclusion et le bouton Téléverser. Sources au tag clonées hors du
+          # dépôt du wiki ; le dépôt sample est public, aucun jeton n'est nécessaire.
+          src="$RUNNER_TEMP/arduino-steami-sample"
+          git clone --depth 1 --quiet --branch "$DERNIERE" https://github.com/steamicc/arduino-steami-sample.git "$src"
+          python3 scripts/convertir-croquis.py "$src" --sortie-github "$GITHUB_OUTPUT"
           # Commit au nom du compte robot de l'App (<slug>[bot]).
           bot_id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
           git config user.name "${APP_SLUG}[bot]"
           git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
           git switch -c "$BRANCHE"
-          git add exemples-arduino-sample.json
+          git add exemples-arduino-sample.json docs scripts/exemples-arduino-sample-a-documenter.txt
           git commit -m "chore(configs): croquis du sample $DERNIERE"
           git push origin "$BRANCHE"
 
@@ -244,14 +253,24 @@ jobs:
           DERNIERE: ${{ steps.comparaison.outputs.derniere }}
           ARCHIVE: ${{ steps.comparaison.outputs.archive }}
           BRANCHE: ${{ steps.comparaison.outputs.branche }}
+          # Vide si la branche existait déjà (conversion faite lors d'une exécution précédente).
+          CONVERTIS: ${{ steps.epinglage.outputs.convertis }}
         run: |
           set -euo pipefail
+          conversion=""
+          if [ -n "$CONVERTIS" ]; then
+            read -ra ids <<<"$CONVERTIS"
+            liste=$(printf '`%s`, ' "${ids[@]}")
+            conversion="Elle remplace aussi chaque croquis écrit en ligne dans une page du wiki, marqué \`sample=G/N\` et publié par cette release (${liste%, }), par son inclusion depuis le sample (bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\`) suivie du bouton \`<EssayerExemple id=\"G/N\" source=\"sample\" />\`, et le retire de \`scripts/exemples-arduino-sample-a-documenter.txt\` s'il y figurait (\`scripts/convertir-croquis.py\`). Le croquis affiché est désormais celui de la release : vérifier le diff des pages."
+          fi
           corps="$RUNNER_TEMP/corps.md"
           cat > "$corps" <<EOT
           Le dépôt des croquis Arduino du wiki a une nouvelle release : \`$DERNIERE\` (le wiki épingle \`$ACTUEL\`).
           https://github.com/steamicc/arduino-steami-sample/releases/tag/$DERNIERE
 
           Cette PR met à jour \`exemples-arduino-sample.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
+
+          $conversion
 
           La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
 

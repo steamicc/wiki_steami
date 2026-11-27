@@ -730,5 +730,395 @@ class TestFluxRobot(unittest.TestCase):
         self.assertIs(f["concurrency"]["cancel-in-progress"], False)
 
 
+IMPORT_ESSAYER = "import EssayerExemple from '@site/src/components/EssayerExemple';"
+ENTETE_PAGE = "---\ntitle: Premiers programmes\nsidebar_position: 3\n---\n\n"
+IMPORTS_TABS = "import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';\n"
+IMPORT_TOC = "import TOCInline from '@theme/TOCInline';\n"
+
+
+def charger_conversion():
+    """Chargé à la demande : son absence ne casse que les tests de la conversion."""
+    spec_conv = importlib.util.spec_from_file_location(
+        "convertir_croquis", SCRIPTS / "convertir-croquis.py"
+    )
+    module = importlib.util.module_from_spec(spec_conv)
+    spec_conv.loader.exec_module(module)
+    return module
+
+
+def inclusion(ident, indent="", eol="\n"):
+    """Bloc converti attendu : inclusion du croquis, puis bouton Téléverser."""
+    groupe, nom = ident.split("/")
+    return (
+        f"{indent}```cpp file=.external/arduino-steami-sample/examples/{groupe}/{nom}/{nom}.ino{eol}"
+        f"{eol}"
+        f"{indent}```{eol}"
+        f"{eol}"
+        f'{indent}<EssayerExemple id="{ident}" source="sample" />{eol}'
+    )
+
+
+class TestConversion(unittest.TestCase):
+    """convertir-croquis.py : un bloc `sample=G/N` publié dans le sample devient
+    son inclusion ; le reste de la page est identique octet pour octet."""
+
+    def setUp(self):
+        self.conv = charger_conversion()
+
+    def convertir(self, texte, publies):
+        return self.conv.convertir_texte(texte, set(publies))
+
+    def test_block_replaced_and_import_added_after_frontmatter(self):
+        avant = "# Premiers programmes\n\nIntro.\n\n## LED\n\nTexte avant.\n\n"
+        apres = "\nTexte après.\n"
+        texte = ENTETE_PAGE + avant + bloc_md("sample=PREMIERS/ClignoterLed") + apres
+        nouveau, convertis = self.convertir(texte, {"PREMIERS/ClignoterLed"})
+        self.assertEqual(
+            nouveau,
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n" + avant + inclusion("PREMIERS/ClignoterLed") + apres,
+        )
+        self.assertEqual(convertis, ["PREMIERS/ClignoterLed"])
+
+    def test_unpublished_block_left_untouched(self):
+        texte = ENTETE_PAGE + "# T\n\n" + bloc_md("sample=PREMIERS/ClignoterLed") + "\nFin.\n"
+        nouveau, convertis = self.convertir(texte, {"PREMIERS/Autre"})
+        self.assertEqual(nouveau, texte)
+        self.assertEqual(convertis, [])
+
+    def test_several_blocks_in_one_section_only_published_ones(self):
+        b1 = bloc_md("sample=CARTE/ToutesLesCartes")
+        b2 = bloc_md("sample=CARTE/PasEncore", code=CROQUIS_2)
+        b3 = bloc_md("sample=CARTE/MesDrivers", code=CROQUIS_2)
+        texte = (
+            ENTETE_PAGE + "# Carte\n\n## Section\n\nUn.\n\n" + b1 + "\nDeux.\n\n" + b2
+            + "\nTrois.\n\n" + b3 + "\nQuatre.\n"
+        )
+        nouveau, convertis = self.convertir(texte, {"CARTE/ToutesLesCartes", "CARTE/MesDrivers"})
+        self.assertEqual(
+            nouveau,
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n# Carte\n\n## Section\n\nUn.\n\n"
+            + inclusion("CARTE/ToutesLesCartes") + "\nDeux.\n\n" + b2 + "\nTrois.\n\n"
+            + inclusion("CARTE/MesDrivers") + "\nQuatre.\n",
+        )
+        self.assertEqual(convertis, ["CARTE/ToutesLesCartes", "CARTE/MesDrivers"])
+        self.assertEqual(nouveau.count(IMPORT_ESSAYER), 1)
+
+    def test_blocks_in_release_tabs_keep_their_indentation(self):
+        entete = "---\ntitle: Écran\n---\n\n" + IMPORTS_TABS + IMPORT_TOC + "\n# Écran\n\n## Jauge\n\n"
+        onglet_1 = '<ReleaseTabs>\n<Release releases="v1a v1b">\n\nTexte V1a.\n\n'
+        b1 = bloc_md("sample=ECRAN/EcranJauge", indent="  ")
+        onglet_2 = '\n  Suite V1a.\n\n</Release>\n<Release releases="v1c">\n\n'
+        b2 = bloc_md("sample=ECRAN/EcranGraphe", code=CROQUIS_2)
+        fin = "\n</Release>\n</ReleaseTabs>\n\nAprès les onglets.\n"
+        texte = entete + onglet_1 + b1 + onglet_2 + b2 + fin
+        nouveau, _ = self.convertir(texte, {"ECRAN/EcranJauge", "ECRAN/EcranGraphe"})
+        self.assertEqual(
+            nouveau,
+            "---\ntitle: Écran\n---\n\n" + IMPORTS_TABS + IMPORT_TOC + IMPORT_ESSAYER + "\n"
+            + "\n# Écran\n\n## Jauge\n\n" + onglet_1 + inclusion("ECRAN/EcranJauge", indent="  ")
+            + onglet_2 + inclusion("ECRAN/EcranGraphe") + fin,
+        )
+
+    def test_block_directly_followed_by_text_gets_a_blank_line(self):
+        # Sans ligne vide, MDX lirait la balise et le texte comme un même paragraphe.
+        texte = ENTETE_PAGE + "# T\n\nTexte collé.\n" + bloc_md("sample=PREMIERS/JouerSon") + "Texte qui suit.\n"
+        nouveau, _ = self.convertir(texte, {"PREMIERS/JouerSon"})
+        self.assertEqual(
+            nouveau,
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n# T\n\nTexte collé.\n"
+            + inclusion("PREMIERS/JouerSon") + "\nTexte qui suit.\n",
+        )
+
+    def test_block_at_end_of_page_without_final_newline(self):
+        texte = ENTETE_PAGE + "# T\n\n" + bloc_md("sample=PREMIERS/JouerSon").rstrip("\n")
+        nouveau, _ = self.convertir(texte, {"PREMIERS/JouerSon"})
+        self.assertEqual(
+            nouveau,
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("PREMIERS/JouerSon").rstrip("\n"),
+        )
+
+    def test_crlf_page_keeps_crlf_everywhere(self):
+        lf = ENTETE_PAGE + "# T\n\nAvant.\n\n" + bloc_md("sample=PREMIERS/LireBoutons") + "\nAprès.\n"
+        texte = lf.replace("\n", "\r\n")
+        nouveau, convertis = self.convertir(texte, {"PREMIERS/LireBoutons"})
+        attendu = (
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n# T\n\nAvant.\n\n"
+            + inclusion("PREMIERS/LireBoutons") + "\nAprès.\n"
+        ).replace("\n", "\r\n")
+        self.assertEqual(nouveau, attendu)
+        self.assertEqual(nouveau.count("\n"), nouveau.count("\r\n"))
+        self.assertEqual(convertis, ["PREMIERS/LireBoutons"])
+
+    def test_mixed_line_endings_outside_the_block_are_kept(self):
+        texte = (
+            ENTETE_PAGE + "# T\r\n\r\nAvant.\n\n" + bloc_md("sample=PREMIERS/LireBoutons")
+            + "\r\nAprès.\r\n"
+        )
+        nouveau, _ = self.convertir(texte, {"PREMIERS/LireBoutons"})
+        self.assertTrue(nouveau.endswith("\n" + '<EssayerExemple id="PREMIERS/LireBoutons" source="sample" />\n\r\nAprès.\r\n'))
+        self.assertIn("# T\r\n\r\nAvant.\n\n```cpp file=", nouveau)
+
+    def test_import_added_once_with_existing_imports(self):
+        texte = (
+            "---\ntitle: T\n---\n\n" + IMPORTS_TABS + IMPORT_TOC + "\n<!-- cspell:ignore x -->\n\n# T\n\n"
+            + bloc_md("sample=CARTE/A") + "\n" + bloc_md("sample=CARTE/B", code=CROQUIS_2)
+        )
+        nouveau, _ = self.convertir(texte, {"CARTE/A", "CARTE/B"})
+        self.assertTrue(
+            nouveau.startswith(
+                "---\ntitle: T\n---\n\n" + IMPORTS_TABS + IMPORT_TOC + IMPORT_ESSAYER
+                + "\n\n<!-- cspell:ignore x -->\n\n# T\n\n"
+            )
+        )
+        self.assertEqual(nouveau.count(IMPORT_ESSAYER), 1)
+
+    def test_existing_import_not_duplicated(self):
+        texte = (
+            "---\ntitle: T\n---\n\n" + IMPORT_ESSAYER + "\n\n# T\n\n"
+            + bloc_md("sample=CARTE/A") + "\nFin.\n"
+        )
+        nouveau, _ = self.convertir(texte, {"CARTE/A"})
+        self.assertEqual(
+            nouveau,
+            "---\ntitle: T\n---\n\n" + IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A") + "\nFin.\n",
+        )
+
+    def test_import_without_frontmatter_goes_first(self):
+        texte = "# T\n\n" + bloc_md("sample=CARTE/A")
+        nouveau, _ = self.convertir(texte, {"CARTE/A"})
+        self.assertEqual(nouveau, IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A"))
+
+    def test_frontmatter_after_byte_order_mark(self):
+        texte = "﻿---\ntitle: T\n---\n\n# T\n\n" + bloc_md("sample=CARTE/A")
+        nouveau, _ = self.convertir(texte, {"CARTE/A"})
+        self.assertEqual(
+            nouveau, "﻿---\ntitle: T\n---\n\n" + IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A")
+        )
+
+    def test_frontmatter_not_followed_by_blank_line(self):
+        texte = "---\ntitle: T\n---\n# T\n\n" + bloc_md("sample=CARTE/A")
+        nouveau, _ = self.convertir(texte, {"CARTE/A"})
+        self.assertEqual(
+            nouveau, "---\ntitle: T\n---\n\n" + IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A")
+        )
+
+    def test_nothing_converted_leaves_page_and_imports_alone(self):
+        texte = ENTETE_PAGE + "# T\n\n" + bloc_md("norun") + "\n" + bloc_md()
+        self.assertEqual(self.convertir(texte, {"CARTE/A"}), (texte, []))
+
+    def test_second_pass_changes_nothing(self):
+        texte = (
+            ENTETE_PAGE + "# T\n\n" + bloc_md("sample=CARTE/A") + "\nEntre.\n\n"
+            + bloc_md("sample=CARTE/B", code=CROQUIS_2) + "\nFin.\n"
+        )
+        une_fois, _ = self.convertir(texte, {"CARTE/A", "CARTE/B"})
+        deux_fois, convertis = self.convertir(une_fois, {"CARTE/A", "CARTE/B"})
+        self.assertEqual(deux_fois, une_fois)
+        self.assertEqual(convertis, [])
+
+    def test_norun_unclosed_invalid_and_duplicate_blocks_untouched(self):
+        norun = bloc_md("sample=CARTE/A norun")
+        invalide = bloc_md("sample=carte/a")
+        premier = bloc_md("sample=CARTE/B")
+        doublon = bloc_md("sample=CARTE/B", code=CROQUIS_2)
+        non_ferme = "```cpp sample=CARTE/C\n" + CROQUIS
+        texte = ENTETE_PAGE + "# T\n\n" + norun + "\n" + invalide + "\n" + premier + "\n" + doublon + "\n" + non_ferme
+        nouveau, convertis = self.convertir(texte, {"CARTE/A", "carte/a", "CARTE/B", "CARTE/C"})
+        self.assertEqual(convertis, ["CARTE/B"])
+        self.assertEqual(
+            nouveau,
+            ENTETE_PAGE + IMPORT_ESSAYER + "\n\n# T\n\n" + norun + "\n" + invalide + "\n"
+            + inclusion("CARTE/B") + "\n" + doublon + "\n" + non_ferme,
+        )
+
+    def test_other_meta_and_fence_forms(self):
+        # ~~~ et ```` sont des délimiteurs aussi ; le bloc converti prend la forme ```cpp.
+        tilde = bloc_md("sample=CARTE/A", langage="ino", cloture="~~~")
+        quatre = bloc_md('title="Mon croquis" sample=CARTE/B', cloture="````")
+        texte = "# T\n\n" + tilde + "\n" + quatre
+        nouveau, _ = self.convertir(texte, {"CARTE/A", "CARTE/B"})
+        self.assertEqual(nouveau, IMPORT_ESSAYER + "\n\n# T\n\n" + inclusion("CARTE/A") + "\n" + inclusion("CARTE/B"))
+
+    def test_converted_page_passes_both_lints(self):
+        texte = (
+            ENTETE_PAGE + "# T\n\n## Clignoter\n\n" + bloc_md("sample=PREMIERS/ClignoterLed")
+            + "\n## Sons\n\n" + bloc_md("sample=PREMIERS/JouerSon", code=CROQUIS_2) + "\nFin.\n"
+        )
+        nouveau, _ = self.convertir(texte, {"PREMIERS/ClignoterLed", "PREMIERS/JouerSon"})
+        # Plus aucun croquis en ligne : rien à marquer ni en attente.
+        self.assertEqual(blocs(nouveau), [])
+        spec_ex = importlib.util.spec_from_file_location(
+            "check_arduino_examples", SCRIPTS / "check-arduino-examples.py"
+        )
+        exemples = importlib.util.module_from_spec(spec_ex)
+        spec_ex.loader.exec_module(exemples)
+        ids = {"PREMIERS/ClignoterLed", "PREMIERS/JouerSon"}
+        self.assertEqual(exemples.verifier_sample(ids, {PAGE: nouveau}, []), [])
+
+
+class TestConversionFichiers(unittest.TestCase):
+    """main() de convertir-croquis.py sur un dossier de pages et un sample simulés."""
+
+    def setUp(self):
+        self.conv = charger_conversion()
+        dossier = tempfile.TemporaryDirectory()
+        self.addCleanup(dossier.cleanup)
+        self.tmp = Path(dossier.name)
+        self.pages = self.tmp / "docs"
+        self.sample = self.tmp / "sample"
+        self.attente = self.tmp / "a-documenter.txt"
+        self.sortie = self.tmp / "sortie"
+        (self.pages / "arduino").mkdir(parents=True)
+        for ident in ("PREMIERS/ClignoterLed", "CAPTEURS/Distance"):
+            groupe, nom = ident.split("/")
+            dossier = self.sample / "examples" / groupe / nom
+            dossier.mkdir(parents=True)
+            (dossier / f"{nom}.ino").write_text(entete() + CROQUIS, encoding="utf-8")
+
+    def lancer(self, *extra):
+        sortie = io.StringIO()
+        with contextlib.redirect_stdout(sortie), contextlib.redirect_stderr(sortie):
+            code = self.conv.main(
+                [str(self.sample), "--pages", str(self.pages), "--attente-sample", str(self.attente),
+                 "--sortie-github", str(self.sortie), *extra]
+            )
+        return code, sortie.getvalue()
+
+    def test_converts_pages_and_cleans_waiting_list(self):
+        page = self.pages / "arduino" / "premiers.md"
+        contenu = (ENTETE_PAGE + "# T\r\n\r\n" + bloc_md("sample=PREMIERS/ClignoterLed")).encode("utf-8")
+        page.write_bytes(contenu)
+        autre = self.pages / "arduino" / "autre.mdx"
+        autre_octets = ("# Autre\r\n\r\n" + bloc_md("sample=PREMIERS/PasEncore")).encode("utf-8")
+        autre.write_bytes(autre_octets)
+        self.attente.write_bytes(b"BOUTONS/LedsBoutons\r\nPREMIERS/ClignoterLed\r\nBUZZER/Melodie\r\n")
+        code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertIn(inclusion("PREMIERS/ClignoterLed").encode("utf-8"), page.read_bytes())
+        self.assertIn(IMPORT_ESSAYER.encode("utf-8"), page.read_bytes())
+        # Fins de ligne et page non concernée intactes.
+        self.assertTrue(page.read_bytes().startswith(ENTETE_PAGE.encode("utf-8")))
+        self.assertEqual(autre.read_bytes(), autre_octets)
+        self.assertEqual(self.attente.read_bytes(), b"BOUTONS/LedsBoutons\r\nBUZZER/Melodie\r\n")
+        self.assertEqual(self.sortie.read_text(encoding="utf-8"), "convertis=PREMIERS/ClignoterLed\n")
+        self.assertIn("PREMIERS/ClignoterLed", sortie)
+        self.assertIn("premiers.md", sortie)
+        # Deuxième passage : aucun changement.
+        octets = page.read_bytes()
+        self.sortie.unlink()
+        code, _ = self.lancer()
+        self.assertEqual(code, 0)
+        self.assertEqual(page.read_bytes(), octets)
+        self.assertEqual(self.sortie.read_text(encoding="utf-8"), "convertis=\n")
+
+    def test_waiting_list_untouched_when_not_listed_or_absent(self):
+        (self.pages / "arduino" / "p.md").write_text("# P\n\n" + bloc_md("sample=CAPTEURS/Distance"), encoding="utf-8")
+        code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertFalse(self.attente.exists())
+        self.attente.write_bytes(b"BUZZER/Melodie")
+        (self.pages / "arduino" / "q.md").write_text("# Q\n\n" + bloc_md("sample=PREMIERS/ClignoterLed"), encoding="utf-8")
+        code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertEqual(self.attente.read_bytes(), b"BUZZER/Melodie")
+
+    def test_missing_sample_examples_is_an_error(self):
+        code, sortie = self.lancer_sur(self.tmp / "absent")
+        self.assertEqual(code, 2)
+        self.assertIn("examples", sortie)
+
+    def lancer_sur(self, sample):
+        self.sample = sample
+        return self.lancer()
+
+    def test_unpublished_block_announced_not_converted(self):
+        page = self.pages / "arduino" / "p.md"
+        page.write_text("# P\n\n" + bloc_md("sample=CARTE/PasEncore"), encoding="utf-8")
+        avant = page.read_bytes()
+        code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertEqual(page.read_bytes(), avant)
+        self.assertIn("CARTE/PasEncore", sortie)
+
+    def test_published_sketch_different_from_page_is_announced(self):
+        # Croquis corrigé dans la PR du sample (ou nom déjà pris) : converti
+        # quand même, mais signalé pour la relecture du diff.
+        (self.pages / "arduino" / "p.md").write_text(
+            "# P\n\n" + bloc_md("sample=PREMIERS/ClignoterLed") + "\n"
+            + bloc_md("sample=CAPTEURS/Distance", code=CROQUIS_2),
+            encoding="utf-8",
+        )
+        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}):
+            code, sortie = self.lancer()
+        self.assertEqual(code, 0, sortie)
+        self.assertIn("::warning", sortie)
+        self.assertIn("CAPTEURS/Distance", sortie)
+        avertissements = [l for l in sortie.splitlines() if "diffère" in l]
+        self.assertEqual(len(avertissements), 2)  # texte et annotation, pour Distance seulement
+        self.assertTrue(all("CAPTEURS/Distance" in l for l in avertissements))
+
+    def test_command_line_runs(self):
+        (self.pages / "arduino" / "p.md").write_text("# P\n\n" + bloc_md("sample=CAPTEURS/Distance"), encoding="utf-8")
+        r = subprocess.run(
+            [sys.executable, str(SCRIPTS / "convertir-croquis.py"), str(self.sample),
+             "--pages", str(self.pages), "--attente-sample", str(self.attente)],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('<EssayerExemple id="CAPTEURS/Distance" source="sample" />',
+                      (self.pages / "arduino" / "p.md").read_text(encoding="utf-8"))
+
+
+FLUX_EPINGLAGE = RACINE / ".github" / "workflows" / "suivre-croquis-sample.yml"
+
+
+class TestFluxConversion(unittest.TestCase):
+    """Branchement de la conversion dans le robot d'épinglage du sample."""
+
+    def etape(self):
+        etapes = yaml.safe_load(FLUX_EPINGLAGE.read_text(encoding="utf-8"))["jobs"]["suivre"]["steps"]
+        (e,) = [e for e in etapes if e.get("name") == "Crée la branche et épingle la nouvelle archive"]
+        return e
+
+    def code(self):
+        return "\n".join(
+            l for l in self.etape()["run"].splitlines() if not l.lstrip().startswith("#")
+        )
+
+    def test_sources_cloned_at_the_new_tag_outside_the_checkout(self):
+        t = self.code()
+        self.assertIn('git clone --depth 1 --quiet --branch "$DERNIERE"', t)
+        self.assertIn("https://github.com/steamicc/arduino-steami-sample.git", t)
+        (clone,) = [l for l in t.splitlines() if "git clone" in l]
+        (conversion,) = [l for l in t.splitlines() if "convertir-croquis.py" in l]
+        # Hors du dépôt du wiki : git add ne peut pas l'emporter dans le commit.
+        self.assertIn('src="$RUNNER_TEMP/', t)
+        self.assertTrue(clone.endswith(' "$src"'))
+        self.assertIn('convertir-croquis.py "$src"', conversion)
+
+    def test_conversion_between_pin_and_commit(self):
+        t = self.code()
+        conversion = t.index("python3 scripts/convertir-croquis.py")
+        self.assertGreater(conversion, t.index("> exemples-arduino-sample.json"))
+        self.assertGreater(conversion, t.index("git clone"))
+        self.assertLess(conversion, t.index("git add"))
+        self.assertLess(t.index("git add"), t.index("git commit"))
+
+    def test_converted_files_are_committed(self):
+        t = self.code()
+        ajout = [l for l in t.splitlines() if "git add" in l]
+        self.assertEqual(len(ajout), 1)
+        for chemin in ("exemples-arduino-sample.json", "docs", "scripts/exemples-arduino-sample-a-documenter.txt"):
+            with self.subTest(chemin=chemin):
+                self.assertIn(chemin, ajout[0])
+
+    def test_pr_body_mentions_the_conversion(self):
+        texte = FLUX_EPINGLAGE.read_text(encoding="utf-8")
+        self.assertIn("steps.epinglage.outputs.convertis", texte)
+        self.assertIn("--sortie-github", self.code())
+        self.assertIn("sample=G/N", texte)
+        self.assertNotIn("point d'extension", texte)
+
+
 if __name__ == "__main__":
     unittest.main()
