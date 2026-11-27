@@ -18,6 +18,7 @@ import {
   erreurCarteAffichee,
   estOccupee,
   lireFichiers,
+  messageSession,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
@@ -1143,4 +1144,10 @@ test('erreurCarteAffichee : pendant la mise à jour du DAPLink, le texte du bout
   const refus = { connectee: false, erreur: acces, dernierClic: 'page#3' };
   const repos = { actif: null, etape: 'repos', erreur: null, message: null };
   assert.equal(erreurCarteAffichee(refus, repos, 'page#3'), TEXTE_ACCES_REFUSE_MICROPYTHON);
+});
+
+test('messageSession : l’installation dure moins d’une minute', () => {
+  const texte = messageSession({ etape: 'installation', message: null });
+  assert.match(texte, /moins d'une minute/);
+  assert.doesNotMatch(texte, /environ/);
 });

@@ -138,7 +138,7 @@ const TEXTES_ETAPES = Object.freeze({
   sondage: 'Recherche de MicroPython sur la carte…',
   diagnostic: 'La carte ne répond pas : redémarrage de la carte…',
   installation:
-    'Installation de MicroPython (environ une minute) : ne pas débrancher la carte ni fermer la page…',
+    "Installation de MicroPython (moins d'une minute) : ne pas débrancher la carte ni fermer la page…",
   redemarrage: 'Redémarrage de la carte…',
   fichiers: 'Envoi des fichiers annexes…',
   programme: 'Programme en cours.',

@@ -79,10 +79,11 @@ export function texteInstallation(version, raison) {
   return `${constat} Installer MicroPython ${version} pour essayer cet exemple.`;
 }
 
-// Mesure à refaire dans Chrome : DAP.js envoie le .bin (environ 520 ko) par
-// paquets de 62 octets, après l'effacement complet de la puce.
+// Mesuré le 2026-11-27 sur la V1c dans Chrome 158 : 37 s du clic sur
+// « Installer » à la sortie du programme. DAP.js envoie le .bin (environ
+// 520 ko) par paquets de 62 octets, après l'effacement complet de la puce.
 export const TEXTE_DUREE_INSTALLATION =
-  "L'installation dure environ une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
+  "L'installation dure moins d'une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
 
 export const TEXTE_EFFACEMENT =
   "Attention : l'installation peut effacer les fichiers enregistrés sur la carte. Les copier avant de continuer.";

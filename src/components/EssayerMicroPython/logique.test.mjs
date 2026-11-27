@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 
 import {
   TEXTE_CARTE_OCCUPEE,
+  TEXTE_DUREE_INSTALLATION,
   TEXTE_EFFACEMENT,
   comparerVersions,
   decisionFirmware,
@@ -113,4 +114,10 @@ test('texteInstallation : MicroPython plus ancien que celui du wiki', () => {
     texteInstallation('v0.29.0', 'ancien'),
     'La version de MicroPython de cette carte est plus ancienne que celle du wiki. Installer MicroPython v0.29.0 pour essayer cet exemple.',
   );
+});
+
+// Mesure : 37 s du clic à la sortie du programme (V1c, Chrome 158).
+test('TEXTE_DUREE_INSTALLATION : moins d’une minute', () => {
+  assert.match(TEXTE_DUREE_INSTALLATION, /moins d'une minute/);
+  assert.doesNotMatch(TEXTE_DUREE_INSTALLATION, /environ/);
 });

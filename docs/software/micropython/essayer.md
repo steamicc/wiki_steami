@@ -64,7 +64,7 @@ Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la 
 
 Le wiki affiche le code d'une version précise de la bibliothèque MicroPython STeaMi, celle du firmware qu'il propose d'installer. Une carte qui a cette version de MicroPython, ou une plus récente, lance le programme directement.
 
-Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose de l'installer. Rien n'est installé sans un clic sur **Installer MicroPython** (suivi du numéro de version proposé). Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé. L'installation dure environ une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page, sinon la carte reste sans firmware. Après une installation interrompue, débrancher la carte (et sa batterie, s'il y en a une), la rebrancher, puis relancer l'installation.
+Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose de l'installer. Rien n'est installé sans un clic sur **Installer MicroPython** (suivi du numéro de version proposé). Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé. L'installation dure moins d'une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page, sinon la carte reste sans firmware. Après une installation interrompue, débrancher la carte (et sa batterie, s'il y en a une), la rebrancher, puis relancer l'installation.
 
 :::warning
 
