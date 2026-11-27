@@ -313,19 +313,19 @@ Le programme ne teste pas les bornes : `menu()` ramène l'indice dans la liste e
 
 Les widgets de `SteamiScreen` reprennent ceux de la [bibliothèque MicroPython de la STeaMi](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen), avec les mêmes noms et les mêmes rôles. Seule l'écriture change :
 
-| MicroPython                                                | Arduino                                                                 |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `screen = Screen(display)`                                 | `SteamiScreen screen;` puis `screen.begin();` au début de `setup()`     |
-| `screen.value(v, unit="%", at="W", label="HUM", color=C)`  | `screen.value(v, "%", SteamiAt::W, "HUM", C)`                           |
-| `screen.subtitle("a", "b", color=C)`                       | `screen.subtitle("a", "b", C)` (trois lignes au plus)                   |
-| `screen.bar(v, max_val=100, color=C)`                      | `screen.bar(v, 100, C)`                                                 |
-| `screen.text("x", at="NE", scale=2)`                       | `screen.text("x", SteamiAt::NE, STEAMI_WHITE, 2)`                       |
-| `screen.gauge(v, min_val, max_val, color=C)`               | `screen.gauge(v, min, max, C)`                                          |
-| `screen.graph(data, min_val, max_val)`                     | `screen.graph(historique, min, max)` avec un `SteamiHistory<N>`         |
-| `screen.menu(items, selected=i)`                           | `i = screen.menu(ITEMS, i);` (taille du tableau déduite, indice ramené) |
-| `screen.face("happy", color=C)`                            | `screen.face(SteamiFace::HAPPY, C)`                                     |
-| `"N"`, `"NE"`… `"CENTER"` ; `BLACK`… `YELLOW`              | `SteamiAt::N`… `SteamiAt::CENTER` ; `STEAMI_BLACK`… `STEAMI_YELLOW`     |
-| `screen.center`, `screen.radius`, `screen.width`           | `centerX()`, `centerY()`, `radius()`, `width()`                         |
+| MicroPython                                               | Arduino                                                                 |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `screen = Screen(display)`                                | `SteamiScreen screen;` puis `screen.begin();` au début de `setup()`     |
+| `screen.value(v, unit="%", at="W", label="HUM", color=C)` | `screen.value(v, "%", SteamiAt::W, "HUM", C)`                           |
+| `screen.subtitle("a", "b", color=C)`                      | `screen.subtitle("a", "b", C)` (trois lignes au plus)                   |
+| `screen.bar(v, max_val=100, color=C)`                     | `screen.bar(v, 100, C)`                                                 |
+| `screen.text("x", at="NE", scale=2)`                      | `screen.text("x", SteamiAt::NE, STEAMI_WHITE, 2)`                       |
+| `screen.gauge(v, min_val, max_val, color=C)`              | `screen.gauge(v, min, max, C)`                                          |
+| `screen.graph(data, min_val, max_val)`                    | `screen.graph(historique, min, max)` avec un `SteamiHistory<N>`         |
+| `screen.menu(items, selected=i)`                          | `i = screen.menu(ITEMS, i);` (taille du tableau déduite, indice ramené) |
+| `screen.face("happy", color=C)`                           | `screen.face(SteamiFace::HAPPY, C)`                                     |
+| `"N"`, `"NE"`… `"CENTER"` ; `BLACK`… `YELLOW`             | `SteamiAt::N`… `SteamiAt::CENTER` ; `STEAMI_BLACK`… `STEAMI_YELLOW`     |
+| `screen.center`, `screen.radius`, `screen.width`          | `centerX()`, `centerY()`, `radius()`, `width()`                         |
 
 ## Avec les drivers SSD1327 et GC9A01
 
