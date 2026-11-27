@@ -6,6 +6,7 @@ import { describe, it } from 'node:test';
 
 import {
   DELAIS_PILE,
+  LIBELLE_RENVOI,
   TEXTE_ANNULE,
   TEXTE_CARTE_PERDUE_PILE,
   TEXTE_CONFIRMATION_VERIFICATION,
@@ -849,6 +850,33 @@ describe('relecture après UPGRADE', () => {
     assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
     assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
     assert.deepEqual(propositions, []);
+  });
+
+  it('relecture sans version de pile, hors FUS : TEXTE_PILE_ABSENTE_APRES, START', async () => {
+    const p = preparer({
+      operateur: {
+        version: [
+          VERSION_SANS_PILE,
+          VERSION_SANS_PILE,
+          { command: 'Version', status: 0, fus_version: 0, copro_fw_version: '' },
+        ],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.etape, 'erreur');
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ABSENTE_APRES);
+    assert.equal(p.parcours.etat.versions.relue, null);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
+
+  it('TEXTE_PILE_ABSENTE_APRES : relancer la vérification, ou EasyFlash', () => {
+    assert.match(TEXTE_PILE_ABSENTE_APRES, /^Aucune pile radio n'est lue après l'installation\./);
+    assert.match(TEXTE_PILE_ABSENTE_APRES, /« Vérifier la pile radio »/);
+    assert.ok(TEXTE_PILE_ABSENTE_APRES.includes(LIBELLE_RENVOI));
+    assert.match(TEXTE_PILE_ABSENTE_APRES, /DapLink-EasyFlash/);
   });
 
   it('pile relue en marche, bonne version et bonne taille : réussite', async () => {
