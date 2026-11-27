@@ -108,6 +108,16 @@ describe('module léger etat.mjs', () => {
   it('EssayerExemple charge PileRadio par un import dynamique', () => {
     assert.match(lire('../EssayerExemple/index.js'), /import\(\s*'\.\.\/PileRadio'\s*\)/);
   });
+
+  // Seul branchement du relais : sans lui, les blocs liraient toujours l'état
+  // initial et Téléverser redeviendrait cliquable pendant l'installation.
+  it('PileRadio/index.js branche le parcours et le suivi sur relaisPile à son chargement', () => {
+    const source = lire('./index.js');
+    assert.match(source, /^relaisPile\.brancher\(parcoursPile, suiviOperateur\);$/m);
+    assert.match(source, /^import \{[^}]*\brelaisPile\b[^}]*\} from '\.\/etat\.mjs';$/m);
+    assert.match(source, /^import \{[^}]*\bparcoursPile\b[^}]*\} from '\.\/deroulement\.mjs';$/m);
+    assert.match(source, /^export const suiviOperateur = /m);
+  });
 });
 
 describe('relais de la pile radio', () => {
