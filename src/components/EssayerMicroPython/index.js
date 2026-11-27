@@ -21,6 +21,7 @@ import {
   texteMiseAJourDaplink,
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
+import { suivreDefilement } from './defilement.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
@@ -75,14 +76,36 @@ function SansWebUSB() {
   );
 }
 
+// Élément au moins en partie dans la fenêtre.
+function estALEcran(element) {
+  if (!element) return false;
+  const { top, bottom } = element.getBoundingClientRect();
+  return bottom > 0 && top < window.innerHeight;
+}
+
 // Question en attente sous le bloc : le focus y passe, pour que les lecteurs
 // d'écran la lisent ; jamais sur le bouton d'action, qu'une touche Entrée de
 // trop validerait. surReponse : le bouton cliqué va disparaître, le bloc
-// reprend le focus ensuite.
-function Encart({ encart, surReponse }) {
+// reprend le focus ensuite. Le focus fait défiler la page pour montrer
+// l'encart : à sa fermeture, la page revient où elle était, sauf si la
+// personne l'a fait défiler entre-temps ou que le bouton « Essayer »
+// (blocRef) n'était pas à l'écran (defilement.mjs). Effet de mise en page : la
+// position revient avant que la page ne s'affiche sans l'encart.
+function Encart({ encart, surReponse, blocRef }) {
   const ref = useRef(null);
-  useEffect(() => {
-    ref.current?.focus();
+  useLayoutEffect(() => {
+    const suivi = suivreDefilement(
+      () => window.scrollY,
+      () => estALEcran(blocRef.current),
+    );
+    suivi.ouvrir(() => ref.current?.focus());
+    const surDefilement = () => suivi.surDefilement();
+    window.addEventListener('scroll', surDefilement, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', surDefilement);
+      const position = suivi.fermer();
+      if (position !== null) window.scrollTo(window.scrollX, position);
+    };
   }, [encart]);
   const { type, donnees } = encart;
   const repondre = (valeur) => () => {
@@ -113,7 +136,7 @@ function Encart({ encart, surReponse }) {
   } else {
     contenu = (
       <>
-        <p>{texteInstallation(donnees.version)}</p>
+        <p>{texteInstallation(donnees.version, donnees.raison)}</p>
         <p>{TEXTE_DUREE_INSTALLATION}</p>
         <p>
           <strong>{TEXTE_EFFACEMENT}</strong>
@@ -179,7 +202,10 @@ function EtapesDaplink({ release, href, surPlusTard }) {
           Copier le fichier téléchargé sur le lecteur <strong>MAINTENANCE</strong>, puis attendre
           que le lecteur de la carte revienne.
         </li>
-        <li>Cliquer de nouveau sur « Essayer sur la carte », puis choisir la carte.</li>
+        <li>
+          Cliquer de nouveau sur « Essayer sur la carte », puis choisir la carte si la fenêtre de
+          connexion s&apos;ouvre.
+        </li>
       </ol>
       <p>
         <Link to="/docs/software/arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas">
@@ -313,7 +339,8 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     focaliserApresRef.current = false;
     const actuel = document.activeElement;
     if (actuel && actuel !== document.body) return;
-    essayerRef.current?.focus();
+    // Sans défilement : la page est déjà revenue à sa position (Encart).
+    essayerRef.current?.focus({ preventScroll: true });
   }, [occupee, encart, etapesDaplink, etat.etape, etatCarte.connectee]);
   const montrerConsole =
     actif && (etat.sortie !== '' || etat.traceback !== null || etat.etape === 'programme');
@@ -363,7 +390,7 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
           libelle={statut === 'televersement' ? 'installation' : undefined}
         />
       </div>
-      {encart && <Encart encart={encart} surReponse={focaliserApres} />}
+      {encart && <Encart encart={encart} surReponse={focaliserApres} blocRef={essayerRef} />}
       {etapesDaplink && (
         <EtapesDaplink
           release={etat.daplink.release}

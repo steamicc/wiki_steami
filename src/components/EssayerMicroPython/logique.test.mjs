@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 
 import {
   TEXTE_CARTE_OCCUPEE,
+  TEXTE_DUREE_INSTALLATION,
   TEXTE_EFFACEMENT,
   comparerVersions,
   decisionFirmware,
@@ -95,8 +96,31 @@ test('diagnosticSansInvite : bannière vue → occupee, sinon absent', () => {
 
 test('textes : contiennent la version, la release et les consignes', () => {
   assert.match(texteInstallation('v0.29.0'), /MicroPython v0\.29\.0/);
-  assert.match(TEXTE_EFFACEMENT, /effac/i);
+  // Chaque flash par DAP.js efface toute la flash non protégée (essai du
+  // 2026-11-27 sur la V1c) : l'effacement est certain, pas seulement possible.
+  assert.match(TEXTE_EFFACEMENT, /l'installation efface les fichiers/);
+  assert.doesNotMatch(TEXTE_EFFACEMENT, /peut effacer/);
   assert.match(TEXTE_CARTE_OCCUPEE, /Thonny/);
   assert.match(TEXTE_CARTE_OCCUPEE, /RESET/);
   assert.match(texteMiseAJourDaplink('2026-11-25.3'), /DAPLink.*2026-11-25\.3/);
+});
+
+test('texteInstallation : carte muette, sans doute sans MicroPython (constat prudent)', () => {
+  assert.equal(
+    texteInstallation('v0.29.0', 'absent'),
+    'Cette carte ne semble pas avoir MicroPython. Installer MicroPython v0.29.0 pour essayer cet exemple.',
+  );
+});
+
+test('texteInstallation : MicroPython plus ancien que celui du wiki', () => {
+  assert.equal(
+    texteInstallation('v0.29.0', 'ancien'),
+    'La version de MicroPython de cette carte est plus ancienne que celle du wiki. Installer MicroPython v0.29.0 pour essayer cet exemple.',
+  );
+});
+
+// Mesure : 37 s du clic à la sortie du programme (V1c, Chrome 158).
+test('TEXTE_DUREE_INSTALLATION : moins d’une minute', () => {
+  assert.match(TEXTE_DUREE_INSTALLATION, /moins d'une minute/);
+  assert.doesNotMatch(TEXTE_DUREE_INSTALLATION, /environ/);
 });

@@ -18,6 +18,7 @@ import {
   erreurCarteAffichee,
   estOccupee,
   lireFichiers,
+  messageSession,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
@@ -328,6 +329,7 @@ test('firmware ancien, « non » : rien n’est flashé, rien n’est lancé', a
   assert.equal(questions[0].type, 'installation');
   assert.equal(questions[0].donnees.version, 'v0.29.0');
   assert.equal(questions[0].donnees.autreCause, false);
+  assert.equal(questions[0].donnees.raison, 'ancien');
   assert.ok(!journal.some((l) => l.startsWith('flasherFirmware')));
   assert.ok(!journal.some((l) => l.startsWith('executer')));
   assert.ok(!journal.some((l) => l.startsWith('ecrireFichierRam')));
@@ -425,6 +427,14 @@ test('pas d’invite ni de bannière : installation proposée, avec l’autre ca
     'demander installation',
   ]);
   assert.equal(questions[0].donnees.autreCause, true);
+  assert.equal(questions[0].donnees.raison, 'absent');
+});
+
+test('MicroPython sans steami.version : installation proposée comme pour une version ancienne', async () => {
+  const { questions, dependances } = preparer({ versions: [null] });
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'annule');
+  assert.equal(questions[0].donnees.raison, 'ancien');
 });
 
 test('redémarrage refusé (DAPLink ancien) : la bannière est quand même guettée', async () => {
@@ -1031,6 +1041,27 @@ test('diagnostic : après le redémarrage, Ctrl-C finit par répondre (main.py e
   assert.ok(!journal.includes('demander installation'));
 });
 
+// Le redémarrage du diagnostic relance boot.py et main.py, que Ctrl-C
+// interrompt : leurs variables, minuteries et modules restent en mémoire.
+test('diagnostic sur une connexion ouverte : remise à zéro avant le programme', async () => {
+  const { journal, dependances, session } = preparer({
+    invites: [false, true],
+    versions: ['v0.29.0'],
+  });
+  assert.equal(session.etat.programmeLance, false);
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'lance', journal.join(' | '));
+  assert.deepEqual(sansRepetition(journal), [
+    'lireVersionDaplink',
+    'interrompre',
+    'redemarrer',
+    'interrompre',
+    'lireVersion',
+    'arreter',
+    'executer print(1+1)',
+  ]);
+});
+
 test('nouvelle connexion, carte sans MicroPython : fenêtre bornée, puis installation proposée sans second redémarrage', async () => {
   const { journal, questions, dependances } = preparer({
     connectee: false,
@@ -1046,6 +1077,7 @@ test('nouvelle connexion, carte sans MicroPython : fenêtre bornée, puis instal
   assert.ok(!journal.includes('redemarrer'));
   assert.equal(questions[0].type, 'installation');
   assert.equal(questions[0].donnees.autreCause, true);
+  assert.equal(questions[0].donnees.raison, 'absent');
 });
 
 // I6. Premier essai d'une connexion : remise à zéro (raw REPL, sans main.py).
@@ -1133,4 +1165,10 @@ test('erreurCarteAffichee : pendant la mise à jour du DAPLink, le texte du bout
   const refus = { connectee: false, erreur: acces, dernierClic: 'page#3' };
   const repos = { actif: null, etape: 'repos', erreur: null, message: null };
   assert.equal(erreurCarteAffichee(refus, repos, 'page#3'), TEXTE_ACCES_REFUSE_MICROPYTHON);
+});
+
+test('messageSession : l’installation dure moins d’une minute', () => {
+  const texte = messageSession({ etape: 'installation', message: null });
+  assert.match(texte, /moins d'une minute/);
+  assert.doesNotMatch(texte, /environ/);
 });

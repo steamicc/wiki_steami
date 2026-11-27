@@ -18,6 +18,8 @@ let etapesFlash = [];
 // Fenêtre de choix de la carte : nombre d'ouvertures, et réponse du lecteur.
 let choix = 0;
 let choisir = async () => appareil;
+// Appareils déjà autorisés pour le site (navigator.usb.getDevices).
+let autorises = async () => [];
 // Promesses attendues par le faux flash, la fausse déconnexion, les fausses
 // lecture et écriture série (null : tout de suite).
 let attenteFlash = null;
@@ -163,7 +165,10 @@ class FauxDAPLink {
   }
 }
 
+const VENDOR_ID_DAPLINK = 0x0d28;
+
 const appareil = {
+  vendorId: VENDOR_ID_DAPLINK,
   async close() {
     journal.push('close');
   },
@@ -185,6 +190,7 @@ Object.defineProperty(globalThis, 'navigator', {
         choix += 1;
         return choisir();
       },
+      getDevices: () => autorises(),
       addEventListener(nom, fn) {
         ecouteursUsb[nom] = fn;
       },
@@ -241,6 +247,7 @@ afterEach(async (t) => {
   attenteEcriture = null;
   pannes = {};
   choisir = async () => appareil;
+  autorises = async () => [];
 });
 
 // Abonne un composant et connecte la carte depuis l'exemple « A ».
@@ -318,6 +325,8 @@ test("connexion : état « connexion » pendant la fenêtre de choix, jusqu'à l
   const connexion = carte.connecter('A');
   assert.equal(carte.etat.connexion, true);
   assert.equal(carte.etat.connectee, false);
+  // La fenêtre de choix s'ouvre après la lecture des cartes déjà autorisées.
+  await attendre();
   choisirCarte();
   await connexion;
   assert.equal(carte.etat.connexion, false);
@@ -561,6 +570,8 @@ test('déconnexion : sans effet pendant une connexion', async (t) => {
   assert.equal(carte.etat.occupee, true);
   assert.equal(carte.etat.dernierClic, 'A');
 
+  // La fenêtre de choix s'ouvre après la lecture des cartes déjà autorisées.
+  await attendre();
   choisirCarte();
   await connexion;
   assert.deepEqual(journal, ['connect', 'bauds 115200', 'serialRead']);
@@ -822,6 +833,82 @@ test("reconnexion après une carte perdue : attend la fermeture de l'ancienne co
   assert.deepEqual(journal, ['close', 'connect', 'bauds 115200', 'serialRead']);
   assert.equal(carte.etat.connectee, true);
   await quitter(t, desabonner);
+});
+
+// --- Carte déjà autorisée (getDevices) --------------------------------------
+
+// Connecte depuis l'exemple « A » quand les appareils donnés sont déjà
+// autorisés (autorises : la fonction appelée par getDevices).
+async function connecterAvec(appareils, obtenir = async () => appareils) {
+  journal = [];
+  pannes = {};
+  choix = 0;
+  autorises = obtenir;
+  const desabonner = abonner(() => {});
+  await carte.connecter('A');
+  return desabonner;
+}
+
+test('carte déjà autorisée : aucune, la fenêtre de choix s’ouvre', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const desabonner = await connecterAvec([]);
+  assert.equal(choix, 1);
+  assert.equal(carte.etat.connectee, true);
+  await quitter(t, desabonner);
+});
+
+test('carte déjà autorisée : une seule, reprise sans la fenêtre de choix', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const desabonner = await connecterAvec([appareil]);
+  assert.equal(choix, 0);
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(derniere.transport.device, appareil);
+  await quitter(t, desabonner);
+});
+
+test('carte déjà autorisée : deux STeaMi, la fenêtre de choix s’ouvre', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const autre = { vendorId: VENDOR_ID_DAPLINK, async close() {} };
+  const desabonner = await connecterAvec([autre, appareil]);
+  assert.equal(choix, 1);
+  assert.equal(derniere.transport.device, appareil);
+  await quitter(t, desabonner);
+});
+
+test('carte déjà autorisée : un appareil d’un autre fabricant ne compte pas', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const arduino = { vendorId: 0x2341, async close() {} };
+  let desabonner = await connecterAvec([arduino]);
+  assert.equal(choix, 1, 'seul autorisé, mais pas une STeaMi');
+  await quitter(t, desabonner);
+  desabonner = await connecterAvec([arduino, appareil]);
+  assert.equal(choix, 0, 'une seule STeaMi parmi les autorisés');
+  assert.equal(derniere.transport.device, appareil);
+  await quitter(t, desabonner);
+});
+
+test('carte déjà autorisée : getDevices en échec, la fenêtre de choix s’ouvre', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const desabonner = await connecterAvec([], async () => {
+    throw new Error('SecurityError');
+  });
+  assert.equal(choix, 1);
+  assert.equal(carte.etat.connectee, true);
+  await quitter(t, desabonner);
+});
+
+test('carte déjà autorisée : sans getDevices, la fenêtre de choix s’ouvre', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { getDevices } = navigator.usb;
+  delete navigator.usb.getDevices;
+  try {
+    const desabonner = await connecterAvec([appareil]);
+    assert.equal(choix, 1);
+    assert.equal(carte.etat.connectee, true);
+    await quitter(t, desabonner);
+  } finally {
+    navigator.usb.getDevices = getDevices;
+  }
 });
 
 // --- Lecture série brute, écriture, firmware, version du DAPLink ------------
@@ -1247,6 +1334,8 @@ test("carte perdue par la console puis nouvelle connexion : l'ancien appareil d�
   assert.equal(carte.etat.connexion, true);
   debrancher();
   assert.equal(carte.etat.erreur, null);
+  // La fenêtre de choix s'ouvre après la lecture des cartes déjà autorisées.
+  await attendre();
   choisirCarte();
   await connexion;
   await attendre();

@@ -68,17 +68,30 @@ export function decisionMiseAJour(version, epingle) {
 
 // --- Textes -----------------------------------------------------------------
 
-export function texteInstallation(version) {
-  return `Cette carte n'a pas la bonne version de MicroPython. Installer MicroPython ${version} pour essayer cet exemple.`;
+// raison : 'absent' (carte muette : sans doute pas de MicroPython, un
+// programme Arduino par exemple) ou 'ancien' (MicroPython plus ancien que la
+// version épinglée, ou sans steami.version). Une carte muette peut aussi avoir
+// MicroPython, tenu par un outil ou par un programme qui ignore Ctrl-C : le
+// constat reste prudent, et TEXTE_AUTRE_CAUSE (deroulement.mjs) le complète.
+export function texteInstallation(version, raison) {
+  const constat =
+    raison === 'absent'
+      ? 'Cette carte ne semble pas avoir MicroPython.'
+      : 'La version de MicroPython de cette carte est plus ancienne que celle du wiki.';
+  return `${constat} Installer MicroPython ${version} pour essayer cet exemple.`;
 }
 
-// Mesure à refaire dans Chrome : DAP.js envoie le .bin (environ 520 ko) par
-// paquets de 62 octets, après l'effacement complet de la puce.
+// Mesuré le 2026-11-27 sur la V1c dans Chrome 158 : 37 s du clic sur
+// « Installer » à la sortie du programme. DAP.js envoie le .bin (environ
+// 520 ko) par paquets de 62 octets, après l'effacement complet de la puce.
 export const TEXTE_DUREE_INSTALLATION =
-  "L'installation dure environ une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
+  "L'installation dure moins d'une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
 
+// DAP.js efface toute la flash non protégée avant d'écrire, système de
+// fichiers compris (essai du 2026-11-27 sur la V1c) : seule la pile radio,
+// protégée par le FUS, reste en place.
 export const TEXTE_EFFACEMENT =
-  "Attention : l'installation peut effacer les fichiers enregistrés sur la carte. Les copier avant de continuer.";
+  "Attention : l'installation efface les fichiers enregistrés sur la carte. Les copier avant de continuer.";
 
 export const TEXTE_CARTE_OCCUPEE =
   "La carte ne répond pas : un autre outil (Thonny, mpremote) ou un programme en cours peut la tenir. Fermer l'outil, ou appuyer sur RESET, puis réessayer.";

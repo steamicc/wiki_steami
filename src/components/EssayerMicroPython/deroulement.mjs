@@ -138,7 +138,7 @@ const TEXTES_ETAPES = Object.freeze({
   sondage: 'Recherche de MicroPython sur la carte…',
   diagnostic: 'La carte ne répond pas : redémarrage de la carte…',
   installation:
-    'Installation de MicroPython (environ une minute) : ne pas débrancher la carte ni fermer la page…',
+    "Installation de MicroPython (moins d'une minute) : ne pas débrancher la carte ni fermer la page…",
   redemarrage: 'Redémarrage de la carte…',
   fichiers: 'Envoi des fichiers annexes…',
   programme: 'Programme en cours.',
@@ -487,7 +487,13 @@ async function obtenirInvite(repl, carte, { fenetre, guet, delais, remplace }) {
 // ce redémarrage tient lieu de diagnostic. Sinon, une carte muette est
 // redémarrée une fois (dap.reset()), puis sondée de la même façon. Une
 // bannière vue n'est jamais suivie d'une proposition d'installation.
-async function sonder(repl, carte, epinglee, { delais, changer, remplace, guetConnexion }) {
+// retenir : mémoire de la page (session.retenir).
+async function sonder(
+  repl,
+  carte,
+  epinglee,
+  { delais, changer, retenir, remplace, guetConnexion },
+) {
   changer({ etape: 'sondage' });
   const lire = async () => {
     const version = await repl.lireVersion();
@@ -511,6 +517,11 @@ async function sonder(repl, carte, epinglee, { delais, changer, remplace, guetCo
       } catch {
         // Redémarrage refusé (DAPLink trop ancien) : la fenêtre décidera.
       }
+      // Comme après une nouvelle connexion : le redémarrage relance boot.py
+      // et main.py, que Ctrl-C interrompt en laissant leurs variables,
+      // minuteries et modules. Refusé, l'état de la carte muette n'est pas
+      // mieux connu. Le prochain programme part d'une remise à zéro.
+      retenir({ programmeLance: true });
       resultat = await obtenirInvite(repl, carte, {
         fenetre: delais.demarrage,
         guet,
@@ -638,6 +649,7 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     const decision = await sonder(repl, carte, epinglee, {
       delais,
       changer,
+      retenir: session.retenir,
       remplace,
       guetConnexion,
     });
@@ -656,9 +668,13 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     // 3. Firmware absent ou ancien : installation après « Installer » seulement.
     if (decision === 'ancien' || decision === 'muette') {
       changer({ etape: 'question' });
+      // raison : texte de la question (texteInstallation). Une carte muette
+      // sans bannière n'a sans doute pas MicroPython (autreCause : ou bien un
+      // outil la tient).
       const reponse = await demander('installation', {
         id,
         version: epinglee,
+        raison: decision === 'ancien' ? 'ancien' : 'absent',
         autreCause: decision === 'muette',
       });
       if (remplace()) return { fin: 'abandonne' };
