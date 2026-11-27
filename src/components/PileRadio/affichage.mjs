@@ -16,7 +16,7 @@ export const TEXTE_CONSIGNES_PILE =
 // Dernière étape de la mise à jour guidée du DAPLink : la carte redémarre
 // avec son nouveau DAPLink, la connexion est perdue.
 export const TEXTE_DERNIERE_ETAPE_DAPLINK =
-  'Cliquer sur « Connecter la carte » et choisir la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+  "Cliquer sur « Connecter la carte », choisir la carte si la fenêtre de connexion s'ouvre, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
 const MESSAGES_ETAPES = Object.freeze({
   operateur: 'Écriture du programme de lecture sur la carte…',

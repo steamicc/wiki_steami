@@ -11,6 +11,7 @@ import {
   CLE_FORCER,
   TEXTE_CONSIGNES_PILE,
   TEXTE_DUREE_PILE,
+  TEXTE_DERNIERE_ETAPE_DAPLINK,
   boutonPileActif,
   contenuEncart,
   controlesOccupes,
@@ -610,5 +611,12 @@ describe('retenirOnglet', () => {
     parcours.poser({ etape: 'suppression' });
     parcours.poser({ etape: 'erreur' });
     assert.equal(ecouteurs.size, 0);
+  });
+});
+
+describe('TEXTE_DERNIERE_ETAPE_DAPLINK', () => {
+  it('ne demande de choisir la carte que si la fenêtre de connexion s ouvre (carte autorisée reprise)', () => {
+    assert.match(TEXTE_DERNIERE_ETAPE_DAPLINK, /si la fenêtre de connexion s'ouvre/);
+    assert.match(TEXTE_DERNIERE_ETAPE_DAPLINK, /Vérifier la pile radio/);
   });
 });
