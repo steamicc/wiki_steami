@@ -5,22 +5,34 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  TEXTE_ACCES_REFUSE_MICROPYTHON,
   TEXTE_APRES_INSTALLATION,
   TEXTE_CARTE_PERDUE,
+  TEXTE_DECONNECTEE,
   TEXTE_RESET,
   abandonnerBloc,
   arreter,
   chargerEpingles,
   creerSession,
   essayer,
+  erreurCarteAffichee,
   estOccupee,
   lireFichiers,
   signalerDeconnexion,
   statutPastille,
   texteConsole,
+  traduireMessageCarte,
 } from './deroulement.mjs';
 import { TEXTE_CARTE_OCCUPEE } from './logique.mjs';
-import { ErreurLecteur } from '../EssayerExemple/logique.mjs';
+import {
+  ErreurLecteur,
+  MESSAGE_DAPJS_INTROUVABLE,
+  MESSAGE_DEBRANCHEE,
+  MESSAGE_FLASH_EN_COURS,
+  MESSAGE_SANS_CARTE,
+  messageErreur,
+  messageFrancais,
+} from '../EssayerExemple/logique.mjs';
 
 const BANNIERE = 'MicroPython v1.29.0 on 2026-11-26; STeaMi with STM32WB55RGV6\r\n>>> ';
 const EPINGLES = {
@@ -461,18 +473,16 @@ test('sortie et traceback dans la console du bloc', async () => {
   assert.equal(session.etat.etape, 'fini');
 });
 
-test('erreur de la carte en cours de route : message en français', async () => {
+test('erreur de la carte en cours de route : message du bouton MicroPython', async () => {
   const { dependances, session } = preparer();
   dependances.creerRepl = () => ({
     async interrompre() {
-      const err = new Error('Aucune carte connectée : cliquer sur « Connecter la carte ».');
-      err.name = 'ErreurLecteur';
-      throw err;
+      throw new ErreurLecteur(MESSAGE_SANS_CARTE);
     },
   });
   const r = await essayer(BLOC, dependances);
   assert.equal(r.fin, 'erreur');
-  assert.match(session.etat.erreur, /Aucune carte connectée/);
+  assert.equal(session.etat.erreur, TEXTE_CARTE_PERDUE);
 });
 
 test('épinglage du wiki illisible : rien n’est lancé', async () => {
@@ -1068,4 +1078,59 @@ test('« Plus tard » sous les étapes du DAPLink : le statut dit quoi faire', a
   session.reporterDaplink();
   assert.equal(session.etat.daplink, null);
   assert.match(session.etat.message, /reportée.*Essayer sur la carte/);
+});
+
+// I3, I4, I5. Messages de la connexion partagée sous un bloc MicroPython :
+// jamais « Connecter la carte », ni le .bin, ni le téléversement des pages
+// Arduino.
+
+const ARDUINO = /Connecter la carte|\.bin|page Codespace|éléversement/;
+
+test('traduireMessageCarte : les messages des pages Arduino reformulés pour MicroPython', () => {
+  const acces = messageErreur({ name: 'SecurityError', message: 'Access denied.' });
+  assert.match(acces, /\.bin ci-dessous/, 'texte des pages Arduino inchangé');
+  const cas = [
+    MESSAGE_SANS_CARTE,
+    MESSAGE_DEBRANCHEE,
+    MESSAGE_FLASH_EN_COURS,
+    MESSAGE_DAPJS_INTROUVABLE,
+    acces,
+    messageFrancais(new Error('Flash error'), 'televersement'),
+    messageErreur({ name: 'NotFoundError', message: 'The device was disconnected.' }),
+  ];
+  for (const texte of cas) {
+    const traduit = traduireMessageCarte(texte);
+    assert.doesNotMatch(traduit, ARDUINO, traduit);
+  }
+  assert.equal(traduireMessageCarte(MESSAGE_SANS_CARTE), TEXTE_CARTE_PERDUE);
+  assert.equal(traduireMessageCarte(MESSAGE_DEBRANCHEE), TEXTE_CARTE_PERDUE);
+  assert.equal(traduireMessageCarte(acces), TEXTE_ACCES_REFUSE_MICROPYTHON);
+  assert.match(TEXTE_ACCES_REFUSE_MICROPYTHON, /udev/);
+  assert.match(TEXTE_ACCES_REFUSE_MICROPYTHON, /Thonny/);
+  assert.match(traduireMessageCarte(messageFrancais(new Error('Flash error'))), /^L'installation/);
+  assert.match(traduireMessageCarte(MESSAGE_FLASH_EN_COURS), /^Installation en cours/);
+  // Les autres messages passent tels quels.
+  assert.equal(traduireMessageCarte('Aucune carte choisie.'), 'Aucune carte choisie.');
+  assert.equal(traduireMessageCarte(null), null);
+});
+
+test('erreurCarteAffichee : un seul message quand la carte est débranchée pendant un programme', () => {
+  const carte = { connectee: false, erreur: MESSAGE_DEBRANCHEE, dernierClic: 'page#1' };
+  const session = { actif: 'page#1', etape: 'fini', erreur: null, message: TEXTE_DECONNECTEE };
+  assert.equal(erreurCarteAffichee(carte, session, 'page#1'), null);
+});
+
+test('erreurCarteAffichee : pendant la mise à jour du DAPLink, le texte du bouton MicroPython', () => {
+  const carte = { connectee: false, erreur: MESSAGE_DEBRANCHEE, dernierClic: 'page#1' };
+  const session = { actif: 'page#1', etape: 'fini', erreur: null, message: 'Suivre…' };
+  assert.equal(erreurCarteAffichee(carte, session, 'page#1'), TEXTE_CARTE_PERDUE);
+  assert.equal(erreurCarteAffichee(carte, session, 'page#2'), null, 'sous le bloc actif seulement');
+  // Une erreur de l'essai l'emporte : pas de doublon.
+  const avecErreur = { ...session, erreur: TEXTE_CARTE_PERDUE };
+  assert.equal(erreurCarteAffichee(carte, avecErreur, 'page#1'), null);
+  // Sans essai, sous le dernier bloc cliqué (connexion refusée).
+  const acces = messageErreur({ name: 'SecurityError', message: 'Access denied.' });
+  const refus = { connectee: false, erreur: acces, dernierClic: 'page#3' };
+  const repos = { actif: null, etape: 'repos', erreur: null, message: null };
+  assert.equal(erreurCarteAffichee(refus, repos, 'page#3'), TEXTE_ACCES_REFUSE_MICROPYTHON);
 });

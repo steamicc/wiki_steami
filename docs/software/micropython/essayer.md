@@ -29,7 +29,7 @@ Le bouton passe par WebUSB : il est prévu pour **Chrome** ou **Edge** sur un or
 
 1. Brancher la carte à l'ordinateur avec un câble USB qui transporte les données (certains câbles ne servent qu'à la charge).
 2. Fermer Thonny ou `mpremote` s'ils sont ouverts : ils occupent la carte.
-3. Sous le programme, cliquer sur **Essayer sur la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. Tant que la carte reste connectée, les autres programmes s'essaient sans repasser par cette fenêtre. Elle revient après un clic sur **Déconnecter**, un débranchement de la carte, ou un passage par une page sans bouton d'essai.
+3. Sous le programme, cliquer sur **Essayer sur la carte**. Le navigateur ouvre une fenêtre de connexion : choisir **STeaMi CMSIS-DAP**, puis cliquer sur **Connexion**. Tant que la carte reste connectée, les autres programmes s'essaient sans repasser par cette fenêtre. Elle revient après un clic sur **Déconnecter**, un débranchement de la carte, ou un passage par une page sans bouton d'essai. La connexion redémarre la carte : le programme qu'elle exécutait, par exemple son `main.py`, repart de zéro, puis le wiki l'interrompt.
 4. Le wiki vérifie la carte (voir [Vérifications avant le lancement](#vérifications-avant-le-lancement)), puis lance le programme. La console s'ouvre sous le programme et affiche ce qu'il écrit avec `print()`. Une erreur Python (_traceback_) y est mise en évidence.
 5. Cliquer sur **Arrêter** pour interrompre le programme. Lancer un autre programme de la page arrête d'abord celui qui tourne.
 
@@ -41,7 +41,7 @@ Le programme tourne dans la mémoire vive (RAM) de la carte, sans être enregist
 
 Certains programmes ont besoin de fichiers annexes, par exemple un `pins.py` qui décrit les broches utilisées. Ces fichiers sont écrits dans un disque en RAM (`/ram`), jamais dans la mémoire flash de la carte : ils disparaissent avec le programme.
 
-**Arrêter** interrompt le programme et redémarre MicroPython sans exécuter le `main.py` de la carte : l'essai suivant part de zéro. Si la carte ne répond plus, appuyer sur le bouton **RESET** de la carte, puis réessayer.
+**Arrêter** interrompt le programme et redémarre MicroPython sans exécuter le `main.py` de la carte : l'essai suivant part de zéro. Le premier programme lancé après une connexion part aussi de zéro, même si la carte exécutait autre chose avant. Si la carte ne répond plus, appuyer sur le bouton **RESET** de la carte, puis réessayer.
 
 ## Vérifications avant le lancement
 
@@ -54,7 +54,7 @@ Si le DAPLink de la carte est plus ancien que la version retenue par le wiki, un
 Le DAPLink ne peut pas se mettre à jour lui-même : **Mettre à jour…** affiche les étapes à suivre à la main, les mêmes que [dans le Codespace](../arduino/codespace#mettre-à-jour-le-daplink-depuis-la-page) :
 
 1. Cliquer sur **Télécharger le firmware** : le fichier `stm32f103xb_steami32_if_crc.bin` arrive dans le dossier des téléchargements.
-2. Créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre et un lecteur **MAINTENANCE** apparaît à la place.
+2. Créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre et un lecteur **MAINTENANCE** apparaît à la place. La page indique alors que la carte a été déconnectée : c'est normal, les étapes restent affichées.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 4. Cliquer de nouveau sur **Essayer sur la carte**, puis choisir la carte.
 
@@ -64,7 +64,7 @@ Le bouton **Plus tard** sous les étapes les masque jusqu'au rechargement de la 
 
 Le wiki affiche le code d'une version précise de la bibliothèque MicroPython STeaMi, celle du firmware qu'il propose d'installer. Une carte qui a cette version de MicroPython, ou une plus récente, lance le programme directement.
 
-Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose de l'installer. Rien n'est installé sans un clic sur **Installer MicroPython** (suivi du numéro de version proposé). Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé.
+Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa version de MicroPython est plus ancienne, un encart propose de l'installer. Rien n'est installé sans un clic sur **Installer MicroPython** (suivi du numéro de version proposé). Après ce clic, le firmware est envoyé à la carte (une barre de progression suit l'envoi), la carte redémarre, puis le programme est lancé. L'installation dure environ une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page, sinon la carte reste sans firmware. Après une installation interrompue, débrancher la carte (et sa batterie, s'il y en a une), la rebrancher, puis relancer l'installation.
 
 :::warning
 
@@ -74,9 +74,10 @@ L'installation de MicroPython peut effacer les fichiers enregistrés sur la cart
 
 ### Carte occupée
 
-Si un autre outil utilise déjà la carte (Thonny, `mpremote`) ou si un programme en cours ignore l'interruption (Ctrl-C), MicroPython ne répond pas au wiki. Le wiki redémarre alors la carte une fois, ce qui interrompt ce qu'elle exécutait :
+Si un autre outil utilise déjà la carte (Thonny, `mpremote`) ou si un programme en cours ignore l'interruption (Ctrl-C), MicroPython ne répond pas au wiki. Le wiki redémarre alors la carte une fois (à la connexion, c'est déjà fait) et lui laisse quelques secondes pour démarrer, en renvoyant l'interruption :
 
-- si MicroPython démarre, le wiki signale que la carte est occupée, sans proposer d'installation ;
+- si MicroPython répond, le programme est lancé ;
+- si MicroPython démarre sans répondre, le wiki signale que la carte est occupée, sans proposer d'installation ;
 - avec un DAPLink trop ancien, ce redémarrage n'est pas possible : l'encart d'installation peut alors apparaître même si MicroPython est installé, et il le rappelle (« Si MicroPython est déjà installé… »).
 
 Dans les deux cas, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
@@ -94,6 +95,31 @@ Les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960 ne sont pas montés sur la V1c : 
 ## Sans Chrome ni Edge
 
 Avec un navigateur qui ne sait pas parler à la carte par USB (Firefox, Safari), le bouton est remplacé par un renvoi vers [Thonny](./thonny) et [mpremote](./mpremote) : copier le programme dans Thonny, ou l'enregistrer dans un fichier et le lancer avec `mpremote run`.
+
+## Dépannage
+
+### La carte n'apparaît pas dans la fenêtre de connexion
+
+Vérifier que le câble USB transporte les données (certains câbles ne servent qu'à la charge), puis débrancher et rebrancher la carte, au besoin sur un autre port. Le lecteur **STEAMI** doit apparaître sur l'ordinateur.
+
+### Accès à la carte refusé
+
+Le message « Accès à la carte refusé par le système » apparaît après le choix de la carte :
+
+- sous Linux, il manque sans doute la règle `udev` qui donne au navigateur l'accès à l'interface du DAPLink : la procédure est décrite dans la section [Troubleshooting uploads](https://github.com/steamicc/arduino-steami-lib#troubleshooting-uploads) du dépôt arduino-steami-lib ;
+- sinon, un autre onglet ou un autre programme utilise la carte (un autre onglet du wiki, un Codespace) : le fermer, puis réessayer.
+
+### La carte est déjà utilisée par un autre onglet
+
+Une seule page à la fois peut se connecter à la carte. Cliquer sur **Déconnecter** dans l'autre onglet, ou le fermer, puis réessayer.
+
+### La carte a été déconnectée
+
+La carte a été débranchée, ou elle a redémarré sur son lecteur **MAINTENANCE** (mise à jour du DAPLink). La rebrancher si besoin, puis cliquer de nouveau sur **Essayer sur la carte** : le navigateur demande de choisir la carte une nouvelle fois.
+
+### En dernier recours
+
+Si le bouton ne fonctionne toujours pas, lancer le programme avec [Thonny](./thonny) ou [mpremote](./mpremote) : ils passent par le port série de la carte, sans WebUSB.
 
 ## Enregistrer un programme sur la carte
 

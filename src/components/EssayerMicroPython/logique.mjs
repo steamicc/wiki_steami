@@ -72,6 +72,11 @@ export function texteInstallation(version) {
   return `Cette carte n'a pas la bonne version de MicroPython. Installer MicroPython ${version} pour essayer cet exemple.`;
 }
 
+// Mesure à refaire dans Chrome : DAP.js envoie le .bin (environ 520 ko) par
+// paquets de 62 octets, après l'effacement complet de la puce.
+export const TEXTE_DUREE_INSTALLATION =
+  "L'installation dure environ une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
+
 export const TEXTE_EFFACEMENT =
   "Attention : l'installation peut effacer les fichiers enregistrés sur la carte. Les copier avant de continuer.";
 

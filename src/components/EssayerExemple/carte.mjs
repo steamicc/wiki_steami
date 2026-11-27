@@ -26,6 +26,10 @@
 // vidée entre l'ancien programme et le nouveau.
 import {
   ErreurLecteur,
+  MESSAGE_DAPJS_INTROUVABLE,
+  MESSAGE_DEBRANCHEE,
+  MESSAGE_FLASH_EN_COURS,
+  MESSAGE_SANS_CARTE,
   TamponLignes,
   activiteASignaler,
   messageFrancais,
@@ -54,11 +58,6 @@ export const PAQUET_SERIE = 62;
 
 // Commande vendeur du DAPLink STeaMi qui renvoie sa version.
 const COMMANDE_VERSION = 0x9f;
-
-const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
-const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
-const MESSAGE_DEBRANCHEE =
-  'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».';
 
 export const ETAT_INITIAL = Object.freeze({
   connectee: false,
@@ -147,11 +146,7 @@ function chargerDapjs(src) {
       script.onerror = () => {
         promesseDapjs = null; // permet de réessayer
         script.remove();
-        reject(
-          new ErreurLecteur(
-            'Impossible de charger la bibliothèque de téléversement : vérifier la connexion à Internet, puis réessayer.',
-          ),
-        );
+        reject(new ErreurLecteur(MESSAGE_DAPJS_INTROUVABLE));
       };
       document.head.append(script);
     });

@@ -31,12 +31,13 @@ function Telechargement({ id, href }) {
 // État de la carte : pastille de couleur et libellé, jamais la couleur seule.
 // Pas de région aria-live : chaque exemple de la page l'affiche, une
 // annonce serait répétée autant de fois. Les annonces passent par les
-// messages de l'exemple cliqué.
-export function EtatCarte({ statut }) {
+// messages de l'exemple cliqué. libelle : remplace celui du statut (le
+// composant MicroPython dit « installation » au lieu de « téléversement »).
+export function EtatCarte({ statut, libelle }) {
   return (
     <p className={styles.etatCarte}>
       <span className={styles.pastille} data-statut={statut} aria-hidden="true" />
-      Carte : {LIBELLES_STATUT[statut]}
+      Carte : {libelle ?? LIBELLES_STATUT[statut]}
     </p>
   );
 }
@@ -63,8 +64,9 @@ function VoyantSerie({ activite }) {
 // Barre native : les lecteurs d'écran en donnent la valeur. Tant que DAP.js
 // n'a pas commencé à écrire, elle est indéterminée (pas d'attribut value) et
 // annonce la préparation de la carte. Le texte écrit à côté est pour les yeux
-// seulement : « Téléversement en cours… » est déjà annoncé.
-export function Progression({ progression }) {
+// seulement : « Téléversement en cours… » est déjà annoncé. libelle : nom de
+// la barre pour les lecteurs d'écran.
+export function Progression({ progression, libelle = 'Progression du téléversement' }) {
   const { valeur, texte } = affichageProgression(progression);
   return (
     <div className={styles.progression}>
@@ -72,7 +74,7 @@ export function Progression({ progression }) {
         className={styles.barre}
         max={100}
         value={valeur ?? undefined}
-        aria-label="Progression du téléversement"
+        aria-label={libelle}
       />
       <span aria-hidden="true">{texte}</span>
     </div>

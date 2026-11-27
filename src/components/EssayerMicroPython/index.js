@@ -14,7 +14,12 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from '../EssayerExemple/carte.mjs';
 import { EtatCarte, Progression } from '../EssayerExemple';
 import { estEnBas, etatWebUSB } from '../EssayerExemple/logique.mjs';
-import { TEXTE_EFFACEMENT, texteInstallation, texteMiseAJourDaplink } from './logique.mjs';
+import {
+  TEXTE_DUREE_INSTALLATION,
+  TEXTE_EFFACEMENT,
+  texteInstallation,
+  texteMiseAJourDaplink,
+} from './logique.mjs';
 import { creerRepl } from './repl.mjs';
 import {
   SESSION_INITIALE,
@@ -23,6 +28,7 @@ import {
   arreter,
   chargerEpingles,
   creerSession,
+  erreurCarteAffichee,
   essayer,
   estOccupee,
   lireFichiers,
@@ -108,6 +114,7 @@ function Encart({ encart, surReponse }) {
     contenu = (
       <>
         <p>{texteInstallation(donnees.version)}</p>
+        <p>{TEXTE_DUREE_INSTALLATION}</p>
         <p>
           <strong>{TEXTE_EFFACEMENT}</strong>
         </p>
@@ -253,9 +260,22 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     }
   }, [etatCarte.connectee, actif, etat]);
 
-  // Bloc quitté (navigation) : sa question en attente ne doit pas bloquer les
-  // boutons des autres pages.
+  // Bloc quitté (navigation) : son essai en préparation ou sa question en
+  // attente ne doit pas bloquer les boutons des autres pages.
   useEffect(() => () => abandonnerBloc(session, id), [id]);
+
+  // Installation en cours : fermer ou recharger la page la couperait et
+  // laisserait la carte sans firmware. Le navigateur demande confirmation.
+  const installation = actif && etat.etape === 'installation';
+  useEffect(() => {
+    if (!installation) return undefined;
+    const retenir = (evenement) => {
+      evenement.preventDefault();
+      evenement.returnValue = '';
+    };
+    window.addEventListener('beforeunload', retenir);
+    return () => window.removeEventListener('beforeunload', retenir);
+  }, [installation]);
 
   function lancer() {
     focaliserApres();
@@ -273,12 +293,13 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
   }
 
   const occupee = estOccupee(etat) || etatCarte.occupee;
+  // 'televersement' : la carte est réservée par l'installation de MicroPython.
+  const statut = statutPastille(etatCarte, etat, id);
   const message = actif ? messageSession(etat) : null;
   const erreur = actif ? etat.erreur : null;
-  // Erreur de la connexion partagée : sous le bloc MicroPython actif, sinon
-  // sous le dernier bloc cliqué ; pas en double d'une erreur de l'essai.
-  const blocCarte = etat.actif ?? etatCarte.dernierClic;
-  const erreurCarte = blocCarte === id && !erreur ? etatCarte.erreur : null;
+  // Erreur de la connexion partagée, avec les mots de ce bouton (voir
+  // traduireMessageCarte).
+  const erreurCarte = erreurCarteAffichee(etatCarte, etat, id);
   const encart = etat.encart?.donnees.id === id ? etat.encart : null;
   const etapesDaplink = actif && etat.daplink;
 
@@ -337,7 +358,10 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         )}
       </div>
       <div className={communs.indicateurs}>
-        <EtatCarte statut={statutPastille(etatCarte, etat, id)} />
+        <EtatCarte
+          statut={statut}
+          libelle={statut === 'televersement' ? 'installation' : undefined}
+        />
       </div>
       {encart && <Encart encart={encart} surReponse={focaliserApres} />}
       {etapesDaplink && (
@@ -347,8 +371,8 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
           surPlusTard={focaliserApres}
         />
       )}
-      {actif && etat.etape === 'installation' && etatCarte.occupee && (
-        <Progression progression={etatCarte.progression} />
+      {installation && etatCarte.occupee && (
+        <Progression progression={etatCarte.progression} libelle="Progression de l'installation" />
       )}
       <div className={communs.messages} aria-live="polite">
         {message && <p className={communs.statut}>{message}</p>}

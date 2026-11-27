@@ -13,6 +13,21 @@ export function etatWebUSB(nav, estFenetrePrincipale) {
   return 'ok';
 }
 
+// La fenêtre de choix a déjà donné l'accès au site : un refus vient du
+// système (Linux sans règle udev) ou d'un autre programme qui tient la carte.
+export const TEXTE_ACCES_REFUSE =
+  "Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte : l'installer, ou glisser le .bin ci-dessous sur le lecteur STEAMI (voir la page Codespace). Sinon, un autre programme ou onglet utilise la carte (Arduino IDE, Codespace…) : le fermer, puis réessayer.";
+
+// Messages de la connexion partagée (carte.mjs), écrits pour les pages
+// Arduino. Exportés pour que le composant MicroPython les reformule
+// (traduireMessageCarte) : il n'a ni bouton « Connecter la carte » ni .bin.
+export const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
+export const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
+export const MESSAGE_DEBRANCHEE =
+  'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».';
+export const MESSAGE_DAPJS_INTROUVABLE =
+  'Impossible de charger la bibliothèque de téléversement : vérifier la connexion à Internet, puis réessayer.';
+
 // Traduit les erreurs de Chrome (WebUSB et DAP.js) en français.
 export function messageErreur(err) {
   const nom = err?.name || '';
@@ -27,11 +42,7 @@ export function messageErreur(err) {
   if (nom === 'SecurityError' && /permissions policy/i.test(message)) {
     return "Le navigateur interdit l'USB dans cet aperçu : ouvrir la page dans un onglet du navigateur.";
   }
-  // La fenêtre de choix a déjà donné l'accès au site : un refus vient du
-  // système (Linux sans règle udev) ou d'un autre programme qui tient la carte.
-  if (nom === 'SecurityError') {
-    return "Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte : l'installer, ou glisser le .bin ci-dessous sur le lecteur STEAMI (voir la page Codespace). Sinon, un autre programme ou onglet utilise la carte (Arduino IDE, Codespace…) : le fermer, puis réessayer.";
-  }
+  if (nom === 'SecurityError') return TEXTE_ACCES_REFUSE;
   if (nom === 'NetworkError' && /claim interface/i.test(message)) {
     return 'La carte est déjà utilisée par un autre onglet ou un autre programme : le fermer, puis réessayer.';
   }
@@ -61,13 +72,13 @@ export class ErreurLecteur extends Error {
 export const CONSEIL_REINITIALISATION =
   "débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer.";
 
-const ECHECS = {
+export const ECHECS = Object.freeze({
   connexion: 'La connexion à la carte a échoué',
   televersement: 'Le téléversement a échoué',
   console: 'La lecture de la console série a échoué',
   ecriture: "L'envoi à la carte a échoué",
   redemarrage: 'Le redémarrage de la carte a échoué',
-};
+});
 
 // Message à afficher pour une erreur survenue pendant une étape (connexion,
 // televersement, console, ecriture ou redemarrage). Ce que messageErreur ne traduit pas (erreurs de

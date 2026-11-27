@@ -26,7 +26,17 @@ import {
   lireFirmwareEpingle,
 } from './logique.mjs';
 import { ArretDemande, estBanniereMicroPython } from './repl.mjs';
-import { ErreurLecteur, messageFrancais } from '../EssayerExemple/logique.mjs';
+import {
+  ECHECS,
+  ErreurLecteur,
+  MESSAGE_DAPJS_INTROUVABLE,
+  MESSAGE_DEBRANCHEE,
+  MESSAGE_FLASH_EN_COURS,
+  MESSAGE_SANS_CARTE,
+  TEXTE_ACCES_REFUSE,
+  messageErreur,
+  messageFrancais,
+} from '../EssayerExemple/logique.mjs';
 
 // Délais (ms) :
 // - demarrage : fenêtre pendant laquelle Ctrl-C est renvoyé à une carte qui
@@ -65,6 +75,49 @@ export const TEXTE_EPINGLAGE_ILLISIBLE =
 
 export const TEXTE_CARTE_PERDUE =
   'La carte a été déconnectée : la rebrancher si besoin, puis cliquer de nouveau sur « Essayer sur la carte ».';
+
+export const TEXTE_ACCES_REFUSE_MICROPYTHON =
+  'Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte (voir « Dépannage » sur la page « Essayer sur la carte » du wiki). Sinon, un autre onglet ou programme utilise la carte (un autre onglet du wiki, un Codespace…) : le fermer, puis réessayer. En attendant, Thonny ou mpremote peuvent lancer le programme.';
+
+// Messages de la connexion partagée (carte.mjs) écrits pour les pages
+// Arduino, qui renvoient à « Connecter la carte », au .bin ou au
+// téléversement : leur version pour le bouton MicroPython. Les pages
+// Arduino gardent les leurs.
+const MESSAGES_MICROPYTHON = new Map([
+  [MESSAGE_SANS_CARTE, TEXTE_CARTE_PERDUE],
+  [MESSAGE_DEBRANCHEE, TEXTE_CARTE_PERDUE],
+  [messageErreur({ name: 'NotFoundError', message: 'disconnected' }), TEXTE_CARTE_PERDUE],
+  [TEXTE_ACCES_REFUSE, TEXTE_ACCES_REFUSE_MICROPYTHON],
+  [MESSAGE_FLASH_EN_COURS, 'Installation en cours : attendre la fin, puis réessayer.'],
+  [
+    MESSAGE_DAPJS_INTROUVABLE,
+    'Impossible de charger la bibliothèque USB du wiki : vérifier la connexion à Internet, puis réessayer.',
+  ],
+]);
+
+// Message de la connexion partagée, tel qu'affiché sous un bloc MicroPython.
+export function traduireMessageCarte(texte) {
+  if (typeof texte !== 'string') return texte;
+  if (MESSAGES_MICROPYTHON.has(texte)) return MESSAGES_MICROPYTHON.get(texte);
+  // Flash du firmware raté (messageFrancais, étape 'televersement').
+  if (texte.startsWith(`${ECHECS.televersement} :`)) {
+    return `L'installation de MicroPython a échoué${texte.slice(ECHECS.televersement.length)}`;
+  }
+  return texte;
+}
+
+// Erreur de la connexion partagée à afficher sous le bloc id : sous le bloc
+// MicroPython actif, sinon sous le dernier bloc cliqué ; jamais en double
+// d'une erreur de l'essai, ni de l'avis « Carte déconnectée » (un seul
+// message quand la carte part pendant un programme).
+export function erreurCarteAffichee(etatCarte, etatSession, id) {
+  const bloc = etatSession.actif ?? etatCarte.dernierClic;
+  if (bloc !== id) return null;
+  if (etatSession.actif === id) {
+    if (etatSession.erreur || etatSession.message === TEXTE_DECONNECTEE) return null;
+  }
+  return traduireMessageCarte(etatCarte.erreur ?? null);
+}
 
 export const TEXTE_DAPLINK_REPORTE =
   'Mise à jour du DAPLink reportée : cliquer de nouveau sur « Essayer sur la carte » pour lancer le programme.';
@@ -687,7 +740,7 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     // Erreur due à l'arrêt (KeyboardInterrupt d'une commande) : Arrêter ou
     // l'autre bloc affichent la suite, pas de message d'erreur.
     if (stoppe()) return { fin: 'arrete' };
-    changer({ etape: 'fini', erreur: messageFrancais(err, 'ecriture') });
+    changer({ etape: 'fini', erreur: traduireMessageCarte(messageFrancais(err, 'ecriture')) });
     return { fin: 'erreur' };
   } finally {
     guetConnexion?.fermer();
@@ -708,7 +761,7 @@ export async function arreter({ session }) {
   try {
     ok = await repl.arreter();
   } catch (err) {
-    changer({ etape: 'fini', erreur: messageFrancais(err, 'ecriture') });
+    changer({ etape: 'fini', erreur: traduireMessageCarte(messageFrancais(err, 'ecriture')) });
     return false;
   }
   if (ok) {
