@@ -3,7 +3,7 @@ title: DAPLink
 sidebar_position: 6
 ---
 
-# DAPLink — Firmware interface
+# DAPLink : firmware d'interface
 
 Le STM32F103 exécute le firmware [DAPLink](https://github.com/steamicc/DAPLink) (branche `release_letssteam`). Il fait office d'interface entre l'ordinateur et le MCU applicatif (STM32WB55).
 
@@ -187,7 +187,7 @@ Voir le [README DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash
 
 ## Pile radio Bluetooth
 
-La pile radio du second cœur du STM32WB55 ne dépend pas du DAPLink : son choix et son installation sont décrits dans [Pile radio Bluetooth](./pile-radio). Le DAPLink sert seulement de passage, par USB, aux outils qui l'installent.
+La pile radio tourne sur le second cœur du STM32WB55, pas sur le DAPLink. Les outils qui l'installent passent par le DAPLink, à travers le câble USB, et le bouton **Vérifier la pile radio** du wiki demande le DAPLink proposé par le wiki (voir [Condition : le DAPLink du wiki](./pile-radio#condition--le-daplink-du-wiki)). Le choix de la pile et son installation sont décrits dans [Pile radio Bluetooth](./pile-radio).
 
 ## Voir aussi
 

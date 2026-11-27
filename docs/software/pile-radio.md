@@ -36,7 +36,7 @@ Une pile radio en `(0, 0, 0, 0, 0)` signifie qu'aucune pile n'est installée.
 
 ## Depuis le wiki
 
-Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît sous les boutons **Téléverser** et **Connecter la carte**, dans un navigateur compatible WebUSB (Chrome ou Edge), grisé tant que la carte n'est pas connectée avec **Connecter la carte**.
+Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît sous le bouton **Connecter la carte** (remplacé par **Téléverser** et **Déconnecter** une fois la carte connectée), dans un navigateur compatible WebUSB (Chrome ou Edge). Il reste grisé tant que la carte n'est pas connectée.
 
 ![Encadré sous un exemple BLE, carte déconnectée : bouton orange « Connecter la carte », état « Carte : déconnectée », et le bouton grisé « Vérifier la pile radio »](/img/software/pile-radio-wiki-01-bouton.png)
 
@@ -44,7 +44,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    ![Première question sous le bouton : la vérification remplace le programme de la carte par un programme de lecture et efface toute la mémoire du programme, la pile radio n'est pas touchée ; boutons « Continuer » et « Annuler »](/img/software/pile-radio-wiki-02-confirmation.png)
 
-2. Le bouton écrit le programme de lecture sur la carte, puis lit les versions du FUS et de la pile radio : une vingtaine de secondes en tout. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple. La console, sous le message, montre les réponses du programme de lecture.
+2. Le bouton écrit le programme de lecture sur la carte, puis lit les versions du FUS et de la pile radio : une vingtaine de secondes en tout. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple. La console, sous le message, montre les réponses du programme de lecture. Ces lignes servent au dépannage : seul le message au-dessus de la console donne le résultat, même si une ligne contient le mot `error`.
 
    ![Fin de la vérification : « La pile radio est à jour (BLE HCI Layer 1.20.0). Téléverser l'exemple pour l'essayer. », suivi des réponses du programme de lecture dans la console](/img/software/pile-radio-wiki-03-a-jour.png)
 
@@ -60,7 +60,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    ![Attente de la fin de l'installation : « Le FUS installe la pile radio. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page. », puis « Temps restant : 60 s »](/img/software/pile-radio-wiki-06-attente.png)
 
-4. Une fois la pile relue, le bouton affiche qu'elle est installée. **Téléverser ensuite l'exemple** : le programme de lecture occupe encore la carte, et l'exemple le remplace.
+4. Une fois la pile relue, le bouton affiche qu'elle est installée. Cliquer ensuite sur **Téléverser** sous l'exemple : le programme de lecture occupe encore la carte, et l'exemple le remplace.
 
    ![Fin de l'installation : « Pile radio BLE HCI Layer 1.20.0 installée. Téléverser l'exemple pour l'essayer. », suivi des réponses du programme de lecture dans la console](/img/software/pile-radio-wiki-07-fin.png)
 
