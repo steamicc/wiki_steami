@@ -54,6 +54,19 @@ function resolveAllowedPath(filePath, rootDir, label) {
   return path.resolve(rootDir, normalized);
 }
 
+/**
+ * Les croquis d'arduino-steami-sample commencent par un en-tête « // Croquis
+ * de la page du wiki … » suivi d'une ligne vide : il sert à retrouver la page
+ * depuis le dépôt, mais n'a rien à faire dans le bloc affiché par la page
+ * qu'il désigne.
+ */
+function stripSampleHeader(content, normalizedPath) {
+  if (!normalizedPath.split(path.sep).join('/').startsWith('.external/arduino-steami-sample/')) {
+    return content;
+  }
+  return content.replace(/^\/\/ Croquis de la page du wiki[^\n]*\n(?:\/\/[^\n]*\n)*\n*/, '');
+}
+
 function remarkCodeFile() {
   return (tree, file) => {
     visit(tree, 'code', (node) => {
@@ -69,7 +82,10 @@ function remarkCodeFile() {
       const normalized = path.normalize(filePath);
 
       try {
-        const content = fs.readFileSync(absolutePath, 'utf-8').trimEnd();
+        const content = stripSampleHeader(
+          fs.readFileSync(absolutePath, 'utf-8'),
+          normalized,
+        ).trimEnd();
         node.value = content;
         // Keep the source path for later plugins (remark-micropython-run).
         node.data = { ...node.data, sourceFile: normalized.split(path.sep).join('/') };
@@ -94,3 +110,4 @@ function remarkCodeFile() {
 
 module.exports = remarkCodeFile;
 module.exports.resolveAllowedPath = resolveAllowedPath;
+module.exports.stripSampleHeader = stripSampleHeader;
