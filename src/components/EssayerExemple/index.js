@@ -2,6 +2,14 @@ import React, { useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
+import PileRadio, { suiviOperateur } from '../PileRadio';
+import {
+  controlesOccupes,
+  erreurCarteVisible,
+  operateurSurCarte,
+  pileRadioVisible,
+} from '../PileRadio/affichage.mjs';
+import { ETAT_INITIAL_PILE, estOccupee, parcoursPile } from '../PileRadio/deroulement.mjs';
 import {
   LIBELLES_STATUT,
   affichageProgression,
@@ -87,6 +95,21 @@ function Controles({ id, href }) {
     () => carte.etat,
     () => ETAT_INITIAL,
   );
+  // Vérification de la pile radio (exemples BLE) : une seule par page. Tant
+  // qu'elle tient la carte, Téléverser et Déconnecter sont inactifs sous
+  // tous les exemples.
+  const etatPile = useSyncExternalStore(
+    parcoursPile.abonner,
+    () => parcoursPile.etat,
+    () => ETAT_INITIAL_PILE,
+  );
+  const idOperateur = useSyncExternalStore(
+    suiviOperateur.abonner,
+    () => suiviOperateur.id,
+    () => null,
+  );
+  const pileOccupee = estOccupee(etatPile);
+  const occupee = controlesOccupes(etat, etatPile);
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const consoleRef = useRef(null);
   const connecterRef = useRef(null);
@@ -102,8 +125,10 @@ function Controles({ id, href }) {
   const colleRef = useRef(true);
 
   // Statut et erreur ne s'affichent que sous l'exemple cliqué en dernier.
+  // Vérification de la pile radio en erreur sous cet exemple : son message
+  // remplace celui de la carte, qui parlerait de MicroPython.
   const clique = etat.dernierClic === id;
-  const erreur = clique ? etat.erreur : null;
+  const erreur = clique && erreurCarteVisible(etatPile, id) ? etat.erreur : null;
   const montrerConsole = etat.programmeActif === id && etat.lignes.length > 0;
 
   // La console suit les nouvelles lignes, sauf si le lecteur est remonté.
@@ -152,11 +177,17 @@ function Controles({ id, href }) {
 
   function televerser() {
     focaliserApresRef.current = true;
+    // Le programme de lecture de la pile radio va être remplacé. Une
+    // vérification finie en erreur s'efface : l'erreur éventuelle du
+    // téléversement doit se voir.
+    suiviOperateur.oublier();
+    parcoursPile.oublierErreur();
     carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
     focaliserApresRef.current = true;
+    parcoursPile.oublierErreur();
     carte.connecter(id, urlDapjs);
   }
 
@@ -165,10 +196,15 @@ function Controles({ id, href }) {
     carte.deconnecter();
   }
 
-  const statutEtat = statutCarte(etat, id);
+  // Après une vérification de la pile radio, la carte garde l'operator, que
+  // carte.mjs compte comme le programme de cet exemple : l'état affiché est
+  // « connectée », sans « Programme téléversé. ». Pendant la vérification,
+  // ses propres messages remplacent le statut.
+  const operateur = operateurSurCarte(etat, idOperateur);
+  const statutEtat = statutCarte(operateur ? { ...etat, programmeActif: null } : etat, id);
   // Téléversement lancé depuis cet exemple, téléchargement du .bin compris.
   const televersement = clique && statutEtat === 'televersement';
-  const statut = messageStatut(etat, id);
+  const statut = operateur || (pileOccupee && etatPile.id === id) ? null : messageStatut(etat, id);
 
   return (
     <div className={styles.controles}>
@@ -179,17 +215,18 @@ function Controles({ id, href }) {
               ref={televerserRef}
               type="button"
               className={styles.bouton}
-              disabled={etat.occupee}
+              disabled={occupee}
               onClick={televerser}
             >
               Téléverser
             </button>
             {/* Libère la carte tout de suite, pour un Codespace ou l'Arduino
-                IDE ; grisé pendant un téléversement, qu'il ne faut pas couper. */}
+                IDE ; grisé pendant un téléversement ou une vérification de la
+                pile radio, qu'il ne faut pas couper. */}
             <button
               type="button"
               className={styles.boutonSecondaire}
-              disabled={etat.occupee}
+              disabled={occupee}
               onClick={deconnecter}
             >
               Déconnecter
@@ -219,6 +256,7 @@ function Controles({ id, href }) {
       {/* WebUSB peut exister mais être inutilisable (poste géré, Linux sans
           règle udev) : après une erreur, le .bin reste accessible. */}
       {erreur && <Telechargement id={id} href={href} />}
+      {pileRadioVisible(id) && <PileRadio id={id} />}
       {montrerConsole && (
         // Région nommée et accessible au clavier pour défiler ; pas role="log",
         // qui ferait lire cinq lignes par seconde.

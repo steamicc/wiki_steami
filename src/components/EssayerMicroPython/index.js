@@ -13,6 +13,7 @@ import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from '../EssayerExemple/carte.mjs';
 import { EtatCarte, Progression } from '../EssayerExemple';
+import EtapesDaplink from '../EssayerExemple/EtapesDaplink';
 import { estEnBas, etatWebUSB } from '../EssayerExemple/logique.mjs';
 import {
   TEXTE_DUREE_INSTALLATION,
@@ -22,6 +23,12 @@ import {
 } from './logique.mjs';
 import { creerRepl } from './repl.mjs';
 import { suivreDefilement } from './defilement.mjs';
+import { controlesOccupes } from '../PileRadio/affichage.mjs';
+import {
+  ETAT_INITIAL_PILE,
+  estOccupee as estOccupeePile,
+  parcoursPile,
+} from '../PileRadio/deroulement.mjs';
 import {
   SESSION_INITIALE,
   TEXTE_AUTRE_CAUSE,
@@ -61,8 +68,6 @@ function epingles(urls) {
   });
   return epinglesEnCours;
 }
-
-const NOM_FIRMWARE_DAPLINK = 'stm32f103xb_steami32_if_crc.bin';
 
 // Sans WebUSB (Firefox, Safari, aperçu dans un cadre) : pas de bouton.
 function SansWebUSB() {
@@ -150,7 +155,7 @@ function Encart({ encart, surReponse, blocRef }) {
     ];
   }
   return (
-    <div ref={ref} className={styles.encart} role="group" aria-label="Question" tabIndex={-1}>
+    <div ref={ref} className={communs.encart} role="group" aria-label="Question" tabIndex={-1}>
       {contenu}
       <div className={communs.boutons}>
         {boutons.map(([valeur, libelle], i) => (
@@ -164,64 +169,6 @@ function Encart({ encart, surReponse, blocRef }) {
           </button>
         ))}
       </div>
-    </div>
-  );
-}
-
-// Mise à jour du DAPLink, guidée à la main comme dans le Codespace : le
-// DAPLink ne peut pas se flasher lui-même. Le focus y passe à l'affichage,
-// comme pour une question, pour que les étapes soient lues.
-function EtapesDaplink({ release, href, surPlusTard }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    ref.current?.focus();
-  }, []);
-  return (
-    <div
-      ref={ref}
-      className={styles.encart}
-      role="group"
-      aria-label="Mise à jour du DAPLink"
-      tabIndex={-1}
-    >
-      <p>{texteMiseAJourDaplink(release)}</p>
-      <ol className={styles.etapes}>
-        <li>
-          <a href={href} download={NOM_FIRMWARE_DAPLINK}>
-            Télécharger le firmware
-          </a>{' '}
-          : le fichier <code>{NOM_FIRMWARE_DAPLINK}</code> arrive dans le dossier des
-          téléchargements.
-        </li>
-        <li>
-          Créer un fichier vide nommé <code>START_BL.ACT</code> sur le lecteur de la carte (
-          <strong>STEAMI</strong>) : la carte redémarre et un lecteur <strong>MAINTENANCE</strong>{' '}
-          apparaît à la place.
-        </li>
-        <li>
-          Copier le fichier téléchargé sur le lecteur <strong>MAINTENANCE</strong>, puis attendre
-          que le lecteur de la carte revienne.
-        </li>
-        <li>
-          Cliquer de nouveau sur « Essayer sur la carte », puis choisir la carte si la fenêtre de
-          connexion s&apos;ouvre.
-        </li>
-      </ol>
-      <p>
-        <Link to="/docs/software/arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas">
-          Si le lecteur MAINTENANCE n&apos;apparaît pas
-        </Link>
-      </p>
-      <button
-        type="button"
-        className={communs.boutonSecondaire}
-        onClick={() => {
-          surPlusTard();
-          session.reporterDaplink();
-        }}
-      >
-        Plus tard
-      </button>
     </div>
   );
 }
@@ -264,6 +211,15 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
     session.abonner,
     () => session.etat,
     () => SESSION_INITIALE,
+  );
+  // Vérification de la pile radio (exemples BLE), une seule par page : tant
+  // qu'elle tient la carte, même entre deux commandes et pendant l'attente du
+  // FUS, Essayer et Déconnecter sont inactifs ici aussi (une navigation vers
+  // une page MicroPython ne l'arrête pas une fois DELETE envoyé).
+  const etatPile = useSyncExternalStore(
+    parcoursPile.abonner,
+    () => parcoursPile.etat,
+    () => ETAT_INITIAL_PILE,
   );
   const actif = etat.actif === id;
   const essayerRef = useRef(null);
@@ -314,11 +270,13 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         demander: session.demander,
         epingles: () => epingles(urls),
         urls: { dapjs: urls.dapjs, firmware: urls.firmware },
+        // Relu au moment d'agir : le clic peut partir avant le rendu.
+        pileOccupee: () => estOccupeePile(parcoursPile.etat),
       },
     );
   }
 
-  const occupee = estOccupee(etat) || etatCarte.occupee;
+  const occupee = estOccupee(etat) || controlesOccupes(etatCarte, etatPile);
   // 'televersement' : la carte est réservée par l'installation de MicroPython.
   const statut = statutPastille(etatCarte, etat, id);
   const message = actif ? messageSession(etat) : null;
@@ -395,7 +353,10 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
         <EtapesDaplink
           release={etat.daplink.release}
           href={urls.daplinkBin}
-          surPlusTard={focaliserApres}
+          surPlusTard={() => {
+            focaliserApres();
+            session.reporterDaplink();
+          }}
         />
       )}
       {installation && etatCarte.occupee && (

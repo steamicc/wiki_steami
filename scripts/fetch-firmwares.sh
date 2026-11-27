@@ -1,9 +1,11 @@
 #!/bin/bash
-# Récupère les deux firmwares épinglés servis par le wiki :
+# Récupère les firmwares et la pile radio épinglés servis par le wiki :
 #   - MicroPython (release micropython-steami-lib, micropython.json)
 #     -> static/micropython/{firmware.bin,index.json}
 #   - DAPLink (release steamicc/DAPLink, daplink.json)
 #     -> static/daplink/{firmware.bin,firmware.json} (format du Codespace)
+#   - pile radio BLE (release steamicc/DapLink-EasyFlash, pile-radio.json)
+#     -> static/pile-radio/{operateur.hex,installation.hex,index.json}
 # Les fichiers téléchargés sont traités comme non fiables : téléchargement et
 # sha256 se font dans un dossier de préparation de .external/ (même système de
 # fichiers que les cibles, ignoré par git et par Docusaurus), puis la cible est
@@ -12,11 +14,13 @@
 # Rien n'est téléchargé quand le firmware est déjà là pour la version épinglée
 # (sha256 du .bin égal à celui épinglé). FORCER_FIRMWARES=1 force le
 # téléchargement. FIRMWARES_URL_BASE (défaut https://github.com) remplace
-# l'hôte des releases, pour les tests.
+# l'hôte des releases, PILE_RADIO_URL_BASE (défaut
+# https://raw.githubusercontent.com) celui de la pile radio, pour les tests.
 
 set -euo pipefail
 
 BASE="${FIRMWARES_URL_BASE:-https://github.com}"
+PILE_BASE="${PILE_RADIO_URL_BASE:-https://raw.githubusercontent.com}"
 FORCE="${FORCER_FIRMWARES:-0}"
 
 mkdir -p .external static
@@ -91,4 +95,41 @@ else
     "$(stat -c %s "$TMP/dap/firmware.bin")" "$DAP_SHA" > "$TMP/dap/firmware.json"
   installer "$DAP_DEST" "$TMP/dap"
   echo "Firmware DAPLink ${DAP_RELEASE} prêt dans $DAP_DEST"
+fi
+
+# --- Pile radio ---
+PILE_RELEASE=$(node -p "require('./pile-radio.json').release")
+PILE_VERSION=$(node -p "require('./pile-radio.json').version")
+PILE_SECTEURS=$(node -p "require('./pile-radio.json').secteurs")
+PILE_OPERATEUR="wb55_operator.hex"
+PILE_OPERATEUR_SANS_FIN="wb55_operator_no_end.hex"
+PILE_FICHIER="stm32wb5xxG_BLE_HCILayer_fw.hex"
+PILE_DEST="static/pile-radio"
+PILE_INDEX=$(printf '{"release": "%s", "pile": "BLE HCI Layer", "version": "%s", "secteurs": %s}' \
+  "$PILE_RELEASE" "$PILE_VERSION" "$PILE_SECTEURS")
+
+# pile_a_jour : l'operator présent a le sha256 épinglé, installation.hex existe
+# et l'index est celui de la release épinglée.
+pile_a_jour() {
+  [ "$FORCE" != "1" ] && [ -f "$PILE_DEST/installation.hex" ] && [ -f "$PILE_DEST/index.json" ] \
+    && [ "$(sha256sum "$PILE_DEST/operateur.hex" 2>/dev/null | cut -d' ' -f1)" = \
+         "$(node -p "require('./pile-radio.json').fichiers['$PILE_OPERATEUR']")" ] \
+    && [ "$(cat "$PILE_DEST/index.json")" = "$PILE_INDEX" ]
+}
+
+if pile_a_jour; then
+  echo "Pile radio ${PILE_RELEASE} déjà présente dans $PILE_DEST (FORCER_FIRMWARES=1 pour la retélécharger)"
+else
+  mkdir -p "$TMP/pile"
+  for nom in "$PILE_OPERATEUR" "$PILE_OPERATEUR_SANS_FIN" "$PILE_FICHIER"; do
+    telecharger "de la pile radio ${nom}" \
+      "${PILE_BASE}/steamicc/DapLink-EasyFlash/${PILE_RELEASE}/wireless_stack/${nom}" \
+      "$(node -p "require('./pile-radio.json').fichiers['$nom']")" pile-radio.json "$TMP/pile/$nom"
+  done
+  mkdir -p "$TMP/pile-radio"
+  cp "$TMP/pile/$PILE_OPERATEUR" "$TMP/pile-radio/operateur.hex"
+  cat "$TMP/pile/$PILE_OPERATEUR_SANS_FIN" "$TMP/pile/$PILE_FICHIER" > "$TMP/pile-radio/installation.hex"
+  echo "$PILE_INDEX" > "$TMP/pile-radio/index.json"
+  installer "$PILE_DEST" "$TMP/pile-radio"
+  echo "Pile radio ${PILE_RELEASE} prête dans $PILE_DEST"
 fi

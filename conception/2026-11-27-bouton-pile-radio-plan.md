@@ -37,6 +37,8 @@
 
 ### Task 0: Essai préalable sur la V1c (contrôleur, avec l'utilisateur)
 
+**Faite le 2026-11-27** : résultats dans la section « Résultats de l'essai préalable » de la conception. Le flux du DAPLink accepte le .hex, chaque flash efface toute la flash non protégée sauf la pile, `current_ws` ne donne pas le type (la pile se reconnaît à `copro_fw_version` et à sa taille en secteurs), et seul `START` relance la pile après un double STATUS. Les étapes ci-dessous sont gardées pour mémoire ; le SWD a été abandonné (il échoue quand l'operator tourne), et les lectures de flash se sont faites depuis MicroPython.
+
 Cette tâche n'est pas confiée à un sous-agent. Elle demande l'accord explicite de l'utilisateur, car STATUS fait passer le second cœur au FUS, et un créneau sur la carte.
 
 **Files :**
@@ -68,8 +70,8 @@ Si le Step 3 ou le Step 5 échoue, ou si le Step 6 montre que la pile n'a pas é
 
 **Interfaces :**
 
-- Produces : au build, `static/pile-radio/operateur.hex` (copie de `wb55_operator.hex`), `static/pile-radio/installation.hex` (concaténation de `wb55_operator_no_end.hex` puis `stm32wb5xxG_BLE_HCILayer_fw.hex`) et `static/pile-radio/index.json` = `{"release": "v1.3", "pile": "BLE HCI Layer", "version": "1.20.0", "currentWs": <valeur de la Tâche 0>}`.
-- `pile-radio.json` = `{"release": "v1.3", "version": "1.20.0", "currentWs": …, "fichiers": {"wb55_operator.hex": "<sha>", "wb55_operator_no_end.hex": "<sha>", "stm32wb5xxG_BLE_HCILayer_fw.hex": "<sha>"}}`, avec les empreintes des Global Constraints.
+- Produces : au build, `static/pile-radio/operateur.hex` (copie de `wb55_operator.hex`), `static/pile-radio/installation.hex` (concaténation de `wb55_operator_no_end.hex` puis `stm32wb5xxG_BLE_HCILayer_fw.hex`) et `static/pile-radio/index.json` = `{"release": "v1.3", "pile": "BLE HCI Layer", "version": "1.20.0", "secteurs": 20}`.
+- `pile-radio.json` = `{"release": "v1.3", "version": "1.20.0", "secteurs": 20, "fichiers": {"wb55_operator.hex": "<sha>", "wb55_operator_no_end.hex": "<sha>", "stm32wb5xxG_BLE_HCILayer_fw.hex": "<sha>"}}`, avec les empreintes des Global Constraints.
 
 - [ ] **Step 1 : tests qui échouent**, dans `test_fetch_firmwares.py`, sur le modèle des tests DAPLink existants (serveur local, variable d'hôte). Variable `PILE_RADIO_URL_BASE`, par défaut `https://raw.githubusercontent.com`.
   - `test_pile_radio_installe_les_trois_fichiers` : `operateur.hex`, `installation.hex` et `index.json` présents. `installation.hex` égal à la concaténation exacte des deux fichiers. `index.json` avec les valeurs ci-dessus.
@@ -89,9 +91,10 @@ Si le Step 3 ou le Step 5 échoue, ou si le Step 6 montre que la pile n'a pas é
 **Interfaces :**
 
 - Produces :
-  - `decoderVersion(entier) → { majeur, mineur, sous }`, au codage relevé en Tâche 0 (octet 31-24 majeur, 23-16 mineur, 15-8 sous, si la Tâche 0 le confirme).
+  - `decoderVersion(entier) → { majeur, mineur, sous }` : octet 31-24 majeur, 23-16 mineur, 15-8 sous-version (Tâche 0 : 0x01020000 → 1.2.0, 0x01140002 → 1.20.0).
   - `decisionFus(fusVersion) → 'ok' | 'ancien' | 'inconnu'`.
-  - `decisionPile({ currentWs, wsVersion }, epinglee) → 'a-jour' | 'absente' | 'ancienne' | 'autre'`, où `epinglee` = `{ version: '1.20.0', currentWs }`.
+  - `lirePileEnMarche(reponseVersion) → { version: string | null, secteurs: number }` : lit la réponse de VERSION envoyée **avant** le double STATUS. `version` est `copro_fw_version` (null s'il est vide ou « 0.0.0 »), et `secteurs` l'octet de poids faible de `ws_version` (Tâche 0 : 118292500 = 0x070D0014 → 20).
+  - `decisionPile({ version, secteurs }, epinglee) → 'a-jour' | 'absente' | 'ancienne' | 'plus-recente' | 'autre'`, où `epinglee` = `{ version: '1.20.0', secteurs: 20 }`. Même version et même taille : `a-jour`. Version inférieure : `ancienne`. Version supérieure : `plus-recente`. Même version, autre taille : `autre`.
   - `etatFus(status) → 'repos' | 'pile' | 'fus' | 'service' | 'inconnu'` (0, 0x10-0x1F, 0x20-0x2F, 0x30-0x3F).
   - `texteErreurFus(code) → string`, en français, pour les codes 0x00 à 0x0A et 0x11, avec un texte générique pour les autres.
   - `class LecteurLignes { ajouter(octets: Uint8Array): object[] }` : recolle les paquets, coupe sur `\n`, retire `\r`, et ne rend que les lignes qui sont un objet JSON. Le reste est ignoré.
@@ -99,11 +102,12 @@ Si le Step 3 ou le Step 5 échoue, ou si le Step 6 montre que la pile n'a pas é
 - [ ] **Step 1 : tests qui échouent**
   - `decoderVersion` : la valeur relevée pour le FUS 1.2.0 donne `{1,2,0}`, celle de la pile 1.20.0 donne `{1,20,0}`, et 0 donne `{0,0,0}`.
   - `decisionFus` : 0.x et 1.1 donnent `ancien`, 1.2 donne `ok`, 2.0 donne `inconnu`.
+  - `lirePileEnMarche` : la ligne réelle de la Tâche 0 (`{"command": "Version", "status": 0, "fus_version": 0, "copro_fw_version": "1.20.0", "ws_version": 118292500}`) donne `{ version: '1.20.0', secteurs: 20 }` ; `copro_fw_version` vide ou « 0.0.0 » donne `version: null`.
   - `decisionPile` :
-    - `wsVersion` 0 donne `absente` ;
-    - même `currentWs` et 1.19 donne `ancienne` ;
-    - même `currentWs` et 1.20 ou 1.21 donne `a-jour` ;
-    - un autre `currentWs` donne `autre`.
+    - `version` null donne `absente` ;
+    - 1.20.0 et 20 secteurs donne `a-jour` ;
+    - 1.19.0 donne `ancienne`, 1.21.0 donne `plus-recente` ;
+    - 1.20.0 et 25 secteurs donne `autre`.
   - `etatFus` : 0, 0x10, 0x1F, 0x20, 0x30, 0x3F et 0x40 donnent les états attendus.
   - `texteErreurFus(4)` mentionne le manque de place, et `texteErreurFus(0x99)` donne le texte générique.
   - `LecteurLignes` :
@@ -130,13 +134,15 @@ Si le Step 3 ou le Step 5 échoue, ou si le Step 6 montre que la pile n'a pas é
   - `ecrire(octets: Uint8Array) → Promise`, et `ecouter(fn(octets)) → retirer`, comme `carte.ecrireSerie` et `carte.ecouterSerie`.
   - `attendre(ms) → Promise` est injectable, pour les tests.
   - Chaque commande écrit `NOM\n`, attend 1 s, puis rend la première ligne JSON reçue.
-  - `statusDouble()` envoie deux STATUS, avec trois essais chacun, et rend la seconde réponse.
+  - `statusDouble()` envoie deux STATUS, avec trois essais chacun, et rend la seconde réponse. Comportement relevé en Tâche 0 : le premier répond `{"command": "Status", "status": 255, "error": 254}` (normal, ce n'est pas une erreur), le second ne répond souvent pas (le second cœur bascule), et un essai suivant, 2 s plus tard, répond `{"command": "Status", "status": 0, "last_fus_status": 0, "last_ws_status": 0, "current_ws": 1}`. La seconde réponse valable est celle qui contient `last_fus_status`.
+  - `relancer()` envoie `START`, qui ne répond rien : elle se termine après 1 s, sans attendre de ligne.
   - `supprimer()` envoie DELETE avec trois essais.
   - `upgrade({ surLigne })` attend 5 s, envoie UPGRADE, appelle `surLigne(objet)` pour chaque ligne, et se termine sur le premier `status === 0` (acceptation) ou sur une ligne d'`error` non nul, qu'elle rejette avec `ErreurFus(code)`. Aucune ligne pendant 10 s : rejet avec `ErreurDelaiOperateur`.
   - `ErreurDelaiOperateur` et `ErreurFus` sont exportées.
 
 - [ ] **Step 1 : tests qui échouent**, avec une fausse carte qui répond selon un script :
-  - `statusDouble` : deux STATUS écrits, seconde réponse rendue ; premier STATUS sans réponse, réessayé, puis réussite ; trois échecs, rejet `ErreurDelaiOperateur`.
+  - `statusDouble` : séquence réelle de la Tâche 0 (réponse 255/254, silence, puis réponse avec `last_fus_status`) rendue comme succès avec la dernière réponse ; premier STATUS sans réponse, réessayé, puis réussite ; trois échecs, rejet `ErreurDelaiOperateur`.
+  - `relancer` : écrit `START\n` et se termine sans ligne reçue.
   - `version` : la ligne VERSION est rendue même précédée d'une ligne non JSON.
   - `upgrade` :
     - 5 s attendues avant l'écriture ;
@@ -168,9 +174,13 @@ Si le Step 3 ou le Step 5 échoue, ou si le Step 6 montre que la pile n'a pas é
   - `DELAIS_PILE` = `{ apresCommande: 1000, avantUpgrade: 5000, ligneUpgrade: 10000, attenteApresUpgrade: 60000, relectureMax: 120000, pasRelecture: 10000 }`, injectable.
   - Indicateur de développement, documenté dans le code seulement : `localStorage['steami-pile-radio-forcer'] === '1'` fait proposer l'installation même quand la pile est à jour. Il sert à l'essai complet.
 
+- Ordre des lectures (Tâche 0) : VERSION **avant** le double STATUS (version et taille de la pile, `lirePileEnMarche`), puis double STATUS, puis VERSION (version du FUS). Dès que le double STATUS a été envoyé, toute fin de parcours (à jour, refus du FUS, DAPLink non épinglé, Annuler, erreur, abandon du bloc) envoie `relancer()` tant que DELETE n'a pas été envoyé : une réinitialisation ne relance pas la pile.
+
 - [ ] **Step 1 : tests qui échouent**, sur une fausse carte et un faux operator :
   - vérification sans confirmation : rien n'est flashé ;
-  - FUS 1.1 : étape `erreur`, message qui renvoie vers EasyFlash, aucun DELETE ;
+  - FUS 1.1 : étape `erreur`, message qui renvoie vers EasyFlash, aucun DELETE, `START` envoyé ;
+  - proposition puis `annuler()`, et DAPLink non épinglé puis « Plus tard » : `START` envoyé dans les deux cas ;
+  - erreur de liaison série après le double STATUS : `START` tenté avant l'étape `erreur` ;
   - pile à jour : `START` envoyé, étape `a-jour` ;
   - pile absente et DAPLink épinglé : `proposition` ; `confirmer('installer')` enchaîne DELETE, flash d'`installation.hex`, upgrade, décompte de 60 s, `statusDouble`, `version`, `START`, et finit sur `fini` avec la version relue ;
   - pile absente et DAPLink non épinglé, ou illisible (`null`) : étape `daplink`, sans bouton installer ; `confirmer('plus-tard')` revient à `repos` sans rien installer ;

@@ -3,7 +3,7 @@ title: DAPLink
 sidebar_position: 6
 ---
 
-# DAPLink — Firmware interface
+# DAPLink : firmware d'interface
 
 Le STM32F103 exécute le firmware [DAPLink](https://github.com/steamicc/DAPLink) (branche `release_letssteam`). Il fait office d'interface entre l'ordinateur et le MCU applicatif (STM32WB55).
 
@@ -185,26 +185,9 @@ L'outil effectue automatiquement :
 
 Voir le [README DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash) pour les instructions détaillées et le câblage.
 
-## Installation de la stack radio (BLE/Thread/Zigbee)
+## Pile radio Bluetooth
 
-La stack radio du STM32WB55 (FUS + firmware wireless) peut être installée via l'outil WebUSB [steami-tools/webusb-wireless-stack](https://github.com/steamicc/steami-tools/tree/main/webusb-wireless-stack) :
-
-1. Connecter la carte via USB
-2. Ouvrir l'outil dans un navigateur Chromium
-3. Sélectionner le firmware wireless souhaité (BLE Stack, Thread, Zigbee, etc.)
-4. Flasher via WebUSB
-
-Les firmwares disponibles incluent :
-
-- **BLE Stack full** — Stack Bluetooth complète
-- **BLE Stack light** — Stack Bluetooth allégée
-- **Thread** — Support OpenThread
-- **Zigbee** — Support Zigbee
-- **Combinés** — BLE + Thread, BLE + Zigbee
-
-:::caution
-L'installation de la stack radio nécessite un navigateur Chromium (Chrome, Edge). Firefox et Safari ne supportent pas le Web USB.
-:::
+La pile radio tourne sur le second cœur du STM32WB55, pas sur le DAPLink. Les outils qui l'installent passent par le DAPLink, à travers le câble USB, et le bouton **Vérifier la pile radio** du wiki demande le DAPLink proposé par le wiki (voir [Condition : le DAPLink du wiki](./pile-radio#condition--le-daplink-du-wiki)). Le choix de la pile et son installation sont décrits dans [Pile radio Bluetooth](./pile-radio).
 
 ## Voir aussi
 
@@ -214,6 +197,6 @@ L'installation de la stack radio nécessite un navigateur Chromium (Chrome, Edge
 - [Conception — Service et USB](../design/service-usb) — Exigences et justifications
 - [Code source DAPLink](https://github.com/steamicc/DAPLink) — Firmware (branche `release_letssteam`)
 - [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash) — Outil d'installation initiale
-- [WebUSB Wireless Stack](https://github.com/steamicc/steami-tools/tree/main/webusb-wireless-stack) — Installation de la stack radio
+- [Pile radio Bluetooth](./pile-radio) — Choix et installation de la pile radio
 - [Code source daplink_flash](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash) — Driver MicroPython
 - [Code source steami_config](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_config) — Module config

@@ -1,0 +1,10 @@
+{
+  "release": "v1.3",
+  "version": "1.20.0",
+  "secteurs": 20,
+  "fichiers": {
+    "wb55_operator.hex": "0801ec7ec78dff3791061a748d64bd893ffc36a9c1c68b0df561a11037c56057",
+    "wb55_operator_no_end.hex": "81b2517f3e6e3752e740315de1c368326ecdada714dc03b3a087ab03f8a6d561",
+    "stm32wb5xxG_BLE_HCILayer_fw.hex": "df6da5ab4e5ff47a9302e5f089fb2f5c207972e7234b6a812fe71a68f8ad9b24"
+  }
+}

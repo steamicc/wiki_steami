@@ -548,7 +548,8 @@ async function remettreAZero(repl, session, changer) {
 }
 
 // Lance un bloc : étapes 0 à 5. Renvoie { fin } :
-// 'occupe' (un autre essai se prépare), 'annule', 'connexion', 'reset',
+// 'occupe' (un autre essai se prépare, ou la vérification de la pile radio
+// tient la carte : dependances.pileOccupee()), 'annule', 'connexion', 'reset',
 // 'daplink' (étapes de mise à jour affichées), 'occupee' (carte tenue),
 // 'installation' (flash raté ou MicroPython muet ensuite), 'deconnectee'
 // (carte partie avant d'agir dessus), 'erreur',
@@ -561,13 +562,19 @@ async function remettreAZero(repl, session, changer) {
 export async function essayer({ id, code, fichiers = [], confirmation }, dependances) {
   const { carte, session, demander } = dependances;
   const delais = { ...DELAIS_DEROULEMENT, ...dependances.delais };
-  if (estOccupee(session.etat)) return { fin: 'occupe' };
+  // La vérification de la pile radio (PileRadio, exemples BLE) tient la
+  // carte entre ses commandes, sans que carte.etat.occupee le dise : ni
+  // Ctrl-C, ni redémarrage, ni installation de MicroPython pendant ce temps
+  // (le FUS installe peut-être la pile). Un clic peut partir avant le rendu
+  // qui grise le bouton.
+  const occupe = () => estOccupee(session.etat) || Boolean(dependances.pileOccupee?.());
+  if (occupe()) return { fin: 'occupe' };
 
   // 0. Bloc qui modifie la carte : rien ne part avant « Lancer quand même ».
   if (confirmation) {
     const reponse = await demander('confirmation', { id, texte: confirmation });
     if (reponse !== 'oui') return { fin: 'annule' };
-    if (estOccupee(session.etat)) return { fin: 'occupe' };
+    if (occupe()) return { fin: 'occupe' };
   }
 
   const enMarche = EN_MARCHE.has(session.etat.etape);
