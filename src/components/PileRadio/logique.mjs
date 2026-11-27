@@ -72,7 +72,7 @@ export function etatFus(status) {
 // DapLink-EasyFlash (src/operator_tool.rs).
 const ERREURS_FUS = {
   0x00: 'Aucune erreur.',
-  0x01: "Image introuvable : l'en-tête ou la mémoire flash est corrompu.",
+  0x01: "Image introuvable : l'en-tête ou la mémoire flash sont corrompus.",
   0x02: 'Image authentique mais corrompue : les données sont abîmées.',
   0x03: "Signature non valide : l'image n'est pas reconnue.",
   0x04: "Pas assez de place pour installer l'image, à cause de l'image déjà installée.",
