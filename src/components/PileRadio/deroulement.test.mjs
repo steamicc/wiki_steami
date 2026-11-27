@@ -2,6 +2,7 @@
 // un operator simulés : aucun navigateur, aucune carte, aucune vraie attente.
 // Lancer : node --test src/components/PileRadio/deroulement.test.mjs
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { describe, it } from 'node:test';
 
 import {
@@ -10,6 +11,7 @@ import {
   TEXTE_ANNULE,
   TEXTE_CARTE_PERDUE_PILE,
   TEXTE_CONFIRMATION_VERIFICATION,
+  TEXTE_EMPREINTE_PILE,
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
   TEXTE_INSTALLATION_ANNULEE,
@@ -22,6 +24,7 @@ import {
   TEXTE_TELECHARGEMENT_PILE,
   creerParcoursPile,
   estOccupee,
+  lirePileEpinglee,
   parcoursPile,
   texteAutrePile,
 } from './deroulement.mjs';
@@ -36,7 +39,17 @@ const URLS = {
   index: '/pile-radio/index.json',
   daplink: '/daplink/firmware.json',
 };
-const INDEX = { release: 'v1.3', pile: 'BLE HCI Layer', version: '1.20.0', secteurs: 20 };
+const HEX_INSTALLATION = ':020000040800F2\n';
+const sha256 = (texte) => createHash('sha256').update(texte).digest('hex');
+// sha256Installation : empreinte de installation.hex, écrite au prebuild
+// (scripts/fetch-firmwares.sh).
+const INDEX = {
+  release: 'v1.3',
+  pile: 'BLE HCI Layer',
+  version: '1.20.0',
+  secteurs: 20,
+  sha256Installation: sha256(HEX_INSTALLATION),
+};
 const DAPLINK_EPINGLE = { release: '2026-11-25.3', numero: 3, date: 20261125 };
 
 // Réponses relevées sur la V1c (conception, Résultats de l'essai préalable).
@@ -137,8 +150,6 @@ function fausseCarte(journal, { daplink = { numero: 3, date: 20261125 }, flash }
   return carte;
 }
 
-const HEX_INSTALLATION = ':020000040800F2\n';
-
 function fauxRecuperer(
   donnees = {
     [URLS.index]: INDEX,
@@ -159,7 +170,13 @@ function fauxRecuperer(
 
 // Prépare un parcours et ses dépendances. Les attentes sont notées sans
 // dormir : `attentes` garde chaque durée demandée.
-function preparer({ operateur = {}, carte: optionsCarte, recuperer, forcer = false } = {}) {
+function preparer({
+  operateur = {},
+  carte: optionsCarte,
+  recuperer,
+  forcer = false,
+  empreinte,
+} = {}) {
   const journal = [];
   const attentes = [];
   const carte = fausseCarte(journal, optionsCarte);
@@ -185,6 +202,7 @@ function preparer({ operateur = {}, carte: optionsCarte, recuperer, forcer = fal
     },
     creerOperateur,
     forcer,
+    ...(empreinte ? { empreinte } : {}),
   };
   return { journal, attentes, carte, creerOperateur, parcours, etats, deps };
 }
@@ -1274,6 +1292,122 @@ describe('téléchargement avant DELETE', () => {
     assert.ok(!p.journal.includes('DELETE'));
     assert.equal(p.journal.at(-1), 'START');
     assert.equal(p.parcours.etat.message, TEXTE_INSTALLATION_ANNULEE);
+  });
+});
+
+describe('empreinte du .hex d installation', () => {
+  // Fin attendue : ni DELETE ni flash, START, erreur qui dit que rien n'a été
+  // effacé.
+  async function sansEffacement(p) {
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.deepEqual(apres(p.journal, `get ${URLS.installation}`), ['START']);
+    assert.ok(!p.journal.includes('DELETE'));
+    assert.ok(!p.journal.includes(`flash ${URLS.installation}`));
+    assert.equal(p.parcours.etat.etape, 'erreur');
+    assert.equal(p.parcours.etat.erreur, TEXTE_EMPREINTE_PILE);
+  }
+
+  it('TEXTE_EMPREINTE_PILE dit que rien n a été effacé et renvoie vers EasyFlash', () => {
+    assert.match(TEXTE_EMPREINTE_PILE, /rien n'a été effacé/);
+    assert.ok(TEXTE_EMPREINTE_PILE.includes(LIBELLE_RENVOI));
+  });
+
+  it('empreinte calculée par défaut (SHA-256) : égale à l index, installation', async () => {
+    const p = preparer({
+      operateur: { version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS] },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+  });
+
+  it('empreinte injectable : reçoit les octets téléchargés, avant DELETE', async () => {
+    const vus = [];
+    const p = preparer({
+      operateur: { version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS] },
+      empreinte: async (donnees) => {
+        vus.push(new TextDecoder().decode(donnees));
+        p.journal.push('empreinte');
+        return INDEX.sha256Installation;
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.deepEqual(vus, [HEX_INSTALLATION]);
+    const i = p.journal.indexOf('empreinte');
+    assert.equal(p.journal[i - 1], `get ${URLS.installation}`);
+    assert.equal(p.journal[i + 1], 'DELETE');
+  });
+
+  it('empreinte différente : ni DELETE ni flash, START, rien n est effacé', async () => {
+    await sansEffacement(preparer({ operateur: sansPile, empreinte: async () => 'f'.repeat(64) }));
+  });
+
+  it('.hex téléchargé différent de celui du build : même arrêt (SHA-256 par défaut)', async () => {
+    const recuperer = fauxRecuperer({
+      [URLS.index]: INDEX,
+      [URLS.daplink]: DAPLINK_EPINGLE,
+      [URLS.installation]: ':00000001FF\n',
+    });
+    await sansEffacement(preparer({ operateur: sansPile, recuperer }));
+  });
+
+  it('index.json sans sha256Installation : même arrêt, empreinte non calculée', async () => {
+    const { sha256Installation, ...sansEmpreinte } = INDEX;
+    assert.ok(sha256Installation);
+    let calculs = 0;
+    const recuperer = fauxRecuperer({
+      [URLS.index]: sansEmpreinte,
+      [URLS.daplink]: DAPLINK_EPINGLE,
+      [URLS.installation]: HEX_INSTALLATION,
+    });
+    await sansEffacement(
+      preparer({
+        operateur: sansPile,
+        recuperer,
+        empreinte: async () => {
+          calculs += 1;
+          return INDEX.sha256Installation;
+        },
+      }),
+    );
+    assert.equal(calculs, 0);
+  });
+
+  it('calcul de l empreinte en échec : même arrêt', async () => {
+    await sansEffacement(
+      preparer({
+        operateur: sansPile,
+        empreinte: async () => {
+          throw new Error('crypto.subtle indisponible');
+        },
+      }),
+    );
+  });
+
+  it('lirePileEpinglee lit sha256Installation (64 chiffres hexadécimaux), null sinon', () => {
+    assert.equal(lirePileEpinglee(INDEX).sha256Installation, INDEX.sha256Installation);
+    const sans = { ...INDEX };
+    delete sans.sha256Installation;
+    assert.equal(lirePileEpinglee(sans).sha256Installation, null);
+    for (const valeur of ['abc', 42, 'g'.repeat(64), `${INDEX.sha256Installation}0`]) {
+      assert.equal(
+        lirePileEpinglee({ ...INDEX, sha256Installation: valeur }).sha256Installation,
+        null,
+      );
+    }
+    assert.equal(
+      lirePileEpinglee({ ...INDEX, sha256Installation: INDEX.sha256Installation.toUpperCase() })
+        .sha256Installation,
+      INDEX.sha256Installation,
+    );
   });
 });
 

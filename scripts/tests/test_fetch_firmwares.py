@@ -20,6 +20,10 @@ PILE_FICHIERS = {
     "stm32wb5xxG_BLE_HCILayer_fw.hex": b":pile\n:00000001FF\n",
 }
 
+INSTALLATION = (
+    PILE_FICHIERS["wb55_operator_no_end.hex"] + PILE_FICHIERS["stm32wb5xxG_BLE_HCILayer_fw.hex"]
+)
+
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
@@ -151,8 +155,44 @@ class TestFetchFirmwares(unittest.TestCase):
         )
         self.assertEqual(
             json.loads((dest / "index.json").read_text()),
-            {"release": "v1.3", "pile": "BLE HCI Layer", "version": "1.20.0", "secteurs": 20},
+            {
+                "release": "v1.3",
+                "pile": "BLE HCI Layer",
+                "version": "1.20.0",
+                "secteurs": 20,
+                "sha256Installation": sha(INSTALLATION),
+            },
         )
+
+    def test_pile_radio_empreinte_egale_au_fichier_servi(self):
+        res = self.run_script()
+        self.assertEqual(res.returncode, 0, res.stderr)
+        dest = self.work / "static/pile-radio"
+        index = json.loads((dest / "index.json").read_text())
+        self.assertEqual(
+            index["sha256Installation"], sha((dest / "installation.hex").read_bytes())
+        )
+
+    def test_pile_radio_index_sans_empreinte_est_refait(self):
+        self.assertEqual(self.run_script().returncode, 0)
+        dest = self.work / "static/pile-radio"
+        (dest / "index.json").write_text(
+            '{"release": "v1.3", "pile": "BLE HCI Layer", "version": "1.20.0", "secteurs": 20}\n'
+        )
+        res = self.run_script()
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("Pile radio v1.3 prête", res.stdout)
+        index = json.loads((dest / "index.json").read_text())
+        self.assertEqual(index["sha256Installation"], sha(INSTALLATION))
+
+    def test_pile_radio_installation_modifiee_est_refaite(self):
+        self.assertEqual(self.run_script().returncode, 0)
+        dest = self.work / "static/pile-radio"
+        (dest / "installation.hex").write_bytes(b":abime\n")
+        res = self.run_script()
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("Pile radio v1.3 prête", res.stdout)
+        self.assertEqual((dest / "installation.hex").read_bytes(), INSTALLATION)
 
     def test_pile_radio_sha_different_echoue(self):
         ok = self.run_script()

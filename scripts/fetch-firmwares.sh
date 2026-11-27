@@ -6,6 +6,7 @@
 #     -> static/daplink/{firmware.bin,firmware.json} (format du Codespace)
 #   - pile radio BLE (release steamicc/DapLink-EasyFlash, pile-radio.json)
 #     -> static/pile-radio/{operateur.hex,installation.hex,index.json}
+#     (index.json porte le sha256 de installation.hex : sha256Installation)
 # Les fichiers téléchargés sont traités comme non fiables : téléchargement et
 # sha256 se font dans un dossier de préparation de .external/ (même système de
 # fichiers que les cibles, ignoré par git et par Docusaurus), puis la cible est
@@ -105,16 +106,24 @@ PILE_OPERATEUR="wb55_operator.hex"
 PILE_OPERATEUR_SANS_FIN="wb55_operator_no_end.hex"
 PILE_FICHIER="stm32wb5xxG_BLE_HCILayer_fw.hex"
 PILE_DEST="static/pile-radio"
-PILE_INDEX=$(printf '{"release": "%s", "pile": "BLE HCI Layer", "version": "%s", "secteurs": %s}' \
-  "$PILE_RELEASE" "$PILE_VERSION" "$PILE_SECTEURS")
+
+# pile_index SHA256 : index servi au navigateur. sha256Installation est
+# l'empreinte de installation.hex, vérifiée par le bouton « Vérifier la pile
+# radio » avant DELETE.
+pile_index() {
+  printf '{"release": "%s", "pile": "BLE HCI Layer", "version": "%s", "secteurs": %s, "sha256Installation": "%s"}' \
+    "$PILE_RELEASE" "$PILE_VERSION" "$PILE_SECTEURS" "$1"
+}
 
 # pile_a_jour : l'operator présent a le sha256 épinglé, installation.hex existe
-# et l'index est celui de la release épinglée.
+# et l'index est celui de la release épinglée, avec l'empreinte de
+# installation.hex présent (un index sans empreinte est refait).
 pile_a_jour() {
   [ "$FORCE" != "1" ] && [ -f "$PILE_DEST/installation.hex" ] && [ -f "$PILE_DEST/index.json" ] \
     && [ "$(sha256sum "$PILE_DEST/operateur.hex" 2>/dev/null | cut -d' ' -f1)" = \
          "$(node -p "require('./pile-radio.json').fichiers['$PILE_OPERATEUR']")" ] \
-    && [ "$(cat "$PILE_DEST/index.json")" = "$PILE_INDEX" ]
+    && [ "$(cat "$PILE_DEST/index.json")" = \
+         "$(pile_index "$(sha256sum "$PILE_DEST/installation.hex" | cut -d' ' -f1)")" ]
 }
 
 if pile_a_jour; then
@@ -129,7 +138,8 @@ else
   mkdir -p "$TMP/pile-radio"
   cp "$TMP/pile/$PILE_OPERATEUR" "$TMP/pile-radio/operateur.hex"
   cat "$TMP/pile/$PILE_OPERATEUR_SANS_FIN" "$TMP/pile/$PILE_FICHIER" > "$TMP/pile-radio/installation.hex"
-  echo "$PILE_INDEX" > "$TMP/pile-radio/index.json"
+  pile_index "$(sha256sum "$TMP/pile-radio/installation.hex" | cut -d' ' -f1)" \
+    > "$TMP/pile-radio/index.json"
   installer "$PILE_DEST" "$TMP/pile-radio"
   echo "Pile radio ${PILE_RELEASE} prête dans $PILE_DEST"
 fi

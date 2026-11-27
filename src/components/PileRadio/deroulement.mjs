@@ -14,6 +14,8 @@
 // - recuperer : fetch, injectable (lecture de index.json et de firmware.json,
 //   téléchargement du .hex d'installation avant DELETE) ;
 // - attendre(ms) : l'attente, injectable ; creerOperateur : operateur.mjs ;
+// - empreinte(octets) : sha256 en hexadécimal du .hex d'installation,
+//   injectable (par défaut crypto.subtle.digest('SHA-256')) ;
 // - delais : remplace tout ou partie de DELAIS_PILE ;
 // - forcer : propose l'installation même quand la pile est à jour. Seule
 //   l'interface le lit, dans localStorage['steami-pile-radio-forcer'] === '1'
@@ -33,9 +35,11 @@
 //   FUS, DAPLink non épinglé, Annuler, Plus tard, erreur) envoie START ;
 // - l'installation exige le DAPLink épinglé (illisible : non épinglé) et un
 //   second « oui » (« Installer la pile radio ») ;
-// - le .hex d'installation est téléchargé avant DELETE : s'il manque, DELETE
-//   ne part pas (START, rien n'est effacé) ; ses octets sont écrits tels
-//   quels après DELETE, sans nouvelle requête ;
+// - le .hex d'installation est téléchargé avant DELETE : s'il manque, ou si
+//   son sha256 n'est pas sha256Installation de index.json (écrit au
+//   prebuild ; clé absente comprise), DELETE ne part pas (START, rien n'est
+//   effacé) ; ses octets sont écrits tels quels après DELETE, sans nouvelle
+//   requête ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
 //   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F) ;
 // - UPGRADE muet 10 s : la commande est écrite, le parcours continue vers
@@ -105,6 +109,8 @@ export const TEXTE_OPERATEUR_MUET =
 
 export const TEXTE_TELECHARGEMENT_PILE =
   "Impossible de télécharger la pile radio depuis le wiki : rien n'a été effacé sur la carte. Vérifier la connexion à Internet, puis cliquer de nouveau sur « Vérifier la pile radio ».";
+
+export const TEXTE_EMPREINTE_PILE = `La pile radio téléchargée depuis le wiki n'est pas celle attendue : rien n'a été effacé sur la carte. Recharger la page, puis cliquer de nouveau sur « Vérifier la pile radio », ou : ${RENVOI_EASYFLASH}`;
 
 export const TEXTE_ANNULE =
   "Vérification arrêtée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
@@ -221,16 +227,41 @@ export const ETAT_INITIAL_PILE = Object.freeze({
 });
 
 // Pile épinglée par le wiki (/pile-radio/index.json), null si illisible.
+// sha256Installation : empreinte du .hex d'installation en minuscules, null
+// si elle manque ou n'est pas un sha256 (l'installation est alors refusée,
+// la lecture reste possible).
 export function lirePileEpinglee(json) {
   if (!json || typeof json.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(json.version)) {
     return null;
   }
   if (!Number.isInteger(json.secteurs) || json.secteurs <= 0) return null;
+  const empreinte = json.sha256Installation;
   return {
     pile: typeof json.pile === 'string' ? json.pile : '',
     version: json.version,
     secteurs: json.secteurs,
+    sha256Installation:
+      typeof empreinte === 'string' && /^[0-9a-f]{64}$/i.test(empreinte)
+        ? empreinte.toLowerCase()
+        : null,
   };
+}
+
+// sha256 des octets (ArrayBuffer), en hexadécimal minuscule.
+async function sha256Hex(donnees) {
+  const condense = await globalThis.crypto.subtle.digest('SHA-256', donnees);
+  return [...new Uint8Array(condense)].map((o) => o.toString(16).padStart(2, '0')).join('');
+}
+
+// Le .hex téléchargé est-il celui du build ? false si l'index n'a pas
+// d'empreinte ou si le calcul échoue.
+async function empreinteConforme(donnees, attendue, empreinte) {
+  if (!attendue) return false;
+  try {
+    return (await empreinte(donnees)) === attendue;
+  } catch {
+    return false;
+  }
 }
 
 // Télécharge le .hex d'installation en entier (corps compris) : ses octets
@@ -347,6 +378,7 @@ export function creerParcoursPile() {
     const attendre = deps.attendre ?? dormir;
     const recuperer = deps.recuperer ?? ((...args) => fetch(...args));
     const fabriquer = deps.creerOperateur ?? creerOperateur;
+    const empreinte = deps.empreinte ?? sha256Hex;
 
     poser({ ...ETAT_INITIAL_PILE, id });
 
@@ -527,6 +559,11 @@ export function creerParcoursPile() {
       installation = await telechargerInstallation(urls.installation, recuperer);
       if (!installation) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
+      }
+      // Empreinte du .hex avant DELETE : un fichier servi qui n'est pas celui
+      // du build ne doit rien effacer.
+      if (!(await empreinteConforme(installation, epinglee.sha256Installation, empreinte))) {
+        return finir('erreur', { etape: 'erreur', erreur: TEXTE_EMPREINTE_PILE });
       }
       if (annulation) return finir(...annulee(TEXTE_INSTALLATION_ANNULEE));
       if (!carte.etat.connectee) {
