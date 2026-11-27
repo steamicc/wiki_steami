@@ -2,12 +2,18 @@
 // de la carte à 115 200 bauds : une commande « NOM\n », une réponse JSON d'une
 // ligne. Le module ne touche ni à la carte ni au temps : ecrire/ecouter ont la
 // forme de carte.ecrireSerie/carte.ecouterSerie (octets bruts) et attendre(ms)
-// est injectée, pour que les tests ne dorment jamais.
+// est injectée, pour que les tests ne dorment jamais. `delais` (facultatif)
+// remplace tout ou partie de DELAIS_OPERATEUR : le déroulement y passe
+// DELAIS_PILE.
 import { LecteurLignes, texteErreurFus } from './logique.mjs';
 
-const ATTENTE_COMMANDE_MS = 1000;
-const ATTENTE_AVANT_UPGRADE_MS = 5000;
-const DELAI_LIGNE_UPGRADE_MS = 10000;
+// Délais (ms) d'EasyFlash : attente après chaque commande, avant UPGRADE, et
+// silence le plus long accepté entre deux lignes d'UPGRADE.
+export const DELAIS_OPERATEUR = Object.freeze({
+  apresCommande: 1000,
+  avantUpgrade: 5000,
+  ligneUpgrade: 10000,
+});
 const ESSAIS = 3;
 
 export class ErreurDelaiOperateur extends Error {
@@ -32,8 +38,9 @@ function repondA(objet, nom) {
   return objet.command === undefined || String(objet.command).toUpperCase() === nom;
 }
 
-export function creerOperateur({ ecrire, ecouter, attendre }) {
+export function creerOperateur({ ecrire, ecouter, attendre, delais }) {
   const encodeur = new TextEncoder();
+  const { apresCommande, avantUpgrade, ligneUpgrade } = { ...DELAIS_OPERATEUR, ...delais };
 
   // Écoute la carte le temps de `corps(recevoir)`, puis retire l'écouteur : ce
   // qui arrive ensuite n'est jamais attribué à la commande suivante.
@@ -64,7 +71,7 @@ export function creerOperateur({ ecrire, ecouter, attendre }) {
     for (let essai = 0; essai < essais; essai++) {
       const reponse = await ecoutant(nom, async ({ lignes }) => {
         await ecrire(encodeur.encode(`${nom}\n`));
-        await attendre(ATTENTE_COMMANDE_MS);
+        await attendre(apresCommande);
         return lignes.find(convient);
       });
       if (reponse) return reponse;
@@ -95,22 +102,19 @@ export function creerOperateur({ ecrire, ecouter, attendre }) {
     // START ne répond rien : 1 s d'attente, sans lire de ligne.
     async relancer() {
       await ecrire(encodeur.encode('START\n'));
-      await attendre(ATTENTE_COMMANDE_MS);
+      await attendre(apresCommande);
     },
 
     // Rend la ligne d'acceptation (status 0). Une ligne d'error non nul rejette
     // ErreurFus ; 10 s sans ligne rejettent ErreurDelaiOperateur.
     async upgrade({ surLigne }) {
-      await attendre(ATTENTE_AVANT_UPGRADE_MS);
+      await attendre(avantUpgrade);
       return ecoutant('UPGRADE', async ({ lignes, signal }) => {
         await ecrire(encodeur.encode('UPGRADE\n'));
         for (;;) {
           if (lignes.length === 0) {
             const delai = Symbol('delai');
-            const issue = await Promise.race([
-              signal(),
-              attendre(DELAI_LIGNE_UPGRADE_MS).then(() => delai),
-            ]);
+            const issue = await Promise.race([signal(), attendre(ligneUpgrade).then(() => delai)]);
             if (issue === delai && lignes.length === 0) {
               throw new ErreurDelaiOperateur('UPGRADE');
             }

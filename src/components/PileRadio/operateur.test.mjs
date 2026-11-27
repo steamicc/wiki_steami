@@ -198,3 +198,29 @@ describe('réponse tardive', () => {
     assert.equal(reponse.version, 2);
   });
 });
+
+describe('délais', () => {
+  it('prend les délais passés à la création (DELAIS_PILE du déroulement)', async () => {
+    const carte = creerCarte();
+    const operateur = creerOperateur({
+      ...carte,
+      delais: { apresCommande: 7, avantUpgrade: 8, ligneUpgrade: 9 },
+    });
+    await operateur.relancer();
+    await assert.rejects(operateur.upgrade({ surLigne: () => {} }), ErreurDelaiOperateur);
+    assert.deepEqual(carte.journal, [
+      'ecrire START',
+      'attendre 7',
+      'attendre 8',
+      'ecrire UPGRADE',
+      'attendre 9',
+    ]);
+  });
+
+  it('garde 1 s, 5 s et 10 s pour un délai non donné', async () => {
+    const carte = creerCarte();
+    const operateur = creerOperateur({ ...carte, delais: { apresCommande: 7 } });
+    await assert.rejects(operateur.upgrade({ surLigne: () => {} }), ErreurDelaiOperateur);
+    assert.deepEqual(carte.journal, ['attendre 5000', 'ecrire UPGRADE', 'attendre 10000']);
+  });
+});
