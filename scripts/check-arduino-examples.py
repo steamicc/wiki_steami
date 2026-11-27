@@ -69,22 +69,23 @@ TITRE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
 # Délimiteur de bloc de code : au moins trois ` ou trois ~ (CommonMark).
 CLOTURE = re.compile(r"^(`{3,}|~{3,})(.*)$")
 BALISE = re.compile(r"<EssayerExemple\b[^>]*?\bid=(?:\"([^\"]*)\"|'([^']*)')[^>]*>")
-SOURCE = re.compile(r"\bsource=(?:\"([^\"]*)\"|'([^']*)'|([^\s/>]+))")
+# Pas précédé d'un mot ni d'un tiret : data-source= n'est pas source=.
+SOURCE = re.compile(r"(?<![\w-])source=(?:\"([^\"]*)\"|'([^']*)'|([^\s/>]+))")
 FICHIER = re.compile(r"(?:^|\s)file=(\S+)")
 
 
 def _balises_de_page(texte):
-    """Retourne (id, source, titre_de_section, dernier_fichier_sample) pour
+    """Retourne (id, source, titre_de_section, dernier_dernier_sample) pour
     chaque balise de la page.
 
-    dernier_fichier_sample : chemin du bloc `file=` du sample juste au-dessus
+    dernier_dernier_sample : chemin du bloc `file=` du sample juste au-dessus
     de la balise dans la section (titre de niveau 1 ou 2), sinon None. Un bloc
     `file=` hors du sample ou un croquis en ligne le remet à None ; un bloc de
     sortie (text, etc.) ne le change pas.
     """
     resultat = []
     titre = None
-    fichier_sample = None
+    dernier_sample = None
     cloture = None  # délimiteur du bloc de code ouvert, sinon None
     for ligne in texte.splitlines():
         m = CLOTURE.match(ligne.lstrip())
@@ -97,13 +98,13 @@ def _balises_de_page(texte):
                     chemin = posixpath.normpath(f.group(1))
                     # Un bloc `file=` d'ailleurs (la bibliothèque) cache le
                     # croquis du sample qui le précède.
-                    fichier_sample = chemin if chemin.startswith(DOSSIER_SAMPLE) else None
+                    dernier_sample = chemin if chemin.startswith(DOSSIER_SAMPLE) else None
                 else:
                     langage = (m.group(2).split() or [""])[0].lower()
                     if langage in LANGAGES_CROQUIS:
                         # Un croquis en ligne le cache aussi ; un bloc de
                         # sortie (text, etc.) reste sans effet.
-                        fichier_sample = None
+                        dernier_sample = None
                 continue
         else:
             # Le bloc ne se ferme que sur le même caractère, au moins aussi
@@ -121,17 +122,17 @@ def _balises_de_page(texte):
             niveau = len(m.group(1))
             if niveau == 1:
                 titre = None
-                fichier_sample = None
+                dernier_sample = None
             elif niveau == 2:
                 titre = m.group(2)
-                fichier_sample = None
+                dernier_sample = None
             continue
         for b in BALISE.finditer(ligne):
             s = SOURCE.search(b.group(0))
             source = BIBLIOTHEQUE
             if s:
                 source = next(g for g in s.groups() if g is not None)
-            resultat.append((b.group(1) or b.group(2), source, titre, fichier_sample))
+            resultat.append((b.group(1) or b.group(2), source, titre, dernier_sample))
     return resultat
 
 
@@ -218,6 +219,11 @@ def verifier_sample(index_ids, pages, attente):
                 erreurs.append(
                     f"{chemin} : le croquis « {ident} » n'existe pas dans l'index "
                     "d'arduino-steami-sample"
+                )
+                continue
+            if "/" not in ident:
+                erreurs.append(
+                    f"{chemin} : l'id « {ident} » n'a pas la forme GROUPE/Nom"
                 )
                 continue
             attendu = fichier_sample(ident)

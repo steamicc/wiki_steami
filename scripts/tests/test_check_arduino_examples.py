@@ -286,6 +286,11 @@ class TestSample(unittest.TestCase):
         erreurs = self.verifier_sample({SID}, {PAGE: texte}, [])
         self.assertTrue(any(SID in e and "ni utilisé" in e for e in erreurs))
 
+    def test_id_without_group_reported(self):
+        texte = page_sample(ident="Distance")
+        erreurs = self.verifier_sample({"Distance"}, {PAGE: texte}, [])
+        self.assertTrue(any("GROUPE/Nom" in e for e in erreurs), erreurs)
+
     def test_missing_file_block(self):
         # (b)
         texte = f'## Distance\n\nTexte.\n\n<EssayerExemple id="{SID}" source="sample" />\n'
@@ -383,6 +388,11 @@ class TestSourceInconnue(unittest.TestCase):
         erreurs = module.verifier_sources({PAGE: texte})
         self.assertTrue(any("autre" in e and ID in e for e in erreurs), erreurs)
 
+    def test_data_source_attribute_not_a_source(self):
+        texte = page().replace("/>", 'data-source="autre" />')
+        self.assertEqual(module.verifier_sources({PAGE: texte}), [])
+        self.assertEqual(len(module._ids_de_page(texte, module.BIBLIOTHEQUE)), 1)
+
     def test_known_sources_ok(self):
         texte = page() + "\n" + page_sample()
         self.assertEqual(module.verifier_sources({PAGE: texte}), [])
@@ -427,6 +437,16 @@ class TestMainSample(unittest.TestCase):
         self.assertEqual(code, 0, erreurs)
         self.assertIn("arduino-steami-sample", sortie)
         self.assertIn("sautée", sortie)
+
+    def test_index_present_but_not_pinned(self):
+        # Sans épinglage, la version de l'index n'est pas comparée mais le croquis l'est.
+        texte = page() + "\n" + page_sample()
+        code, sortie, erreurs = self.lancer(texte, sample_ids=[SID], version="v9.9.9")
+        self.assertEqual(code, 0, erreurs)
+        self.assertIn("1 croquis", sortie)
+        code, _, erreurs = self.lancer(page(), sample_ids=[SID], version="v9.9.9")
+        self.assertEqual(code, 1)
+        self.assertIn(SID, erreurs)
 
     def test_index_absent_but_pinned(self):
         code, _, erreurs = self.lancer(page(), epinglee="v1.0.0")
