@@ -298,15 +298,27 @@ export function creerParcoursPile() {
 
     poser({ ...ETAT_INITIAL_PILE, id });
 
+    // Fin sur annuler() après l'écriture de l'operator. L'interface l'appelle
+    // aussi quand la carte disparaît pendant une question : le dire alors,
+    // plutôt que « Vérification arrêtée ».
+    const annulee = () =>
+      carte.etat.connectee
+        ? ['annule', { etape: 'repos', message: TEXTE_ANNULE }]
+        : ['erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE }];
+    // Avant l'écriture de l'operator, rien n'a changé : retour au repos, sauf
+    // carte perdue.
+    const annuleeAvantOperateur = () => {
+      const [fin, partie] = annulee();
+      poser(fin === 'annule' ? { ...ETAT_INITIAL_PILE } : { encart: null, ...partie });
+      return { fin };
+    };
+
     // 1. Première confirmation : rien ne part vers la carte avant.
     const choix = await demander('confirmation-verification', {
       id,
       texte: TEXTE_CONFIRMATION_VERIFICATION,
     });
-    if (choix !== 'continuer' || annulation) {
-      poser({ ...ETAT_INITIAL_PILE });
-      return { fin: 'annule' };
-    }
+    if (choix !== 'continuer' || annulation) return annuleeAvantOperateur();
 
     // 2. Épinglages, version du DAPLink (illisible pendant un flash), puis
     // flash de l'operator.
@@ -326,10 +338,7 @@ export function creerParcoursPile() {
     }
     const daplinkEpingle = lireFirmwareEpingle(await lireJson(urls.daplink, recuperer));
     const versionDaplink = await carte.lireVersionDaplink();
-    if (annulation) {
-      poser({ ...ETAT_INITIAL_PILE });
-      return { fin: 'annule' };
-    }
+    if (annulation) return annuleeAvantOperateur();
     // Ne rejette jamais ; le détail de l'échec est dans carte.etat.erreur.
     if (!(await carte.flasherFirmware(id, urls.operateur))) {
       poser({
@@ -340,8 +349,9 @@ export function creerParcoursPile() {
     }
     await attendre(delais.demarrageOperateur);
     if (annulation) {
-      poser({ etape: 'repos', message: TEXTE_ANNULE });
-      return { fin: 'annule' };
+      const [fin, partie] = annulee();
+      poser(partie);
+      return { fin };
     }
 
     // 3. Lectures et décision.
@@ -384,7 +394,7 @@ export function creerParcoursPile() {
           statusEnvoye = false;
           return finir('fus-occupe', { etape: 'erreur', erreur: TEXTE_FUS_OCCUPE });
         }
-        if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+        if (annulation) return finir(...annulee());
         // Une pile installée : la relancer, puis la relire en marche. Sans
         // pile, il n'y a rien à relancer.
         if (lirePileEnMarche(reponseVersion).version !== null) {
@@ -392,7 +402,7 @@ export function creerParcoursPile() {
           statusEnvoye = false;
           statut = null;
           await attendre(delais.relancePile);
-          if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+          if (annulation) return finir(...annulee());
           reponseVersion = await operateur.version();
           if (reponseDuFus(reponseVersion)) {
             return finir('pile-arretee', { etape: 'erreur', erreur: TEXTE_PILE_ARRETEE });
@@ -400,13 +410,13 @@ export function creerParcoursPile() {
         }
       }
       const pile = lirePileEnMarche(reponseVersion);
-      if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+      if (annulation) return finir(...annulee());
       statusEnvoye = true;
       statut ??= await operateur.statusDouble();
-      if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+      if (annulation) return finir(...annulee());
       const fus = decoderVersion((await operateur.version())?.fus_version ?? 0);
       poser({ versions: { pile, fus, epinglee, relue: null } });
-      if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+      if (annulation) return finir(...annulee());
       if (fusAuTravail(statut?.status)) {
         // Le FUS modifie déjà la pile : ne pas l'interrompre par START.
         statusEnvoye = false;
@@ -436,7 +446,7 @@ export function creerParcoursPile() {
         const release = daplinkEpingle?.release ?? null;
         const choixDaplink = await demander('daplink', { ...donnees, release });
         if (annulation || choixDaplink === 'annuler') {
-          return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+          return finir(...annulee());
         }
         if (choixDaplink === 'mettre-a-jour' && release) {
           return finir('daplink', {
@@ -451,7 +461,7 @@ export function creerParcoursPile() {
       // Seconde confirmation : « Installer la pile radio ».
       const choixInstallation = await demander('proposition', donnees);
       if (choixInstallation !== 'installer' || annulation) {
-        return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+        return finir(...annulee());
       }
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
@@ -462,7 +472,7 @@ export function creerParcoursPile() {
       if (!(await telechargerInstallation(urls.installation, recuperer))) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
       }
-      if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+      if (annulation) return finir(...annulee());
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
       }
@@ -596,6 +606,14 @@ export function creerParcoursPile() {
         enCours = false;
         reponse = null;
       }
+    },
+    // Vérification finie en erreur : retour au repos, pour que l'erreur de la
+    // carte d'une action suivante (Téléverser, Connecter) ne reste pas
+    // masquée sous le bloc. false si rien n'est effacé.
+    oublierErreur() {
+      if (enCours || etat.etape !== 'erreur') return false;
+      poser({ ...ETAT_INITIAL_PILE });
+      return true;
     },
     // Réponse à la question en attente ; false s'il n'y en a pas.
     confirmer(choix) {

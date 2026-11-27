@@ -139,9 +139,9 @@ export default function PileRadio({ id }) {
   }
 
   // Étapes du DAPLink fermées : leur message (« Suivre les étapes
-  // ci-dessous… ») disparaît avec elles.
+  // ci-dessous… ») laisse place à l'invitation à téléverser l'exemple.
   const daplinkReporte = actif && etat.daplink !== null && etat.daplink === daplinkFerme;
-  const message = actif && !daplinkReporte ? messageEtape(etat) : null;
+  const message = actif ? messageEtape(etat, daplinkReporte) : null;
   const erreur = actif ? etat.erreur : null;
   const decompte = actif && etat.etape === 'attente' ? etat.decompte : null;
 
@@ -159,6 +159,18 @@ export default function PileRadio({ id }) {
         </button>
       </div>
       {encart && <Encart encart={encart} surReponse={focaliserApres} />}
+      {/* Messages avant les étapes du DAPLink : leur guide dit « Suivre les
+          étapes ci-dessous ». */}
+      <div className={communs.messages} aria-live="polite">
+        {message && <p className={communs.statut}>{message}</p>}
+        {erreur && <p className={communs.erreur}>{erreur}</p>}
+      </div>
+      {/* role="timer" : pas d'annonce à chaque seconde. */}
+      {decompte !== null && (
+        <p className={communs.statut} role="timer">
+          {texteDecompte(decompte)}
+        </p>
+      )}
       {etapesDaplink && (
         <EtapesDaplink
           release={etat.daplink.release}
@@ -169,16 +181,6 @@ export default function PileRadio({ id }) {
             setDaplinkFerme(etat.daplink);
           }}
         />
-      )}
-      <div className={communs.messages} aria-live="polite">
-        {message && <p className={communs.statut}>{message}</p>}
-        {erreur && <p className={communs.erreur}>{erreur}</p>}
-      </div>
-      {/* role="timer" : pas d'annonce à chaque seconde. */}
-      {decompte !== null && (
-        <p className={communs.statut} role="timer">
-          {texteDecompte(decompte)}
-        </p>
       )}
     </>
   );

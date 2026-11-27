@@ -3,7 +3,12 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
 import PileRadio, { suiviOperateur } from '../PileRadio';
-import { operateurSurCarte, pileRadioVisible } from '../PileRadio/affichage.mjs';
+import {
+  controlesOccupes,
+  erreurCarteVisible,
+  operateurSurCarte,
+  pileRadioVisible,
+} from '../PileRadio/affichage.mjs';
 import { ETAT_INITIAL_PILE, estOccupee, parcoursPile } from '../PileRadio/deroulement.mjs';
 import {
   LIBELLES_STATUT,
@@ -104,7 +109,7 @@ function Controles({ id, href }) {
     () => null,
   );
   const pileOccupee = estOccupee(etatPile);
-  const occupee = etat.occupee || pileOccupee;
+  const occupee = controlesOccupes(etat, etatPile);
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
   const consoleRef = useRef(null);
   const connecterRef = useRef(null);
@@ -120,8 +125,10 @@ function Controles({ id, href }) {
   const colleRef = useRef(true);
 
   // Statut et erreur ne s'affichent que sous l'exemple cliqué en dernier.
+  // Vérification de la pile radio en erreur sous cet exemple : son message
+  // remplace celui de la carte, qui parlerait de MicroPython.
   const clique = etat.dernierClic === id;
-  const erreur = clique ? etat.erreur : null;
+  const erreur = clique && erreurCarteVisible(etatPile, id) ? etat.erreur : null;
   const montrerConsole = etat.programmeActif === id && etat.lignes.length > 0;
 
   // La console suit les nouvelles lignes, sauf si le lecteur est remonté.
@@ -170,13 +177,17 @@ function Controles({ id, href }) {
 
   function televerser() {
     focaliserApresRef.current = true;
-    // Le programme de lecture de la pile radio va être remplacé.
+    // Le programme de lecture de la pile radio va être remplacé. Une
+    // vérification finie en erreur s'efface : l'erreur éventuelle du
+    // téléversement doit se voir.
     suiviOperateur.oublier();
+    parcoursPile.oublierErreur();
     carte.televerser(id, () => telechargerExemple(href));
   }
 
   function connecter() {
     focaliserApresRef.current = true;
+    parcoursPile.oublierErreur();
     carte.connecter(id, urlDapjs);
   }
 

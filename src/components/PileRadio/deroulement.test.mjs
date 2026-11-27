@@ -6,6 +6,8 @@ import { describe, it } from 'node:test';
 
 import {
   DELAIS_PILE,
+  TEXTE_ANNULE,
+  TEXTE_CARTE_PERDUE_PILE,
   TEXTE_CONFIRMATION_VERIFICATION,
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
@@ -929,6 +931,80 @@ describe('téléchargement avant DELETE', () => {
     assert.deepEqual(await fin, { fin: 'annule' });
     assert.ok(!p.journal.includes('DELETE'));
     assert.equal(p.journal.at(-1), 'START');
+  });
+});
+
+describe('carte perdue pendant une question', () => {
+  // L'interface appelle annuler() quand la carte disparaît pendant une
+  // question (PileRadio/index.js).
+  const perdre = (p) => {
+    p.carte.etat = { ...p.carte.etat, connectee: false };
+    p.parcours.annuler();
+  };
+
+  it('première confirmation : message de carte perdue, rien n est envoyé', async () => {
+    const p = preparer();
+    const fin = p.parcours.verifier(ID, p.deps);
+    await etape(p.parcours, 'confirmation-verification');
+    perdre(p);
+    await fin;
+    assert.deepEqual(p.journal, []);
+    assert.equal(p.parcours.etat.etape, 'erreur');
+    assert.equal(p.parcours.etat.id, ID);
+    assert.equal(p.parcours.etat.erreur, TEXTE_CARTE_PERDUE_PILE);
+    assert.equal(p.parcours.etat.message, null);
+  });
+
+  for (const [question, options] of [
+    ['proposition', { operateur: sansPile }],
+    ['daplink', { operateur: sansPile, carte: { daplink: null } }],
+  ]) {
+    it(`${question} : message de carte perdue, pas « annulé »`, async () => {
+      const p = preparer(options);
+      const fin = verifierConfirme(p);
+      await etape(p.parcours, question);
+      perdre(p);
+      await fin;
+      assert.equal(p.parcours.etat.etape, 'erreur');
+      assert.equal(p.parcours.etat.erreur, TEXTE_CARTE_PERDUE_PILE);
+      assert.notEqual(p.parcours.etat.message, TEXTE_ANNULE);
+      assert.equal(p.parcours.etat.encart, null);
+      assert.ok(!p.journal.includes('DELETE'));
+    });
+  }
+
+  it('carte toujours là : annuler() garde le message « annulé »', async () => {
+    const p = preparer({ operateur: sansPile });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.annuler();
+    await fin;
+    assert.equal(p.parcours.etat.message, TEXTE_ANNULE);
+  });
+});
+
+describe('oublierErreur', () => {
+  it('une vérification finie en erreur revient au repos', async () => {
+    const p = preparer({ recuperer: fauxRecuperer({}) });
+    await verifierConfirme(p);
+    assert.equal(p.parcours.etat.etape, 'erreur');
+    assert.equal(p.parcours.oublierErreur(), true);
+    assert.equal(p.parcours.etat.etape, 'repos');
+    assert.equal(p.parcours.etat.erreur, null);
+    assert.equal(p.parcours.etat.id, null);
+  });
+
+  it('sans effet hors erreur, et pendant une vérification', async () => {
+    const p = preparer();
+    await verifierConfirme(p);
+    assert.equal(p.parcours.etat.etape, 'a-jour');
+    assert.equal(p.parcours.oublierErreur(), false);
+    assert.equal(p.parcours.etat.etape, 'a-jour');
+    const fin = p.parcours.verifier(ID, p.deps);
+    await etape(p.parcours, 'confirmation-verification');
+    assert.equal(p.parcours.oublierErreur(), false);
+    p.parcours.annuler();
+    await fin;
   });
 });
 

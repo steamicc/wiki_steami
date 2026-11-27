@@ -11,8 +11,10 @@ import {
   TEXTE_DUREE_PILE,
   boutonPileActif,
   contenuEncart,
+  controlesOccupes,
   creerSuiviOperateur,
   doitAbandonner,
+  erreurCarteVisible,
   lireForcer,
   messageEtape,
   operateurSurCarte,
@@ -23,7 +25,12 @@ import {
   retenirOnglet,
   texteDecompte,
 } from './affichage.mjs';
-import { ETAT_INITIAL_PILE, TEXTE_CONFIRMATION_VERIFICATION } from './deroulement.mjs';
+import {
+  ETAT_INITIAL_PILE,
+  TEXTE_CONFIRMATION_VERIFICATION,
+  TEXTE_DAPLINK_GUIDE,
+  TEXTE_PLUS_TARD,
+} from './deroulement.mjs';
 
 const ID = 'BLE/BleBeacon';
 const CARTE_LIBRE = { connectee: true, occupee: false, programmeActif: null };
@@ -199,6 +206,67 @@ describe('messageEtape', () => {
     assert.equal(messageEtape(pile({ etape: 'fini', message: 'Fin.' })), 'Fin.');
     assert.equal(messageEtape(pile({ etape: 'repos' })), null);
     assert.equal(messageEtape(pile({ etape: 'proposition', encart: {} })), null);
+  });
+
+  it('étapes du DAPLink fermées par « Plus tard » : invitation à téléverser l exemple', () => {
+    const etat = pile({
+      etape: 'fini',
+      daplink: { release: '2026-11-25.3' },
+      message: TEXTE_DAPLINK_GUIDE,
+    });
+    assert.equal(messageEtape(etat), TEXTE_DAPLINK_GUIDE);
+    assert.equal(messageEtape(etat, true), TEXTE_PLUS_TARD);
+    assert.match(messageEtape(etat, true), /[Tt]éléverser l'exemple/);
+  });
+
+  it('le guide du DAPLink renvoie aux étapes affichées sous les messages', () => {
+    assert.match(TEXTE_DAPLINK_GUIDE, /ci-dessous/);
+  });
+});
+
+describe('controlesOccupes', () => {
+  it('Téléverser et Déconnecter grisés pendant une opération de la carte', () => {
+    assert.equal(controlesOccupes({ ...CARTE_LIBRE, occupee: true }, pile({})), true);
+  });
+
+  it('grisés aussi pendant chaque étape occupée de la vérification', () => {
+    for (const etape of [
+      'operateur',
+      'lecture',
+      'proposition',
+      'daplink',
+      'telechargement',
+      'suppression',
+      'ecriture',
+      'upgrade',
+      'attente',
+      'relecture',
+    ]) {
+      assert.equal(controlesOccupes(CARTE_LIBRE, pile({ etape })), true, etape);
+    }
+  });
+
+  it('libres carte libre, vérification au repos, en question préalable ou finie', () => {
+    for (const etape of ['repos', 'confirmation-verification', 'a-jour', 'fini', 'erreur']) {
+      assert.equal(controlesOccupes(CARTE_LIBRE, pile({ etape })), false, etape);
+    }
+  });
+});
+
+describe('erreurCarteVisible', () => {
+  it('masquée sous le bloc dont la vérification est en erreur', () => {
+    assert.equal(erreurCarteVisible(pile({ id: ID, etape: 'erreur', erreur: 'x' }), ID), false);
+  });
+
+  it('visible sous les autres blocs, et hors erreur de la vérification', () => {
+    assert.equal(
+      erreurCarteVisible(pile({ id: ID, etape: 'erreur', erreur: 'x' }), 'BLE/Autre'),
+      true,
+    );
+    for (const etape of ['repos', 'operateur', 'fini', 'a-jour']) {
+      assert.equal(erreurCarteVisible(pile({ id: ID, etape }), ID), true, etape);
+    }
+    assert.equal(erreurCarteVisible(pile({}), ID), true);
   });
 });
 

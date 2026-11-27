@@ -1,7 +1,7 @@
 // Ce qu'affiche le bouton « Vérifier la pile radio » (PileRadio/index.js) :
 // fonctions pures et petits suivis du parcours, sans DOM ni WebUSB, testés
 // par affichage.test.mjs. Le déroulement lui-même est dans deroulement.mjs.
-import { estOccupee } from './deroulement.mjs';
+import { TEXTE_PLUS_TARD, estOccupee } from './deroulement.mjs';
 
 // --- Textes (ton neutre) ----------------------------------------------------
 
@@ -105,8 +105,12 @@ export function contenuEncart({ type, donnees }) {
 
 // Message annoncé (région aria-live) sous le bloc de la vérification : ce
 // qui se passe pendant une étape occupée, sinon le message du parcours. Le
-// décompte n'y est pas : il changerait chaque seconde.
-export function messageEtape(etat) {
+// décompte n'y est pas : il changerait chaque seconde. daplinkReporte : les
+// étapes du DAPLink ont été fermées par « Plus tard » ; leur guide
+// (« Suivre les étapes ci-dessous… ») laisse place à l'invitation à
+// téléverser l'exemple.
+export function messageEtape(etat, daplinkReporte = false) {
+  if (daplinkReporte) return TEXTE_PLUS_TARD;
   return MESSAGES_ETAPES[etat.etape] ?? etat.message ?? null;
 }
 
@@ -130,6 +134,20 @@ export function boutonPileActif(etatCarte, etatPile) {
     !estOccupee(etatPile) &&
     etatPile.etape !== 'confirmation-verification'
   );
+}
+
+// Téléverser et Déconnecter (EssayerExemple), sous tous les exemples : grisés
+// pendant une opération de la carte et pendant toute étape occupée de la
+// vérification, qui tient la carte.
+export function controlesOccupes(etatCarte, etatPile) {
+  return etatCarte.occupee || estOccupee(etatPile);
+}
+
+// Erreur de carte.mjs sous le bloc id : masquée tant que sa vérification est
+// en erreur. Celle du parcours dit déjà ce qui s'est passé, alors que celle
+// de carte.mjs (flash de l'operator raté) parle de MicroPython.
+export function erreurCarteVisible(etatPile, id) {
+  return !(etatPile.id === id && etatPile.etape === 'erreur');
 }
 
 // Fermer ou recharger la page couperait l'installation : de DELETE à la
