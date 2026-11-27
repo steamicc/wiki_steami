@@ -7,6 +7,7 @@ import {
   decoderVersion,
   etatFus,
   lirePileEnMarche,
+  reponseDuFus,
   texteErreurFus,
 } from './logique.mjs';
 
@@ -52,6 +53,33 @@ describe('lirePileEnMarche', () => {
   it('rend version null pour une version vide ou 0.0.0', () => {
     assert.equal(lirePileEnMarche({ copro_fw_version: '', ws_version: 0 }).version, null);
     assert.equal(lirePileEnMarche({ copro_fw_version: '0.0.0', ws_version: 0 }).version, null);
+  });
+});
+
+describe('reponseDuFus', () => {
+  it('pile en marche : fus_version 0 (réponse relevée sur la carte)', () => {
+    const reponse = {
+      command: 'Version',
+      status: 0,
+      fus_version: 0,
+      copro_fw_version: '1.20.0',
+      ws_version: 118292500,
+    };
+    assert.equal(reponseDuFus(reponse), false);
+  });
+  it('pile arrêtée : fus_version non nul, la réponse vient du FUS', () => {
+    const reponse = {
+      command: 'Version',
+      status: 0,
+      fus_version: 16908288,
+      copro_fw_version: '1.20.0',
+      ws_version: 18087938,
+    };
+    assert.equal(reponseDuFus(reponse), true);
+  });
+  it('réponse absente ou sans fus_version : pas du FUS', () => {
+    assert.equal(reponseDuFus(undefined), false);
+    assert.equal(reponseDuFus({ command: 'Version' }), false);
   });
 });
 

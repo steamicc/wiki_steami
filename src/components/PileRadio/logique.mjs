@@ -28,6 +28,14 @@ export function lirePileEnMarche(reponseVersion) {
   return { version, secteurs: (reponseVersion?.ws_version ?? 0) & 0xff };
 }
 
+// La réponse de VERSION vient-elle du FUS ? Pile en marche, fus_version vaut
+// 0 ; sur le FUS (pile arrêtée par un STATUS, ou absente), il donne la
+// version du FUS (16908288 = 0x01020000 sur la V1c).
+export function reponseDuFus(reponseVersion) {
+  const fus = reponseVersion?.fus_version;
+  return Number.isInteger(fus) && fus !== 0;
+}
+
 function composantes(version) {
   return version.split('.').map((n) => Number.parseInt(n, 10) || 0);
 }

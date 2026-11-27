@@ -21,6 +21,11 @@
 // - rien ne part vers la carte avant « Continuer » ;
 // - lectures dans l'ordre VERSION (pile en marche : version et taille), double
 //   STATUS, VERSION (version du FUS) ;
+// - si le premier VERSION répond depuis le FUS : double STATUS (FUS au
+//   travail : fin sans START) ; puis, si le FUS annonce une pile installée
+//   (restée arrêtée par un parcours interrompu), START, une attente et un
+//   nouveau VERSION ; s'il répond encore depuis le FUS, rien n'est proposé et
+//   le message conseille RESET ;
 // - une réinitialisation ne relance pas la pile : dès le double STATUS envoyé
 //   et tant que DELETE ne l'a pas été, toute fin du parcours (à jour, refus du
 //   FUS, DAPLink non épinglé, Annuler, Plus tard, erreur) envoie START ;
@@ -34,6 +39,7 @@ import {
   decoderVersion,
   etatFus,
   lirePileEnMarche,
+  reponseDuFus,
   texteErreurFus,
 } from './logique.mjs';
 import { DELAIS_OPERATEUR, ErreurDelaiOperateur, ErreurFus, creerOperateur } from './operateur.mjs';
@@ -47,13 +53,15 @@ import { MESSAGE_FLASH_EN_COURS, messageFrancais } from '../EssayerExemple/logiq
 //   d'UPGRADE, avec un décompte visible ;
 // - relectureMax, pasRelecture : relectures tant que le FUS travaille ;
 // - demarrageOperateur : entre le flash de l'operator et la première commande
-//   (essai préalable : VERSION répond 2 à 3 s après le flash).
+//   (essai préalable : VERSION répond 2 à 3 s après le flash) ;
+// - relancePile : entre START (pile restée arrêtée) et le nouveau VERSION.
 export const DELAIS_PILE = Object.freeze({
   ...DELAIS_OPERATEUR,
   attenteApresUpgrade: 60000,
   relectureMax: 120000,
   pasRelecture: 10000,
   demarrageOperateur: 2000,
+  relancePile: 2000,
 });
 
 // Pas du décompte affiché pendant l'attente (ms).
@@ -84,6 +92,11 @@ export const TEXTE_ANNULE =
 
 export const TEXTE_PLUS_TARD =
   "Installation de la pile radio reportée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
+
+// La pile est installée mais ne redémarre pas avec START : le FUS répond
+// toujours. Rien n'est proposé.
+export const TEXTE_PILE_ARRETEE =
+  'La pile radio de la carte est arrêtée et ne redémarre pas : appuyer sur le bouton RESET de la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
 
 export const TEXTE_DAPLINK_GUIDE =
   'Suivre les étapes ci-dessous pour mettre à jour le DAPLink, puis cliquer de nouveau sur « Vérifier la pile radio ».';
@@ -320,10 +333,41 @@ export function creerParcoursPile() {
     };
 
     try {
-      const pile = lirePileEnMarche(await operateur.version());
+      let reponseVersion = await operateur.version();
+      // Double STATUS déjà lu sur le FUS, à ne pas refaire ; null sinon.
+      let statut = null;
+      if (reponseDuFus(reponseVersion)) {
+        // Le FUS répond : la pile est absente, ou restée arrêtée par le
+        // STATUS d'un parcours interrompu (une réinitialisation ne la relance
+        // pas). Sur le FUS, VERSION donne une autre taille de pile : une pile
+        // à jour serait proposée à l'installation. STATUS d'abord, sans
+        // risque sur le FUS : s'il travaille déjà, START ne doit pas
+        // l'interrompre.
+        statusEnvoye = true;
+        statut = await operateur.statusDouble();
+        if (fusAuTravail(statut?.status)) {
+          statusEnvoye = false;
+          return finir('fus-occupe', { etape: 'erreur', erreur: TEXTE_FUS_OCCUPE });
+        }
+        if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+        // Une pile installée : la relancer, puis la relire en marche. Sans
+        // pile, il n'y a rien à relancer.
+        if (lirePileEnMarche(reponseVersion).version !== null) {
+          await operateur.relancer();
+          statusEnvoye = false;
+          statut = null;
+          await attendre(delais.relancePile);
+          if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+          reponseVersion = await operateur.version();
+          if (reponseDuFus(reponseVersion)) {
+            return finir('pile-arretee', { etape: 'erreur', erreur: TEXTE_PILE_ARRETEE });
+          }
+        }
+      }
+      const pile = lirePileEnMarche(reponseVersion);
       if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
       statusEnvoye = true;
-      const statut = await operateur.statusDouble();
+      statut ??= await operateur.statusDouble();
       if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
       const fus = decoderVersion((await operateur.version())?.fus_version ?? 0);
       poser({ versions: { pile, fus, epinglee, relue: null } });
@@ -469,7 +513,8 @@ export function creerParcoursPile() {
       };
     },
     // Lance la vérification sous le bloc id. Renvoie { fin } : 'occupe'
-    // (refusée), 'deconnectee', 'annule', 'erreur', 'fus', 'fus-occupe',
+    // (refusée), 'deconnectee', 'annule', 'erreur', 'pile-arretee', 'fus',
+    // 'fus-occupe',
     // 'a-jour', 'daplink', 'plus-tard', 'fini', 'fus-travaille',
     // 'sans-reponse'.
     async verifier(id, deps) {

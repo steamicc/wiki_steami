@@ -9,6 +9,7 @@ import {
   TEXTE_CONFIRMATION_VERIFICATION,
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
+  TEXTE_PILE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
   TEXTE_SANS_REPONSE,
   creerParcoursPile,
@@ -295,6 +296,97 @@ describe('lectures', () => {
     assert.deepEqual(await verifierConfirme(p), { fin: 'erreur' });
     assert.ok(!p.journal.includes('START'));
     assert.ok(!p.journal.includes('STATUS'));
+  });
+});
+
+describe('pile restée arrêtée', () => {
+  // Un parcours interrompu après STATUS (onglet fermé pendant une question)
+  // laisse la pile arrêtée : le premier VERSION répond depuis le FUS.
+  it('premier VERSION depuis le FUS : STATUS, START, attente, nouvelle lecture, puis la suite', async () => {
+    const p = preparer({
+      operateur: { version: [VERSION_FUS, VERSION_PILE_EN_MARCHE, VERSION_FUS] },
+    });
+    assert.deepEqual(await verifierConfirme(p), { fin: 'a-jour' });
+    assert.deepEqual(p.journal, [
+      'daplink',
+      `flash ${URLS.operateur}`,
+      'VERSION',
+      'STATUS',
+      'START',
+      'VERSION',
+      'STATUS',
+      'VERSION',
+      'START',
+    ]);
+    assert.deepEqual(p.attentes, [DELAIS_PILE.demarrageOperateur, DELAIS_PILE.relancePile]);
+    assert.equal(DELAIS_PILE.relancePile, 2000);
+    // La pile est lue sur la réponse « pile en marche », pas sur celle du FUS.
+    assert.deepEqual(p.parcours.etat.versions.pile, { version: '1.20.0', secteurs: 20 });
+  });
+
+  it('second VERSION encore depuis le FUS : conseil de RESET, rien n est proposé', async () => {
+    const p = preparer({ operateur: { version: [VERSION_FUS, VERSION_FUS] } });
+    const vues = new Set();
+    p.parcours.abonner((etat) => vues.add(etat.etape));
+    assert.deepEqual(await verifierConfirme(p), { fin: 'pile-arretee' });
+    assert.deepEqual(p.journal, [
+      'daplink',
+      `flash ${URLS.operateur}`,
+      'VERSION',
+      'STATUS',
+      'START',
+      'VERSION',
+    ]);
+    assert.equal(p.parcours.etat.etape, 'erreur');
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ARRETEE);
+    assert.match(TEXTE_PILE_ARRETEE, /RESET/);
+    assert.match(TEXTE_PILE_ARRETEE, /Vérifier la pile radio/);
+    assert.ok(!vues.has('proposition'));
+    assert.ok(!vues.has('daplink'));
+  });
+
+  it('délai de relance injectable', async () => {
+    const p = preparer({
+      operateur: { version: [VERSION_FUS, VERSION_PILE_EN_MARCHE, VERSION_FUS] },
+    });
+    p.deps.delais = { relancePile: 5 };
+    await verifierConfirme(p);
+    assert.deepEqual(p.attentes, [DELAIS_PILE.demarrageOperateur, 5]);
+  });
+
+  it('pile arrêtée et FUS déjà au travail : ni START ni proposition', async () => {
+    const p = preparer({
+      operateur: {
+        version: [VERSION_FUS, VERSION_PILE_EN_MARCHE],
+        status: [{ ...STATUS_REPOS, status: 0x10 }],
+      },
+    });
+    assert.deepEqual(await verifierConfirme(p), { fin: 'fus-occupe' });
+    assert.deepEqual(p.journal.slice(2), ['VERSION', 'STATUS']);
+    assert.equal(p.parcours.etat.erreur, TEXTE_FUS_OCCUPE);
+  });
+
+  it('sans pile, le FUS répond : rien à relancer, l installation est proposée', async () => {
+    const p = preparer({ operateur: sansPile });
+    const fin = verifierConfirme(p);
+    const etat = await etape(p.parcours, 'proposition');
+    assert.equal(etat.encart.donnees.decision, 'absente');
+    assert.deepEqual(p.journal.slice(2), ['VERSION', 'STATUS', 'VERSION']);
+    p.parcours.annuler();
+    await fin;
+  });
+
+  it('annuler() pendant l attente de la relance : arrêt, rien de plus n est envoyé', async () => {
+    const p = preparer({ operateur: { version: [VERSION_FUS, VERSION_PILE_EN_MARCHE] } });
+    p.deps.delais = { relancePile: 7 };
+    p.deps.attendre = async (ms) => {
+      p.attentes.push(ms);
+      if (ms === 7) p.parcours.annuler();
+    };
+    assert.deepEqual(await verifierConfirme(p), { fin: 'annule' });
+    // START déjà envoyé : pas de second.
+    assert.deepEqual(p.journal.slice(2), ['VERSION', 'STATUS', 'START']);
+    assert.equal(p.parcours.etat.etape, 'repos');
   });
 });
 
@@ -702,6 +794,7 @@ describe('occupation', () => {
       relectureMax: 120000,
       pasRelecture: 10000,
       demarrageOperateur: 2000,
+      relancePile: 2000,
     });
   });
 });
