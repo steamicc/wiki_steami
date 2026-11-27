@@ -13,6 +13,12 @@ MPY_VERSION = "v9.8.7"
 MPY_BIN = b"micropython-firmware-fixture"
 DAP_RELEASE = "2026-11-25.3"
 DAP_BIN = b"daplink-firmware-fixture"
+PILE_RELEASE = "v1.3"
+PILE_FICHIERS = {
+    "wb55_operator.hex": b":operateur\n:00000001FF\n",
+    "wb55_operator_no_end.hex": b":operateur\n",
+    "stm32wb5xxG_BLE_HCILayer_fw.hex": b":pile\n:00000001FF\n",
+}
 
 
 def sha(data):
@@ -35,6 +41,11 @@ class TestFetchFirmwares(unittest.TestCase):
         self.dap_file = dap / "stm32f103xb_steami32_if_crc.bin"
         self.mpy_file.write_bytes(MPY_BIN)
         self.dap_file.write_bytes(DAP_BIN)
+        self.pile_base = self.tmp / "pile-base"
+        self.pile_dir = self.pile_base / "steamicc/DapLink-EasyFlash" / PILE_RELEASE / "wireless_stack"
+        self.pile_dir.mkdir(parents=True)
+        for nom, contenu in PILE_FICHIERS.items():
+            (self.pile_dir / nom).write_bytes(contenu)
         self.pin(sha(MPY_BIN), sha(DAP_BIN))
 
     def pin(self, mpy_sha, dap_sha):
@@ -44,9 +55,28 @@ class TestFetchFirmwares(unittest.TestCase):
         (self.work / "daplink.json").write_text(
             json.dumps({"release": DAP_RELEASE, "sha256": dap_sha})
         )
+        self.pin_pile()
+
+    def pin_pile(self, empreintes=None):
+        empreintes = empreintes or {n: sha(c) for n, c in PILE_FICHIERS.items()}
+        (self.work / "pile-radio.json").write_text(
+            json.dumps(
+                {
+                    "release": PILE_RELEASE,
+                    "version": "1.20.0",
+                    "secteurs": 20,
+                    "fichiers": empreintes,
+                }
+            )
+        )
 
     def run_script(self, **extra):
-        env = dict(os.environ, FIRMWARES_URL_BASE=f"file://{self.base}", **extra)
+        env = dict(
+            os.environ,
+            FIRMWARES_URL_BASE=f"file://{self.base}",
+            PILE_RADIO_URL_BASE=f"file://{self.pile_base}",
+            **extra,
+        )
         return subprocess.run(
             ["bash", "scripts/fetch-firmwares.sh"],
             cwd=self.work,
@@ -101,9 +131,47 @@ class TestFetchFirmwares(unittest.TestCase):
         self.assertEqual(self.run_script().returncode, 0)
         self.mpy_file.unlink()
         self.dap_file.unlink()
+        for nom in PILE_FICHIERS:
+            (self.pile_dir / nom).unlink()
         res = self.run_script()
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertIn("déjà présent", res.stdout)
+
+    def test_pile_radio_installe_les_trois_fichiers(self):
+        res = self.run_script()
+        self.assertEqual(res.returncode, 0, res.stderr)
+        dest = self.work / "static/pile-radio"
+        self.assertEqual(
+            (dest / "operateur.hex").read_bytes(), PILE_FICHIERS["wb55_operator.hex"]
+        )
+        self.assertEqual(
+            (dest / "installation.hex").read_bytes(),
+            PILE_FICHIERS["wb55_operator_no_end.hex"]
+            + PILE_FICHIERS["stm32wb5xxG_BLE_HCILayer_fw.hex"],
+        )
+        self.assertEqual(
+            json.loads((dest / "index.json").read_text()),
+            {"release": "v1.3", "pile": "BLE HCI Layer", "version": "1.20.0", "secteurs": 20},
+        )
+
+    def test_pile_radio_sha_different_echoue(self):
+        ok = self.run_script()
+        self.assertEqual(ok.returncode, 0, ok.stderr)
+        avant = (self.work / "static/pile-radio/installation.hex").read_bytes()
+        (self.pile_dir / "stm32wb5xxG_BLE_HCILayer_fw.hex").write_bytes(b":autre\n")
+        res = self.run_script(FORCER_FIRMWARES="1")
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("sha256", res.stderr)
+        self.assertEqual((self.work / "static/pile-radio/installation.hex").read_bytes(), avant)
+
+    def test_pile_radio_deja_presente_pas_de_telechargement(self):
+        self.assertEqual(self.run_script().returncode, 0)
+        for nom in PILE_FICHIERS:
+            (self.pile_dir / nom).unlink()
+        res = self.run_script()
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn("Pile radio v1.3 déjà présente", res.stdout)
+        self.assertNotIn("Téléchargement", res.stdout)
 
     def test_forcer_retelecharge(self):
         self.assertEqual(self.run_script().returncode, 0)
