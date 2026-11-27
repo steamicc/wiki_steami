@@ -312,6 +312,36 @@ class TestSample(unittest.TestCase):
         erreurs = self.verifier_sample({SID}, {PAGE: page_sample(chemin=lib)}, [])
         self.assertTrue(any(SID in e and FICHIER in e for e in erreurs), erreurs)
 
+    def test_library_file_block_between_reported(self):
+        # (b) « juste au-dessus » : un bloc `file=` de la bibliothèque intercalé
+        # cache le croquis du sample.
+        lib = ".external/arduino-steami/examples/VL53L1X/BasicDistance/BasicDistance.ino"
+        texte = (
+            "## D\n\n" + bloc() + "\n" + bloc(lib)
+            + f'\n<EssayerExemple id="{SID}" source="sample" />\n'
+        )
+        erreurs = self.verifier_sample({SID}, {PAGE: texte}, [])
+        self.assertTrue(any(SID in e and FICHIER in e for e in erreurs), erreurs)
+
+    def test_inline_sketch_between_reported(self):
+        # (b) : un croquis en ligne intercalé cache aussi le croquis du sample.
+        for langage in ("cpp", "c++", "ino", "arduino", "CPP title=\"Croquis\""):
+            with self.subTest(langage=langage):
+                texte = (
+                    "## D\n\n" + bloc()
+                    + f"\n```{langage}\nvoid setup() {{}}\nvoid loop() {{}}\n```\n\n"
+                    f'<EssayerExemple id="{SID}" source="sample" />\n'
+                )
+                erreurs = self.verifier_sample({SID}, {PAGE: texte}, [])
+                self.assertTrue(any(SID in e and FICHIER in e for e in erreurs), erreurs)
+
+    def test_sample_block_after_inline_sketch_ok(self):
+        texte = (
+            "## D\n\n```cpp\nvoid setup() {}\n```\n\n" + bloc()
+            + f'\n<EssayerExemple id="{SID}" source="sample" />\n'
+        )
+        self.assertEqual(self.verifier_sample({SID}, {PAGE: texte}, []), [])
+
     def test_subheading_keeps_file_block(self):
         texte = "## Distance\n\n" + bloc() + f'\n### Essai\n\n<EssayerExemple id="{SID}" source="sample" />\n'
         self.assertEqual(self.verifier_sample({SID}, {PAGE: texte}, []), [])

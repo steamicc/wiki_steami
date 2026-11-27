@@ -21,9 +21,11 @@ Règles de la bibliothèque :
 
 Règles du sample : 1, 3, 4 et 5 avec son index et sa liste d'attente ; la
 règle 2 ne s'applique pas (une section peut regrouper plusieurs croquis). À la
-place, le dernier bloc `file=.external/arduino-steami-sample/...` qui précède
-la balise dans la même section doit inclure le même croquis
-(examples/GROUPE/Nom/Nom.ino).
+place, le bloc de code juste au-dessus de la balise, dans la même section, doit
+être un bloc `file=.external/arduino-steami-sample/...` qui inclut le même
+croquis (examples/GROUPE/Nom/Nom.ino). Un bloc `file=` hors du sample ou un
+croquis en ligne (cpp, c++, ino, arduino) intercalé le cache ; un bloc de
+sortie (text, etc.) ne compte pas.
 
 Une balise dont la source n'est ni « bibliotheque » ni « sample » est refusée.
 
@@ -60,6 +62,8 @@ BIBLIOTHEQUE = "bibliotheque"
 SAMPLE = "sample"
 SOURCES = (BIBLIOTHEQUE, SAMPLE)
 DOSSIER_SAMPLE = ".external/arduino-steami-sample/"
+# Langages d'un bloc de code tenu pour un croquis Arduino.
+LANGAGES_CROQUIS = ("cpp", "c++", "ino", "arduino")
 
 TITRE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
 # Délimiteur de bloc de code : au moins trois ` ou trois ~ (CommonMark).
@@ -73,8 +77,10 @@ def _balises_de_page(texte):
     """Retourne (id, source, titre_de_section, dernier_fichier_sample) pour
     chaque balise de la page.
 
-    dernier_fichier_sample : chemin du dernier bloc `file=` du sample vu dans
-    la section (titre de niveau 1 ou 2) avant la balise, sinon None.
+    dernier_fichier_sample : chemin du bloc `file=` du sample juste au-dessus
+    de la balise dans la section (titre de niveau 1 ou 2), sinon None. Un bloc
+    `file=` hors du sample ou un croquis en ligne le remet à None ; un bloc de
+    sortie (text, etc.) ne le change pas.
     """
     resultat = []
     titre = None
@@ -89,8 +95,15 @@ def _balises_de_page(texte):
                 f = FICHIER.search(m.group(2))
                 if f:
                     chemin = posixpath.normpath(f.group(1))
-                    if chemin.startswith(DOSSIER_SAMPLE):
-                        fichier_sample = chemin
+                    # Un bloc `file=` d'ailleurs (la bibliothèque) cache le
+                    # croquis du sample qui le précède.
+                    fichier_sample = chemin if chemin.startswith(DOSSIER_SAMPLE) else None
+                else:
+                    langage = (m.group(2).split() or [""])[0].lower()
+                    if langage in LANGAGES_CROQUIS:
+                        # Un croquis en ligne le cache aussi ; un bloc de
+                        # sortie (text, etc.) reste sans effet.
+                        fichier_sample = None
                 continue
         else:
             # Le bloc ne se ferme que sur le même caractère, au moins aussi
@@ -211,7 +224,8 @@ def verifier_sample(index_ids, pages, attente):
             if trouve is None:
                 erreurs.append(
                     f"{chemin} : le croquis « {ident} » (source=\"sample\") n'est pas précédé, "
-                    f"dans sa section, d'un bloc de code `file={attendu}`"
+                    f"juste au-dessus dans sa section, d'un bloc de code `file={attendu}` "
+                    "(un bloc `file=` d'ailleurs ou un croquis en ligne intercalé le cache)"
                 )
             elif trouve != attendu:
                 erreurs.append(
