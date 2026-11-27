@@ -5,16 +5,18 @@ import assert from 'node:assert/strict';
 
 import { suivreDefilement } from './defilement.mjs';
 
-// Page simulée : position verticale, que le focus fait défiler.
+// Page simulée : position verticale, que le focus fait défiler, et
+// visibilité du bouton « Essayer » du bloc.
 function page(position = 0) {
-  const p = { position };
+  const p = { position, blocVisible: true };
   p.lire = () => p.position;
+  p.visible = () => p.blocVisible;
   return p;
 }
 
 test('question fermée sans défilement de la personne : retour à la position d’avant le focus', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   suivi.ouvrir(() => {
     p.position = 400;
   });
@@ -25,7 +27,7 @@ test('question fermée sans défilement de la personne : retour à la position d
 
 test('la personne a fait défiler la page pendant la question : position gardée', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   suivi.ouvrir(() => {
     p.position = 400;
   });
@@ -36,7 +38,7 @@ test('la personne a fait défiler la page pendant la question : position gardée
 
 test('défilement de la personne puis retour au même endroit : position gardée', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   suivi.ouvrir(() => {
     p.position = 400;
   });
@@ -49,14 +51,14 @@ test('défilement de la personne puis retour au même endroit : position gardée
 
 test('le focus n’a pas fait défiler la page : rien à restaurer', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   suivi.ouvrir(() => {});
   assert.equal(suivi.fermer(), null);
 });
 
 test('écart d’un pixel (position fractionnaire) : pas compté comme un défilement', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   suivi.ouvrir(() => {
     p.position = 400;
   });
@@ -67,7 +69,7 @@ test('écart d’un pixel (position fractionnaire) : pas compté comme un défil
 
 test('le focus est toujours donné, et fermer sans ouvrir ne restaure rien', () => {
   const p = page(0);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   assert.equal(suivi.fermer(), null);
   let focalise = false;
   suivi.ouvrir(() => {
@@ -81,7 +83,7 @@ test('le focus est toujours donné, et fermer sans ouvrir ne restaure rien', () 
 
 test('défilement avant l’ouverture ou après la fermeture : sans effet', () => {
   const p = page(100);
-  const suivi = suivreDefilement(p.lire);
+  const suivi = suivreDefilement(p.lire, p.visible);
   p.position = 120;
   suivi.surDefilement();
   suivi.ouvrir(() => {
@@ -94,4 +96,43 @@ test('défilement avant l’ouverture ou après la fermeture : sans effet', () =
     p.position = 1200;
   });
   assert.equal(suivi.fermer(), 900);
+});
+
+test('bloc hors de l’écran quand la question apparaît : la page reste sur l’encart', () => {
+  // La personne a lu plus bas pendant le diagnostic ; le focus remonte la page
+  // jusqu'à l'encart, sous le bloc dont l'essai va continuer.
+  const p = page(3000);
+  p.blocVisible = false;
+  const suivi = suivreDefilement(p.lire, p.visible);
+  suivi.ouvrir(() => {
+    p.position = 500;
+  });
+  suivi.surDefilement();
+  assert.equal(suivi.fermer(), null);
+});
+
+test('la visibilité du bloc est lue avant le focus', () => {
+  const p = page(100);
+  const suivi = suivreDefilement(p.lire, p.visible);
+  suivi.ouvrir(() => {
+    // Le focus amène l'encart : le bouton, au-dessus, sort de l'écran.
+    p.position = 400;
+    p.blocVisible = false;
+  });
+  assert.equal(suivi.fermer(), 100);
+});
+
+test('bloc hors de l’écran à une question, visible à la suivante', () => {
+  const p = page(3000);
+  p.blocVisible = false;
+  const suivi = suivreDefilement(p.lire, p.visible);
+  suivi.ouvrir(() => {
+    p.position = 500;
+  });
+  assert.equal(suivi.fermer(), null);
+  p.blocVisible = true;
+  suivi.ouvrir(() => {
+    p.position = 700;
+  });
+  assert.equal(suivi.fermer(), 500);
 });

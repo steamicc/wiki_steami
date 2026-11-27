@@ -76,17 +76,28 @@ function SansWebUSB() {
   );
 }
 
+// Élément au moins en partie dans la fenêtre.
+function estALEcran(element) {
+  if (!element) return false;
+  const { top, bottom } = element.getBoundingClientRect();
+  return bottom > 0 && top < window.innerHeight;
+}
+
 // Question en attente sous le bloc : le focus y passe, pour que les lecteurs
 // d'écran la lisent ; jamais sur le bouton d'action, qu'une touche Entrée de
 // trop validerait. surReponse : le bouton cliqué va disparaître, le bloc
 // reprend le focus ensuite. Le focus fait défiler la page pour montrer
 // l'encart : à sa fermeture, la page revient où elle était, sauf si la
-// personne l'a fait défiler entre-temps (defilement.mjs). Effet de mise en
-// page : la position revient avant que la page ne s'affiche sans l'encart.
-function Encart({ encart, surReponse }) {
+// personne l'a fait défiler entre-temps ou que le bouton « Essayer »
+// (blocRef) n'était pas à l'écran (defilement.mjs). Effet de mise en page : la
+// position revient avant que la page ne s'affiche sans l'encart.
+function Encart({ encart, surReponse, blocRef }) {
   const ref = useRef(null);
   useLayoutEffect(() => {
-    const suivi = suivreDefilement(() => window.scrollY);
+    const suivi = suivreDefilement(
+      () => window.scrollY,
+      () => estALEcran(blocRef.current),
+    );
     suivi.ouvrir(() => ref.current?.focus());
     const surDefilement = () => suivi.surDefilement();
     window.addEventListener('scroll', surDefilement, { passive: true });
@@ -379,7 +390,7 @@ function Controles({ id, code, fichiers, confirmation, urls }) {
           libelle={statut === 'televersement' ? 'installation' : undefined}
         />
       </div>
-      {encart && <Encart encart={encart} surReponse={focaliserApres} />}
+      {encart && <Encart encart={encart} surReponse={focaliserApres} blocRef={essayerRef} />}
       {etapesDaplink && (
         <EtapesDaplink
           release={etat.daplink.release}
