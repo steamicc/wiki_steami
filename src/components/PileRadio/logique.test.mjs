@@ -96,6 +96,30 @@ describe('texteErreurFus', () => {
       assert.doesNotMatch(texteErreurFus(code), /inconnue/);
     }
   });
+  it('fige le sens de chaque code (operator_error_string d EasyFlash)', () => {
+    const attendus = {
+      0x00: /aucune erreur/i,
+      0x01: /introuvable/i,
+      0x02: /corrompue/i,
+      0x03: /signature/i,
+      0x04: /place/i,
+      0x05: /interrompue/i,
+      0x06: /effacement/i,
+      0x07: /écriture/i,
+      0x08: /ST\b/,
+      0x09: /client/i,
+      0x0a: /verrouillée/i,
+      0x11: /antérieure/i,
+    };
+    for (const [code, motif] of Object.entries(attendus)) {
+      assert.match(texteErreurFus(Number(code)), motif, `code ${code}`);
+    }
+  });
+  it('donne le texte générique pour une valeur qui n est pas un entier', () => {
+    for (const valeur of [undefined, null, 'abc', '4', 1.5, NaN]) {
+      assert.match(texteErreurFus(valeur), /inconnue/i);
+    }
+  });
 });
 
 describe('LecteurLignes', () => {

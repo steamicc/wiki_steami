@@ -144,6 +144,16 @@ describe('upgrade', () => {
     assert.equal(lignes.length, 1);
   });
 
+  it('ne prend pas error null ou absent pour une erreur', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      emettre('{"command": "Upgrade", "status": 1, "error": null}\n');
+      emettre('{"command": "Upgrade", "status": 2}\n');
+      emettre('{"command": "Upgrade", "status": 0, "error": 0}\n');
+    });
+    const fin = await creerOperateur(carte).upgrade({ surLigne: () => {} });
+    assert.equal(fin.status, 0);
+  });
+
   it('rejette ErreurDelaiOperateur après 10 s de silence', async () => {
     const carte = creerCarte();
     await assert.rejects(

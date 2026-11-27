@@ -60,22 +60,25 @@ export function etatFus(status) {
   return 'inconnu';
 }
 
+// Sens des codes d'erreur du FUS, d'après operator_error_string de
+// DapLink-EasyFlash (src/operator_tool.rs).
 const ERREURS_FUS = {
   0x00: 'Aucune erreur.',
-  0x01: 'Image introuvable dans la mémoire.',
-  0x02: "Image corrompue : sa somme de contrôle n'est pas bonne.",
-  0x03: "Image non authentique : sa signature n'est pas reconnue.",
-  0x04: "Pas assez de place en mémoire pour l'image.",
-  0x05: "Image non autorisée : la version n'est pas acceptée.",
-  0x06: 'Image trop ancienne par rapport à celle déjà installée.',
-  0x07: 'Image incompatible avec le FUS installé.',
-  0x08: 'Erreur de la mémoire flash pendant la mise à jour.',
-  0x09: 'Mise à jour refusée : la mémoire est protégée.',
-  0x0a: 'Mise à jour interrompue : le coprocesseur a redémarré.',
-  0x11: 'Le FUS signale une erreur après la mise à jour.',
+  0x01: "Image introuvable : l'en-tête ou la mémoire flash est corrompu.",
+  0x02: 'Image authentique mais corrompue : les données sont abîmées.',
+  0x03: "Signature non valide : l'image n'est pas reconnue.",
+  0x04: "Pas assez de place pour installer l'image, à cause de l'image déjà installée.",
+  0x05: "Opération interrompue par l'utilisateur ou par une coupure d'alimentation.",
+  0x06: "Erreur d'effacement de la mémoire flash.",
+  0x07: "Erreur d'écriture dans la mémoire flash.",
+  0x08: "Étiquette d'authentification de ST absente de l'image.",
+  0x09: "Étiquette d'authentification du client absente de l'image.",
+  0x0a: 'Clé verrouillée : le FUS refuse de la charger.',
+  0x11: 'Retour à une version antérieure refusé.',
 };
 
 export function texteErreurFus(code) {
+  if (!Number.isInteger(code)) return 'Erreur inconnue du FUS.';
   return (
     ERREURS_FUS[code] ??
     `Erreur inconnue du FUS (code 0x${code.toString(16).toUpperCase().padStart(2, '0')}).`

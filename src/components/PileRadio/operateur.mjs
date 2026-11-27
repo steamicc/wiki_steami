@@ -118,7 +118,7 @@ export function creerOperateur({ ecrire, ecouter, attendre }) {
           }
           const objet = lignes.shift();
           surLigne(objet);
-          if (objet.error !== undefined && objet.error !== 0) throw new ErreurFus(objet.error);
+          if (Number.isInteger(objet.error) && objet.error !== 0) throw new ErreurFus(objet.error);
           if (objet.status === 0) return objet;
         }
       });
