@@ -48,7 +48,7 @@ Depuis la version 0.30.0 de STeaMi, chaque driver porte le préfixe `Steami`, da
 
 Les types définis dans une classe suivent son nom (`ISM330DL::Vector3` devient `SteamiISM330DL::Vector3`). Les constantes (`MCP23009_BTN_UP`, `WSEN_HIDS_ODR_1_HZ`…) ne changent pas.
 
-Les programmes de la V1c qui utilisaient les bibliothèques **Adafruit BME280 Library** ou **GFX Library for Arduino** fonctionnent toujours. Les drivers de la bibliothèque STeaMi sont plus simples : rien à installer en plus, et `SteamiGC9A01` laisse libre la broche P10, sur laquelle l'ancien programme de l'écran déplaçait le MISO du SPI (voir [Capteurs et écran](./capteurs)).
+Les programmes de la V1c qui utilisaient les bibliothèques **Adafruit BME280 Library** ou **GFX Library for Arduino** fonctionnent toujours. Les drivers de la bibliothèque STeaMi sont plus simples : rien à installer en plus, et `SteamiGC9A01` laisse libre la broche P10, sur laquelle l'ancien programme de l'écran déplaçait le MISO du SPI (voir [Écran](./ecran#avec-les-drivers-ssd1327-et-gc9a01)).
 
 Les dépôts d'élèves créés dans un [Codespace](./codespace) gardent la version des drivers de leur création : ceux créés avant le passage à la version 0.30.0 utilisent encore les anciens noms.
 
@@ -81,7 +81,7 @@ Un programme inclut seulement les drivers dont il a besoin. **Croquis → Inclur
 Les exemples des drivers STeaMi sont rangés par composant dans **Fichier → Exemples → STeaMi** : par exemple **STeaMi → LIS2MDL → DigitalCompass**, ou **STeaMi → BLE → BleHotCold** pour le Bluetooth. Dans le menu, STeaMi apparaît dans la section « Exemples des librairies personnalisées ».
 
 ![Menu Fichier → Exemples de l'Arduino IDE : sous « Exemples des librairies personnalisées », le sous-menu STeaMi liste les composants, et LIS2MDL ses exemples BasicReader, DigitalCompass, MagneticCalibration et MetalDetector](/img/software/arduino/bibliotheques-03-exemples.png)
-La page [Capteurs et écran](./capteurs) donne un programme minimal pour chaque fonction de la carte, avec sa classe par fonction puis avec le driver du composant.
+Les pages [Capteurs](./capteurs) et [Écran](./ecran) donnent un programme minimal pour chaque fonction de la carte, avec sa classe par fonction puis avec le driver du composant.
 
 ## Le bus I²C interne
 
@@ -121,5 +121,6 @@ Un programme ne doit pas créer son propre objet `TwoWire` sur le bus interne : 
 ## Étapes suivantes
 
 - [Reconnaître la carte](./carte) : savoir sur quelle release tourne le programme et partager les drivers.
-- [Capteurs et écran](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
+- [Capteurs](./capteurs) : un programme minimal pour chaque fonction, avec sa classe puis avec le driver du composant.
+- [Écran](./ecran) : dessiner sur l'écran rond, avec `SteamiDisplay`, `SteamiScreen` et ses widgets, ou avec le driver de l'écran.
 - [Conventions de l'API](./conventions) : ce que les drivers ont en commun.

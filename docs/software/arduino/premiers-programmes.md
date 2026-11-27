@@ -27,7 +27,7 @@ La définition de la carte fournit des noms prêts à l'emploi. Il est inutile d
 
 `LED_BUILTIN` désigne le canal bleu de la LED RGB.
 
-Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au microcontrôleur : ils passent par un circuit d'extension d'entrées-sorties. Ils se lisent avec la classe `SteamiButtons` ou le driver `SteamiMCP23009E` de la bibliothèque STeaMi (voir [Capteurs et écran](./capteurs#boutons-et-d-pad)).
+Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au microcontrôleur : ils passent par un circuit d'extension d'entrées-sorties. Ils se lisent avec la classe `SteamiButtons` ou le driver `SteamiMCP23009E` de la bibliothèque STeaMi (voir [Capteurs](./capteurs#boutons-et-d-pad)).
 
 ## Faire clignoter la LED RGB
 
@@ -110,4 +110,5 @@ Pour jouer une mélodie, enchaîner des appels à `tone()` avec une durée, sép
 ## Étapes suivantes
 
 - [Bibliothèques STeaMi](./bibliotheques) : installer les drivers des capteurs.
-- [Capteurs et écran](./capteurs) : lire les capteurs de la carte.
+- [Capteurs](./capteurs) : lire les capteurs de la carte.
+- [Écran](./ecran) : dessiner et afficher des mesures sur l'écran rond.

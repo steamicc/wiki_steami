@@ -18,7 +18,7 @@ Ses caractéristiques, sa fiche technique et son schéma (repère U13) sont sur 
 
 Le WSEN-HIDS équipe la **V1b**. Pour la V1a, il figure dans la nomenclature, mais son montage reste à confirmer. Il est retiré sur la **V1c**, où le BME280 mesure l'humidité et la température (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)). Sur une V1c, les quatre exemples de cette page ne trouvent pas le capteur : ils écrivent `WSEN-HIDS not detected — check wiring and I2C address.` au démarrage, puis ne font plus rien (la console reste vide si elle s'est ouverte après ce message). Les exemples **STeaMi → BME280** en sont les équivalents pour la V1c ; trois portent les mêmes noms (**BasicReader**, **ComfortZone**, **DewPointMonitor**).
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → WSEN-HIDS** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs et écran](../capteurs#pression-humidité-et-température) donne la façon la plus simple de lire l'humidité et la température, avec les classes `SteamiHumidity` et `SteamiTemperature`, qui marchent sur les trois releases ; ici, les exemples utilisent directement le driver du composant.
+Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → WSEN-HIDS** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent pas l'écran : il garde l'image laissée par le programme précédent, ce n'est pas une panne. La page [Capteurs](../capteurs#pression-humidité-et-température) donne la façon la plus simple de lire l'humidité et la température, avec les classes `SteamiHumidity` et `SteamiTemperature`, qui marchent sur les trois releases ; ici, les exemples utilisent directement le driver du composant.
 
 ## Le driver en bref
 
@@ -36,7 +36,7 @@ Le capteur ne donne pas directement des °C et des % : il donne des nombres brut
 Deux points comptent pour comprendre les exemples :
 
 - La moyenne remise par `begin()` est celle du démarrage du capteur : d'après le driver, chaque valeur donnée est la moyenne de 16 mesures internes pour la température et de 32 pour l'humidité. Le driver permet de la changer (`setAveraging()`), mais les exemples ne le font pas.
-- Les exemples lisent la mesure du capteur sans la calibration de la température enregistrée dans la zone de configuration du DAPLink, contrairement à `SteamiTemperature` (voir [Capteurs et écran](../capteurs#pression-humidité-et-température)). Le driver permet d'ajouter un décalage (`setTemperatureOffset()`) ou une correction sur deux points (`calibrateTemperature()`), que les exemples n'utilisent pas non plus.
+- Les exemples lisent la mesure du capteur sans la calibration de la température enregistrée dans la zone de configuration du DAPLink, contrairement à `SteamiTemperature` (voir [Capteurs](../capteurs#pression-humidité-et-température)). Le driver permet d'ajouter un décalage (`setTemperatureOffset()`) ou une correction sur deux points (`calibrateTemperature()`), que les exemples n'utilisent pas non plus.
 
 ## BasicReader {#basicreader}
 
