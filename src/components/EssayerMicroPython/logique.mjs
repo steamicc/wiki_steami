@@ -87,8 +87,11 @@ export function texteInstallation(version, raison) {
 export const TEXTE_DUREE_INSTALLATION =
   "L'installation dure moins d'une minute : pendant ce temps, ne pas débrancher la carte ni fermer la page.";
 
+// DAP.js efface toute la flash non protégée avant d'écrire, système de
+// fichiers compris (essai du 2026-11-27 sur la V1c) : seule la pile radio,
+// protégée par le FUS, reste en place.
 export const TEXTE_EFFACEMENT =
-  "Attention : l'installation peut effacer les fichiers enregistrés sur la carte. Les copier avant de continuer.";
+  "Attention : l'installation efface les fichiers enregistrés sur la carte. Les copier avant de continuer.";
 
 export const TEXTE_CARTE_OCCUPEE =
   "La carte ne répond pas : un autre outil (Thonny, mpremote) ou un programme en cours peut la tenir. Fermer l'outil, ou appuyer sur RESET, puis réessayer.";

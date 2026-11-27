@@ -96,7 +96,10 @@ test('diagnosticSansInvite : bannière vue → occupee, sinon absent', () => {
 
 test('textes : contiennent la version, la release et les consignes', () => {
   assert.match(texteInstallation('v0.29.0'), /MicroPython v0\.29\.0/);
-  assert.match(TEXTE_EFFACEMENT, /effac/i);
+  // Chaque flash par DAP.js efface toute la flash non protégée (essai du
+  // 2026-11-27 sur la V1c) : l'effacement est certain, pas seulement possible.
+  assert.match(TEXTE_EFFACEMENT, /l'installation efface les fichiers/);
+  assert.doesNotMatch(TEXTE_EFFACEMENT, /peut effacer/);
   assert.match(TEXTE_CARTE_OCCUPEE, /Thonny/);
   assert.match(TEXTE_CARTE_OCCUPEE, /RESET/);
   assert.match(texteMiseAJourDaplink('2026-11-25.3'), /DAPLink.*2026-11-25\.3/);

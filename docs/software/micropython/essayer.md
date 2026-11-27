@@ -10,6 +10,8 @@ import TOCInline from '@theme/TOCInline';
 
 Sous certains programmes MicroPython du wiki, un bouton **Essayer sur la carte** lance le programme sur une carte STeaMi branchée à l'ordinateur, sans rien installer : ni Thonny, ni `mpremote`, ni firmware à télécharger à la main. Une console s'ouvre sous le programme et affiche ce qu'il écrit.
 
+Pour un premier essai, le guide [Premier essai pas à pas](./premier-essai) montre le parcours écran par écran.
+
 Sur cette page :
 
 <TOCInline toc={toc} maxHeadingLevel={2} />
@@ -68,7 +70,7 @@ Si la carte n'a pas MicroPython (carte neuve, programme Arduino…) ou si sa ver
 
 :::warning
 
-L'installation de MicroPython peut effacer les fichiers enregistrés sur la carte (système de fichiers de MicroPython, avec son `main.py`). Les copier sur l'ordinateur avant de cliquer sur **Installer MicroPython**, avec [Thonny](./thonny#gérer-les-fichiers) ou [mpremote](./mpremote#copier-des-fichiers-sur-la-carte).
+L'installation de MicroPython efface les fichiers enregistrés sur la carte (système de fichiers de MicroPython, avec son `main.py`) : le firmware est écrit après un effacement de toute la mémoire du programme. Seule la [pile radio Bluetooth](../pile-radio) reste en place. Les copier sur l'ordinateur avant de cliquer sur **Installer MicroPython**, avec [Thonny](./thonny#gérer-les-fichiers) ou [mpremote](./mpremote#copier-des-fichiers-sur-la-carte).
 
 :::
 
@@ -88,7 +90,7 @@ Quelques exemples modifient la carte de façon durable : ils effacent ou écrive
 
 ## Sur une V1c
 
-Le firmware MicroPython ne gère pas l'écran rond de la V1c (GC9A01). Sur une V1c, un programme qui dessine à l'écran tourne quand même, mais l'écran reste noir. La console montre ce que le programme écrit. Les V1a et V1b ont un autre écran (SSD1327), géré par MicroPython.
+Depuis la v0.30.0, le firmware MicroPython gère l'écran rond de la V1c (GC9A01) par `steami.Screen`, comme l'écran SSD1327 des V1a et V1b : le même programme dessine sur les deux écrans, mis à l'échelle. Un programme qui utilise directement le driver `ssd1327` reste réservé aux V1a et V1b.
 
 Les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960 ne sont pas montés sur la V1c : leurs exemples s'y arrêtent sur une erreur (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)).
 
