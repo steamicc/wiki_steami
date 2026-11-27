@@ -37,7 +37,11 @@
 //   ne part pas (START, rien n'est effacé) ; ses octets sont écrits tels
 //   quels après DELETE, sans nouvelle requête ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
-//   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F).
+//   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F) ;
+// - relecture après UPGRADE : double STATUS (attente tant que le FUS
+//   travaille), puis toujours VERSION et START ; la pile relue décide (pile
+//   épinglée : réussite, même si last_fus_status ou last_ws_status est non
+//   nul ; sinon échec, avec le texte du code s'il est non nul).
 import {
   decisionFus,
   decisionPile,
@@ -257,6 +261,35 @@ function codeEchec(statut) {
     if (Number.isInteger(code) && code !== 0) return code;
   }
   return null;
+}
+
+// Écart entre la pile relue après l'installation et l'épinglée : texte de
+// l'échec, null si c'est l'épinglée. Pile en marche, VERSION donne la version
+// et la taille (secteurs) ; sur le FUS, l'octet de poids faible de ws_version
+// n'est pas la taille (conception, essai préalable) : la version seule
+// décide.
+function ecartPileRelue(reponseVersion, epinglee) {
+  const pile = lirePileEnMarche(reponseVersion);
+  if (pile.version === null) return TEXTE_PILE_ABSENTE_APRES;
+  if (reponseDuFus(reponseVersion)) {
+    return pile.version === epinglee.version
+      ? null
+      : texteAutrePile(pile.version, epinglee.version);
+  }
+  const decision = decisionPile(pile, epinglee);
+  if (decision === 'a-jour') return null;
+  if (decision === 'autre') {
+    return texteAutrePile(
+      `${pile.version} (${pile.secteurs} secteurs)`,
+      `${epinglee.version} (${epinglee.secteurs} secteurs)`,
+    );
+  }
+  return texteAutrePile(pile.version, epinglee.version);
+}
+
+// Échec de la relecture accompagné d'un code non nul du FUS ou de la pile.
+function texteEchecCode(code, ecart) {
+  return `L'installation de la pile radio a échoué : ${texteErreurFus(code)} ${ecart}`;
 }
 
 // Message d'une erreur de lecture, avant DELETE.
@@ -536,21 +569,18 @@ export function creerParcoursPile() {
         await attendre(delais.pasRelecture);
         if (!carte.etat.connectee) return perdue();
       }
-      // Erreur de la dernière opération du FUS ou de la pile (forme de
-      // réponse du second STATUS, avec last_fus_status).
+      // Code de la dernière opération du FUS ou de la pile (second STATUS,
+      // avec last_fus_status). Son sens après une installation réussie n'a
+      // jamais été relevé sur la carte (essai préalable : 0, pile en
+      // marche) : il ne décide pas seul, la pile relue décide.
       const code = codeEchec(statut);
-      if (code !== null) {
-        poser({ etape: 'erreur', erreur: texteEchecInstallation(code) });
-        return { fin: 'erreur' };
-      }
-      // Sur le FUS, copro_fw_version donne la pile installée.
-      const relue = lirePileEnMarche(await operateur.version()).version;
+      // Toujours VERSION puis START, quel que soit le code : sans START, la
+      // pile resterait arrêtée. Sur le FUS, copro_fw_version donne la pile
+      // installée.
+      const reponseRelue = await operateur.version();
+      const relue = lirePileEnMarche(reponseRelue).version;
       poser({ versions: { ...etat.versions, relue } });
-      if (relue === null) {
-        poser({ etape: 'erreur', erreur: TEXTE_PILE_ABSENTE_APRES });
-        return { fin: 'erreur' };
-      }
-      // La pile est relue en place : un START raté ne doit jamais faire
+      // La pile est peut-être en place : un START raté ne doit jamais faire
       // conclure « pile peut-être effacée ».
       let relancee = true;
       try {
@@ -558,14 +588,19 @@ export function creerParcoursPile() {
       } catch {
         relancee = false;
       }
-      if (relue !== epinglee.version) {
-        poser({ etape: 'erreur', erreur: texteAutrePile(relue, epinglee.version) });
-        return { fin: 'erreur' };
+      const ecart = ecartPileRelue(reponseRelue, epinglee);
+      if (ecart === null) {
+        // Pile épinglée relue : réussite, même si last_fus_status ou
+        // last_ws_status est non nul (code seulement noté ici, jamais
+        // affiché). Jamais de DELETE ni de nouvelle proposition après
+        // l'installation.
+        // 6. Fin : invitation à téléverser l'exemple.
+        const fini = texteFini(epinglee, relue);
+        poser({ etape: 'fini', message: relancee ? fini : `${fini} ${TEXTE_RELANCE_RATEE}` });
+        return { fin: 'fini' };
       }
-      // 6. Fin : invitation à téléverser l'exemple.
-      const fini = texteFini(epinglee, relue);
-      poser({ etape: 'fini', message: relancee ? fini : `${fini} ${TEXTE_RELANCE_RATEE}` });
-      return { fin: 'fini' };
+      poser({ etape: 'erreur', erreur: code === null ? ecart : texteEchecCode(code, ecart) });
+      return { fin: 'erreur' };
     } catch (err) {
       if (err instanceof ErreurFus) {
         poser({ etape: 'erreur', decompte: null, erreur: texteEchecInstallation(err.code) });

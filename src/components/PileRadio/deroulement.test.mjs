@@ -11,6 +11,7 @@ import {
   TEXTE_CONFIRMATION_VERIFICATION,
   TEXTE_FUS_OCCUPE,
   TEXTE_FUS_TRAVAILLE,
+  TEXTE_PILE_ABSENTE_APRES,
   TEXTE_PILE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
   TEXTE_SANS_REPONSE,
@@ -18,6 +19,7 @@ import {
   creerParcoursPile,
   estOccupee,
   parcoursPile,
+  texteAutrePile,
 } from './deroulement.mjs';
 import { texteErreurFus } from './logique.mjs';
 import { ErreurDelaiOperateur, ErreurFus } from './operateur.mjs';
@@ -770,7 +772,7 @@ describe('relecture après UPGRADE', () => {
     ['last_fus_status', 0x03],
     ['last_ws_status', 0x11],
   ]) {
-    it(`${champ} non nul : échec affiché avec le texte du code, ni VERSION ni START`, async () => {
+    it(`${champ} non nul et pile absente : échec avec le texte du code, VERSION puis START`, async () => {
       const p = preparer({
         operateur: {
           ...sansPile,
@@ -783,10 +785,101 @@ describe('relecture après UPGRADE', () => {
       assert.deepEqual(await fin, { fin: 'erreur' });
       assert.equal(p.parcours.etat.etape, 'erreur');
       assert.ok(p.parcours.etat.erreur.includes(texteErreurFus(code)));
-      assert.match(p.parcours.etat.erreur, /EasyFlash/);
-      assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS']);
+      assert.match(p.parcours.etat.erreur, /Aucune pile radio/);
+      assert.equal(p.parcours.etat.erreur.match(/EasyFlash/g).length, 1);
+      assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+      assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+      assert.equal(p.journal.filter((l) => l === 'UPGRADE').length, 1);
+    });
+
+    it(`${champ} non nul et pile épinglée relue : réussite, START, code non affiché`, async () => {
+      const p = preparer({
+        operateur: {
+          version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS],
+          status: [STATUS_REPOS, STATUS_REPOS, { ...STATUS_REPOS, [champ]: code }],
+        },
+      });
+      const fin = verifierConfirme(p);
+      await etape(p.parcours, 'proposition');
+      p.parcours.confirmer('installer');
+      assert.deepEqual(await fin, { fin: 'fini' });
+      const etat = p.parcours.etat;
+      assert.equal(etat.etape, 'fini');
+      assert.equal(etat.erreur, null);
+      assert.equal(etat.versions.relue, '1.20.0');
+      assert.match(etat.message, /1\.20\.0/);
+      assert.ok(!etat.message.includes(texteErreurFus(code)));
+      assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+    });
+
+    it(`${champ} non nul et autre pile relue : échec avec les deux textes, START`, async () => {
+      const p = preparer({
+        operateur: {
+          version: [
+            VERSION_SANS_PILE,
+            VERSION_SANS_PILE,
+            { ...VERSION_FUS, copro_fw_version: '1.19.0' },
+          ],
+          status: [STATUS_REPOS, STATUS_REPOS, { ...STATUS_REPOS, [champ]: code }],
+        },
+      });
+      const fin = verifierConfirme(p);
+      await etape(p.parcours, 'proposition');
+      p.parcours.confirmer('installer');
+      assert.deepEqual(await fin, { fin: 'erreur' });
+      const erreur = p.parcours.etat.erreur;
+      assert.ok(erreur.includes(texteErreurFus(code)));
+      assert.ok(erreur.includes(texteAutrePile('1.19.0', '1.20.0')));
+      assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
     });
   }
+
+  it('pile absente sans code : échec, START envoyé, sans DELETE ni nouvelle proposition', async () => {
+    const p = preparer({ operateur: sansPile });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    // Après « Installer la pile radio », aucune question ne revient.
+    const propositions = [];
+    p.parcours.abonner((e) => {
+      if (e.encart !== null) propositions.push(e.encart.type);
+    });
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ABSENTE_APRES);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+    assert.deepEqual(propositions, []);
+  });
+
+  it('pile relue en marche, bonne version et bonne taille : réussite', async () => {
+    const p = preparer({
+      operateur: { version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_PILE_EN_MARCHE] },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
+
+  it('pile relue en marche, bonne version mais autre taille : échec, START', async () => {
+    const p = preparer({
+      operateur: {
+        version: [
+          VERSION_SANS_PILE,
+          VERSION_SANS_PILE,
+          { ...VERSION_PILE_EN_MARCHE, ws_version: 0x070d0010 },
+        ],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.match(p.parcours.etat.erreur, /16 secteurs/);
+    assert.match(p.parcours.etat.erreur, /20 secteurs/);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
 
   it('un champ error dans la réponse de la relecture n est plus lu', async () => {
     const p = preparer({
