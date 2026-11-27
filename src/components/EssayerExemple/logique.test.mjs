@@ -26,8 +26,8 @@ import {
   statutCarte,
   telechargerExemple,
   telechargerFirmware,
-  urlBin,
   sourceValide,
+  urlBin,
   voyantVisible,
 } from './logique.mjs';
 

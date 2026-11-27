@@ -297,7 +297,8 @@ function ControlesOuTelechargement({ id, href }) {
   return <Controles id={id} href={href} />;
 }
 
-// id : « COMPOSANT/NomExemple », par exemple « VL53L1X/GestureDetection ».
+// id : « COMPOSANT/NomExemple », par exemple « VL53L1X/GestureDetection »
+// (bibliothèque) ou « CAPTEURS/Distance » (sample).
 // source : 'bibliotheque' (défaut) ou 'sample' (dépôt arduino-steami-sample).
 export default function EssayerExemple({ id, source = 'bibliotheque' }) {
   const href = useBaseUrl(urlBin(String(id), source) ?? '');

@@ -190,7 +190,7 @@ const DOSSIERS_SOURCE = {
 };
 
 export function sourceValide(source) {
-  return typeof source === 'string' && Object.hasOwn(DOSSIERS_SOURCE, source);
+  return typeof source === 'string' && Object.prototype.hasOwnProperty.call(DOSSIERS_SOURCE, source);
 }
 
 // null si la source est inconnue (refusée comme un id invalide).
