@@ -92,6 +92,24 @@ Quelques exemples modifient la carte de façon durable : ils effacent ou écrive
 
 Depuis la v0.30.0, le firmware MicroPython gère l'écran rond de la V1c (GC9A01) par `steami.Screen`, comme l'écran SSD1327 des V1a et V1b : le même programme dessine sur les deux écrans, mis à l'échelle. Un programme qui utilise directement le driver `ssd1327` reste réservé aux V1a et V1b.
 
+Depuis la v0.31.0, `steami.Screen` écrit le texte de la V1c avec les polices Spleen, les mêmes que la bibliothèque Arduino depuis sa v0.40.0 : `text(s, (x, y), c, scale)` dessine des caractères de 8 × 16 pixels, multipliés par `scale`, contre 8 × 8 sur les V1a et V1b. Un caractère garde donc 8 pixels de large sur les deux écrans. `screen.text_height(scale)` donne la hauteur d'une ligne sur l'écran de la carte, et `screen.max_chars` le nombre de caractères qui tiennent dans la largeur à l'échelle 1 (30 sur la V1c, 16 sur les V1a et V1b). Un programme écrit avant la v0.31.0 qui empile ses lignes avec un pas fixe de 8 à 15 pixels les fait se chevaucher sur la V1c : calculer le pas avec `text_height()`.
+
+```python run
+from steami import Screen
+
+screen = Screen()
+cx, cy = screen.center
+h = screen.text_height()  # 16 sur une V1c, 8 sur une V1a ou une V1b
+
+screen.clear()
+# 8 pixels par caractère sur les deux écrans : 44 = 11 caractères × 8 / 2
+screen.text("Température", at=(cx - 44, cy - h))
+screen.text("23°C", at=(cx - 16, cy))  # 16 = 4 caractères × 8 / 2
+screen.show()
+```
+
+Les lettres accentuées du français et le signe « ° » s'affichent sur la V1c ; tout autre caractère, comme « € », s'y affiche « ? ». Sur les V1a et V1b, une lettre accentuée s'affiche comme sa lettre de base (« Temperature ») et « ° » comme un petit rond, comme en Arduino.
+
 Les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960 ne sont pas montés sur la V1c : leurs exemples s'y arrêtent sur une erreur (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)).
 
 ## Sans Chrome ni Edge
