@@ -33,9 +33,17 @@ export class ErreurFus extends Error {
 }
 
 // Une réponse tardive d'une autre commande porte son propre nom : elle est
-// écartée. Une ligne sans nom est acceptée.
+// écartée. Le suffixe entre parenthèses ne compte pas : UPGRADE répond
+// « Upgrade », puis « Upgrade(status) » avec status et error. Une ligne sans
+// nom est acceptée : la réponse de DELETE a la clé "command " (avec une
+// espace), d'après les chaînes du binaire de l'operator épinglé.
 function repondA(objet, nom) {
-  return objet.command === undefined || String(objet.command).toUpperCase() === nom;
+  if (objet.command === undefined) return true;
+  return (
+    String(objet.command)
+      .toUpperCase()
+      .replace(/\(.*\)$/, '') === nom
+  );
 }
 
 export function creerOperateur({ ecrire, ecouter, attendre, delais }) {
@@ -91,8 +99,12 @@ export function creerOperateur({ ecrire, ecouter, attendre, delais }) {
       });
     },
 
+    // Trois essais, comme STATUS : le premier VERSION part peu après le
+    // démarrage de l'operator, qui peut ne pas l'entendre. VERSION ne change
+    // rien sur la carte, et une réponse tardive à un essai précédent a le
+    // même contenu.
     version() {
-      return commande('VERSION');
+      return commande('VERSION', { essais: ESSAIS });
     },
 
     supprimer() {
@@ -105,8 +117,9 @@ export function creerOperateur({ ecrire, ecouter, attendre, delais }) {
       await attendre(apresCommande);
     },
 
-    // Rend la ligne d'acceptation (status 0). Une ligne d'error non nul rejette
-    // ErreurFus ; 10 s sans ligne rejettent ErreurDelaiOperateur.
+    // Rend la ligne d'acceptation (status 0), « Upgrade » ou, plus tard,
+    // « Upgrade(status) ». Une ligne d'error non nul rejette ErreurFus ; 10 s
+    // sans ligne rejettent ErreurDelaiOperateur.
     async upgrade({ surLigne }) {
       await attendre(avantUpgrade);
       return ecoutant('UPGRADE', async ({ lignes, signal }) => {

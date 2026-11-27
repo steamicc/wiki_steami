@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { ErreurDelaiOperateur, ErreurFus, creerOperateur } from './operateur.mjs';
+import { DELAIS_OPERATEUR, ErreurDelaiOperateur, ErreurFus, creerOperateur } from './operateur.mjs';
 
 const octets = (texte) => new TextEncoder().encode(texte);
 const texte = (o) => new TextDecoder().decode(o);
 
+// Lignes écrites telles quelles par l'operator épinglé (chaînes relevées dans
+// static/pile-radio/operateur.hex) : la réponse de DELETE a la clé
+// « command  » (avec une espace), et UPGRADE répond d'abord « Upgrade », puis
+// « Upgrade(status) » avec status et error.
 const PREMIER = '{"command": "Status", "status": 255, "error": 254}\n';
 const SECOND =
   '{"command": "Status", "status": 0, "last_fus_status": 0, "last_ws_status": 0, "current_ws": 1}\n';
@@ -92,15 +96,31 @@ describe('version', () => {
     assert.equal(reponse.version, 16777216);
   });
 
-  it('rejette si rien ne répond', async () => {
-    await assert.rejects(creerOperateur(creerCarte()).version(), ErreurDelaiOperateur);
+  it('rejette après trois essais sans réponse', async () => {
+    const carte = creerCarte();
+    await assert.rejects(creerOperateur(carte).version(), ErreurDelaiOperateur);
+    assert.equal(carte.journal.filter((l) => l === 'ecrire VERSION').length, 3);
+  });
+
+  it('réessaie un VERSION parti avant que l operator soit prêt', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      if (n === 2) emettre('{"command": "Version", "status": 0, "fus_version": 0}\n');
+    });
+    const reponse = await creerOperateur(carte).version();
+    assert.equal(reponse.fus_version, 0);
+    assert.deepEqual(carte.journal, [
+      'ecrire VERSION',
+      'attendre 1000',
+      'ecrire VERSION',
+      'attendre 1000',
+    ]);
   });
 });
 
 describe('supprimer', () => {
   it('réessaie DELETE jusqu à trois fois', async () => {
     const carte = creerCarte((cmd, n, { emettre }) => {
-      if (n === 3) emettre('{"command": "Delete", "status": 0}\n');
+      if (n === 3) emettre('{"command ": "Delete", "status": 0}\n');
     });
     const reponse = await creerOperateur(carte).supprimer();
     assert.equal(reponse.status, 0);
@@ -121,37 +141,90 @@ describe('upgrade', () => {
     assert.deepEqual(carte.journal.slice(0, 2), ['attendre 5000', 'ecrire UPGRADE']);
   });
 
-  it('se termine sur status 0 et passe chaque ligne à surLigne', async () => {
+  it('acceptation tout de suite : la ligne « Upgrade » de status 0', async () => {
     const carte = creerCarte((cmd, n, { emettre }) => {
-      emettre('{"command": "Upgrade", "status": 1}\n{"command": "Upgrade", "status": 0}\n');
-      emettre('{"command": "Upgrade", "status": 9}\n');
+      emettre('{"command": "Upgrade", "status": 0}\n');
+      emettre('{"command": "Upgrade(status)", "status": 16, "error": 0}\n');
+    });
+    const lignes = [];
+    const fin = await creerOperateur(carte).upgrade({ surLigne: (o) => lignes.push(o) });
+    assert.deepEqual(fin, { command: 'Upgrade', status: 0 });
+    assert.equal(lignes.length, 1);
+  });
+
+  it('acceptation tardive : un status 0 sur une ligne « Upgrade(status) »', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      emettre('{"command": "Upgrade", "status": 1}\n');
+      emettre('{"command": "Upgrade(status)", "status": 16, "error": 0}\n');
+      emettre('{"command": "Upgrade(status)", "status": 0, "error": 0}\n');
+      emettre('{"command": "Upgrade(status)", "status": 9, "error": 0}\n');
     });
     const lignes = [];
     const fin = await creerOperateur(carte).upgrade({ surLigne: (o) => lignes.push(o.status) });
+    assert.equal(fin.command, 'Upgrade(status)');
     assert.equal(fin.status, 0);
-    assert.deepEqual(lignes, [1, 0]);
+    assert.deepEqual(lignes, [1, 16, 0]);
   });
 
-  it('rejette ErreurFus(4) sur une ligne d error non nul', async () => {
+  it('rejette ErreurFus(4) sur une ligne « Upgrade(status) » d error non nul', async () => {
     const carte = creerCarte((cmd, n, { emettre }) => {
-      emettre('{"command": "Upgrade", "status": 3, "error": 4}\n');
+      emettre('{"command": "Upgrade", "status": 3}\n');
+      emettre('{"command": "Upgrade(status)", "status": 3, "error": 4}\n');
     });
     const lignes = [];
     await assert.rejects(
       creerOperateur(carte).upgrade({ surLigne: (o) => lignes.push(o) }),
       (err) => err instanceof ErreurFus && err.code === 4 && /place/.test(err.message),
     );
-    assert.equal(lignes.length, 1);
+    assert.equal(lignes.length, 2);
+  });
+
+  it('rejette ErreurFus(3) après une acceptation refusée (status 1)', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      emettre('{"command": "Upgrade", "status": 1}\n');
+      emettre('{"command": "Upgrade(status)", "status": 0, "error": 3}\n');
+    });
+    await assert.rejects(
+      creerOperateur(carte).upgrade({ surLigne: () => {} }),
+      (err) => err instanceof ErreurFus && err.code === 3,
+    );
+  });
+
+  it('une ligne « Upgrade(status) » arrivée plus tard réveille l attente', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      emettre('{"command": "Upgrade", "status": 1}\n');
+    });
+    // L'attente de 10 s dure ici 200 ms réelles : la ligne suivante arrive
+    // pendant ce temps et doit la couper.
+    const attendre = async (ms) => {
+      carte.journal.push(`attendre ${ms}`);
+      if (ms === DELAIS_OPERATEUR.ligneUpgrade) await new Promise((r) => setTimeout(r, 200));
+    };
+    const fin = creerOperateur({ ...carte, attendre }).upgrade({ surLigne: () => {} });
+    await new Promise((r) => setImmediate(r));
+    carte.emettre('{"command": "Upgrade(status)", "status": 0, "error": 0}\n');
+    assert.equal((await fin).status, 0);
   });
 
   it('ne prend pas error null ou absent pour une erreur', async () => {
     const carte = creerCarte((cmd, n, { emettre }) => {
-      emettre('{"command": "Upgrade", "status": 1, "error": null}\n');
-      emettre('{"command": "Upgrade", "status": 2}\n');
-      emettre('{"command": "Upgrade", "status": 0, "error": 0}\n');
+      emettre('{"command": "Upgrade", "status": 1}\n');
+      emettre('{"command": "Upgrade(status)", "status": 2, "error": null}\n');
+      emettre('{"command": "Upgrade(status)", "status": 0, "error": 0}\n');
     });
     const fin = await creerOperateur(carte).upgrade({ surLigne: () => {} });
     assert.equal(fin.status, 0);
+  });
+
+  it('une ligne d une autre commande pendant UPGRADE est écartée', async () => {
+    const carte = creerCarte((cmd, n, { emettre }) => {
+      emettre('{"command": "Status", "status": 0, "error": 3}\n');
+      emettre('{"command": "Upgrade", "status": 0}\n');
+    });
+    const lignes = [];
+    const fin = await creerOperateur(carte).upgrade({ surLigne: (o) => lignes.push(o) });
+    assert.equal(fin.command, 'Upgrade');
+    assert.equal(lignes.length, 1);
   });
 
   it('rejette ErreurDelaiOperateur après 10 s de silence', async () => {

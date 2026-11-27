@@ -1085,3 +1085,80 @@ describe('occupation', () => {
     });
   });
 });
+
+// Le vrai operator (operateur.mjs) sur une liaison série simulée, qui répond
+// avec les lignes telles que les écrit le binaire épinglé
+// (static/pile-radio/operateur.hex) : DELETE avec la clé "command " (une
+// espace), UPGRADE avec « Upgrade » puis « Upgrade(status) ». Ces tests
+// vérifient le protocole, pas un simulacre de l'operator.
+describe('avec le vrai operator', () => {
+  const LIGNE_VERSION_SANS_PILE =
+    '{"command": "Version", "status": 0, "fus_version": 16908288, "copro_fw_version": "0.0.0", "ws_version": 0}\n';
+  const LIGNE_VERSION_INSTALLEE =
+    '{"command": "Version", "status": 0, "fus_version": 16908288, "copro_fw_version": "1.20.0", "ws_version": 18087938}\n';
+  const LIGNES_STATUS =
+    '{"command": "Status", "status": 255, "error": 254}\n' +
+    '{"command": "Status", "status": 0, "last_fus_status": 0, "last_ws_status": 0, "current_ws": 1}\n';
+  const LIGNE_DELETE = '{"command ": "Delete", "status": 0}\n';
+
+  // upgrade : lignes émises après UPGRADE ; ensuite VERSION relit la pile
+  // installée.
+  function brancher(p, upgrade) {
+    const ecouteurs = new Set();
+    let installee = false;
+    const emettre = (t) => {
+      for (const fn of [...ecouteurs]) fn(new TextEncoder().encode(t));
+    };
+    p.carte.ecouterSerie = (fn) => {
+      ecouteurs.add(fn);
+      return () => ecouteurs.delete(fn);
+    };
+    p.carte.ecrireSerie = async (octets) => {
+      const commande = new TextDecoder().decode(octets).trim();
+      p.journal.push(commande);
+      if (commande === 'VERSION') {
+        emettre(installee ? LIGNE_VERSION_INSTALLEE : LIGNE_VERSION_SANS_PILE);
+      } else if (commande === 'STATUS') emettre(LIGNES_STATUS);
+      else if (commande === 'DELETE') emettre(LIGNE_DELETE);
+      else if (commande === 'UPGRADE') {
+        installee = true;
+        emettre(upgrade);
+      }
+    };
+    delete p.deps.creerOperateur;
+  }
+
+  it('acceptation sur une ligne « Upgrade(status) » : attente, relecture, fini', async () => {
+    const p = preparer();
+    brancher(
+      p,
+      '{"command": "Upgrade", "status": 1}\n' +
+        '{"command": "Upgrade(status)", "status": 16, "error": 0}\n' +
+        '{"command": "Upgrade(status)", "status": 0, "error": 0}\n',
+    );
+    const fin = verifierConfirme(p);
+    const etat = await etape(p.parcours, 'proposition');
+    assert.equal(etat.encart.donnees.decision, 'absente');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.equal(p.parcours.etat.versions.relue, '1.20.0');
+    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+    assert.ok(p.attentes.includes(1000));
+    assert.equal(apres(p.journal, 'UPGRADE').at(-1), 'START');
+  });
+
+  it('erreur 3 sur une ligne « Upgrade(status) » : texte du code, sans START', async () => {
+    const p = preparer();
+    brancher(
+      p,
+      '{"command": "Upgrade", "status": 1}\n' +
+        '{"command": "Upgrade(status)", "status": 0, "error": 3}\n',
+    );
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.ok(p.parcours.etat.erreur.includes(texteErreurFus(3)));
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), []);
+  });
+});
