@@ -2,6 +2,8 @@ import React, { Suspense, lazy, useLayoutEffect, useRef, useSyncExternalStore } 
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
+import { ETAT_INITIAL_DAPLINK, verificationDaplink } from './daplink.mjs';
+import EtapesDaplink from './EtapesDaplink';
 import {
   ETAT_INITIAL_PILE,
   controlesOccupes,
@@ -117,9 +119,19 @@ function Controles({ id, href }) {
     () => relaisPile.idOperateur,
     () => null,
   );
+  // DAPLink plus ancien que celui du wiki : un seul encart pour la page,
+  // affiché sous l'exemple cliqué en dernier. Il reste après une
+  // déconnexion (redémarrage en MAINTENANCE pendant la mise à jour).
+  const etatDaplink = useSyncExternalStore(
+    verificationDaplink.abonner,
+    () => verificationDaplink.etat,
+    () => ETAT_INITIAL_DAPLINK,
+  );
   const pileOccupee = estOccupee(etatPile);
   const occupee = controlesOccupes(etat, etatPile);
   const urlDapjs = useBaseUrl('/vendor/dapjs-2.3.0/dap.umd.js');
+  const urlFirmwareJson = useBaseUrl('/daplink/firmware.json');
+  const urlFirmwareBin = useBaseUrl('/daplink/firmware.bin');
   const consoleRef = useRef(null);
   const connecterRef = useRef(null);
   const televerserRef = useRef(null);
@@ -194,10 +206,18 @@ function Controles({ id, href }) {
     carte.televerser(id, () => telechargerExemple(href));
   }
 
-  function connecter() {
+  // Une fois connectée, la version du DAPLink est comparée à celle épinglée
+  // par le wiki. verifier ne rejette jamais : un échec laisse l'encart masqué.
+  async function connecter() {
     focaliserApresRef.current = true;
     relaisPile.oublierErreur();
-    carte.connecter(id, urlDapjs);
+    await carte.connecter(id, urlDapjs);
+    if (!carte.etat.connectee) return;
+    await verificationDaplink.verifier({
+      numeroSerie: carte.numeroSerie,
+      lireReponse: carte.lireReponseVersionDaplink,
+      chargerEpingle: () => fetch(urlFirmwareJson).then((r) => r.json()),
+    });
   }
 
   function deconnecter() {
@@ -262,6 +282,14 @@ function Controles({ id, href }) {
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}
       </div>
+      {etatDaplink.release !== null && clique && (
+        <EtapesDaplink
+          release={etatDaplink.release}
+          href={urlFirmwareBin}
+          surPlusTard={verificationDaplink.reporter}
+          derniereEtape="Cliquer sur « Connecter la carte », puis sur « Téléverser »."
+        />
+      )}
       {/* WebUSB peut exister mais être inutilisable (poste géré, Linux sans
           règle udev) : après une erreur, le .bin reste accessible. */}
       {erreur && <Telechargement id={id} href={href} />}
