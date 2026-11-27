@@ -27,6 +27,7 @@ import {
   telechargerExemple,
   telechargerFirmware,
   urlBin,
+  sourceValide,
   voyantVisible,
 } from './logique.mjs';
 
@@ -128,6 +129,33 @@ test('urlBin et nomFichier', () => {
   assert.equal(nomFichier('VL53L1X/GestureDetection'), 'GestureDetection.bin');
   assert.equal(urlBin('APDS9960/ambient_light'), '/exemples-arduino/APDS9960/ambient_light.bin');
   assert.equal(nomFichier('APDS9960/ambient_light'), 'ambient_light.bin');
+});
+
+test('urlBin : source du dépôt arduino-steami-sample', () => {
+  assert.equal(
+    urlBin('CAPTEURS/Distance', 'sample'),
+    '/exemples-arduino-sample/CAPTEURS/Distance.bin',
+  );
+  assert.equal(
+    urlBin('APDS9960/ambient_light', 'sample'),
+    '/exemples-arduino-sample/APDS9960/ambient_light.bin',
+  );
+  assert.equal(nomFichier('CAPTEURS/Distance'), 'Distance.bin');
+});
+
+test('urlBin : source par défaut et source explicite identiques', () => {
+  assert.equal(urlBin('BLE/BleBeacon'), urlBin('BLE/BleBeacon', 'bibliotheque'));
+  assert.equal(urlBin('BLE/BleBeacon', undefined), '/exemples-arduino/BLE/BleBeacon.bin');
+});
+
+test('urlBin : source inconnue refusée', () => {
+  assert.equal(urlBin('CAPTEURS/Distance', 'autre'), null);
+  assert.equal(urlBin('CAPTEURS/Distance', ''), null);
+  assert.equal(urlBin('CAPTEURS/Distance', null), null);
+  assert.equal(sourceValide('sample'), true);
+  assert.equal(sourceValide('bibliotheque'), true);
+  assert.equal(sourceValide('autre'), false);
+  assert.equal(sourceValide('toString'), false);
 });
 
 test('idValide', () => {
