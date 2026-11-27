@@ -3,6 +3,11 @@
 Vérifie la cohérence entre les pages d'exemples Arduino du wiki et les
 exemples publiés (index.json).
 
+Toutes les pages du dossier docs/ (*.md et *.mdx, sous-dossiers compris) sont
+lues, pas seulement celles de docs/software/arduino/exemples/ : une balise
+placée sur n'importe quelle page est vérifiée. Les balises situées dans un bloc
+de code délimité (``` ou ~~~) sont ignorées.
+
 Règles :
 1. un <EssayerExemple id="X" /> doit exister dans l'index ;
 2. il doit suivre, dans la même section, un titre `## <nom> {#<nom en minuscules>}` ;
@@ -16,6 +21,8 @@ exemples-arduino.json : sinon l'index est périmé (npm run prebuild).
 Usage :
     python3 scripts/check-arduino-examples.py [--index PATH] [--pages DIR] [--attente PATH]
                                               [--epingle PATH]
+
+--pages désigne le dossier parcouru récursivement (docs/ par défaut).
 """
 
 import argparse
@@ -26,11 +33,13 @@ from pathlib import Path
 
 RACINE = Path(__file__).resolve().parent.parent
 INDEX_DEFAUT = RACINE / "static" / "exemples-arduino" / "index.json"
-PAGES_DEFAUT = RACINE / "docs" / "software" / "arduino" / "exemples"
+PAGES_DEFAUT = RACINE / "docs"
 ATTENTE_DEFAUT = Path(__file__).resolve().parent / "exemples-arduino-a-documenter.txt"
 EPINGLE_DEFAUT = RACINE / "exemples-arduino.json"
 
 TITRE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
+# Délimiteur de bloc de code : au moins trois ` ou trois ~ (CommonMark).
+CLOTURE = re.compile(r"^(`{3,}|~{3,})(.*)$")
 BALISE = re.compile(r"<EssayerExemple\b[^>]*?\bid=(?:\"([^\"]*)\"|'([^']*)')[^>]*>")
 
 
@@ -38,12 +47,24 @@ def _ids_de_page(texte):
     """Retourne (id, titre_de_section) pour chaque balise de la page."""
     resultat = []
     titre = None
-    en_code = False
+    cloture = None  # délimiteur du bloc de code ouvert, sinon None
     for ligne in texte.splitlines():
-        if ligne.lstrip().startswith("```"):
-            en_code = not en_code
-            continue
-        if en_code:
+        m = CLOTURE.match(ligne.lstrip())
+        if cloture is None:
+            # Un délimiteur ``` ouvrant ne peut pas contenir de ` dans son info.
+            if m and not (m.group(1)[0] == "`" and "`" in m.group(2)):
+                cloture = m.group(1)
+                continue
+        else:
+            # Le bloc ne se ferme que sur le même caractère, au moins aussi
+            # long, sans rien après : un ```` peut contenir des lignes ```.
+            if (
+                m
+                and m.group(1)[0] == cloture[0]
+                and len(m.group(1)) >= len(cloture)
+                and not m.group(2).strip()
+            ):
+                cloture = None
             continue
         m = TITRE.match(ligne)
         if m:
@@ -56,6 +77,26 @@ def _ids_de_page(texte):
         for b in BALISE.finditer(ligne):
             resultat.append((b.group(1) or b.group(2), titre))
     return resultat
+
+
+def lister_pages(dossier):
+    """Pages *.md et *.mdx du dossier et de ses sous-dossiers, triées."""
+    if not dossier.is_dir():
+        return []
+    return sorted(
+        p for p in dossier.rglob("*") if p.suffix in (".md", ".mdx") and p.is_file()
+    )
+
+
+def chemin_affiche(chemin):
+    """Chemin relatif à la racine du dépôt, sinon au dossier courant, sinon tel quel."""
+    chemin = chemin.resolve()
+    for base in (RACINE, Path.cwd().resolve()):
+        try:
+            return chemin.relative_to(base)
+        except ValueError:
+            pass
+    return chemin
 
 
 def verifier(index_ids, pages, attente):
@@ -128,9 +169,7 @@ def main(argv=None):
             print(f"Erreur : {erreur}", file=sys.stderr)
             return 1
     index_ids = {e["id"] for e in index["exemples"]}
-    pages = {
-        p: p.read_text(encoding="utf-8") for p in sorted(args.pages.glob("*.md"))
-    } if args.pages.is_dir() else {}
+    pages = {chemin_affiche(p): p.read_text(encoding="utf-8") for p in lister_pages(args.pages)}
     attente = []
     if args.attente.is_file():
         attente = [

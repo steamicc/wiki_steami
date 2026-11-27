@@ -70,6 +70,94 @@ class TestVerifier(unittest.TestCase):
         self.assertTrue(any(ID in e for e in erreurs))
 
 
+    def test_tag_in_tilde_fence_ignored(self):
+        texte = page() + '\n~~~mdx\n<EssayerExemple id="VL53L1X/Inconnu" />\n~~~\n'
+        self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
+
+    def test_tag_in_long_fence_with_inner_fence_ignored(self):
+        texte = page() + (
+            '\n````md\n```mdx\n<EssayerExemple id="VL53L1X/Inconnu" />\n```\n````\n'
+        )
+        self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
+
+    def test_tilde_does_not_close_backtick_fence(self):
+        texte = page() + '\n```\n~~~\n<EssayerExemple id="VL53L1X/Inconnu" />\n```\n'
+        self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
+
+    def test_fence_with_info_does_not_close(self):
+        texte = page() + '\n```\n```cpp\n<EssayerExemple id="VL53L1X/Inconnu" />\n```\n'
+        self.assertEqual(verifier({ID}, {PAGE: texte}, []), [])
+
+    def test_tag_after_closed_fence_checked(self):
+        texte = "```cpp\nvoid setup() {}\n```\n\n" + page(ident="VL53L1X/Inconnu")
+        erreurs = verifier({ID}, {PAGE: texte}, [ID])
+        self.assertTrue(any("VL53L1X/Inconnu" in e for e in erreurs))
+
+
+class TestPages(unittest.TestCase):
+    """Parcours récursif du dossier des pages par main()."""
+
+    def lancer(self, ecrire_pages, ids=(ID,)):
+        with tempfile.TemporaryDirectory() as dossier:
+            dossier = Path(dossier)
+            index = dossier / "index.json"
+            index.write_text(
+                json.dumps({"version": "v1", "exemples": [{"id": i} for i in ids]}),
+                encoding="utf-8",
+            )
+            pages = dossier / "docs"
+            pages.mkdir()
+            ecrire_pages(pages)
+            args = ["--index", str(index), "--pages", str(pages)]
+            args += ["--epingle", str(dossier / "absente.json")]
+            args += ["--attente", str(dossier / "absente.txt")]
+            sortie, erreurs = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(sortie), contextlib.redirect_stderr(erreurs):
+                code = module.main(args)
+            return code, sortie.getvalue(), erreurs.getvalue()
+
+    def test_subfolder_page_scanned(self):
+        def ecrire(pages):
+            sous = pages / "software" / "arduino" / "exemples" / "capteurs"
+            sous.mkdir(parents=True)
+            (sous / "vl53l1x.md").write_text(page(), encoding="utf-8")
+
+        code, sortie, erreurs = self.lancer(ecrire)
+        self.assertEqual(code, 0, erreurs)
+        self.assertIn("1 page(s)", sortie)
+
+    def test_mdx_page_scanned(self):
+        def ecrire(pages):
+            (pages / "vl53l1x.mdx").write_text(page(), encoding="utf-8")
+
+        code, sortie, erreurs = self.lancer(ecrire)
+        self.assertEqual(code, 0, erreurs)
+        self.assertIn("1 page(s)", sortie)
+
+    def test_bad_id_outside_examples_reported(self):
+        def ecrire(pages):
+            exemples = pages / "software" / "arduino" / "exemples"
+            exemples.mkdir(parents=True)
+            (exemples / "vl53l1x.md").write_text(page(), encoding="utf-8")
+            autre = pages / "software" / "arduino" / "capteurs.md"
+            autre.write_text(page(ident="VL53L1X/Inconnu"), encoding="utf-8")
+
+        code, _, erreurs = self.lancer(ecrire)
+        self.assertEqual(code, 1)
+        self.assertIn("capteurs.md", erreurs)
+        self.assertIn("VL53L1X/Inconnu", erreurs)
+
+    def test_other_files_ignored(self):
+        def ecrire(pages):
+            (pages / "vl53l1x.md").write_text(page(), encoding="utf-8")
+            (pages / "notes.txt").write_text(page(ident="VL53L1X/Inconnu"), encoding="utf-8")
+            (pages / "dossier.md").mkdir()
+
+        code, sortie, erreurs = self.lancer(ecrire)
+        self.assertEqual(code, 0, erreurs)
+        self.assertIn("1 page(s)", sortie)
+
+
 class TestVersion(unittest.TestCase):
     def test_same_version_ok(self):
         self.assertIsNone(module.verifier_version("v0.37.0", "v0.37.0"))
