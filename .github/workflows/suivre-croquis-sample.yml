@@ -249,7 +249,7 @@ jobs:
 
           Cette PR change seulement \`exemples-arduino-sample.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
 
-          Les croquis ajoutés, retirés ou renommés dans cette release peuvent exiger une mise à jour des pages Arduino qui les citent ou de \`scripts/exemples-arduino-sample-a-documenter.txt\` : si le build échoue, il nomme les croquis en cause ; corriger la page ou la liste sur cette branche avant de fusionner.
+          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
 
           La fusion automatique (squash) est activée : la PR est fusionnée dès que le CI est vert, y compris après des commits ajoutés sur la branche. Pour l'éviter, passer la PR en brouillon : désactiver seulement la fusion automatique ne suffit pas, le robot la réactive à son passage suivant.
           EOT
