@@ -170,13 +170,13 @@ Depuis la version 2026.11.8 de l'image, la page Téléverser vérifie à la conn
 Cliquer sur **Mettre à jour…** affiche les étapes :
 
 1. Cliquer sur **Télécharger le firmware** : le fichier `stm32f103xb_steami32_if_crc.bin` arrive dans le dossier des téléchargements.
-2. Créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**). La carte redémarre et un lecteur **MAINTENANCE** apparaît à la place ; la page indique que la carte a été débranchée, l'encart reste affiché.
+2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton. La page indique que la carte a été débranchée, l'encart reste affiché.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 4. Cliquer sur **Connecter la carte** : si la mise à jour a réussi, l'encart disparaît.
 
 ![Page Téléverser pendant la mise à jour : encart « Une mise à jour du DAPLink de cette carte est disponible (release 2026-11-25.3) » avec le bouton Plus tard, les quatre étapes (Télécharger le firmware, START_BL.ACT, copie sur MAINTENANCE, reconnexion) et le lien « Si le lecteur MAINTENANCE n'apparaît pas », sous l'état « Carte non connectée »](/img/software/arduino/codespace-15-mise-a-jour-daplink.png)
 
-Cette mise à jour n'efface pas le programme de la carte. Si le lecteur MAINTENANCE n'apparaît pas, voir [le dépannage](#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
+Cette mise à jour n'efface pas le programme de la carte. Si le lecteur **MAINTENANCE** n'apparaît pas, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Voir aussi [le dépannage](#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
 ### Autre méthode : glisser le fichier sur le lecteur STEAMI
 
@@ -310,13 +310,10 @@ La page affiche « Cette carte ne sait pas redémarrer depuis la page : son DAPL
 Avec la version 2026.11.8 de l'image ou une plus récente, la page propose elle-même la mise à jour : voir [Mettre à jour le DAPLink depuis la page](#mettre-à-jour-le-daplink-depuis-la-page). Sinon, à la main :
 
 1. Télécharger [stm32f103xb_steami32_if_crc.bin](https://github.com/steamicc/DAPLink/releases/latest/download/stm32f103xb_steami32_if_crc.bin) (dernière release du DAPLink).
-2. Brancher la carte, puis créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**). La carte redémarre et un lecteur **MAINTENANCE** apparaît à la place.
+2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 
-**Si le lecteur MAINTENANCE n'apparaît pas :**
-
-- Vérifier le nom exact du fichier. Quand Windows masque les extensions, un fichier créé avec **Nouveau → Document texte** s'appelle en réalité `START_BL.ACT.txt` et la carte l'ignore. Afficher les extensions (dans l'Explorateur de fichiers, menu **Affichage**, option **Extensions de noms de fichiers**), puis renommer le fichier en `START_BL.ACT`.
-- Sinon, utiliser l'autre méthode décrite dans [DAPLink — Mise à jour du firmware](../daplink.md#mise-à-jour-du-firmware).
+**Si le lecteur MAINTENANCE n'apparaît pas**, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Vérifier le nom exact du fichier : quand Windows masque les extensions, un fichier créé avec **Nouveau → Document texte** s'appelle en réalité `START_BL.ACT.txt` et la carte l'ignore. Afficher les extensions (dans l'Explorateur de fichiers, menu **Affichage**, option **Extensions de noms de fichiers**), puis renommer le fichier en `START_BL.ACT`.
 
 ## Conseils pour la classe
 
