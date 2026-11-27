@@ -122,7 +122,7 @@ Le schéma indice C (feuille FP8, page 9/16) n'est pas encore publié dans le d�
 <Release releases="v1c">
 
 - [Driver MicroPython — gc9a01](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/gc9a01), dans le firmware depuis la v0.30.0
-- [steami_screen](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen) — `steami.Screen`, le même programme sur les écrans des trois releases
+- [steami_screen](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen) — `steami.Screen`, le même programme sur les écrans des trois releases ; depuis la v0.31.0, le texte de la V1c utilise les polices Spleen (caractères de 8 × 16 pixels), `screen.text_height()` donne la hauteur d'une ligne et les accents s'affichent (voir la section [Fonts](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen/README.md#fonts) du README)
 
 </Release>
 </ReleaseTabs>

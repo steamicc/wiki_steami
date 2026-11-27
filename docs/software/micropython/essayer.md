@@ -92,6 +92,23 @@ Quelques exemples modifient la carte de façon durable : ils effacent ou écrive
 
 Depuis la v0.30.0, le firmware MicroPython gère l'écran rond de la V1c (GC9A01) par `steami.Screen`, comme l'écran SSD1327 des V1a et V1b : le même programme dessine sur les deux écrans, mis à l'échelle. Un programme qui utilise directement le driver `ssd1327` reste réservé aux V1a et V1b.
 
+Depuis la v0.31.0, `steami.Screen` écrit le texte de la V1c avec les polices Spleen, les mêmes qu'en Arduino : `text(s, (x, y), c, scale)` dessine des caractères de 8 × 16 pixels, multipliés par `scale`, contre 8 × 8 sur les V1a et V1b. `screen.text_height(scale)` donne la hauteur d'une ligne sur l'écran de la carte, et `screen.max_chars` le nombre de caractères qui tiennent dans la largeur (30 sur la V1c, 16 sur les V1a et V1b). Un programme écrit avant la v0.31.0 qui empile ses lignes avec un pas fixe de 8 à 15 pixels les fait se chevaucher sur la V1c : calculer le pas avec `text_height()`.
+
+```python run
+from steami import Screen
+
+screen = Screen()
+cx, cy = screen.center
+h = screen.text_height()  # 16 sur une V1c, 8 sur une V1a ou une V1b
+
+screen.clear()
+screen.text("Température", at=(cx - 44, cy - h))
+screen.text("23°C", at=(cx - 16, cy))
+screen.show()
+```
+
+Les lettres accentuées et le signe « ° » s'affichent sur la V1c. Sur les V1a et V1b, une lettre accentuée s'affiche comme sa lettre de base (« Temperature ») et « ° » comme un petit rond, comme en Arduino.
+
 Les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960 ne sont pas montés sur la V1c : leurs exemples s'y arrêtent sur une erreur (voir [Révisions de la carte](/docs/hardware/revisions#capteurs-internes)).
 
 ## Sans Chrome ni Edge
