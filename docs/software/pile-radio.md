@@ -51,14 +51,14 @@ L'installation exige que la carte ait le DAPLink proposé par le wiki, car une i
 
 ### Limites
 
-Le bouton n'installe que la pile BLE HCI Layer 1.20.0. Les autres piles (Full, extended, Thread, Zigbee…) ne sont pas proposées : elles passent par [DapLink-EasyFlash](#installer-la-pile). Une pile d'un autre type n'est remplacée par BLE HCI Layer que sur confirmation.
+Le bouton n'installe que la pile BLE HCI Layer 1.20.0. Pour une autre pile (Full, extended, Thread, Zigbee…), passer par [DapLink-EasyFlash](#installer-la-pile). Une pile d'un autre type que BLE HCI Layer 1.20.0 est remplacée par celle-ci, mais seulement après confirmation dans la seconde question.
 
 Dans les deux cas suivants, le bouton n'installe rien et renvoie vers DapLink-EasyFlash :
 
 - un FUS antérieur à la version 1.2, ou de version majeure 2 et plus : le bouton ne met **jamais** le FUS à jour ;
 - une pile radio arrêtée qui ne redémarre pas.
 
-Si l'installation échoue ou s'interrompt après l'effacement de l'ancienne pile, la carte peut se retrouver sans pile radio : le bouton le signale et renvoie aussi vers DapLink-EasyFlash.
+Si l'installation échoue, ou si la pile relue n'est pas celle attendue ou manque, le bouton le signale et renvoie aussi vers DapLink-EasyFlash. Si cela survient après l'effacement de l'ancienne pile, la carte peut se retrouver sans pile radio.
 
 Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
 
