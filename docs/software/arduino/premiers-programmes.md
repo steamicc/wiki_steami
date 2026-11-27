@@ -3,6 +3,8 @@ title: Premiers programmes
 sidebar_position: 3
 ---
 
+import EssayerExemple from '@site/src/components/EssayerExemple';
+
 # Premiers programmes
 
 La LED RGB, les boutons A, B et MENU, le buzzer et le port série sont reliés directement au microcontrôleur STM32WB55. Ils s'utilisent avec les fonctions Arduino habituelles (`pinMode`, `digitalWrite`, `digitalRead`, `tone`, `Serial`), sans aucune bibliothèque à installer.
@@ -35,32 +37,11 @@ Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au micr
 
 Le programme allume successivement les trois couleurs et écrit la couleur courante dans le moniteur série.
 
-```cpp sample=PREMIERS/ClignoterLed
-// Fait clignoter la LED RGB en rouge, vert puis bleu.
-void setup() {
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  Serial.begin(115200);
-}
+```cpp file=.external/arduino-steami-sample/examples/PREMIERS/ClignoterLed/ClignoterLed.ino
 
-void loop() {
-  digitalWrite(LED_RED, HIGH);
-  Serial.println("Rouge");
-  delay(500);
-  digitalWrite(LED_RED, LOW);
-
-  digitalWrite(LED_GREEN, HIGH);
-  Serial.println("Vert");
-  delay(500);
-  digitalWrite(LED_GREEN, LOW);
-
-  digitalWrite(LED_BLUE, HIGH);
-  Serial.println("Bleu");
-  delay(500);
-  digitalWrite(LED_BLUE, LOW);
-}
 ```
+
+<EssayerExemple id="PREMIERS/ClignoterLed" source="sample" />
 
 En allumant deux canaux en même temps, on obtient du jaune (rouge + vert), du cyan (vert + bleu) ou du magenta (rouge + bleu).
 
@@ -68,44 +49,21 @@ En allumant deux canaux en même temps, on obtient du jaune (rouge + vert), du c
 
 Un bouton appuyé relie sa broche à la masse : la lecture donne `LOW`. Il faut donc activer la résistance de tirage interne avec `INPUT_PULLUP`, sinon la broche « flotte » quand le bouton est relâché.
 
-```cpp sample=PREMIERS/LireBoutons
-// A allume le rouge, B le vert, MENU le bleu.
-void setup() {
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
+```cpp file=.external/arduino-steami-sample/examples/PREMIERS/LireBoutons/LireBoutons.ino
 
-  // Un bouton appuyé relie la broche à la masse : on active le pull-up interne.
-  pinMode(A_BUTTON, INPUT_PULLUP);
-  pinMode(B_BUTTON, INPUT_PULLUP);
-  pinMode(MENU_BUTTON, INPUT_PULLUP);
-}
-
-void loop() {
-  digitalWrite(LED_RED, digitalRead(A_BUTTON) == LOW);
-  digitalWrite(LED_GREEN, digitalRead(B_BUTTON) == LOW);
-  digitalWrite(LED_BLUE, digitalRead(MENU_BUTTON) == LOW);
-}
 ```
+
+<EssayerExemple id="PREMIERS/LireBoutons" source="sample" />
 
 ## Jouer un son
 
 `tone(broche, fréquence)` produit un signal carré à la fréquence demandée, en hertz. `tone(broche, fréquence, durée)` s'arrête seul après la durée indiquée en millisecondes.
 
-```cpp sample=PREMIERS/JouerSon
-// Joue une note tant que le bouton A est appuyé.
-void setup() {
-  pinMode(A_BUTTON, INPUT_PULLUP);
-}
+```cpp file=.external/arduino-steami-sample/examples/PREMIERS/JouerSon/JouerSon.ino
 
-void loop() {
-  if (digitalRead(A_BUTTON) == LOW) {
-    tone(SPEAKER, 440);  // la 440 Hz
-  } else {
-    noTone(SPEAKER);
-  }
-}
 ```
+
+<EssayerExemple id="PREMIERS/JouerSon" source="sample" />
 
 Pour jouer une mélodie, enchaîner des appels à `tone()` avec une durée, séparés par des `delay()` un peu plus longs que chaque note.
 

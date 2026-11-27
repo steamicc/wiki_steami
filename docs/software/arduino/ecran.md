@@ -132,29 +132,11 @@ Depuis la version 0.40.0 de la bibliothèque, `SteamiScreen` dessine des widgets
 
 ### Jauge
 
-```cpp sample=ECRAN/EcranJauge
-#include <SteamiScreen.h>
-#include <SteamiHumidity.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranJauge/EcranJauge.ino
 
-SteamiScreen ecran;
-SteamiHumidity humidite;
-
-void setup() {
-  Serial.begin(115200);
-  ecran.begin();
-  humidite.begin();
-}
-
-void loop() {
-  float h = humidite.read();
-  ecran.clear();
-  ecran.gauge(h, 0, 100, STEAMI_BLUE);  // d'abord la jauge : le texte passe par-dessus
-  ecran.title("Humidité");
-  ecran.value(h, "%");                  // gauge() n'écrit pas la valeur
-  ecran.show();
-  delay(500);
-}
 ```
+
+<EssayerExemple id="ECRAN/EcranJauge" source="sample" />
 
 `gauge(v, min, max)` trace un anneau de 270° près du bord, ouvert en bas, sur un fond gris foncé (`STEAMI_DARK`). Il se remplit depuis le bas à gauche, dans le sens des aiguilles d'une montre, en proportion de `v` entre `min` et `max`, et les deux bornes s'écrivent en petits chiffres à ses deux bouts. Une valeur hors des bornes est ramenée à la plus proche ; `NAN` laisse l'anneau vide ; avec `min` plus grand que `max`, l'anneau se remplit quand la valeur baisse. La couleur du remplissage, gris clair (`STEAMI_LIGHT`) par défaut, vient en quatrième argument ; un cinquième argument facultatif donne l'épaisseur de l'anneau, en pixels de l'écran utilisé (7 sur l'écran de 128, 13 sur celui de 240 par défaut).
 
@@ -205,30 +187,11 @@ ecran.show();
 
 Depuis la version 0.41.0 de la bibliothèque, `graph()` trace la courbe des dernières mesures. Ce programme montre la pression des 30 dernières secondes :
 
-```cpp sample=ECRAN/EcranGraphe
-#include <SteamiScreen.h>
-#include <SteamiPressure.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranGraphe/EcranGraphe.ino
 
-SteamiScreen ecran;
-SteamiPressure pression;
-SteamiHistory<30> historique;           // les 30 dernières mesures, sans allocation dynamique
-
-void setup() {
-  Serial.begin(115200);
-  ecran.begin();                        // en premier, comme pour SteamiDisplay
-  pression.begin();
-}
-
-void loop() {
-  historique.add(pression.read());      // la plus ancienne est oubliée ; NAN laisse un trou
-  ecran.clear();
-  ecran.title("Pression");
-  ecran.graph(historique, 950, 1050);   // dernière valeur, bornes, axes et courbe
-  ecran.subtitle(pression.chip());
-  ecran.show();
-  delay(1000);                          // une mesure par seconde
-}
 ```
+
+<EssayerExemple id="ECRAN/EcranGraphe" source="sample" />
 
 `SteamiHistory<N>` garde les `N` dernières valeurs dans la mémoire du programme, sans allocation dynamique : 4 octets par valeur, plus 4. `add(v)` ajoute la plus récente ; une fois `N` valeurs gardées, chaque ajout fait oublier la plus ancienne. `size()` donne le nombre de valeurs gardées, `last()` la plus récente, `historique[0]` la plus ancienne, et `clear()` vide l'historique.
 
@@ -240,36 +203,11 @@ Exemples à essayer : [ScreenGraph](./exemples/steami-board#screengraph), et la 
 
 Depuis la version 0.41.0 de la bibliothèque, `menu()` affiche une liste dans laquelle le D-PAD déplace la sélection :
 
-```cpp sample=ECRAN/EcranMenu
-#include <SteamiScreen.h>
-#include <SteamiButtons.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranMenu/EcranMenu.ino
 
-SteamiScreen ecran;
-SteamiButtons boutons;
-
-const char* const ELEMENTS[] = {"Température", "Humidité", "Pression", "Boussole"};
-int choix = 0;                          // un int, pas un unsigned ni un size_t
-
-void setup() {
-  Serial.begin(115200);
-  ecran.begin();
-  boutons.begin();
-}
-
-void loop() {
-  if (boutons.wasPressed(SteamiButton::UP)) {
-    choix--;
-  }
-  if (boutons.wasPressed(SteamiButton::DOWN)) {
-    choix++;
-  }
-  ecran.clear();
-  ecran.title("Menu");
-  choix = ecran.menu(ELEMENTS, choix);  // -1 devient le dernier élément
-  ecran.show();
-  delay(20);
-}
 ```
+
+<EssayerExemple id="ECRAN/EcranMenu" source="sample" />
 
 `menu(ELEMENTS, choix)` écrit les éléments un par ligne, centrés, en gris ; l'élément sélectionné s'écrit en blanc, précédé de `>`, sur une barre gris foncé dont les bouts suivent le cercle. L'écran de 128 pixels montre 5 lignes, celui de 240 en montre 6 : une liste plus longue défile pour garder la sélection visible. Un élément trop large est coupé.
 
