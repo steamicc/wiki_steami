@@ -53,6 +53,28 @@ Sous chaque exemple BLE, un bouton vérifie la pile radio de la carte depuis le 
 - **Partage de la carte** : la V1c est partagée entre sessions (créneau à demander à wiki-steami-71). Aucun essai réel qui touche à la pile sans l'accord explicite de l'utilisateur.
 - **Wiki** : ton neutre (infinitif, ni tu ni vous), sommaire sur les pages longues, CSpell, markdownlint, prettier, tests `node --test`.
 
+## Résultats de l'essai préalable (2026-11-27, V1c, Chrome 158)
+
+Avec l'accord de l'utilisateur, sur une page d'essai qui utilise DAP.js 2.3.0, la même version que le wiki. Le DAPLink est l'épinglé (`STM1`, numéro 3, date 20261125). Avant l'essai, sous MicroPython : FUS (1, 2, 0, 0, 0), pile (1, 20, 0, 0, 2), et `BLE().active(True)` réussit.
+
+- **Le flux de flash du DAPLink accepte le .hex.**
+  - `wb55_operator.hex` (228 262 caractères) est flashé en 11,5 s.
+  - Un .hex fait de MicroPython et de 16 octets en 0x080D0000 (1 466 430 caractères) est flashé en 46,8 s, et les 16 octets sont relus en place depuis MicroPython.
+  - Le .bin MicroPython (521 320 octets) est flashé en 35,5 s.
+- **Chaque flash par DAP.js efface toute la flash non protégée**, et pas seulement ce que le fichier couvre : après le flash du seul .bin MicroPython, 0x080D0000 revient à `FF`. Le système de fichiers MicroPython est donc effacé à chaque flash, quel qu'il soit. La pile, protégée par le FUS, reste en place : le FUS et la pile ont été relus identiques, et le BLE marche, après chaque flash.
+- **Réponses de l'operator** (une ligne JSON, sans `\r`) :
+  - VERSION, pile en marche, avant tout STATUS : `{"command": "Version", "status": 0, "fus_version": 0, "copro_fw_version": "1.20.0", "ws_version": 118292500}`. 118292500 = 0x070D0014. L'octet de poids faible, 0x14 = 20 secteurs de 4 Ko = 80 Ko, est la taille de HCI Layer 1.20.0 : c'est sans doute la table mémoire de la pile.
+  - Premier STATUS : `{"command": "Status", "status": 255, "error": 254}`. Le second ne répond pas dans les 2 s (le second cœur bascule) ; un troisième, envoyé 2 s plus tard, répond `{"command": "Status", "status": 0, "last_fus_status": 0, "last_ws_status": 0, "current_ws": 1}`.
+  - VERSION, sur le FUS : `fus_version` 16908288 = 0x01020000 (FUS 1.2.0), `copro_fw_version` « 1.20.0 », `ws_version` 18087938 = 0x01140002. Le codage est octet 31-24 majeur, 23-16 mineur, 15-8 sous-version, et le dernier octet correspond aux deux derniers champs de `stm.rfcore_fw_version(1)` = (1, 20, 0, 0, 2).
+  - `current_ws` vaut 1 : **il ne donne pas le type de la pile**.
+  - `START` ne renvoie aucune ligne. Ensuite, VERSION redonne la réponse « pile en marche » (`fus_version` 0, `ws_version` 0x070D0014).
+- **Une réinitialisation ne relance pas la pile.** Après un double STATUS, puis un flash (qui réinitialise la carte), VERSION répond encore depuis le FUS. Seul `START` relance la pile. Tout parcours qui a envoyé STATUS doit donc envoyer `START` avant de se terminer, même sur une erreur, tant que la pile n'a pas été effacée.
+- **Après chaque essai**, MicroPython relit la pile (1, 20, 0, 0, 2), et `BLE().active(True)` réussit.
+- **SWD** : `ADI.readMem32` marche après `ADI.connect()` tant que MicroPython tourne, mais échoue (« Bad status for 8 -> 255 ») quand l'operator tourne. La page n'utilise pas SWD.
+- **Incident** : « Bad response for 8 -> 17 » à la connexion de la page d'essai, juste après avoir quitté brutalement (navigation CDP) une page du wiki dont la boucle de lecture série tournait. Récupération par START_BL.ACT puis START_IF.ACT, avec l'accord de l'utilisateur. Cause probable, non démontrée : une réponse restée dans le DAPLink. Ce risque concerne aussi les composants existants : il est à étudier à part.
+
+Conséquences sur les décisions ci-dessous : le type de pile se reconnaît à sa version et à sa taille, lues par VERSION **avant** le double STATUS (Décision 3) ; la confirmation de la vérification annonce l'effacement de toute la mémoire du programme, et pas seulement « peut effacer ».
+
 ## Approches considérées
 
 1. **Reprendre la procédure d'EasyFlash en JavaScript avec DAP.js (retenue).** La page flashe l'operator, lui parle par la liaison série de DAP.js, puis flashe l'operator et la pile ensemble. Elle réutilise l'outillage de l'installation MicroPython, sur une procédure déjà validée sur la V1c. Le risque est que le flux de flash du DAPLink (vendeur `FLASH_OPEN/WRITE/CLOSE` de DAP.js) n'accepte pas un .hex qui écrit à 0x080E0000, ou qu'il efface toute la puce. Un essai le lève avant toute autre chose (Décision 6).
@@ -75,13 +97,13 @@ L'utilisateur a choisi l'option A pour l'affichage : le bouton est toujours visi
 
 ### 3. Déroulement
 
-1. Clic sur **Vérifier la pile radio**. Un encart dit que la vérification remplace le programme de la carte (MicroPython et ses fichiers compris), et propose **Continuer** ou **Annuler**. (Proposition de l'assistant : l'option A accepte l'effacement, mais une carte sous MicroPython peut contenir des fichiers de la personne.)
-2. Flash de `wb55_operator.hex`, puis attente du démarrage, puis double STATUS, puis VERSION.
+1. Clic sur **Vérifier la pile radio**. Un encart dit que la vérification efface le programme de la carte et toute sa mémoire de programme (MicroPython et ses fichiers compris ; la pile radio n'est pas touchée), et propose **Continuer** ou **Annuler**. (Proposition de l'assistant : l'option A accepte l'effacement, mais une carte sous MicroPython peut contenir des fichiers de la personne.)
+2. Flash de `wb55_operator.hex`, puis attente du démarrage. VERSION, pile en marche : `copro_fw_version` et taille de la pile (octet de poids faible de `ws_version`, en secteurs de 4 Ko). Ensuite, double STATUS, en réessayant le second comme EasyFlash, puis VERSION, sur le FUS : version du FUS. À partir du double STATUS, toute fin de parcours (à jour, refus, erreur, abandon) envoie `START` tant que la pile n'a pas été effacée.
 3. Décision (fonction pure, testée) :
    - FUS de majeur 0, ou 1 avec un mineur inférieur à 2 : arrêt. Message : le FUS est trop ancien pour le bouton, utiliser EasyFlash. Lien vers la page.
    - FUS de majeur supérieur à 1 : arrêt prudent, même message. (EasyFlash essaie quand même ; le wiki ne le fait pas.)
-   - Pile HCI Layer (`current_ws`, lu dans la seconde réponse du double STATUS, égal à la valeur relevée sur la V1c par l'essai préalable) de version supérieure ou égale à l'épinglée : `START` pour relancer la pile, puis « La pile radio est à jour » et invitation à téléverser l'exemple. Si l'essai montre que HCI Layer et HCI Layer extended donnent le même `current_ws`, le noter comme limite dans pile-radio.md. (Décision de l'assistant.)
-   - Sinon (pas de pile, ancienne version, autre type, `current_ws` inconnu) : encart de proposition. Si le DAPLink n'est pas l'épinglé, l'encart ne propose pas **Installer la pile radio**. Il explique pourquoi et propose la mise à jour guidée du DAPLink, celle du parcours MicroPython. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non épinglé. La vérification, elle, reste possible avec « Plus tard ». Il donne la version trouvée (ou « aucune pile ») et celle qui sera installée, la durée, les consignes, et le fait que l'ancienne pile est effacée. Boutons **Installer la pile radio** et **Annuler**.
+   - Pile reconnue comme l'épinglée (`copro_fw_version` égal à « 1.20.0 » et taille de 0x14 secteurs, relevés par l'essai préalable) : `START` pour relancer la pile, puis « La pile radio est à jour » et invitation à téléverser l'exemple. (Décision de l'assistant, après l'essai : `current_ws` ne donne pas le type.)
+   - Sinon (pas de pile, `copro_fw_version` vide ou « 0.0.0 », autre version, autre taille donc autre type) : encart de proposition. Une version plus récente que l'épinglée est signalée comme telle dans l'encart (« plus récente que celle du wiki »), et l'installation reste possible mais n'est pas mise en avant ; le FUS peut la refuser (code 0x11, retour en arrière interdit). Si le DAPLink n'est pas l'épinglé, l'encart ne propose pas **Installer la pile radio**. Il explique pourquoi et propose la mise à jour guidée du DAPLink, celle du parcours MicroPython. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non épinglé. La vérification, elle, reste possible avec « Plus tard ». Il donne la version trouvée (ou « aucune pile ») et celle qui sera installée, la durée, les consignes, et le fait que l'ancienne pile est effacée. Boutons **Installer la pile radio** et **Annuler**.
 4. Installation : DELETE (trois essais), double STATUS, flash du .hex fusionné, 5 s d'attente, UPGRADE. La page suit ensuite les lignes JSON. Le premier `status 0` veut seulement dire « commande acceptée », pas « réussi ». Toute erreur non nulle s'affiche avec un texte français et un renvoi vers EasyFlash.
 5. Après l'acceptation : attente d'une minute avec un décompte visible, sans rien envoyer à la carte. Ensuite : double STATUS, lecture de `error`, `last_fus_status` et `last_ws_status`, puis VERSION et `START`. (Décision de l'assistant.)
    - Un état de 0x10 à 0x3F veut dire que le second cœur travaille encore : attendre de nouveau, avec une limite de temps et un message. Ne jamais envoyer DELETE ni reproposer l'installation à ce moment-là.
