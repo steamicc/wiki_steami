@@ -59,7 +59,7 @@ plugin remark ajoute le composant sous les blocs exécutables.
 
 ---
 
-### Tâche 1 : essai jetable sur la carte (porte d'entrée)
+### Task 1: essai jetable sur la carte (porte d'entrée)
 
 **Fichiers :** scratchpad uniquement (rien n'est commité).
 
@@ -87,7 +87,7 @@ plugin remark ajoute le composant sous les blocs exécutables.
 - [ ] **Étape 6 :** écrire la conclusion dans #233. Si l'étape 2 ou 3 échoue :
       s'arrêter et revenir à la conception (approche B).
 
-### Tâche 2 : la lib grave sa version dans le firmware
+### Task 2: la lib grave sa version dans le firmware
 
 **Dépôt :** `steamicc/micropython-steami-lib` (issue à créer, commits en anglais,
 fusion squash).
@@ -132,7 +132,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
 - [ ] **Étape 6 :** commit `feat(steami): Expose the release version in the firmware.` ;
       PR. Après fusion et release, noter la version dans #233.
 
-### Tâche 3 : épingler le firmware MicroPython et le DAPLink dans le wiki
+### Task 3: épingler le firmware MicroPython et le DAPLink dans le wiki
 
 **Fichiers :**
 
@@ -173,7 +173,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
       firmwares.
 - [ ] **Étape 6 :** commit `feat(configs): épingler le firmware MicroPython et le DAPLink` ; PR.
 
-### Tâche 4 : protocole REPL brut
+### Task 4: protocole REPL brut
 
 **Fichiers :**
 
@@ -218,7 +218,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
       et `lireVersion()`. Sur la V1c (créneau) : les trois réussissent.
 - [ ] **Étape 6 :** commit `feat(software): protocole REPL brut pour essayer MicroPython` ; PR.
 
-### Tâche 5 : décisions (firmware, DAPLink, carte muette)
+### Task 5: décisions (firmware, DAPLink, carte muette)
 
 **Fichiers :**
 
@@ -246,7 +246,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
 - [ ] **Étape 4 :** tests → PASS.
 - [ ] **Étape 5 :** commit `feat(software): décisions de mise à jour pour MicroPython` (même PR que la tâche 6 ou séparée).
 
-### Tâche 6 : la connexion partagée sait écrire, flasher un firmware et lire le DAPLink
+### Task 6: la connexion partagée sait écrire, flasher un firmware et lire le DAPLink
 
 **Fichiers :**
 
@@ -279,7 +279,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
 - [ ] **Étape 4 :** `npm run test:js` → PASS (anciens et nouveaux).
 - [ ] **Étape 5 :** commit `feat(software): écriture série, firmware et version DAPLink dans la connexion partagée` ; PR.
 
-### Tâche 7 : composant `EssayerMicroPython`
+### Task 7: composant `EssayerMicroPython`
 
 **Fichiers :**
 
@@ -314,7 +314,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
 - [ ] **Étape 4 :** tests → PASS ; `npm run build` sans erreur.
 - [ ] **Étape 5 :** commit `feat(software): composant EssayerMicroPython` ; PR.
 
-### Tâche 8 : blocs exécutables (plugin remark et CI)
+### Task 8: blocs exécutables (plugin remark et CI)
 
 **Fichiers :**
 
@@ -353,7 +353,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
       `build/` que la page ISM330DL contient le bouton.
 - [ ] **Étape 5 :** commit `feat(software): blocs MicroPython exécutables` ; PR.
 
-### Tâche 9 : page d'explication et marquage des pages
+### Task 9: page d'explication et marquage des pages
 
 **Fichiers :**
 
@@ -369,7 +369,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
       `npm run lint:md`, `npm run lint:spell`.
 - [ ] **Étape 3 :** commit `docs(software): essayer le code MicroPython sur la carte` ; PR.
 
-### Tâche 10 : robot de suivi des releases
+### Task 10: robot de suivi des releases
 
 **Fichiers :**
 
@@ -384,7 +384,7 @@ def test_write_version_rejects_bad_tag(tmp_path):
       PR attendue (ou ne fait rien si à jour).
 - [ ] **Étape 3 :** commit `ci(configs): robot de suivi du firmware MicroPython` ; PR.
 
-### Tâche 11 : vérification de bout en bout
+### Task 11: vérification de bout en bout
 
 - [ ] **Étape 1 :** avec l'utilisateur (la fenêtre de choix WebUSB de Chrome
       demande un clic humain), sur la V1c (créneau), avec `npm run serve` :

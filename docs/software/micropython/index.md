@@ -42,6 +42,7 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 ## Installation et outils
 
 - [**Installation du firmware**](./install) — Flasher MicroPython sur la carte STeaMi
+- [**Essayer sur la carte**](./essayer) — Lancer un programme du wiki sur la carte depuis la page, sans rien installer
 - [**mpremote**](./mpremote) — Outil en ligne de commande (recommandé)
 - [**Thonny**](./thonny) — Éditeur graphique avec REPL intégré
 - [**Vittascience**](./vittascience) — IDE en ligne avec programmation par blocs

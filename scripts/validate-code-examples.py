@@ -23,15 +23,14 @@ def extract_python_blocks(md_path):
     """Extract Python code blocks from a Markdown file."""
     content = Path(md_path).read_text(encoding="utf-8")
     blocks = []
-    # Match ```python ... ``` blocks (ignore file= blocks which are imported)
+    # Match ```python ... ``` blocks, whatever their meta (run, title=…, file=…)
     pattern = re.compile(
-        r"```python(?:\s+file=\S+)?\s*\n(.*?)```", re.DOTALL
+        r"```python(?:[ \t]+([^\n]*))?\n(.*?)```", re.DOTALL
     )
-    for i, match in enumerate(pattern.finditer(content)):
-        code = match.group(1).strip()
+    for match in pattern.finditer(content):
+        meta, code = match.group(1) or "", match.group(2).strip()
         # Skip file= blocks (they are validated by the source repo)
-        meta_match = re.search(r"```python\s+file=", content[match.start():match.end()])
-        if meta_match:
+        if re.search(r"(?:^|\s)file=", meta):
             continue
         if code and not code.startswith("# File not found"):
             line_no = content[: match.start()].count("\n") + 1

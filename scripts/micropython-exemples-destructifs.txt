@@ -1,0 +1,29 @@
+# Exemples de micropython-steami-lib qui modifient la carte durablement.
+# Chemins relatifs à lib/ de la bibliothèque ; * et ? ne franchissent pas « / ».
+# Publié avec le bouton « Essayer sur la carte », un exemple destructif doit
+# porter confirm="<ce qui sera modifié>" (vérifié par scripts/check-micropython-blocks.py).
+#
+# Le script détecte aussi ces exemples tout seul (appels qui écrivent ou
+# effacent la flash externe, la zone de configuration ou SteamiConfig) ; cette
+# liste les nomme explicitement et sert à ajouter ce que la détection
+# manquerait. Au tag épinglé, liste et détection sont d'accord (test
+# TestDestructifsDuClone).
+
+# Zone de configuration (calibrations comprises).
+# Remplace la configuration et les calibrations par des valeurs de démonstration.
+steami_config/examples/populate_demo_config.py
+# Écrivent dans la zone de configuration.
+steami_config/examples/calibrate_*.py
+# Réécrit la configuration (compteur de démarrages).
+steami_config/examples/boot_counter.py
+# Efface toute la zone de configuration et y écrit des données de test.
+daplink_flash/examples/config_zone.py
+
+# Flash externe du DAPLink : effacée, puis un fichier y est écrit.
+daplink_flash/examples/erase_flash.py
+daplink_flash/examples/sensor_log.py
+daplink_flash/examples/write_csv.py
+bme280/examples/weather_station.py
+wsen-pads/examples/weather_station.py
+lis2mdl/examples/field_logger.py
+wsen-hids/examples/data_logger.py

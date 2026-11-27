@@ -13,6 +13,21 @@ export function etatWebUSB(nav, estFenetrePrincipale) {
   return 'ok';
 }
 
+// La fenêtre de choix a déjà donné l'accès au site : un refus vient du
+// système (Linux sans règle udev) ou d'un autre programme qui tient la carte.
+export const TEXTE_ACCES_REFUSE =
+  "Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte : l'installer, ou glisser le .bin ci-dessous sur le lecteur STEAMI (voir la page Codespace). Sinon, un autre programme ou onglet utilise la carte (Arduino IDE, Codespace…) : le fermer, puis réessayer.";
+
+// Messages de la connexion partagée (carte.mjs), écrits pour les pages
+// Arduino. Exportés pour que le composant MicroPython les reformule
+// (traduireMessageCarte) : il n'a ni bouton « Connecter la carte » ni .bin.
+export const MESSAGE_SANS_CARTE = 'Aucune carte connectée : cliquer sur « Connecter la carte ».';
+export const MESSAGE_FLASH_EN_COURS = 'Téléversement en cours : attendre la fin, puis réessayer.';
+export const MESSAGE_DEBRANCHEE =
+  'La carte a été débranchée : la rebrancher, puis cliquer sur « Connecter la carte ».';
+export const MESSAGE_DAPJS_INTROUVABLE =
+  'Impossible de charger la bibliothèque de téléversement : vérifier la connexion à Internet, puis réessayer.';
+
 // Traduit les erreurs de Chrome (WebUSB et DAP.js) en français.
 export function messageErreur(err) {
   const nom = err?.name || '';
@@ -27,11 +42,7 @@ export function messageErreur(err) {
   if (nom === 'SecurityError' && /permissions policy/i.test(message)) {
     return "Le navigateur interdit l'USB dans cet aperçu : ouvrir la page dans un onglet du navigateur.";
   }
-  // La fenêtre de choix a déjà donné l'accès au site : un refus vient du
-  // système (Linux sans règle udev) ou d'un autre programme qui tient la carte.
-  if (nom === 'SecurityError') {
-    return "Accès à la carte refusé par le système. Sous Linux, il manque sans doute la règle udev de la carte : l'installer, ou glisser le .bin ci-dessous sur le lecteur STEAMI (voir la page Codespace). Sinon, un autre programme ou onglet utilise la carte (Arduino IDE, Codespace…) : le fermer, puis réessayer.";
-  }
+  if (nom === 'SecurityError') return TEXTE_ACCES_REFUSE;
   if (nom === 'NetworkError' && /claim interface/i.test(message)) {
     return 'La carte est déjà utilisée par un autre onglet ou un autre programme : le fermer, puis réessayer.';
   }
@@ -61,14 +72,16 @@ export class ErreurLecteur extends Error {
 export const CONSEIL_REINITIALISATION =
   "débrancher le câble USB et, s'il y en a une, la batterie, attendre quelques secondes, puis rebrancher et réessayer.";
 
-const ECHECS = {
+export const ECHECS = Object.freeze({
   connexion: 'La connexion à la carte a échoué',
   televersement: 'Le téléversement a échoué',
   console: 'La lecture de la console série a échoué',
-};
+  ecriture: "L'envoi à la carte a échoué",
+  redemarrage: 'Le redémarrage de la carte a échoué',
+});
 
 // Message à afficher pour une erreur survenue pendant une étape (connexion,
-// televersement ou console). Ce que messageErreur ne traduit pas (erreurs de
+// televersement, console, ecriture ou redemarrage). Ce que messageErreur ne traduit pas (erreurs de
 // DAP.js, comme « Flash error ») devient une phrase en français qui dit quoi
 // faire, suivie du message d'origine.
 export function messageFrancais(err, etape = 'televersement') {
@@ -80,22 +93,36 @@ export function messageFrancais(err, etape = 'televersement') {
   return `${echec} : ${CONSEIL_REINITIALISATION} (${brut})`;
 }
 
-// Télécharge le .bin d'un exemple. cache: 'no-cache' revalide auprès du
+// Télécharge un .bin du wiki. cache: 'no-cache' revalide auprès du
 // serveur : après un changement de version, on n'envoie pas un ancien .bin
-// gardé par le navigateur.
-export async function telechargerExemple(href, recuperer = fetch) {
+// gardé par le navigateur. quoi / introuvable : ce qui est téléchargé, pour
+// les messages d'erreur.
+async function telechargerBin(href, recuperer, { quoi, introuvable }) {
   let reponse;
   try {
     reponse = await recuperer(href, { cache: 'no-cache' });
     if (reponse.ok) return await reponse.arrayBuffer();
   } catch {
     throw new ErreurLecteur(
-      "Impossible de télécharger l'exemple : vérifier la connexion à Internet, puis réessayer.",
+      `Impossible de télécharger ${quoi} : vérifier la connexion à Internet, puis réessayer.`,
     );
   }
   throw new ErreurLecteur(
-    `Exemple introuvable sur le wiki (erreur ${reponse.status}) : recharger la page, puis réessayer.`,
+    `${introuvable} sur le wiki (erreur ${reponse.status}) : recharger la page, puis réessayer.`,
   );
+}
+
+// Télécharge le .bin d'un exemple.
+export function telechargerExemple(href, recuperer = fetch) {
+  return telechargerBin(href, recuperer, { quoi: "l'exemple", introuvable: 'Exemple introuvable' });
+}
+
+// Télécharge le firmware MicroPython épinglé par le wiki.
+export function telechargerFirmware(href, recuperer = fetch) {
+  return telechargerBin(href, recuperer, {
+    quoi: 'MicroPython',
+    introuvable: 'Firmware MicroPython introuvable',
+  });
 }
 
 // La console suit les nouvelles lignes tant que le lecteur est en bas ; s'il
@@ -249,8 +276,8 @@ export function progressionChangee(avant, apres) {
 }
 
 // Intervalle minimal entre deux clignotements du voyant d'activité série :
-// la console est lue toutes les 10 ms, sans limite la page se redessinerait
-// à chaque paquet.
+// la console est lue en continu, par paquets de 62 octets au plus ; sans
+// limite, la page se redessinerait à chaque paquet.
 export const INTERVALLE_ACTIVITE_MS = 100;
 
 // Faut-il signaler les données série arrivées à l'instant maintenant (ms) ?

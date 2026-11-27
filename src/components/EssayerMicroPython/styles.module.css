@@ -1,0 +1,41 @@
+/* Compléments aux styles d'EssayerExemple (boutons, console, messages),
+   repris tels quels par le composant. Couleurs d'Infima : elles changent avec
+   le thème clair ou sombre. */
+
+.sansWebUSB {
+  margin: 0;
+}
+
+/* Question ou étapes à suivre : bandeau d'avertissement du thème. */
+.encart {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ifm-color-warning-dark);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-warning-contrast-background);
+  color: var(--ifm-color-warning-contrast-foreground);
+}
+
+.encart:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.encart p {
+  margin: 0 0 0.5rem;
+}
+
+.etapes {
+  margin: 0 0 0.5rem;
+}
+
+/* Erreur Python dans la console : même contraste que les messages d'erreur
+   (au moins 4,5:1). */
+.traceback {
+  color: var(--ifm-color-danger-darkest);
+  font-weight: bold;
+}
+
+[data-theme='dark'] .traceback {
+  color: var(--ifm-color-danger-lighter);
+}
