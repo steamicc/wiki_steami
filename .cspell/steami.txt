@@ -230,3 +230,4 @@ redemarrer
 retelecharge
 serie
 daplink
+Zigbee

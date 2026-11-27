@@ -38,10 +38,31 @@ Une pile radio en `(0, 0, 0, 0, 0)` signifie qu'aucune pile n'est installée.
 
 Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît sous les boutons **Téléverser** et **Connecter la carte**, dans un navigateur compatible WebUSB (Chrome ou Edge), grisé tant que la carte n'est pas connectée avec **Connecter la carte**.
 
+![Encadré sous un exemple BLE, carte déconnectée : bouton orange « Connecter la carte », état « Carte : déconnectée », et le bouton grisé « Vérifier la pile radio »](/img/software/pile-radio-wiki-01-bouton.png)
+
 1. Cliquer sur **Vérifier la pile radio**. Une première question prévient que la vérification remplace le programme de la carte par un programme de lecture, et qu'elle efface toute la mémoire du programme : MicroPython et ses fichiers compris. La pile radio, elle, n'est pas touchée. Cliquer sur **Continuer**, ou sur **Annuler** pour ne rien changer.
-2. Le bouton lit les versions du FUS et de la pile radio. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple.
-3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, qui prend quelques minutes, ou sur **Annuler**. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page : un décompte indique le temps restant pendant l'attente de la fin du travail du second cœur.
+
+   ![Première question sous le bouton : la vérification remplace le programme de la carte par un programme de lecture et efface toute la mémoire du programme, la pile radio n'est pas touchée ; boutons « Continuer » et « Annuler »](/img/software/pile-radio-wiki-02-confirmation.png)
+
+2. Le bouton écrit le programme de lecture sur la carte, puis lit les versions du FUS et de la pile radio : une vingtaine de secondes en tout. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple. La console, sous le message, montre les réponses du programme de lecture.
+
+   ![Fin de la vérification : « La pile radio est à jour (BLE HCI Layer 1.20.0). Téléverser l'exemple pour l'essayer. », suivi des réponses du programme de lecture dans la console](/img/software/pile-radio-wiki-03-a-jour.png)
+
+3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, ou sur **Annuler**.
+
+   ![Seconde question (ici sur une carte qui avait déjà la pile, réinstallée pour l'essai) : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée, durée, consigne de ne pas débrancher la carte, de ne pas appuyer sur RESET et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
+
+   L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton efface l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page.
+
+   ![Écriture de la nouvelle pile : état « Carte : téléversement », barre de progression et message « Écriture de la nouvelle pile radio sur la carte… »](/img/software/pile-radio-wiki-05-ecriture.png)
+
+   Pendant que le FUS installe la pile, un décompte d'une minute indique le temps restant.
+
+   ![Attente de la fin de l'installation : « Le FUS installe la pile radio. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page. », puis « Temps restant : 60 s »](/img/software/pile-radio-wiki-06-attente.png)
+
 4. Une fois la pile relue, le bouton affiche qu'elle est installée. **Téléverser ensuite l'exemple** : le programme de lecture occupe encore la carte, et l'exemple le remplace.
+
+   ![Fin de l'installation : « Pile radio BLE HCI Layer 1.20.0 installée. Téléverser l'exemple pour l'essayer. », suivi des réponses du programme de lecture dans la console](/img/software/pile-radio-wiki-07-fin.png)
 
 Si la carte a déjà une pile plus récente que celle du wiki, la seconde question le signale et met en avant **Annuler** : le FUS peut refuser de revenir à une version plus ancienne.
 
@@ -64,7 +85,7 @@ Dans tous les cas, le programme de la carte a été remplacé : téléverser l'e
 
 ## Installer la pile
 
-Ce chemin reste valable pour tous les cas que le bouton ne traite pas. La pile s'installe avec [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash), sous Linux ou Windows. Il suffit du câble USB : l'outil passe par le DAPLink de la carte, sans sonde externe.
+Ce chemin reste valable pour tous les cas que le bouton ne traite pas, et pour une carte qui n'est pas branchée à un ordinateur avec Chrome ou Edge. La pile s'installe avec [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash), sous Linux ou Windows. Il suffit du câble USB : l'outil passe par le DAPLink de la carte, sans sonde externe.
 
 1. Télécharger l'archive `xpack` de l'outil pour son système depuis les [releases](https://github.com/steamicc/DapLink-EasyFlash/releases), en version v1.3 ou plus récente : les versions précédentes n'installent pas de pile radio. L'archive contient OpenOCD.
 2. Brancher la carte, puis lancer l'outil et ouvrir l'onglet **Wireless Stack**.
@@ -86,3 +107,7 @@ Ce chemin reste valable pour tous les cas que le bouton ne traite pas. La pile s
 L'outil installe d'abord son programme d'installation sur le premier cœur. Il met le FUS à jour s'il est antérieur à la version 1.2, puis efface l'ancienne pile et installe la nouvelle. Une mise à jour du FUS ne peut pas être annulée.
 
 La procédure a été vérifiée sur une V1c avec DapLink-EasyFlash v1.3 : pile BLE HCI Layer v1.20.0, FUS 1.2.0. Ensuite, `BLE.begin()` renvoie `1`, et un scan Bluetooth en MicroPython voit les appareils voisins.
+
+## Autres outils
+
+L'outil WebUSB [webusb-wireless-stack](https://github.com/steamicc/steami-tools/tree/main/webusb-wireless-stack) du dépôt steami-tools installe aussi le FUS et une pile radio depuis Chrome ou Edge. Il propose d'autres piles (BLE Stack full ou light, Thread, Zigbee, piles combinées), qui n'ont pas été essayées avec les bibliothèques Arduino et MicroPython de la STeaMi : pour le Bluetooth, préférer BLE HCI Layer, avec le bouton du wiki ou avec DapLink-EasyFlash.
