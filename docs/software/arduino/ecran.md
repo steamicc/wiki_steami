@@ -4,6 +4,7 @@ sidebar_position: 5.2
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+import EssayerExemple from '@site/src/components/EssayerExemple';
 import TOCInline from '@theme/TOCInline';
 
 <!-- cspell:ignore colour hline vline -->
@@ -21,33 +22,19 @@ Avant de commencer, installer la bibliothèque **STeaMi**, version 0.41.0 ou plu
 
 Les exemples de la bibliothèque qui utilisent ces classes sont dans **Fichier → Exemples → STeaMi → STEAMI_BOARD** : la page [Exemples STEAMI_BOARD](./exemples/steami-board) les explique un par un, avec une photo de l'écran et un bouton pour les envoyer sur la carte.
 
+Les croquis suivis d'un bouton **Téléverser** viennent du dépôt [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample), où chacun est compilé pour la STeaMi. Ils y sont republiés sous licence GPL-3.0. Le bouton envoie sur la carte le programme compilé.
+
 Sur cette page :
 
 <TOCInline toc={toc} />
 
 ## Dessiner avec SteamiDisplay
 
-```cpp
-#include <SteamiDisplay.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranBonjour/EcranBonjour.ino
 
-SteamiDisplay ecran;
-
-void setup() {
-  Serial.begin(115200);
-  if (!ecran.begin()) {                    // en premier : l'image prend beaucoup de mémoire
-    Serial.print("Pas d'écran : ");
-    Serial.println(ecran.error());
-    return;
-  }
-  const int16_t cx = ecran.centerX(), cy = ecran.centerY();
-  ecran.clear();                           // fond noir
-  ecran.circle(cx, cy, ecran.radius() - 1, STEAMI_GREEN);
-  ecran.text("Bonjour !", cx - ecran.textWidth("Bonjour !") / 2, cy - ecran.textHeight() / 2);
-  ecran.show();                            // envoie l'image à l'écran
-}
-
-void loop() {}
 ```
+
+<EssayerExemple id="ECRAN/EcranBonjour" source="sample" />
 
 `begin()` reconnaît la release, comme les classes des capteurs, puis démarre son écran : le SSD1327 sur une V1a ou une V1b, le GC9A01 sur une V1c. Le même programme dessine la même image sur les deux : `centerX()`, `centerY()` et `radius()` donnent le centre et le rayon de l'écran rond, `(64, 64)` et 64 sur une V1a ou une V1b, `(120, 120)` et 120 sur une V1c ; `width()` et `height()` donnent sa taille en pixels, `(0, 0)` étant le coin en haut à gauche, `x` vers la droite et `y` vers le bas. Placer les formes à partir du centre, avec des fractions du rayon, donne ainsi la même scène sur les deux écrans.
 
@@ -117,30 +104,11 @@ C'est pourquoi `begin()` s'appelle au tout début de `setup()`, tant que la mém
 
 Pour afficher une mesure sans calculer de coordonnées, `SteamiScreen` place elle-même le texte sur l'écran rond :
 
-```cpp
-#include <SteamiScreen.h>
-#include <SteamiHumidity.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranHumidite/EcranHumidite.ino
 
-SteamiScreen ecran;
-SteamiHumidity humidite;
-
-void setup() {
-  Serial.begin(115200);
-  ecran.begin();                     // en premier, comme pour SteamiDisplay
-  humidite.begin();
-}
-
-void loop() {
-  float h = humidite.read();         // NAN si la mesure manque
-  ecran.clear();
-  ecran.title("Humidité");           // en haut ; sans accent sur une V1a ou une V1b
-  ecran.value(h, "%");               // au centre, unité en dessous ; NAN s'écrit --
-  ecran.bar(h);                      // barre remplie de 0 à 100, vide pour NAN
-  ecran.subtitle(humidite.chip());   // nom du capteur, en bas
-  ecran.show();
-  delay(1000);
-}
 ```
+
+<EssayerExemple id="ECRAN/EcranHumidite" source="sample" />
 
 `SteamiScreen` demande la version 0.38.0 de la bibliothèque. C'est une `SteamiDisplay` : `begin()`, `clear()`, `show()`, `error()`, les couleurs, le texte et les fonctions de dessin ci-dessus restent disponibles. Chaque tour de `loop()` refait toute l'image : `clear()` la remplit de noir, les fonctions dessinent dans l'ordre des appels, et un dessin plus tardif passe par-dessus les précédents, puis `show()` envoie l'image.
 
@@ -336,20 +304,11 @@ Le driver de l'écran de chaque release offre ce que la classe n'a pas, comme le
 
 Écran OLED rond 128 × 128, 16 niveaux de gris (contrôleur SSD1327). Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiSSD1327.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranDriverSsd1327/EcranDriverSsd1327.ino
 
-SteamiSSD1327 oled;
-
-void setup() {
-  oled.begin();
-  oled.fill(0);                       // 0 = noir, 15 = blanc
-  oled.text("Bonjour !", 30, 60, 15);
-  oled.show();                        // envoie l'image à l'écran
-}
-
-void loop() {}
 ```
+
+<EssayerExemple id="ECRAN/EcranDriverSsd1327" source="sample" />
 
 Le dessin se fait en mémoire (`fill`, `pixel`, `line`, `fillRect`, `text`) ; rien n'apparaît avant l'appel à `show()`. Les couleurs vont de `0` (noir) à `15` (blanc).
 
@@ -360,25 +319,11 @@ Exemples à essayer sur la carte : [Exemples SSD1327](./exemples/ssd1327).
 
 Écran TFT rond 240 × 240 en couleur (contrôleur GC9A01). Driver : bibliothèque STeaMi.
 
-```cpp
-#include <SteamiGC9A01.h>
+```cpp file=.external/arduino-steami-sample/examples/ECRAN/EcranDriverGc9a01/EcranDriverGc9a01.ino
 
-SteamiGC9A01 affichage;
-
-void setup() {
-  Serial.begin(115200);
-  if (!affichage.begin()) {               // false si la mémoire manque
-    Serial.println("Mémoire insuffisante pour l'écran");
-    while (true) {}
-  }
-  affichage.fill(GC9A01_BLACK);
-  affichage.text("Bonjour !", 93, 100, GC9A01_WHITE);
-  affichage.fillRect(100, 130, 40, 40, GC9A01_RED);
-  affichage.show();                       // envoie l'image à l'écran
-}
-
-void loop() {}
 ```
+
+<EssayerExemple id="ECRAN/EcranDriverGc9a01" source="sample" />
 
 Le dessin se fait en mémoire, avec les mêmes fonctions que l'écran des V1a et V1b (`fill`, `pixel`, `line`, `fillRect`, `text`) ; rien n'apparaît avant l'appel à `show()`. Les couleurs sont au format RGB565 : constantes `GC9A01_RED`, `GC9A01_BLUE`, `GC9A01_YELLOW`…, ou `SteamiGC9A01::color565(r, g, b)` à partir de valeurs de 0 à 255.
 

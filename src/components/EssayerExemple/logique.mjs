@@ -182,8 +182,23 @@ export function idValide(id) {
   return typeof id === 'string' && /^[A-Z0-9_-]+\/[A-Za-z0-9_]+$/.test(id);
 }
 
-export function urlBin(id) {
-  return `/exemples-arduino/${id}.bin`;
+// Dossiers des .bin selon la source du croquis : les exemples de la
+// bibliothèque (par défaut) ou ceux du dépôt arduino-steami-sample.
+const DOSSIERS_SOURCE = {
+  bibliotheque: '/exemples-arduino',
+  sample: '/exemples-arduino-sample',
+};
+
+export function sourceValide(source) {
+  return (
+    typeof source === 'string' && Object.prototype.hasOwnProperty.call(DOSSIERS_SOURCE, source)
+  );
+}
+
+// null si la source est inconnue (refusée comme un id invalide).
+export function urlBin(id, source = 'bibliotheque') {
+  if (!sourceValide(source)) return null;
+  return `${DOSSIERS_SOURCE[source]}/${id}.bin`;
 }
 
 export function nomFichier(id) {

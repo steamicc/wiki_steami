@@ -21,6 +21,7 @@ import {
   idValide,
   messageStatut,
   nomFichier,
+  sourceValide,
   statutCarte,
   telechargerExemple,
   urlBin,
@@ -331,11 +332,16 @@ function ControlesOuTelechargement({ id, href }) {
   return <Controles id={id} href={href} />;
 }
 
-// id : « COMPOSANT/NomExemple », par exemple « VL53L1X/GestureDetection ».
-export default function EssayerExemple({ id }) {
-  const href = useBaseUrl(urlBin(String(id)));
+// id : « COMPOSANT/NomExemple », par exemple « VL53L1X/GestureDetection »
+// (bibliothèque) ou « CAPTEURS/Distance » (sample).
+// source : 'bibliotheque' (défaut) ou 'sample' (dépôt arduino-steami-sample).
+export default function EssayerExemple({ id, source = 'bibliotheque' }) {
+  const href = useBaseUrl(urlBin(String(id), source) ?? '');
   if (!idValide(id)) {
     return <p className={styles.erreur}>Exemple inconnu : {String(id)}</p>;
+  }
+  if (!sourceValide(source)) {
+    return <p className={styles.erreur}>Source d'exemple inconnue : {String(source)}</p>;
   }
   return (
     <div className={styles.essayer}>

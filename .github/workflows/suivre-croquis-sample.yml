@@ -1,0 +1,311 @@
+# =====================================================================
+# suivre-croquis-sample.yml : suit les releases du dépôt des croquis
+# Arduino du wiki (steamicc/arduino-steami-sample), dont l'archive des
+# croquis précompilés est épinglée dans exemples-arduino-sample.json
+# (version + sha256). Jumeau de suivre-exemples-arduino.yml, qui suit
+# arduino-steami-lib.
+#
+# Une fois par jour (et à la demande), le workflow lit la dernière release
+# publiée du dépôt (ni brouillon ni prerelease : c'est ce que renvoie
+# /releases/latest). Si elle est plus récente que la version épinglée, si
+# elle contient l'archive steami-exemples-<tag>.zip et qu'aucune PR
+# `chore/croquis-sample-<tag>` n'existe (points du tag remplacés par
+# des tirets, ex. chore/croquis-sample-v1-2-3, pour respecter la règle
+# de .validate-branch-namerc.js), il télécharge l'archive, calcule son
+# sha256, met à jour exemples-arduino-sample.json et ouvre la PR. Si la
+# branche existe déjà sans PR (ouverture de la PR échouée lors d'une
+# exécution précédente), il ouvre seulement la PR sur cette branche. Si la
+# PR est déjà ouverte, il vérifie seulement sa fusion automatique. Seules
+# comptent les PR dont la branche est dans ce dépôt (les PR de forks sont
+# ignorées), et la fusion automatique n'est activée que pour une PR
+# ouverte par l'App.
+#
+# Point d'extension : la conversion des croquis en pages du wiki (tâche 14)
+# s'insérera dans l'étape « Crée la branche et épingle la nouvelle
+# archive », entre l'écriture de exemples-arduino-sample.json et le commit.
+# Elle devra d'abord cloner arduino-steami-sample au tag $DERNIERE dans
+# .external/ (comme scripts/fetch-examples.sh) pour lire les .ino, puis
+# ajouter ses fichiers avec git add : le commit n'est plus limité à
+# exemples-arduino-sample.json, et le corps de la PR devra le dire.
+#
+# Tout passe par un jeton d'installation de la GitHub App de l'organisation
+# (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
+# une PR ouverte avec ce jeton déclenche build.yml (pull_request) sans
+# approbation manuelle, contrairement à GITHUB_TOKEN.
+#
+# Fusion automatique : après l'ouverture, la PR passe en fusion automatique
+# (squash) ; GitHub la fusionne dès que le CI est vert. Par sécurité, elle
+# n'est activée que si les règles de main exigent la vérification « build »
+# (ruleset « CI verte avant fusion ») : sans vérification exigée, GitHub
+# fusionnerait tout de suite, même avec un CI rouge. Une PR en brouillon
+# n'est pas fusionnée automatiquement.
+#
+# Prérequis :
+# - secrets RELEASE_APP_ID (identifiant numérique de l'App) et
+#   RELEASE_APP_SECRET (clé privée) dans ce dépôt (secret d'organisation
+#   autorisé sur steamicc/wiki_steami) ;
+# - App installée sur steamicc/wiki_steami, avec Contents et Pull requests
+#   en écriture ;
+# - « Allow auto-merge » coché (Settings > General > Pull Requests) ;
+# - ruleset sur main exigeant la vérification « build ».
+#
+# Neutralisé dans les forks.
+# =====================================================================
+name: suivre-croquis-sample
+
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+# GITHUB_TOKEN ne sert pas : tout passe par le jeton de la GitHub App.
+permissions:
+  contents: read
+
+# Une seule exécution à la fois : deux lancements simultanés créeraient la même branche.
+concurrency:
+  group: suivre-croquis-sample
+  cancel-in-progress: false
+
+jobs:
+  suivre:
+    name: nouvelle release des croquis du sample ?
+    # Ne pas tourner dans les forks.
+    if: github.repository == 'steamicc/wiki_steami'
+    runs-on: ubuntu-latest
+    steps:
+      # Pas de repli sur GITHUB_TOKEN : ses PR attendent une approbation du CI.
+      - name: Vérifie les secrets de la GitHub App
+        env:
+          APP_ID: ${{ secrets.RELEASE_APP_ID }}
+          APP_SECRET: ${{ secrets.RELEASE_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          manquants=()
+          [ -n "$APP_ID" ] || manquants+=(RELEASE_APP_ID)
+          [ -n "$APP_SECRET" ] || manquants+=(RELEASE_APP_SECRET)
+          if [ "${#manquants[@]}" -gt 0 ]; then
+            echo "::error::Secret(s) manquant(s) : ${manquants[*]}. Rendre visibles à ce dépôt les secrets d'organisation RELEASE_APP_ID et RELEASE_APP_SECRET de la GitHub App (ceux de steamicc/arduino-steami-lib), ou les ajouter dans ce dépôt (Settings > Secrets and variables > Actions), et installer l'App sur steamicc/wiki_steami."
+            exit 1
+          fi
+
+      - name: Crée le jeton de la GitHub App
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          # Identifiant numérique de l'App (le secret partagé avec arduino-steami-lib).
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_SECRET }}
+          # Jeton limité à ce dépôt.
+          owner: ${{ github.repository_owner }}
+          repositories: wiki_steami
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Explique l'échec du jeton
+        if: failure() && steps.app.outcome == 'failure'
+        run: |
+          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/wiki_steami avec les droits Contents et Pull requests en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
+          exit 1
+
+      # Le jeton de l'App reste dans .git/config : git ls-remote et git push s'en servent.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Compare la dernière release à la version épinglée
+        id: comparaison
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          actuel=$(jq -r .version exemples-arduino-sample.json)
+          release=$(gh api repos/steamicc/arduino-steami-sample/releases/latest)
+          derniere=$(jq -r .tag_name <<<"$release")
+          for t in "$actuel" "$derniere"; do
+            if ! printf '%s' "$t" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::Tag « $t » invalide : le format attendu est vX.Y.Z"
+              exit 1
+            fi
+          done
+          echo "Version épinglée : $actuel ; dernière release du dépôt sample : $derniere"
+          # Comparaison de versions (sort -V), pas de chaînes : v0.10.0 > v0.9.0.
+          plus_recente=$(printf '%s\n%s\n' "${actuel#v}" "${derniere#v}" | sort -V | tail -n1)
+          if [ "$actuel" = "$derniere" ] || [ "v$plus_recente" != "$derniere" ]; then
+            echo "Les croquis du sample sont à jour."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          archive="steami-exemples-$derniere.zip"
+          if ! jq -e --arg a "$archive" 'any(.assets[]; .name == $a)' <<<"$release" >/dev/null; then
+            echo "::warning::La release $derniere n'a pas (encore) l'archive $archive : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Empreinte publiée par GitHub pour l'archive (« sha256:<hex> »), vide si absente.
+          empreinte=$(jq -r --arg a "$archive" \
+            'first(.assets[] | select(.name == $a)) | .digest // ""' <<<"$release")
+          # Points remplacés par des tirets : .validate-branch-namerc.js refuse les points
+          # après chore/, et le hook pre-commit bloquerait les commits faits sur la branche.
+          branche="chore/croquis-sample-${derniere//./-}"
+          # --head filtre sur le seul nom de branche : il trouve aussi les PR venues
+          # d'un fork avec une branche du même nom. On ne garde que les PR dont la
+          # branche est dans ce dépôt (isCrossRepository faux).
+          prs=$(gh pr list --state all --head "$branche" --limit 100 \
+            --json number,state,isCrossRepository,author \
+            --jq '[.[] | select(.isCrossRepository | not)]')
+          # PR déjà ouverte : on vérifie seulement sa fusion automatique, et
+          # seulement si c'est le robot qui l'a ouverte (gh écrit app/<slug>).
+          ouverte=$(jq -c 'first(.[] | select(.state == "OPEN")) // empty' <<<"$prs")
+          if [ -n "$ouverte" ]; then
+            pr=$(jq -r .number <<<"$ouverte")
+            auteur=$(jq -r .author.login <<<"$ouverte")
+            if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+              echo "::warning::La PR #$pr ($branche) a été ouverte par $auteur, pas par le robot : fusion automatique non activée."
+              echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "La PR #$pr est déjà ouverte pour $branche : vérification de sa fusion automatique."
+            {
+              echo "nouvelle=true"
+              echo "pousser=false"
+              echo "ouvrir=false"
+              echo "pr=$pr"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # PR fermée ou fusionnée : on ne recommence pas.
+          if [ "$(jq length <<<"$prs")" -gt 0 ]; then
+            echo "Une PR fermée ou fusionnée existe déjà pour $branche : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Branche sans PR : une exécution précédente a poussé la branche, puis
+          # l'ouverture de la PR a échoué. On garde la branche et on ouvre la PR.
+          pousser=true
+          if git ls-remote --exit-code --heads origin "$branche" >/dev/null 2>&1; then
+            echo "::warning::La branche $branche existe sans PR : ouverture de la PR sur cette branche."
+            pousser=false
+          fi
+          {
+            echo "nouvelle=true"
+            echo "pousser=$pousser"
+            echo "ouvrir=true"
+            echo "actuel=$actuel"
+            echo "derniere=$derniere"
+            echo "archive=$archive"
+            echo "empreinte=$empreinte"
+            echo "branche=$branche"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Crée la branche et épingle la nouvelle archive
+        if: steps.comparaison.outputs.nouvelle == 'true' && steps.comparaison.outputs.pousser == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          ARCHIVE: ${{ steps.comparaison.outputs.archive }}
+          EMPREINTE: ${{ steps.comparaison.outputs.empreinte }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          # L'archive n'est pas décompressée ici : seul son sha256 est utile.
+          dl="$RUNNER_TEMP/croquis-sample"
+          mkdir -p "$dl"
+          curl -fL --retry 3 --silent --show-error -o "$dl/$ARCHIVE" \
+            "https://github.com/steamicc/arduino-steami-sample/releases/download/$DERNIERE/$ARCHIVE"
+          sha=$(sha256sum "$dl/$ARCHIVE" | cut -d' ' -f1)
+          echo "sha256 de $ARCHIVE : $sha"
+          # Si GitHub publie une empreinte pour l'archive, elle doit correspondre au fichier reçu.
+          if [ -n "$EMPREINTE" ] && [ "$EMPREINTE" != "sha256:$sha" ]; then
+            echo "::error::sha256 différent de l'empreinte publiée par GitHub ($EMPREINTE)"
+            exit 1
+          fi
+          # Même forme que le fichier actuel (indentation 2, saut de ligne final) : Prettier l'accepte.
+          jq -n --arg v "$DERNIERE" --arg s "$sha" '{version: $v, sha256: $s}' > exemples-arduino-sample.json
+          # point d'extension : conversion des croquis en ligne (tâche 14)
+          # (insérer ici, avant le commit : la conversion écrit ses fichiers puis les ajoute avec git add)
+          # Commit au nom du compte robot de l'App (<slug>[bot]).
+          bot_id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git switch -c "$BRANCHE"
+          git add exemples-arduino-sample.json
+          git commit -m "chore(configs): croquis du sample $DERNIERE"
+          git push origin "$BRANCHE"
+
+      - name: Ouvre la PR
+        id: ouverture
+        if: steps.comparaison.outputs.nouvelle == 'true' && steps.comparaison.outputs.ouvrir == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          ACTUEL: ${{ steps.comparaison.outputs.actuel }}
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          ARCHIVE: ${{ steps.comparaison.outputs.archive }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          corps="$RUNNER_TEMP/corps.md"
+          cat > "$corps" <<EOT
+          Le dépôt des croquis Arduino du wiki a une nouvelle release : \`$DERNIERE\` (le wiki épingle \`$ACTUEL\`).
+          https://github.com/steamicc/arduino-steami-sample/releases/tag/$DERNIERE
+
+          Cette PR met à jour \`exemples-arduino-sample.json\` : la version et le sha256 de l'archive \`$ARCHIVE\`, calculé sur le fichier de la release.
+
+          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
+
+          La fusion automatique (squash) est activée : la PR est fusionnée dès que le CI est vert, y compris après des commits ajoutés sur la branche. Pour l'éviter, passer la PR en brouillon : désactiver seulement la fusion automatique ne suffit pas, le robot la réactive à son passage suivant.
+          EOT
+          url=$(gh pr create --base main --head "$BRANCHE" \
+            --title "chore(configs): croquis du sample $DERNIERE" \
+            --body-file "$corps")
+          echo "PR ouverte : $url"
+          echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Active la fusion automatique
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
+          # ou ouverte par quelqu'un d'autre que le robot.
+          etat=$(gh pr view "$PR" --json isCrossRepository,author,isDraft,autoMergeRequest)
+          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
+            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
+            exit 1
+          fi
+          auteur=$(jq -r .author.login <<<"$etat")
+          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
+            exit 1
+          fi
+          # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
+          # tout de suite, même avec un CI rouge : on exige la vérification « build ».
+          regles=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main")
+          if ! jq -e 'any(.[]; .type == "required_status_checks"
+                and any(.parameters.required_status_checks[]; .context == "build"))' \
+                <<<"$regles" >/dev/null; then
+            echo "::warning::Fusion automatique non activée pour la PR #$PR : main n'exige pas la vérification « build ». Créer d'abord un ruleset « CI verte avant fusion » sur main qui exige la vérification « build » (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
+            exit 0
+          fi
+          if jq -e .isDraft <<<"$etat" >/dev/null; then
+            echo "La PR #$PR est en brouillon : fusion automatique non activée."
+            exit 0
+          fi
+          if jq -e '.autoMergeRequest != null' <<<"$etat" >/dev/null; then
+            echo "La fusion automatique de la PR #$PR est déjà activée."
+            exit 0
+          fi
+          if ! gh pr merge "$PR" --auto --squash; then
+            echo "::error::Échec de l'activation de la fusion automatique de la PR #$PR : vérifier « Allow auto-merge » et la fusion squash (Settings > General > Pull Requests)."
+            exit 1
+          fi
+          echo "Fusion automatique (squash) activée pour la PR #$PR : fusion dès que le CI est vert."

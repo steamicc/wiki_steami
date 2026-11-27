@@ -22,20 +22,45 @@
 # contrôle a lieu une fois le verrou pris : une exécution qui a attendu trouve
 # le résultat de la précédente et s'arrête sans rien télécharger.
 # FORCER_EXEMPLES_ARDUINO=1 force le téléchargement.
+#
+# Le script sert deux sources, choisies par son premier argument :
+#   (aucun) ou bibliotheque : arduino-steami-lib (exemples-arduino.json,
+#                             static/exemples-arduino/, .external/arduino-steami/)
+#   sample                  : arduino-steami-sample (exemples-arduino-sample.json,
+#                             static/exemples-arduino-sample/,
+#                             .external/arduino-steami-sample/)
+# Chaque source a son verrou, son épinglage et ses cibles : elles ne s'écrasent pas.
 
 set -euo pipefail
 
-REPO="steamicc/arduino-steami"
-PIN="exemples-arduino.json"
-SRC_DIR=".external/arduino-steami"
-DEST="static/exemples-arduino"
+SOURCE="${1:-bibliotheque}"
+case "$SOURCE" in
+  bibliotheque)
+    REPO="steamicc/arduino-steami"
+    PIN="exemples-arduino.json"
+    SRC_DIR=".external/arduino-steami"
+    DEST="static/exemples-arduino"
+    LOCK=".external/.verrou-exemples-arduino"
+    ;;
+  sample)
+    REPO="steamicc/arduino-steami-sample"
+    PIN="exemples-arduino-sample.json"
+    SRC_DIR=".external/arduino-steami-sample"
+    DEST="static/exemples-arduino-sample"
+    LOCK=".external/.verrou-exemples-arduino-sample"
+    ;;
+  *)
+    echo "Usage : fetch-arduino-examples.sh [bibliotheque|sample]" >&2
+    exit 2
+    ;;
+esac
+NOM_REPO="${REPO#steamicc/}"
 
 VERSION=$(node -p "require('./$PIN').version")
 SHA256=$(node -p "require('./$PIN').sha256")
 ZIP="steami-exemples-${VERSION}.zip"
 URL="https://github.com/${REPO}/releases/download/${VERSION}/${ZIP}"
 
-LOCK=".external/.verrou-exemples-arduino"
 ATTENTE="${ATTENTE_VERROU_EXEMPLES_ARDUINO:-600}"
 
 mkdir -p .external "$(dirname "$DEST")"
@@ -44,7 +69,7 @@ mkdir -p .external "$(dirname "$DEST")"
 if command -v flock >/dev/null 2>&1; then
   exec 9>"$LOCK"
   if ! flock -n 9; then
-    echo "Une autre exécution de fetch-arduino-examples.sh est en cours : attente de sa fin (${ATTENTE} s au plus)..."
+    echo "Une autre exécution de fetch-arduino-examples.sh ($SOURCE) est en cours : attente de sa fin (${ATTENTE} s au plus)..."
     if ! flock -w "$ATTENTE" 9; then
       echo "Erreur : le verrou $LOCK est toujours pris après ${ATTENTE} s, abandon" >&2
       exit 1
@@ -93,12 +118,39 @@ if [ -n "$(find "$TMP/out" -type l)" ]; then
   exit 1
 fi
 [ -f "$TMP/out/index.json" ] || { echo "Erreur : index.json absent de l'archive" >&2; exit 1; }
+# La version annoncée par index.json doit être le tag épinglé : sinon l'archive
+# est incompatible (et le saut « déjà présent » échouerait à chaque exécution).
+VERSION_ARCHIVE=$(node -p "const i = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); i && i.version" "$TMP/out/index.json" 2>/dev/null || true)
+if [ "$VERSION_ARCHIVE" != "$VERSION" ]; then
+  echo "Erreur : index.json de l'archive annonce la version '${VERSION_ARCHIVE:-?}' au lieu de ${VERSION} (version illisible ou différente du tag épinglé dans ${PIN})" >&2
+  exit 1
+fi
+# Chaque entrée de l'index doit avoir un id conforme, un champ bin égal à
+# <id>.bin et ce binaire dans l'archive : sinon les boutons du wiki
+# demanderaient des .bin introuvables (404 en production).
+if ! ERREUR_INDEX=$(node -e '
+const fs = require("fs");
+const [fichier, dossier] = process.argv.slice(1);
+const index = JSON.parse(fs.readFileSync(fichier, "utf8"));
+if (!Array.isArray(index.exemples)) { console.log("exemples n'"'"'est pas une liste"); process.exit(1); }
+const motif = /^[A-Z0-9_-]+\/[A-Za-z0-9_]+$/;
+for (const e of index.exemples) {
+  const id = e && e.id;
+  if (typeof id !== "string" || !motif.test(id)) { console.log("id non conforme : " + JSON.stringify(id)); process.exit(1); }
+  if (e.bin !== id + ".bin") { console.log("bin de " + id + " vaut " + JSON.stringify(e.bin) + " au lieu de " + id + ".bin"); process.exit(1); }
+  const chemin = dossier + "/" + e.bin;
+  if (!fs.existsSync(chemin) || !fs.statSync(chemin).isFile()) { console.log("binaire absent de l'"'"'archive : " + e.bin); process.exit(1); }
+}
+' "$TMP/out/index.json" "$TMP/out" 2>&1); then
+  echo "Erreur : index.json de l'archive incompatible : ${ERREUR_INDEX}" >&2
+  exit 1
+fi
 # Empreinte de l'archive vérifiée : permet de sauter le téléchargement la fois suivante.
 printf '%s\n' "$SHA256" > "$TMP/out/.sha256"
 
 NEW_SRC=""
 if [ "$CURRENT" != "$VERSION" ]; then
-  echo "Clonage de arduino-steami ${VERSION}..."
+  echo "Clonage de ${NOM_REPO} ${VERSION}..."
   git clone --depth 1 --quiet --branch "$VERSION" "https://github.com/${REPO}.git" "$TMP/src"
   NEW_SRC="$TMP/src"
 fi
@@ -128,4 +180,4 @@ if [ -n "$NEW_SRC" ]; then
   installer "$NEW_SRC" "$SRC_DIR" "$TMP/old-src"
 fi
 echo "Exemples Arduino prêts dans $DEST"
-echo "arduino-steami ${VERSION} prêt dans $SRC_DIR"
+echo "${NOM_REPO} ${VERSION} prêt dans $SRC_DIR"

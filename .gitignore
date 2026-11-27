@@ -5,6 +5,7 @@ build/
 __pycache__/
 *.pyc
 static/exemples-arduino/
+static/exemples-arduino-sample/
 static/micropython/
 static/daplink/
 static/pile-radio/
