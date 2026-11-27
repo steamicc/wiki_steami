@@ -136,6 +136,23 @@ export function boutonPileActif(etatCarte, etatPile) {
   );
 }
 
+// Que faire du focus demandé par un clic du bloc (Vérifier, réponse d'un
+// encart, Plus tard), le bouton cliqué ayant disparu ou étant grisé ?
+// - 'oublier' : une question ou les étapes du DAPLink le prennent
+//   elles-mêmes ; ou le parcours est fini alors que le bouton reste inactif
+//   (carte perdue ou occupée) : garder la demande ferait sauter le focus
+//   plus tard, au moment d'une reconnexion, peut-être sous un autre
+//   exemple ;
+// - 'attendre' : le parcours tient encore la carte, ou attend la première
+//   réponse ;
+// - 'focaliser' : le bouton est de nouveau actif.
+export function issueFocus({ libre, question, etat }) {
+  if (question) return 'oublier';
+  if (libre) return 'focaliser';
+  if (estOccupee(etat) || etat.etape === 'confirmation-verification') return 'attendre';
+  return 'oublier';
+}
+
 // Téléverser et Déconnecter (EssayerExemple), sous tous les exemples : grisés
 // pendant une opération de la carte et pendant toute étape occupée de la
 // vérification, qui tient la carte.

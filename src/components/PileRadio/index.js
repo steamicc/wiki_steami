@@ -13,6 +13,7 @@ import {
   contenuEncart,
   creerSuiviOperateur,
   doitAbandonner,
+  issueFocus,
   lireForcer,
   messageEtape,
   questionEnAttente,
@@ -119,19 +120,17 @@ export default function PileRadio({ id }) {
     if (!etatCarte.connectee && questionEnAttente(etat, id)) parcoursPile.annuler();
   }, [etatCarte.connectee, etat, id]);
 
+  // La demande ne vit que le temps du parcours (voir issueFocus).
   useLayoutEffect(() => {
     if (!focaliserApresRef.current) return;
-    // Une question ou les étapes du DAPLink prennent elles-mêmes le focus.
-    if (encart || etapesDaplink) {
-      focaliserApresRef.current = false;
-      return;
-    }
-    if (!libre) return;
+    const issue = issueFocus({ libre, question: Boolean(encart || etapesDaplink), etat });
+    if (issue === 'attendre') return;
     focaliserApresRef.current = false;
+    if (issue === 'oublier') return;
     const actuel = document.activeElement;
     if (actuel && actuel !== document.body) return;
     boutonRef.current?.focus();
-  }, [libre, encart, etapesDaplink, etat.etape]);
+  }, [libre, encart, etapesDaplink, etat]);
 
   function verifier() {
     focaliserApres();

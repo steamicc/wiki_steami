@@ -15,6 +15,7 @@ import {
   creerSuiviOperateur,
   doitAbandonner,
   erreurCarteVisible,
+  issueFocus,
   lireForcer,
   messageEtape,
   operateurSurCarte,
@@ -249,6 +250,44 @@ describe('controlesOccupes', () => {
   it('libres carte libre, vérification au repos, en question préalable ou finie', () => {
     for (const etape of ['repos', 'confirmation-verification', 'a-jour', 'fini', 'erreur']) {
       assert.equal(controlesOccupes(CARTE_LIBRE, pile({ etape })), false, etape);
+    }
+  });
+});
+
+describe('issueFocus', () => {
+  it('bouton de nouveau actif après le parcours : focaliser', () => {
+    assert.equal(
+      issueFocus({ libre: true, question: false, etat: pile({ etape: 'a-jour' }) }),
+      'focaliser',
+    );
+  });
+
+  it('une question ou les étapes du DAPLink prennent le focus : oublier', () => {
+    for (const libre of [true, false]) {
+      const etat = pile({ etape: 'proposition' });
+      assert.equal(issueFocus({ libre, question: true, etat }), 'oublier');
+    }
+  });
+
+  it('parcours en cours (étape occupée ou première question) : attendre', () => {
+    for (const etape of ['operateur', 'lecture', 'suppression', 'attente', 'relecture']) {
+      assert.equal(
+        issueFocus({ libre: false, question: false, etat: pile({ etape }) }),
+        'attendre',
+        etape,
+      );
+    }
+    const etat = pile({ etape: 'confirmation-verification' });
+    assert.equal(issueFocus({ libre: false, question: false, etat }), 'attendre');
+  });
+
+  it('parcours fini avec le bouton inactif (carte perdue, occupée) : oublier sans focaliser', () => {
+    for (const etape of ['erreur', 'fini', 'repos', 'a-jour']) {
+      assert.equal(
+        issueFocus({ libre: false, question: false, etat: pile({ etape }) }),
+        'oublier',
+        etape,
+      );
     }
   });
 });
