@@ -3,11 +3,17 @@ title: Pile radio Bluetooth
 sidebar_position: 8
 ---
 
+import TOCInline from '@theme/TOCInline';
+
 # Pile radio Bluetooth
 
 Le STM32WB55 a deux cœurs. Le programme (Arduino, MicroPython…) tourne sur le premier. La radio Bluetooth est pilotée par le second, qui exécute une **pile radio** fournie par STMicroelectronics. Cette pile s'installe à part, une seule fois : téléverser un programme ou changer de firmware ne l'efface pas.
 
 Sans pile radio, le Bluetooth ne démarre pas. En Arduino, `BLE.begin()` (bibliothèque STM32duinoBLE) renvoie `0`. Le reste de la carte fonctionne normalement.
+
+Sur cette page :
+
+<TOCInline toc={toc} maxHeadingLevel={2} />
 
 ## Quelle pile choisir
 
@@ -28,9 +34,35 @@ print(stm.rfcore_fw_version(1))  # pile radio, par exemple (1, 20, 0, 0, 2)
 
 Une pile radio en `(0, 0, 0, 0, 0)` signifie qu'aucune pile n'est installée.
 
+## Depuis le wiki
+
+Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouton **Vérifier la pile radio** lit la pile installée sur la carte et, si besoin, installe la pile BLE HCI Layer 1.20.0, sans autre outil que le navigateur. Il apparaît à côté de **Téléverser**, dans un navigateur compatible WebUSB (Chrome ou Edge), et il est actif une fois la carte connectée avec **Connecter la carte**.
+
+1. Cliquer sur **Vérifier la pile radio**. Une première question prévient que la vérification remplace le programme de la carte par un programme de lecture, et qu'elle efface toute la mémoire du programme : MicroPython et ses fichiers compris. La pile radio, elle, n'est pas touchée. Cliquer sur **Continuer**, ou sur **Annuler** pour ne rien changer.
+2. Le bouton lit les versions du FUS et de la pile radio. Si la pile installée est celle du wiki, le message « La pile radio est à jour » s'affiche, et il reste à téléverser l'exemple.
+3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne. Cliquer sur **Installer la pile radio** pour lancer l'installation, qui prend quelques minutes, ou sur **Annuler**. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page : un décompte indique le temps restant pendant l'attente de la fin du travail du second cœur.
+4. Une fois la pile relue, le bouton affiche qu'elle est installée. **Téléverser ensuite l'exemple** : le programme de lecture occupe encore la carte, et l'exemple le remplace.
+
+Si la carte a déjà une pile plus récente que celle du wiki, la seconde question le signale et met en avant **Annuler** : le FUS peut refuser de revenir à une version plus ancienne.
+
+### Condition : le DAPLink du wiki
+
+L'installation exige que la carte ait le DAPLink proposé par le wiki, car une installation interrompue avec un autre DAPLink peut laisser la carte sans pile radio. Sinon, la question ne propose pas **Installer la pile radio** : elle propose **Mettre à jour le DAPLink…**, qui guide la mise à jour pas à pas, puis il suffit de cliquer de nouveau sur **Vérifier la pile radio**. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non conforme. **Plus tard** ferme la question : la vérification a eu lieu, l'installation est reportée.
+
+### Limites
+
+Le bouton n'installe que la pile BLE HCI Layer 1.20.0. Dans les cas suivants, il n'installe rien et renvoie vers [DapLink-EasyFlash](#installer-la-pile) :
+
+- un FUS antérieur à la version 1.2, ou de version majeure 2 et plus : le bouton ne met **jamais** le FUS à jour ;
+- une autre pile voulue que BLE HCI Layer 1.20.0 (Full, extended, Thread, Zigbee…) : le bouton ne les propose pas, et remplace une pile d'un autre type par BLE HCI Layer seulement sur confirmation ;
+- une pile radio arrêtée qui ne redémarre pas ;
+- une installation qui échoue ou s'interrompt après l'effacement de l'ancienne pile.
+
+Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
+
 ## Installer la pile
 
-La pile s'installe avec [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash), sous Linux ou Windows. Il suffit du câble USB : l'outil passe par le DAPLink de la carte, sans sonde externe.
+Ce chemin reste valable pour tous les cas que le bouton ne traite pas. La pile s'installe avec [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash), sous Linux ou Windows. Il suffit du câble USB : l'outil passe par le DAPLink de la carte, sans sonde externe.
 
 1. Télécharger l'archive `xpack` de l'outil pour son système depuis les [releases](https://github.com/steamicc/DapLink-EasyFlash/releases), en version v1.3 ou plus récente : les versions précédentes n'installent pas de pile radio. L'archive contient OpenOCD.
 2. Brancher la carte, puis lancer l'outil et ouvrir l'onglet **Wireless Stack**.

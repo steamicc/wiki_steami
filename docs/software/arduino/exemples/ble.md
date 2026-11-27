@@ -10,6 +10,8 @@ import TOCInline from '@theme/TOCInline';
 
 # Exemples BLE : Bluetooth Low Energy
 
+Avant le premier essai sur une carte neuve, ou si `BLE.begin()` échoue, cliquer sur **Vérifier la pile radio**, sous chaque exemple : le bouton lit la pile radio de la carte et l'installe si besoin (voir [Depuis le wiki](/docs/software/pile-radio#depuis-le-wiki)).
+
 Le Bluetooth Low Energy (BLE) permet à la carte d'échanger avec d'autres appareils par radio, dans la bande des 2,4 GHz. Les exemples de cette page n'en utilisent que la forme la plus simple, sans connexion : une carte **diffuse des annonces** (_advertising_), de courts paquets radio répétés à intervalle régulier, et une autre carte **les écoute** (_scan_) en mesurant la force du signal reçu, le **RSSI** (_Received Signal Strength Indicator_). Plus les deux cartes sont proches, plus le signal reçu est fort : de ce RSSI, les exemples tirent une proximité, puis une distance, puis une position dans une pièce.
 
 Sur cette page :
