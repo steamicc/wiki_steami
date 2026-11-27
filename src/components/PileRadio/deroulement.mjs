@@ -38,10 +38,14 @@
 //   quels après DELETE, sans nouvelle requête ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
 //   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F) ;
+// - UPGRADE muet 10 s : la commande est écrite, le parcours continue vers
+//   l'attente et la relecture, qui décide (une ligne d'erreur du FUS reste
+//   un échec immédiat) ;
 // - relecture après UPGRADE : double STATUS (attente tant que le FUS
-//   travaille), puis toujours VERSION et START ; la pile relue décide (pile
-//   épinglée : réussite, même si last_fus_status ou last_ws_status est non
-//   nul ; sinon échec, avec le texte du code s'il est non nul).
+//   travaille), puis toujours VERSION et START (START tenté aussi si VERSION
+//   ne répond pas) ; la pile relue décide (pile épinglée : réussite, même si
+//   last_fus_status ou last_ws_status est non nul ; sinon échec, avec le
+//   texte du code s'il est non nul).
 import {
   decisionFus,
   decisionPile,
@@ -533,13 +537,22 @@ export function creerParcoursPile() {
     }
 
     // 4. Installation. À partir d'ici, plus d'annulation ni de START sur une
-    // erreur : la pile est peut-être effacée.
+    // erreur (sauf après le double STATUS de la relecture, qui a arrêté la
+    // pile) : la pile est peut-être effacée.
     supprimee = true;
     const perdue = () => {
       poser({ etape: 'erreur', decompte: null, erreur: TEXTE_PILE_PEUT_ETRE_EFFACEE });
       return { fin: 'erreur' };
     };
     let relecture = false;
+    // UPGRADE resté muet 10 s : la commande est écrite, le FUS travaille
+    // peut-être. Le parcours continue vers l'attente et la relecture, qui
+    // décide ; si la relecture reste muette elle aussi, rien ne dit que
+    // l'installation a eu lieu.
+    let upgradeMuet = false;
+    // Double STATUS de la relecture lu : la pile est arrêtée, START est tenté
+    // même si le VERSION qui suit ne répond pas.
+    let statusRelu = false;
     try {
       poser({ etape: 'suppression' });
       await operateur.supprimer();
@@ -549,7 +562,13 @@ export function creerParcoursPile() {
       // les octets téléchargés avant DELETE.
       if (!(await carte.flasherDonnees(id, installation))) return perdue();
       poser({ etape: 'upgrade' });
-      await operateur.upgrade({ surLigne: () => {} });
+      try {
+        await operateur.upgrade({ surLigne: () => {} });
+      } catch (err) {
+        // Un code d'erreur du FUS (ErreurFus) reste un échec immédiat.
+        if (!(err instanceof ErreurDelaiOperateur)) throw err;
+        upgradeMuet = true;
+      }
 
       // 5. Une minute sans rien envoyer, avec un décompte.
       for (let reste = delais.attenteApresUpgrade; reste > 0; ) {
@@ -576,6 +595,7 @@ export function creerParcoursPile() {
         await attendre(delais.pasRelecture);
         if (!carte.etat.connectee) return perdue();
       }
+      statusRelu = true;
       // Code de la dernière opération du FUS ou de la pile (second STATUS,
       // avec last_fus_status). Son sens après une installation réussie n'a
       // jamais été relevé sur la carte (essai préalable : 0, pile en
@@ -613,10 +633,25 @@ export function creerParcoursPile() {
         poser({ etape: 'erreur', decompte: null, erreur: texteEchecInstallation(err.code) });
         return { fin: 'erreur' };
       }
-      // Operator muet après l'installation, carte toujours là : ne pas
-      // conclure à un échec.
+      // Operator muet après l'installation, carte toujours là.
       if (relecture && err instanceof ErreurDelaiOperateur && carte.etat.connectee) {
-        poser({ etape: 'fini', message: TEXTE_SANS_REPONSE });
+        // VERSION muet après le double STATUS, qui a arrêté la pile : START
+        // avant de conclure.
+        let relancee = true;
+        if (statusRelu) {
+          try {
+            await operateur.relancer();
+          } catch {
+            relancee = false;
+          }
+        }
+        // UPGRADE muet aussi : rien ne dit que l'installation a eu lieu.
+        if (upgradeMuet) return perdue();
+        // Sinon, ne pas conclure à un échec.
+        poser({
+          etape: 'fini',
+          message: relancee ? TEXTE_SANS_REPONSE : `${TEXTE_SANS_REPONSE} ${TEXTE_RELANCE_RATEE}`,
+        });
         return { fin: 'sans-reponse' };
       }
       return perdue();

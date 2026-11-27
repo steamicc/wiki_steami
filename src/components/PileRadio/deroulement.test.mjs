@@ -17,6 +17,7 @@ import {
   TEXTE_PILE_ABSENTE_APRES,
   TEXTE_PILE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
+  TEXTE_RELANCE_RATEE,
   TEXTE_SANS_REPONSE,
   TEXTE_TELECHARGEMENT_PILE,
   creerParcoursPile,
@@ -983,18 +984,151 @@ describe('relecture après UPGRADE', () => {
     assert.notEqual(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
     assert.match(p.parcours.etat.erreur, /1\.19\.0/);
   });
+});
 
-  it('ErreurDelaiOperateur pendant l upgrade : pile peut-être effacée, un seul DELETE', async () => {
+// UPGRADE muet 10 s (ErreurDelaiOperateur) : la commande est écrite et le FUS
+// travaille peut-être. Le parcours continue comme si elle était acceptée :
+// une minute d'attente, puis la relecture décide.
+describe('UPGRADE sans réponse', () => {
+  const muet = { upgrade: [new ErreurDelaiOperateur('UPGRADE')] };
+
+  it('pile épinglée relue : réussite après l attente d une minute', async () => {
     const p = preparer({
-      operateur: { ...sansPile, upgrade: [new ErreurDelaiOperateur('UPGRADE')] },
+      operateur: { ...muet, version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS] },
+    });
+    const etapes = [];
+    p.parcours.abonner((e) => {
+      if (etapes.at(-1) !== e.etape) etapes.push(e.etape);
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    const attentesAvant = p.attentes.length;
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+    assert.equal(p.journal.filter((l) => l === 'UPGRADE').length, 1);
+    assert.equal(p.attentes.slice(attentesAvant).filter((ms) => ms === 1000).length, 60);
+    assert.deepEqual(etapes.slice(-4), ['upgrade', 'attente', 'relecture', 'fini']);
+    assert.equal(p.parcours.etat.versions.relue, '1.20.0');
+    assert.notEqual(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+  });
+
+  it('pile absente à la relecture : échec qui renvoie vers EasyFlash', async () => {
+    const p = preparer({ operateur: { ...muet, ...sansPile } });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ABSENTE_APRES);
+    assert.match(p.parcours.etat.erreur, /EasyFlash/);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
+
+  it('autre pile relue : échec qui renvoie vers EasyFlash', async () => {
+    const p = preparer({
+      operateur: {
+        ...muet,
+        version: [
+          VERSION_SANS_PILE,
+          VERSION_SANS_PILE,
+          { ...VERSION_FUS, copro_fw_version: '1.19.0' },
+        ],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, texteAutrePile('1.19.0', '1.20.0'));
+  });
+
+  it('relecture muette aussi : pile peut-être effacée, sans START', async () => {
+    const p = preparer({
+      operateur: {
+        ...muet,
+        ...sansPile,
+        status: [STATUS_REPOS, STATUS_REPOS, new ErreurDelaiOperateur('STATUS')],
+      },
     });
     const fin = verifierConfirme(p);
     await etape(p.parcours, 'proposition');
     p.parcours.confirmer('installer');
     assert.deepEqual(await fin, { fin: 'erreur' });
     assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
-    assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS']);
+  });
+
+  it('carte perdue pendant l attente : pile peut-être effacée', async () => {
+    const p = preparer({ operateur: { ...muet, ...sansPile } });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.abonner((e) => {
+      if (e.etape === 'attente') p.carte.etat = { ...p.carte.etat, connectee: false };
+    });
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
     assert.deepEqual(apres(p.journal, 'UPGRADE'), []);
+  });
+
+  it('VERSION de la relecture muet aussi : START tenté, puis pile peut-être effacée', async () => {
+    const p = preparer({
+      operateur: {
+        ...muet,
+        version: [VERSION_SANS_PILE, VERSION_SANS_PILE, new ErreurDelaiOperateur('VERSION')],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
+
+  it('ErreurFus pendant l upgrade reste un échec immédiat, sans attente', async () => {
+    const p = preparer({ operateur: { ...sansPile, upgrade: [new ErreurFus(4)] } });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    const attentesAvant = p.attentes.length;
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.ok(p.parcours.etat.erreur.includes(texteErreurFus(4)));
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), []);
+    assert.ok(!p.attentes.slice(attentesAvant).includes(1000));
+  });
+});
+
+// VERSION de la relecture sans réponse : le double STATUS qui le précède a
+// arrêté la pile, START est tenté avant de conclure.
+describe('VERSION de la relecture sans réponse', () => {
+  // Une file neuve par test : le faux operator consomme ses files.
+  const versionMuette = () => ({
+    version: [VERSION_SANS_PILE, VERSION_SANS_PILE, new ErreurDelaiOperateur('VERSION')],
+  });
+
+  it('START tenté, puis fin sans réponse', async () => {
+    const p = preparer({ operateur: versionMuette() });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'sans-reponse' });
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+    assert.equal(p.parcours.etat.etape, 'fini');
+    assert.equal(p.parcours.etat.message, TEXTE_SANS_REPONSE);
+  });
+
+  it('START raté : fin sans réponse, invitation à relancer la pile', async () => {
+    const p = preparer({
+      operateur: { ...versionMuette(), relancer: [new Error('liaison perdue')] },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'sans-reponse' });
+    assert.equal(apres(p.journal, 'UPGRADE').at(-1), 'START');
+    assert.equal(p.parcours.etat.message, `${TEXTE_SANS_REPONSE} ${TEXTE_RELANCE_RATEE}`);
   });
 });
 
@@ -1356,6 +1490,18 @@ describe('avec le vrai operator', () => {
     };
     delete p.deps.creerOperateur;
   }
+
+  it('UPGRADE sans aucune ligne : attente, relecture de la pile installée, fini', async () => {
+    const p = preparer();
+    brancher(p, '');
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.ok(p.attentes.includes(DELAIS_PILE.ligneUpgrade));
+    assert.equal(p.parcours.etat.versions.relue, '1.20.0');
+    assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'STATUS', 'VERSION', 'START']);
+  });
 
   it('acceptation sur une ligne « Upgrade(status) » : attente, relecture, fini', async () => {
     const p = preparer();

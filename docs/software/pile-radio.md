@@ -81,6 +81,8 @@ Dans les deux cas suivants, le bouton n'installe rien et renvoie vers DapLink-Ea
 
 Si l'installation échoue, ou si la pile relue n'est pas celle attendue ou manque, le bouton le signale et renvoie aussi vers DapLink-EasyFlash. Si cela survient après l'effacement de l'ancienne pile, la carte peut se retrouver sans pile radio.
 
+Si le FUS ne répond pas à la commande d'installation, le bouton attend quand même la minute prévue, puis relit la pile : la pile relue dit si l'installation a réussi.
+
 Si la carte est débranchée avant l'effacement de l'ancienne pile, rien n'est installé : la rebrancher, cliquer sur **Connecter la carte**, puis de nouveau sur **Vérifier la pile radio**.
 
 Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
