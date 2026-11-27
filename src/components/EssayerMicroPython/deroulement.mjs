@@ -487,7 +487,13 @@ async function obtenirInvite(repl, carte, { fenetre, guet, delais, remplace }) {
 // ce redémarrage tient lieu de diagnostic. Sinon, une carte muette est
 // redémarrée une fois (dap.reset()), puis sondée de la même façon. Une
 // bannière vue n'est jamais suivie d'une proposition d'installation.
-async function sonder(repl, carte, epinglee, { delais, changer, remplace, guetConnexion }) {
+// retenir : mémoire de la page (session.retenir).
+async function sonder(
+  repl,
+  carte,
+  epinglee,
+  { delais, changer, retenir, remplace, guetConnexion },
+) {
   changer({ etape: 'sondage' });
   const lire = async () => {
     const version = await repl.lireVersion();
@@ -511,6 +517,11 @@ async function sonder(repl, carte, epinglee, { delais, changer, remplace, guetCo
       } catch {
         // Redémarrage refusé (DAPLink trop ancien) : la fenêtre décidera.
       }
+      // Comme après une nouvelle connexion : le redémarrage relance boot.py
+      // et main.py, que Ctrl-C interrompt en laissant leurs variables,
+      // minuteries et modules. Refusé, l'état de la carte muette n'est pas
+      // mieux connu. Le prochain programme part d'une remise à zéro.
+      retenir({ programmeLance: true });
       resultat = await obtenirInvite(repl, carte, {
         fenetre: delais.demarrage,
         guet,
@@ -638,6 +649,7 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     const decision = await sonder(repl, carte, epinglee, {
       delais,
       changer,
+      retenir: session.retenir,
       remplace,
       guetConnexion,
     });

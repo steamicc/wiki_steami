@@ -1041,6 +1041,27 @@ test('diagnostic : après le redémarrage, Ctrl-C finit par répondre (main.py e
   assert.ok(!journal.includes('demander installation'));
 });
 
+// Le redémarrage du diagnostic relance boot.py et main.py, que Ctrl-C
+// interrompt : leurs variables, minuteries et modules restent en mémoire.
+test('diagnostic sur une connexion ouverte : remise à zéro avant le programme', async () => {
+  const { journal, dependances, session } = preparer({
+    invites: [false, true],
+    versions: ['v0.29.0'],
+  });
+  assert.equal(session.etat.programmeLance, false);
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'lance', journal.join(' | '));
+  assert.deepEqual(sansRepetition(journal), [
+    'lireVersionDaplink',
+    'interrompre',
+    'redemarrer',
+    'interrompre',
+    'lireVersion',
+    'arreter',
+    'executer print(1+1)',
+  ]);
+});
+
 test('nouvelle connexion, carte sans MicroPython : fenêtre bornée, puis installation proposée sans second redémarrage', async () => {
   const { journal, questions, dependances } = preparer({
     connectee: false,
