@@ -170,6 +170,7 @@ const VENDOR_ID_DAPLINK = 0x0d28;
 
 const appareil = {
   vendorId: VENDOR_ID_DAPLINK,
+  serialNumber: '0839000012345',
   async close() {
     journal.push('close');
   },
@@ -1142,6 +1143,45 @@ test('version DAPLink : null sans carte, sur une erreur, sur une réponse inconn
   attenteFlash = null;
   finirFlash();
   await televersement;
+  await quitter(t, desabonner);
+});
+
+test('version brute : réponse de 0x9F rendue telle quelle', async (t) => {
+  const desabonner = await demarrer(t);
+  reponseVersion = versionSteami(42, 20261120);
+  assert.equal(await carte.lireReponseVersionDaplink(), reponseVersion);
+  await quitter(t, desabonner);
+});
+
+test('version brute : null sans carte, pendant un flash, ou si send échoue', async (t) => {
+  assert.equal(await carte.lireReponseVersionDaplink(), null);
+  const desabonner = await demarrer(t);
+
+  pannes.send = 'Bad response for 159 -> 0';
+  assert.equal(await carte.lireReponseVersionDaplink(), null);
+  pannes = {};
+
+  let finirFlash;
+  attenteFlash = new Promise((resolve) => {
+    finirFlash = resolve;
+  });
+  const televersement = carte.televerser('A', bin);
+  await attendre();
+  journal = [];
+  assert.equal(await carte.lireReponseVersionDaplink(), null);
+  assert.deepEqual(journal, []);
+  attenteFlash = null;
+  finirFlash();
+  await televersement;
+  await quitter(t, desabonner);
+});
+
+test('numéro de série : celui du périphérique connecté, null après déconnexion', async (t) => {
+  assert.equal(carte.numeroSerie, null);
+  const desabonner = await demarrer(t);
+  assert.equal(carte.numeroSerie, '0839000012345');
+  await carte.deconnecter();
+  assert.equal(carte.numeroSerie, null);
   await quitter(t, desabonner);
 });
 

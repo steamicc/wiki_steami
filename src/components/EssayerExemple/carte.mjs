@@ -545,19 +545,23 @@ function ecouterSerie(fn) {
   };
 }
 
+// Réponse brute (DataView) à la commande vendeur 0x9F du DAPLink. null sans
+// carte, pendant un flash ou sur une erreur : ne rejette jamais.
+async function lireReponseVersionDaplink() {
+  const courant = dap;
+  if (!courant || flashEnCours) return null;
+  try {
+    return (await executerSansAttendre(courant, () => courant.send(COMMANDE_VERSION))) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Version du DAPLink STeaMi ({ numero, date }), par sa commande vendeur 0x9F.
 // null sans carte, pendant un flash, sur une erreur ou une réponse inconnue
 // (DAPLink d'origine) : ne rejette jamais.
 async function lireVersionDaplink() {
-  const courant = dap;
-  if (!courant || flashEnCours) return null;
-  try {
-    return lireVersionSteami(
-      await executerSansAttendre(courant, () => courant.send(COMMANDE_VERSION)),
-    );
-  } catch {
-    return null;
-  }
+  return lireVersionSteami(await lireReponseVersionDaplink());
 }
 
 // Redémarre la carte (dap.reset()). Rejette avec une ErreurLecteur en
@@ -593,10 +597,14 @@ export const carte = {
   ecrireSerie,
   ecouterSerie,
   lireVersionDaplink,
+  lireReponseVersionDaplink,
   redemarrer,
   deconnecter,
   abonner,
   get etat() {
     return etat;
+  },
+  get numeroSerie() {
+    return peripherique?.serialNumber ?? null;
   },
 };
