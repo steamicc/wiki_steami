@@ -52,7 +52,9 @@
 //   travaille), puis toujours VERSION et START (START tenté aussi si VERSION
 //   ne répond pas) ; la pile relue décide (pile épinglée : réussite, même si
 //   last_fus_status ou last_ws_status est non nul ; sinon échec, avec le
-//   texte du code s'il est non nul).
+//   texte du code s'il est non nul). Double STATUS parti sans réponse : pas
+//   de START (le FUS travaille peut-être), mais une invitation à relancer la
+//   pile par une nouvelle vérification.
 import {
   decisionFus,
   decisionPile,
@@ -150,6 +152,11 @@ export const TEXTE_FUS_TRAVAILLE =
   "Le FUS de la carte travaille encore après l'installation : ne pas débrancher la carte, attendre quelques minutes, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_PILE_PEUT_ETRE_EFFACEE = `L'installation s'est interrompue après l'effacement de l'ancienne pile : la pile radio est peut-être effacée. ${RENVOI_EASYFLASH}`;
+
+// Installation peut-être faite, mais pile peut-être arrêtée par le double
+// STATUS de la relecture, sans START réussi : une nouvelle vérification la
+// relance, ou propose de la réinstaller.
+export const TEXTE_PILE_PEUT_ETRE_ARRETEE = `L'installation s'est interrompue après l'effacement de l'ancienne pile : la pile radio est peut-être effacée, ou en place mais arrêtée. Cliquer de nouveau sur « Vérifier la pile radio » pour la relancer ou la réinstaller, ou : ${RENVOI_EASYFLASH}`;
 
 export const TEXTE_SANS_REPONSE =
   "Le programme de lecture ne répond plus après l'installation, ce qui ne veut pas dire qu'elle a échoué. Téléverser l'exemple : s'il démarre le BLE, la pile radio est en place.";
@@ -556,8 +563,11 @@ export function creerParcoursPile() {
     // erreur (sauf après le double STATUS de la relecture, qui a arrêté la
     // pile) : la pile est peut-être effacée.
     supprimee = true;
-    const perdue = () => {
-      poser({ etape: 'erreur', decompte: null, erreur: TEXTE_PILE_PEUT_ETRE_EFFACEE });
+    // arretee : la pile est peut-être arrêtée par le double STATUS de la
+    // relecture, sans START réussi ; le texte invite à relancer la pile.
+    const perdue = (arretee = false) => {
+      const erreur = arretee ? TEXTE_PILE_PEUT_ETRE_ARRETEE : TEXTE_PILE_PEUT_ETRE_EFFACEE;
+      poser({ etape: 'erreur', decompte: null, erreur });
       return { fin: 'erreur' };
     };
     let relecture = false;
@@ -566,6 +576,10 @@ export function creerParcoursPile() {
     // décide ; si la relecture reste muette elle aussi, rien ne dit que
     // l'installation a eu lieu.
     let upgradeMuet = false;
+    // Double STATUS de la relecture envoyé : il a peut-être arrêté la pile,
+    // même sans réponse (le second STATUS fait basculer le cœur radio et ne
+    // répond souvent qu'à un essai suivant).
+    let statusEnvoyeRelecture = false;
     // Double STATUS de la relecture lu : la pile est arrêtée, START est tenté
     // même si le VERSION qui suit ne répond pas.
     let statusRelu = false;
@@ -602,6 +616,7 @@ export function creerParcoursPile() {
       poser({ etape: 'relecture', decompte: null });
       let statut;
       for (let ecoule = 0; ; ecoule += delais.pasRelecture) {
+        statusEnvoyeRelecture = true;
         statut = await operateur.statusDouble();
         if (!fusAuTravail(statut?.status)) break;
         if (ecoule + delais.pasRelecture > delais.relectureMax) {
@@ -660,9 +675,15 @@ export function creerParcoursPile() {
           } catch {
             relancee = false;
           }
+        } else if (statusEnvoyeRelecture) {
+          // Double STATUS parti sans réponse : la pile est peut-être arrêtée,
+          // mais le FUS travaille peut-être encore et START pourrait
+          // l'interrompre. Pas de START : une nouvelle vérification relancera
+          // la pile (VERSION depuis le FUS, puis STATUS et START).
+          relancee = false;
         }
         // UPGRADE muet aussi : rien ne dit que l'installation a eu lieu.
-        if (upgradeMuet) return perdue();
+        if (upgradeMuet) return perdue(!relancee);
         // Sinon, ne pas conclure à un échec.
         poser({
           etape: 'fini',

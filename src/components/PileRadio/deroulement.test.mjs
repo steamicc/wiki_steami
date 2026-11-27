@@ -20,6 +20,7 @@ import {
   TEXTE_OPERATEUR_MUET,
   TEXTE_PILE_ABSENTE_APRES,
   TEXTE_PILE_ARRETEE,
+  TEXTE_PILE_PEUT_ETRE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
   TEXTE_RELANCE_RATEE,
   TEXTE_SANS_REPONSE,
@@ -780,7 +781,10 @@ describe('installation', () => {
     assert.ok(!apres(p.journal, 'DELETE').includes('START'));
   });
 
-  it('operator muet après l installation : le dire sans conclure à un échec', async () => {
+  // Le double STATUS de la relecture est parti : il a peut-être arrêté la
+  // pile. Pas de START (le FUS travaille peut-être), mais une invitation à
+  // relancer la pile par une nouvelle vérification.
+  it('operator muet après l installation : sans conclure à un échec, invitation à relancer', async () => {
     const p = preparer({
       operateur: {
         ...sansPile,
@@ -793,7 +797,7 @@ describe('installation', () => {
     assert.deepEqual(await fin, { fin: 'sans-reponse' });
     assert.equal(p.parcours.etat.etape, 'fini');
     assert.equal(p.parcours.etat.erreur, null);
-    assert.equal(p.parcours.etat.message, TEXTE_SANS_REPONSE);
+    assert.equal(p.parcours.etat.message, `${TEXTE_SANS_REPONSE} ${TEXTE_RELANCE_RATEE}`);
     assert.ok(!apres(p.journal, 'DELETE').includes('START'));
   });
 
@@ -1063,7 +1067,7 @@ describe('UPGRADE sans réponse', () => {
     assert.equal(p.parcours.etat.erreur, texteAutrePile('1.19.0', '1.20.0'));
   });
 
-  it('relecture muette aussi : pile peut-être effacée, sans START', async () => {
+  it('relecture muette aussi : pile peut-être effacée ou arrêtée, sans START', async () => {
     const p = preparer({
       operateur: {
         ...muet,
@@ -1075,8 +1079,15 @@ describe('UPGRADE sans réponse', () => {
     await etape(p.parcours, 'proposition');
     p.parcours.confirmer('installer');
     assert.deepEqual(await fin, { fin: 'erreur' });
-    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_ARRETEE);
     assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS']);
+  });
+
+  it('texte de la pile peut-être arrêtée : relancer par une nouvelle vérification, ou EasyFlash', () => {
+    assert.match(TEXTE_PILE_PEUT_ETRE_ARRETEE, /peut-être effacée/);
+    assert.match(TEXTE_PILE_PEUT_ETRE_ARRETEE, /arrêtée/);
+    assert.match(TEXTE_PILE_PEUT_ETRE_ARRETEE, /de nouveau sur « Vérifier la pile radio »/);
+    assert.match(TEXTE_PILE_PEUT_ETRE_ARRETEE, /EasyFlash/);
   });
 
   it('carte perdue pendant l attente : pile peut-être effacée', async () => {
@@ -1105,6 +1116,22 @@ describe('UPGRADE sans réponse', () => {
     assert.deepEqual(await fin, { fin: 'erreur' });
     assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_EFFACEE);
     assert.deepEqual(apres(p.journal, 'UPGRADE'), ['STATUS', 'VERSION', 'START']);
+  });
+
+  it('VERSION de la relecture muet et START raté : pile peut-être effacée ou arrêtée', async () => {
+    const p = preparer({
+      operateur: {
+        ...muet,
+        version: [VERSION_SANS_PILE, VERSION_SANS_PILE, new ErreurDelaiOperateur('VERSION')],
+        relancer: [new Error('liaison perdue')],
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_PILE_PEUT_ETRE_ARRETEE);
+    assert.equal(apres(p.journal, 'UPGRADE').at(-1), 'START');
   });
 
   it('ErreurFus pendant l upgrade reste un échec immédiat, sans attente', async () => {
@@ -1628,10 +1655,12 @@ describe('avec le vrai operator', () => {
   const LIGNE_DELETE = '{"command ": "Delete", "status": 0}\n';
 
   // upgrade : lignes émises après UPGRADE ; ensuite VERSION relit la pile
-  // installée.
-  function brancher(p, upgrade) {
+  // installée. statusApres(n) : lignes émises par le n-ième STATUS après
+  // UPGRADE (par défaut, les deux lignes habituelles).
+  function brancher(p, upgrade, { statusApres = () => LIGNES_STATUS } = {}) {
     const ecouteurs = new Set();
     let installee = false;
+    let statusApresUpgrade = 0;
     const emettre = (t) => {
       for (const fn of [...ecouteurs]) fn(new TextEncoder().encode(t));
     };
@@ -1644,8 +1673,9 @@ describe('avec le vrai operator', () => {
       p.journal.push(commande);
       if (commande === 'VERSION') {
         emettre(installee ? LIGNE_VERSION_INSTALLEE : LIGNE_VERSION_SANS_PILE);
-      } else if (commande === 'STATUS') emettre(LIGNES_STATUS);
-      else if (commande === 'DELETE') emettre(LIGNE_DELETE);
+      } else if (commande === 'STATUS') {
+        emettre(installee ? statusApres(statusApresUpgrade++) : LIGNES_STATUS);
+      } else if (commande === 'DELETE') emettre(LIGNE_DELETE);
       else if (commande === 'UPGRADE') {
         installee = true;
         emettre(upgrade);
@@ -1683,6 +1713,28 @@ describe('avec le vrai operator', () => {
     assert.equal(p.journal.filter((l) => l === 'DELETE').length, 1);
     assert.ok(p.attentes.includes(1000));
     assert.equal(apres(p.journal, 'UPGRADE').at(-1), 'START');
+  });
+
+  // Essai préalable : le second STATUS fait basculer le cœur radio et ne
+  // répond souvent qu'à un essai suivant. S'il reste muet, la pile est
+  // peut-être arrêtée : pas de START (le FUS travaille peut-être), mais une
+  // invitation à relancer la pile par une nouvelle vérification.
+  it('STATUS de la relecture muet après un UPGRADE accepté : invitation à relancer', async () => {
+    const p = preparer();
+    brancher(p, '{"command": "Upgrade", "status": 0}\n', {
+      statusApres: (n) => (n === 0 ? LIGNES_STATUS.split('\n')[0] + '\n' : ''),
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'sans-reponse' });
+    const suite = apres(p.journal, 'UPGRADE');
+    assert.ok(suite.filter((l) => l === 'STATUS').length >= 2);
+    assert.ok(!suite.includes('START'));
+    assert.ok(!suite.includes('VERSION'));
+    assert.equal(p.parcours.etat.etape, 'fini');
+    assert.equal(p.parcours.etat.erreur, null);
+    assert.equal(p.parcours.etat.message, `${TEXTE_SANS_REPONSE} ${TEXTE_RELANCE_RATEE}`);
   });
 
   it('erreur 3 sur une ligne « Upgrade(status) » : texte du code, sans START', async () => {

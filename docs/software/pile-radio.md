@@ -83,6 +83,8 @@ Si l'installation échoue, ou si la pile relue n'est pas celle attendue ou manqu
 
 Si le FUS ne répond pas à la commande d'installation, le bouton attend quand même la minute prévue, puis relit la pile : la pile relue dit si l'installation a réussi.
 
+Si le programme de lecture ne répond plus pendant cette relecture, la pile radio peut rester arrêtée : cliquer de nouveau sur **Vérifier la pile radio** pour la relancer.
+
 Si la carte est débranchée avant l'effacement de l'ancienne pile, rien n'est installé : la rebrancher, cliquer sur **Connecter la carte**, puis de nouveau sur **Vérifier la pile radio**.
 
 Dans tous les cas, le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.
