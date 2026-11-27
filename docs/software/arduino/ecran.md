@@ -132,7 +132,7 @@ Depuis la version 0.40.0 de la bibliothèque, `SteamiScreen` dessine des widgets
 
 ### Jauge
 
-```cpp
+```cpp sample=ECRAN/EcranJauge
 #include <SteamiScreen.h>
 #include <SteamiHumidity.h>
 
@@ -205,7 +205,7 @@ ecran.show();
 
 Depuis la version 0.41.0 de la bibliothèque, `graph()` trace la courbe des dernières mesures. Ce programme montre la pression des 30 dernières secondes :
 
-```cpp
+```cpp sample=ECRAN/EcranGraphe
 #include <SteamiScreen.h>
 #include <SteamiPressure.h>
 
@@ -240,7 +240,7 @@ Exemples à essayer : [ScreenGraph](./exemples/steami-board#screengraph), et la 
 
 Depuis la version 0.41.0 de la bibliothèque, `menu()` affiche une liste dans laquelle le D-PAD déplace la sélection :
 
-```cpp
+```cpp sample=ECRAN/EcranMenu
 #include <SteamiScreen.h>
 #include <SteamiButtons.h>
 

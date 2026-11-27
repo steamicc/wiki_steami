@@ -64,7 +64,7 @@ Le port série apparaît sous la forme `COM3` (Windows), `/dev/cu.usbmodem…` (
 
 1. Coller ce programme dans une nouvelle fenêtre :
 
-   ```cpp
+   ```cpp norun
    void setup() {
      pinMode(LED_GREEN, OUTPUT);
    }

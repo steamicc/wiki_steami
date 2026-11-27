@@ -25,6 +25,7 @@
     "lint:examples": "npm run prebuild && python3 scripts/validate-code-examples.py",
     "lint:spell": "cspell",
     "lint:arduino-examples": "python3 scripts/check-arduino-examples.py",
+    "lint:inline-sketches": "python3 scripts/check-inline-sketches.py",
     "lint:micropython-blocks": "python3 scripts/check-micropython-blocks.py",
     "prepare": "husky"
   },

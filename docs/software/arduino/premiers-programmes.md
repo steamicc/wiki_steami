@@ -33,7 +33,7 @@ Les quatre boutons directionnels (D-PAD) ne sont pas reliés directement au micr
 
 Le programme allume successivement les trois couleurs et écrit la couleur courante dans le moniteur série.
 
-```cpp
+```cpp sample=PREMIERS/ClignoterLed
 // Fait clignoter la LED RGB en rouge, vert puis bleu.
 void setup() {
   pinMode(LED_RED, OUTPUT);
@@ -66,7 +66,7 @@ En allumant deux canaux en même temps, on obtient du jaune (rouge + vert), du c
 
 Un bouton appuyé relie sa broche à la masse : la lecture donne `LOW`. Il faut donc activer la résistance de tirage interne avec `INPUT_PULLUP`, sinon la broche « flotte » quand le bouton est relâché.
 
-```cpp
+```cpp sample=PREMIERS/LireBoutons
 // A allume le rouge, B le vert, MENU le bleu.
 void setup() {
   pinMode(LED_RED, OUTPUT);
@@ -90,7 +90,7 @@ void loop() {
 
 `tone(broche, fréquence)` produit un signal carré à la fréquence demandée, en hertz. `tone(broche, fréquence, durée)` s'arrête seul après la durée indiquée en millisecondes.
 
-```cpp
+```cpp sample=PREMIERS/JouerSon
 // Joue une note tant que le bouton A est appuyé.
 void setup() {
   pinMode(A_BUTTON, INPUT_PULLUP);
