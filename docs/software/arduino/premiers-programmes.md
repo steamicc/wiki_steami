@@ -9,6 +9,8 @@ La LED RGB, les boutons A, B et MENU, le buzzer et le port série sont reliés d
 
 Les programmes de cette page fonctionnent à l'identique sur les V1a, V1b et V1c. Ils supposent l'Arduino IDE configuré comme indiqué dans [Installer l'Arduino IDE](./arduino-ide).
 
+Les trois croquis de cette page sont repris dans le dépôt [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample), qui les compile pour la STeaMi et les republie sous licence GPL-3.0.
+
 ## Noms des broches
 
 La définition de la carte fournit des noms prêts à l'emploi. Il est inutile de connaître les numéros de broches du microcontrôleur.
