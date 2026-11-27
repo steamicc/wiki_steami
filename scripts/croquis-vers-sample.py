@@ -29,7 +29,8 @@ le workflow la pousse et ouvre (ou met à jour) l'unique PR du robot.
    - page inchangée mais fichier corrigé à la main dans la PR : rien (la
      correction est gardée).
 4. Il annonce les croquis de la branche qui ne sont plus marqués dans le wiki
-   (le robot ne retire rien de la PR).
+   (le robot ne retire rien de la PR) : avertissement, et ligne du corps de
+   la PR, que le workflow met à jour même sans commit à pousser.
 
 Sorties (--sortie-github, en général $GITHUB_OUTPUT) :
   pousser=true|false  la branche locale a des commits à pousser ;

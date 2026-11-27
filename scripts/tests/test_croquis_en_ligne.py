@@ -633,6 +633,10 @@ class TestRobotSample(unittest.TestCase):
         self.assertIn("PREMIERS/ClignoterLed", out)
         self.assertIn("plus marqué", out)
         self.assertEqual(sorties["croquis"], "PREMIERS/ClignoterLed PREMIERS/Autre")
+        # Aucun commit, mais le corps change : le workflow doit quand même
+        # mettre à jour la PR (voir test_open_pr_body_updated_without_push).
+        self.assertEqual(sorties["pousser"], "false")
+        self.assertIn("| `PREMIERS/ClignoterLed` | no longer marked `sample=` in the wiki |", self.corps)
 
 
 class TestTitreDePage(unittest.TestCase):
@@ -706,6 +710,19 @@ class TestFluxRobot(unittest.TestCase):
         self.assertIn("--force-with-lease", t)
         self.assertIn("scripts/croquis-vers-sample.py", t)
         self.assertIn("--reprendre", t)
+
+    def test_open_pr_body_updated_without_push(self):
+        # Un croquis passé en norun ne crée aucun commit (pousser=false) mais
+        # change le corps : la PR ouverte est mise à jour quand même.
+        etapes = {e.get("name"): e for e in flux_robot()["jobs"]["croquis"]["steps"]}
+        pousse = str(etapes["Pousse la branche"]["if"])
+        self.assertIn("steps.preparation.outputs.pousser == 'true'", pousse)
+        self.assertNotIn("steps.pr.outputs.pr", pousse)
+        pr = str(etapes["Ouvre ou met à jour la PR"]["if"])
+        self.assertIn("!inputs.essai", pr)
+        self.assertIn("steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != ''", pr)
+        essai = str(etapes["Affiche l'essai à blanc"]["if"])
+        self.assertIn("steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != ''", essai)
 
     def test_not_in_forks_and_serialized(self):
         f = flux_robot()

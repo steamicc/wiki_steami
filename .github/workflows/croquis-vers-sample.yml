@@ -18,7 +18,9 @@
 # reprise (--reprendre) : un croquis déjà présent n'est pas rajouté, un
 # croquis dont la page a changé reçoit un commit `Update`, un croquis
 # corrigé à la main dans la PR est gardé tant que sa page ne change pas ;
-# le push est une avance rapide et le corps de la PR est mis à jour. Sans
+# le push est une avance rapide. Le corps de la PR est mis à jour même sans
+# nouveau commit : un croquis passé en norun ou retiré de sa page n'ajoute
+# rien à la branche, mais le corps le signale au relecteur. Sans
 # PR ouverte (PR précédente fusionnée ou fermée, ou ouverture échouée), la
 # branche repart de main et remplace l'ancienne (--force-with-lease sur le
 # commit vu au clonage).
@@ -178,7 +180,7 @@ jobs:
           git -C "$SAMPLE" log --oneline origin/main..HEAD
 
       - name: Affiche l'essai à blanc
-        if: inputs.essai && steps.preparation.outputs.pousser == 'true'
+        if: inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '')
         run: |
           set -euo pipefail
           echo "Essai à blanc : rien n'est poussé. Corps de la PR :"
@@ -202,16 +204,23 @@ jobs:
               origin "HEAD:refs/heads/$BRANCHE"
           fi
 
+      # Aussi sans commit à pousser quand la PR est ouverte : son corps peut
+      # avoir changé (croquis qui n'est plus marqué sample= dans le wiki).
       - name: Ouvre ou met à jour la PR
-        if: ${{ !inputs.essai && steps.preparation.outputs.pousser == 'true' }}
+        if: ${{ !inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '') }}
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           PR: ${{ steps.pr.outputs.pr }}
         run: |
           set -euo pipefail
           if [ -n "$PR" ]; then
-            gh pr edit "$PR" --repo steamicc/arduino-steami-sample --body-file "$RUNNER_TEMP/corps.md"
-            echo "PR mise à jour : https://github.com/$DEPOT_SAMPLE/pull/$PR"
+            actuel=$(gh pr view "$PR" --repo steamicc/arduino-steami-sample --json body --jq .body)
+            if [ "$actuel" = "$(cat "$RUNNER_TEMP/corps.md")" ]; then
+              echo "PR inchangée : https://github.com/$DEPOT_SAMPLE/pull/$PR"
+            else
+              gh pr edit "$PR" --repo steamicc/arduino-steami-sample --body-file "$RUNNER_TEMP/corps.md"
+              echo "PR mise à jour : https://github.com/$DEPOT_SAMPLE/pull/$PR"
+            fi
           else
             url=$(gh pr create --repo steamicc/arduino-steami-sample --base main --head "$BRANCHE" \
               --title "feat(examples): Add the wiki sketches." \
