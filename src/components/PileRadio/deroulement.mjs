@@ -6,7 +6,8 @@
 // ce qui permet de le tester avec une carte et un operator simulés
 // (deroulement.test.mjs) :
 // - carte : la connexion partagée (EssayerExemple/carte.mjs) : flasherFirmware
-//   (accepte le texte d'un .hex), ecrireSerie, ecouterSerie,
+//   (accepte le texte d'un .hex), flasherDonnees (les octets du .hex
+//   d'installation, lus avant DELETE), ecrireSerie, ecouterSerie,
 //   lireVersionDaplink, etat ;
 // - urls : { operateur, installation, index, daplink } (/pile-radio/… et
 //   /daplink/firmware.json) ;
@@ -33,7 +34,8 @@
 // - l'installation exige le DAPLink épinglé (illisible : non épinglé) et un
 //   second « oui » (« Installer la pile radio ») ;
 // - le .hex d'installation est téléchargé avant DELETE : s'il manque, DELETE
-//   ne part pas (START, rien n'est effacé) ;
+//   ne part pas (START, rien n'est effacé) ; ses octets sont écrits tels
+//   quels après DELETE, sans nouvelle requête ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
 //   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F).
 import {
@@ -214,16 +216,18 @@ export function lirePileEpinglee(json) {
   };
 }
 
-// Télécharge le .hex d'installation en entier (corps compris) : true s'il est
-// là. carte.flasherFirmware le relit ensuite par son url, après DELETE.
+// Télécharge le .hex d'installation en entier (corps compris) : ses octets
+// (ArrayBuffer), ou null s'il manque ou est vide. Ces octets sont écrits
+// après DELETE par carte.flasherDonnees, sans nouvelle requête : un réseau
+// perdu pendant DELETE ne laisse pas la carte sans pile.
 async function telechargerInstallation(url, recuperer) {
   try {
     const reponse = await recuperer(url, { cache: 'no-cache' });
-    if (!reponse.ok) return false;
-    await reponse.arrayBuffer();
-    return true;
+    if (!reponse.ok) return null;
+    const donnees = await reponse.arrayBuffer();
+    return donnees.byteLength > 0 ? donnees : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -365,6 +369,8 @@ export function creerParcoursPile() {
       delais,
     });
     let statusEnvoye = false;
+    // Octets du .hex d'installation, lus avant DELETE.
+    let installation = null;
     // Fin avant DELETE : START d'abord si STATUS est parti (une erreur de
     // START, carte partie, ne cache pas celle du parcours).
     const finir = async (fin, partie) => {
@@ -471,7 +477,8 @@ export function creerParcoursPile() {
       // Le .hex d'installation avant DELETE : un échec réseau après DELETE
       // laisserait la carte sans pile.
       poser({ etape: 'telechargement' });
-      if (!(await telechargerInstallation(urls.installation, recuperer))) {
+      installation = await telechargerInstallation(urls.installation, recuperer);
+      if (!installation) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
       }
       if (annulation) return finir(...annulee());
@@ -495,9 +502,9 @@ export function creerParcoursPile() {
       await operateur.supprimer();
       await operateur.statusDouble();
       poser({ etape: 'ecriture' });
-      // Jamais de nouvel essai : une seule écriture du .hex fusionné, relu
-      // par son url (déjà téléchargé avant DELETE).
-      if (!(await carte.flasherFirmware(id, urls.installation))) return perdue();
+      // Jamais de nouvel essai : une seule écriture du .hex fusionné, avec
+      // les octets téléchargés avant DELETE.
+      if (!(await carte.flasherDonnees(id, installation))) return perdue();
       poser({ etape: 'upgrade' });
       await operateur.upgrade({ surLigne: () => {} });
 

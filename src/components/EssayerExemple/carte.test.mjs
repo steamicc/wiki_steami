@@ -144,8 +144,9 @@ class FauxDAPLink {
     this.ecouteurs[FauxDAPLink.EVENT_PROGRESS]?.(progression);
   }
 
-  flash() {
+  flash(donnees) {
     journal.push('flash');
+    this.donneesFlash = donnees;
     return this.commande('flash', async () => {
       for (const progression of etapesFlash) this.avancer(progression);
       if (attenteFlash) await retenue(attenteFlash);
@@ -1180,6 +1181,23 @@ test('flash firmware : progression, puis console relancée, pas de reset()', asy
   await lire(t);
   assert.deepEqual(carte.etat.lignes, ['MicroPython v1.29']);
   assert.ok(!journal.includes('reset'));
+  await quitter(t, desabonner);
+});
+
+test('flash de données : octets écrits tels quels, sans téléchargement', async (t) => {
+  const desabonner = await demarrer(t);
+  const appels = servir(t, () => {
+    throw new TypeError('Failed to fetch');
+  });
+  const donnees = new TextEncoder().encode(':020000040800F2\n').buffer;
+  journal = [];
+  assert.equal(await carte.flasherDonnees('BLE/A', donnees), true);
+  assert.deepEqual(appels, []);
+  assert.equal(derniere.donneesFlash, donnees);
+  assert.deepEqual(journal, ['flash', 'serialRead']);
+  assert.equal(carte.etat.occupee, false);
+  assert.equal(carte.etat.erreur, null);
+  assert.equal(carte.etat.programmeActif, 'BLE/A');
   await quitter(t, desabonner);
 });
 

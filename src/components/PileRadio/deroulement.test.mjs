@@ -101,12 +101,25 @@ function fauxOperateur(journal, files) {
 }
 
 // Fausse carte : flasherFirmware note l'url ; `flash(url)` décide de l'issue.
+// Le .hex d'installation s'écrit avec les octets lus avant DELETE
+// (flasherDonnees, noté comme « flash » de son url, octets gardés dans
+// `donnees`) : le relire par son url après DELETE est une faute.
 function fausseCarte(journal, { daplink = { numero: 3, date: 20261125 }, flash } = {}) {
   const carte = {
     etat: { connectee: true, occupee: false },
+    donnees: null,
     async flasherFirmware(id, url) {
+      if (url === URLS.installation) {
+        journal.push('ERREUR : .hex d installation relu par son url');
+        return false;
+      }
       journal.push(`flash ${url}`);
       return flash ? flash(url, carte) : true;
+    },
+    async flasherDonnees(id, donnees) {
+      journal.push(`flash ${URLS.installation}`);
+      carte.donnees = donnees;
+      return flash ? flash(URLS.installation, carte) : true;
     },
     async lireVersionDaplink() {
       journal.push('daplink');
@@ -902,6 +915,55 @@ describe('téléchargement avant DELETE', () => {
     );
     const avantDelete = p.journal.slice(0, p.journal.indexOf('DELETE'));
     assert.ok(avantDelete.includes(`get ${URLS.installation}`));
+  });
+
+  // Sans pile, puis la pile relue après l'installation (une file neuve par
+  // test : le faux operator la vide).
+  const installee = () => ({ version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS] });
+
+  it('le .hex écrit est celui lu avant DELETE, sans second téléchargement', async () => {
+    const p = preparer({ operateur: installee() });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.equal(new TextDecoder().decode(p.carte.donnees), HEX_INSTALLATION);
+    assert.equal(p.journal.filter((l) => l === `get ${URLS.installation}`).length, 1);
+  });
+
+  it('réseau perdu après DELETE : l écriture se fait avec les octets déjà lus', async () => {
+    const source = fauxRecuperer();
+    let lus = 0;
+    const p = preparer({
+      operateur: installee(),
+      recuperer: (url, options) => {
+        if (url === URLS.installation && ++lus > 1) throw new TypeError('Failed to fetch');
+        return source(url, options);
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.equal(new TextDecoder().decode(p.carte.donnees), HEX_INSTALLATION);
+    assert.ok(!p.journal.some((l) => l.startsWith('ERREUR')));
+  });
+
+  it('.hex vide : ni DELETE ni flash, START', async () => {
+    const p = preparer({
+      operateur: sansPile,
+      recuperer: fauxRecuperer({
+        [URLS.index]: INDEX,
+        [URLS.daplink]: DAPLINK_EPINGLE,
+        [URLS.installation]: '',
+      }),
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.equal(p.parcours.etat.erreur, TEXTE_TELECHARGEMENT_PILE);
+    assert.deepEqual(apres(p.journal, `get ${URLS.installation}`), ['START']);
   });
 
   it('carte perdue pendant le téléchargement : ni DELETE ni flash', async () => {

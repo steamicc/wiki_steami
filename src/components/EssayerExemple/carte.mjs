@@ -501,6 +501,14 @@ function flasherFirmware(id, url) {
   return flasher(id, () => telechargerFirmware(url));
 }
 
+// Écrit des octets déjà téléchargés (ArrayBuffer), sans nouvelle requête :
+// le .hex d'installation de la pile radio, lu avant DELETE, est écrit tel
+// quel après, même si le réseau tombe entre-temps. Renvoie true si le flash a
+// réussi.
+function flasherDonnees(id, donnees) {
+  return flasher(id, () => donnees);
+}
+
 // Envoie des octets sur le port série de la carte, par paquets de
 // PAQUET_SERIE octets : DAP.js envoie un octet par caractère (son code), on
 // ne lui passe donc jamais de texte UTF-8. Rejette tout de suite, avec une
@@ -581,6 +589,7 @@ export const carte = {
   connecter,
   televerser,
   flasherFirmware,
+  flasherDonnees,
   ecrireSerie,
   ecouterSerie,
   lireVersionDaplink,
