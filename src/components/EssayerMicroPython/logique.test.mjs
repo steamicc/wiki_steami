@@ -100,3 +100,17 @@ test('textes : contiennent la version, la release et les consignes', () => {
   assert.match(TEXTE_CARTE_OCCUPEE, /RESET/);
   assert.match(texteMiseAJourDaplink('2026-11-25.3'), /DAPLink.*2026-11-25\.3/);
 });
+
+test('texteInstallation : carte sans MicroPython (programme Arduino)', () => {
+  assert.equal(
+    texteInstallation('v0.29.0', 'absent'),
+    "Cette carte n'a pas MicroPython. Installer MicroPython v0.29.0 pour essayer cet exemple.",
+  );
+});
+
+test('texteInstallation : MicroPython plus ancien que celui du wiki', () => {
+  assert.equal(
+    texteInstallation('v0.29.0', 'ancien'),
+    'La version de MicroPython de cette carte est plus ancienne que celle du wiki. Installer MicroPython v0.29.0 pour essayer cet exemple.',
+  );
+});

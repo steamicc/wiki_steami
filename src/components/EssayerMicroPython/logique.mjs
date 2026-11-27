@@ -68,8 +68,15 @@ export function decisionMiseAJour(version, epingle) {
 
 // --- Textes -----------------------------------------------------------------
 
-export function texteInstallation(version) {
-  return `Cette carte n'a pas la bonne version de MicroPython. Installer MicroPython ${version} pour essayer cet exemple.`;
+// raison : 'absent' (pas de MicroPython, un programme Arduino par exemple)
+// ou 'ancien' (MicroPython plus ancien que la version épinglée, ou sans
+// steami.version).
+export function texteInstallation(version, raison) {
+  const constat =
+    raison === 'absent'
+      ? "Cette carte n'a pas MicroPython."
+      : 'La version de MicroPython de cette carte est plus ancienne que celle du wiki.';
+  return `${constat} Installer MicroPython ${version} pour essayer cet exemple.`;
 }
 
 // Mesure à refaire dans Chrome : DAP.js envoie le .bin (environ 520 ko) par

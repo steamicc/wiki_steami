@@ -113,7 +113,7 @@ function Encart({ encart, surReponse }) {
   } else {
     contenu = (
       <>
-        <p>{texteInstallation(donnees.version)}</p>
+        <p>{texteInstallation(donnees.version, donnees.raison)}</p>
         <p>{TEXTE_DUREE_INSTALLATION}</p>
         <p>
           <strong>{TEXTE_EFFACEMENT}</strong>

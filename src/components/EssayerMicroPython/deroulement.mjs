@@ -656,9 +656,13 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     // 3. Firmware absent ou ancien : installation après « Installer » seulement.
     if (decision === 'ancien' || decision === 'muette') {
       changer({ etape: 'question' });
+      // raison : texte de la question (texteInstallation). Une carte muette
+      // sans bannière n'a sans doute pas MicroPython (autreCause : ou bien un
+      // outil la tient).
       const reponse = await demander('installation', {
         id,
         version: epinglee,
+        raison: decision === 'ancien' ? 'ancien' : 'absent',
         autreCause: decision === 'muette',
       });
       if (remplace()) return { fin: 'abandonne' };
