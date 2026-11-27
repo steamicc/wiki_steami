@@ -192,12 +192,16 @@ function preparer(options = {}) {
         },
     epingles: async () => options.epingles ?? EPINGLES,
     urls: { dapjs: '/dap.js', firmware: '/micropython/firmware.bin' },
-    delais: { banniere: 30, redemarrage: 30, ...options.delais },
+    delais: { demarrage: 30, relance: 2, redemarrage: 30, ...options.delais },
   };
   return { journal, questions, carte, repl, session, dependances };
 }
 
 const BLOC = { id: 'page#1', code: 'print(1+1)' };
+
+// Journal sans les répétitions consécutives (Ctrl-C renvoyé pendant la
+// fenêtre de démarrage).
+const sansRepetition = (journal) => journal.filter((l, i) => l !== journal[i - 1]);
 
 // --- Étape 0 : confirmation -------------------------------------------------
 
@@ -387,7 +391,13 @@ test('pas d’invite mais bannière après redémarrage : message « carte occup
   const { journal, dependances, session } = preparer({ invites: [false], banniere: true });
   const r = await essayer(BLOC, dependances);
   assert.equal(r.fin, 'occupee');
-  assert.deepEqual(journal, ['lireVersionDaplink', 'interrompre', 'redemarrer']);
+  // Après le redémarrage, Ctrl-C est renvoyé pendant la fenêtre de démarrage.
+  assert.deepEqual(sansRepetition(journal), [
+    'lireVersionDaplink',
+    'interrompre',
+    'redemarrer',
+    'interrompre',
+  ]);
   assert.equal(session.etat.erreur, TEXTE_CARTE_OCCUPEE);
 });
 
@@ -395,10 +405,11 @@ test('pas d’invite ni de bannière : installation proposée, avec l’autre ca
   const { journal, questions, dependances } = preparer({ invites: [false] });
   const r = await essayer(BLOC, dependances);
   assert.equal(r.fin, 'annule');
-  assert.deepEqual(journal, [
+  assert.deepEqual(sansRepetition(journal), [
     'lireVersionDaplink',
     'interrompre',
     'redemarrer',
+    'interrompre',
     'demander installation',
   ]);
   assert.equal(questions[0].donnees.autreCause, true);
@@ -895,4 +906,166 @@ test('installation sans réponse ensuite : message en français, flash non rées
   assert.equal(journal.filter((l) => l === 'demander installation').length, 1);
   assert.ok(!journal.some((l) => l.startsWith('executer')));
   assert.equal(session.etat.erreur, TEXTE_APRES_INSTALLATION);
+});
+
+// --- Revue finale ------------------------------------------------------------
+
+// I1. Bloc quitté pendant la préparation, avant toute question : l'essai se
+// termine, sans encart ni action sur la carte ensuite.
+
+test('bloc quitté pendant la vérification : ni question, ni carte touchée, boutons libres', async () => {
+  const session = creerSession({ planifier: (fn) => fn() });
+  const versions = differee();
+  const { journal, dependances } = preparer({
+    session,
+    versions: ['v0.28.2'],
+    demander: (type, donnees) => {
+      journal.push(`demander ${type}`);
+      return session.demander(type, donnees);
+    },
+  });
+  dependances.epingles = () => versions.promesse;
+  const fin = essayer(BLOC, dependances);
+  await tic(5);
+  assert.equal(session.etat.etape, 'verification');
+  abandonnerBloc(session, 'page#1');
+  versions.resoudre(EPINGLES);
+  await tic(20);
+  assert.equal(session.etat.encart, null, 'aucun encart pour un bloc quitté');
+  assert.equal(estOccupee(session.etat), false, 'les boutons Essayer sont libres');
+  assert.deepEqual(journal, [], journal.join(' | '));
+  session.repondre('non');
+  assert.equal((await fin).fin, 'abandonne');
+});
+
+test('bloc quitté pendant le sondage : la carte ancienne répond, rien n’est proposé ni flashé', async () => {
+  const session = creerSession({ planifier: (fn) => fn() });
+  const { journal, dependances } = preparer({
+    session,
+    versions: ['v0.28.2'],
+    demander: (type, donnees) => {
+      journal.push(`demander ${type}`);
+      return session.demander(type, donnees);
+    },
+  });
+  const reponse = differee();
+  const repl = dependances.creerRepl();
+  const interrompre = repl.interrompre;
+  repl.interrompre = async () => {
+    await reponse.promesse;
+    return interrompre();
+  };
+  dependances.creerRepl = () => repl;
+  const fin = essayer(BLOC, dependances);
+  await tic(5);
+  assert.equal(session.etat.etape, 'sondage');
+  abandonnerBloc(session, 'page#1');
+  reponse.resoudre();
+  await tic(20);
+  assert.equal(session.etat.encart, null);
+  assert.equal(estOccupee(session.etat), false);
+  assert.ok(!journal.includes('lireVersion'), journal.join(' | '));
+  assert.ok(!journal.some((l) => l.startsWith('demander')));
+  assert.ok(!journal.some((l) => l.startsWith('flasherFirmware')));
+  session.repondre('non');
+  assert.equal((await fin).fin, 'abandonne');
+});
+
+// I2. La connexion redémarre la carte : le premier Ctrl-C peut tomber pendant
+// le démarrage et se perdre.
+
+test('nouvelle connexion, main.py en boucle, premier Ctrl-C perdu : pas d’installation proposée', async () => {
+  const { journal, dependances } = preparer({
+    connectee: false,
+    invites: [false, true],
+    versions: ['v0.29.0'],
+    reponses: { installation: 'oui' },
+  });
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'lance', journal.join(' | '));
+  assert.ok(!journal.includes('demander installation'));
+  assert.ok(!journal.some((l) => l.startsWith('flasherFirmware')));
+});
+
+test('nouvelle connexion, bannière vue au démarrage mais pas d’invite : carte occupée, pas d’installation', async () => {
+  const { journal, dependances, carte, session } = preparer({
+    connectee: false,
+    invites: [false],
+    reponses: { installation: 'oui' },
+    delais: { demarrage: 5000 },
+  });
+  const connecter = carte.connecter;
+  carte.connecter = async (id) => {
+    await connecter(id);
+    setTimeout(() => carte.emettre(BANNIERE), 3);
+  };
+  const debut = Date.now();
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'occupee', journal.join(' | '));
+  // Une tentative ratée après la bannière suffit : pas toute la fenêtre.
+  assert.ok(Date.now() - debut < 1000, `${Date.now() - debut} ms`);
+  assert.ok(!journal.includes('redemarrer'), 'la connexion a déjà redémarré la carte');
+  assert.ok(!journal.includes('demander installation'));
+  assert.equal(session.etat.erreur, TEXTE_CARTE_OCCUPEE);
+});
+
+test('diagnostic : après le redémarrage, Ctrl-C finit par répondre (main.py en boucle) : pas d’installation', async () => {
+  const { journal, dependances } = preparer({
+    invites: [false, false, true],
+    versions: ['v0.29.0'],
+    reponses: { installation: 'oui' },
+  });
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'lance', journal.join(' | '));
+  assert.ok(journal.includes('redemarrer'));
+  assert.ok(!journal.includes('demander installation'));
+});
+
+test('nouvelle connexion, carte sans MicroPython : fenêtre bornée, puis installation proposée sans second redémarrage', async () => {
+  const { journal, questions, dependances } = preparer({
+    connectee: false,
+    invites: [false],
+    delais: { demarrage: 60 },
+  });
+  const debut = Date.now();
+  const r = await essayer(BLOC, dependances);
+  const duree = Date.now() - debut;
+  assert.equal(r.fin, 'annule');
+  assert.ok(duree >= 55 && duree < 1000, `fenêtre de démarrage bornée (${duree} ms)`);
+  assert.ok(journal.filter((l) => l === 'interrompre').length > 1, 'Ctrl-C renvoyé');
+  assert.ok(!journal.includes('redemarrer'));
+  assert.equal(questions[0].type, 'installation');
+  assert.equal(questions[0].donnees.autreCause, true);
+});
+
+// I6. Premier essai d'une connexion : remise à zéro (raw REPL, sans main.py).
+
+test('nouvelle connexion : remise à zéro avant le premier programme', async () => {
+  const { journal, dependances } = preparer({ connectee: false });
+  const r = await essayer(BLOC, dependances);
+  assert.equal(r.fin, 'lance');
+  assert.deepEqual(journal, [
+    'connecter page#1',
+    'lireVersionDaplink',
+    'interrompre',
+    'lireVersion',
+    'arreter',
+    'executer print(1+1)',
+  ]);
+});
+
+test('carte libérée ou perdue : l’état de MicroPython est inconnu, le prochain essai remet à zéro', () => {
+  const session = creerSession({ planifier: (fn) => fn() });
+  signalerDeconnexion(session);
+  assert.equal(session.etat.programmeLance, true);
+});
+
+// « Plus tard » sous les étapes du DAPLink : un statut cohérent.
+
+test('« Plus tard » sous les étapes du DAPLink : le statut dit quoi faire', async () => {
+  const { dependances, session } = preparer({ daplink: null, reponses: { daplink: 'oui' } });
+  await essayer(BLOC, dependances);
+  session.reporterDaplink();
+  assert.equal(session.etat.daplink, null);
+  assert.match(session.etat.message, /reportée.*Essayer sur la carte/);
 });

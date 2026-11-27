@@ -28,10 +28,25 @@ import {
 import { ArretDemande, estBanniereMicroPython } from './repl.mjs';
 import { ErreurLecteur, messageFrancais } from '../EssayerExemple/logique.mjs';
 
-// Délais (ms) : banniere, guet de la bannière après le redémarrage d'une carte
-// muette ; redemarrage, attente du redémarrage après l'installation (le
-// sondage suit dès que la bannière arrive).
-export const DELAIS_DEROULEMENT = Object.freeze({ banniere: 3000, redemarrage: 8000 });
+// Délais (ms) :
+// - demarrage : fenêtre pendant laquelle Ctrl-C est renvoyé à une carte qui
+//   vient de redémarrer. La connexion elle-même redémarre la carte (DAP.js
+//   setSerialBaudrate → commande DAPLink 0x82 UART_SetConfiguration →
+//   SendBreak → nRESET), comme le redémarrage du diagnostic : MicroPython
+//   ignore Ctrl-C tant qu'il n'exécute pas boot.py ou main.py, et un Ctrl-C
+//   reçu pendant boot.py n'arrête pas le main.py qui suit. Chaque tentative
+//   (repl.interrompre) dure environ 1,6 s sans réponse : 6 s en laissent
+//   quatre, pour un démarrage (initialisation, boot.py, début de main.py)
+//   d'habitude bien plus court qu'une seconde. Valeur généreuse, pas encore
+//   mesurée sur la carte ;
+// - relance : pause entre deux tentatives ;
+// - redemarrage : attente du redémarrage après l'installation (le sondage
+//   suit dès que la bannière arrive).
+export const DELAIS_DEROULEMENT = Object.freeze({
+  demarrage: 6000,
+  relance: 100,
+  redemarrage: 8000,
+});
 
 // Taille maximale de la sortie gardée dans la console (caractères).
 export const LIMITE_SORTIE = 100_000;
@@ -51,6 +66,9 @@ export const TEXTE_EPINGLAGE_ILLISIBLE =
 export const TEXTE_CARTE_PERDUE =
   'La carte a été déconnectée : la rebrancher si besoin, puis cliquer de nouveau sur « Essayer sur la carte ».';
 
+export const TEXTE_DAPLINK_REPORTE =
+  'Mise à jour du DAPLink reportée : cliquer de nouveau sur « Essayer sur la carte » pour lancer le programme.';
+
 export const TEXTE_DECONNECTEE =
   'Carte déconnectée : la console ne suit plus le programme. Cliquer sur « Essayer sur la carte » pour le relancer.';
 
@@ -66,7 +84,8 @@ const TEXTES_ETAPES = Object.freeze({
   verification: 'Vérification de la carte…',
   sondage: 'Recherche de MicroPython sur la carte…',
   diagnostic: 'La carte ne répond pas : redémarrage de la carte…',
-  installation: 'Installation de MicroPython…',
+  installation:
+    'Installation de MicroPython (environ une minute) : ne pas débrancher la carte ni fermer la page…',
   redemarrage: 'Redémarrage de la carte…',
   fichiers: 'Envoi des fichiers annexes…',
   programme: 'Programme en cours.',
@@ -180,8 +199,9 @@ export const SESSION_INITIALE = Object.freeze({
   daplink: null,
   // Mémoire de la page (jusqu'au rechargement).
   daplinkReporte: false,
-  // Un programme a tourné sur la carte depuis la connexion : le suivant
-  // commence par une remise à zéro.
+  // Un programme a tourné sur la carte depuis la connexion, ou l'état de
+  // MicroPython est inconnu (nouvelle connexion, carte perdue ou libérée) :
+  // le prochain essai commence par une remise à zéro.
   programmeLance: false,
 });
 
@@ -276,9 +296,14 @@ export function creerSession({ planifier = planifierImage, limiteSortie = LIMITE
       poser({ encart: null });
       r?.(valeur);
     },
-    // « Plus tard » sur les étapes de mise à jour du DAPLink.
+    // « Plus tard » sur les étapes de mise à jour du DAPLink : le statut
+    // qui renvoyait aux étapes est remplacé.
     reporterDaplink() {
-      poser({ daplink: null, daplinkReporte: true });
+      poser({
+        daplink: null,
+        daplinkReporte: true,
+        message: etat.daplink ? TEXTE_DAPLINK_REPORTE : etat.message,
+      });
     },
     // Arrêter : l'essai en cours ne doit plus rien envoyer à la carte, même
     // si l'opération en cours se termine normalement.
@@ -306,30 +331,32 @@ export function creerSession({ planifier = planifierImage, limiteSortie = LIMITE
 
 // La carte est perdue ou libérée : le programme en cours ne s'affiche plus,
 // et le REPL de cette connexion (peut-être bloqué sur une lecture qui ne
-// viendra plus) est oublié.
+// viendra plus) est oublié. Ce que la carte exécutera ensuite est inconnu :
+// le prochain essai la remet à zéro.
 export function signalerDeconnexion(session) {
   session.oublierRepl();
   if (EN_MARCHE.has(session.etat.etape) || session.etat.etape === 'arret') {
-    session.terminer({ etape: 'fini', message: TEXTE_DECONNECTEE, programmeLance: false });
+    session.terminer({ etape: 'fini', message: TEXTE_DECONNECTEE, programmeLance: true });
   } else if (session.etat.etape === 'question') {
     // Question (DAPLink, installation) sur une carte partie : sans objet.
-    session.terminer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE, programmeLance: false });
-  } else if (session.etat.programmeLance) {
-    session.retenir({ programmeLance: false });
+    session.terminer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE, programmeLance: true });
+  } else {
+    session.retenir({ programmeLance: true });
   }
 }
 
-// Le bloc id disparaît de la page (navigation) : sa question en attente est
-// retirée, sinon l'essai resterait en 'question' et griserait les boutons
-// « Essayer » de toutes les pages. Un essai en préparation est terminé (il
-// s'arrête au retour de la question, sans rien envoyer) ; une confirmation,
-// posée avant le début de l'essai, est simplement annulée.
+// Le bloc id disparaît de la page (navigation). Son essai en préparation est
+// terminé, qu'une question soit déjà posée ou non : sinon il en poserait une
+// sous un bloc absent, et l'essai resterait en 'question', ce qui griserait
+// les boutons « Essayer » de toutes les pages. L'essai terminé s'arrête à sa
+// prochaine étape sans rien envoyer à la carte (essayer vérifie remplace()) ;
+// un flash déjà commencé va à son terme (carte.occupee le protège). Une
+// confirmation, posée avant le début de l'essai, est simplement annulée.
 export function abandonnerBloc(session, id) {
   const etat = session.etat;
-  if (etat.encart?.donnees.id !== id) return;
   if (etat.actif === id && estOccupee(etat)) {
     session.terminer({ etape: 'fini', message: 'Essai annulé.' });
-  } else {
+  } else if (etat.encart?.donnees.id === id) {
     session.repondre('non');
   }
 }
@@ -350,6 +377,10 @@ function creerGuet(carte) {
     }
   });
   return {
+    // La bannière est-elle déjà passée ?
+    get vue() {
+      return vue;
+    },
     // true si la bannière est vue dans le délai.
     attendre(delai) {
       if (vue) return Promise.resolve(true);
@@ -371,34 +402,75 @@ function creerGuet(carte) {
   };
 }
 
-// Carte muette : la redémarre une fois et guette la bannière. Un redémarrage
-// refusé (DAPLink trop ancien) laisse le guet aller à son terme.
-async function redemarrerEtGuetter(carte, delai) {
-  const guet = creerGuet(carte);
-  try {
-    try {
-      await carte.redemarrer();
-    } catch {
-      // Rien à faire : la bannière ne viendra pas, le délai décidera.
-    }
-    return await guet.attendre(delai);
-  } finally {
-    guet.fermer();
+const dormir = (ms) => new Promise((resoudre) => setTimeout(resoudre, ms));
+
+// Envoie Ctrl-C jusqu'à obtenir l'invite « >>> », pendant fenetre ms (une
+// seule tentative si fenetre vaut 0) : une carte qui vient de redémarrer
+// ignore les premiers. Une tentative ratée alors que la bannière était déjà
+// passée (guet) suffit : MicroPython a démarré, mais il ne répond pas.
+// 'invite', 'muette', 'perdue' (carte partie) ou 'abandonne' (essai
+// terminé : plus rien ne part vers la carte).
+async function obtenirInvite(repl, carte, { fenetre, guet, delais, remplace }) {
+  const fin = Date.now() + fenetre;
+  for (;;) {
+    if (remplace()) return 'abandonne';
+    const banniereAvant = guet?.vue ?? false;
+    const invite = await repl.interrompre();
+    if (remplace()) return 'abandonne';
+    if (invite) return 'invite';
+    if (!carte.etat.connectee) return 'perdue';
+    if (banniereAvant || Date.now() >= fin) return 'muette';
+    await dormir(delais.relance);
   }
 }
 
 // Étape 2 : 'a-jour', 'dev', 'ancien' (MicroPython répond), 'occupee'
-// (muette mais la bannière apparaît au redémarrage), 'muette' ou 'perdue'
-// (carte débranchée pendant l'attente de l'invite : pas de diagnostic).
-async function sonder(repl, carte, epinglee, delais, changer) {
+// (muette, mais la bannière de MicroPython est passée après un
+// redémarrage), 'muette', 'perdue' (carte débranchée pendant l'attente de
+// l'invite : pas de diagnostic) ou 'abandonne'.
+//
+// guetConnexion : guet branché juste après une nouvelle connexion, qui a
+// redémarré la carte. Ctrl-C est alors renvoyé pendant delais.demarrage, et
+// ce redémarrage tient lieu de diagnostic. Sinon, une carte muette est
+// redémarrée une fois (dap.reset()), puis sondée de la même façon. Une
+// bannière vue n'est jamais suivie d'une proposition d'installation.
+async function sonder(repl, carte, epinglee, { delais, changer, remplace, guetConnexion }) {
   changer({ etape: 'sondage' });
-  if (await repl.interrompre()) {
+  const lire = async () => {
     const version = await repl.lireVersion();
     return decisionFirmware({ micropython: true, version }, epinglee);
+  };
+  let resultat = await obtenirInvite(repl, carte, {
+    fenetre: guetConnexion ? delais.demarrage : 0,
+    guet: guetConnexion,
+    delais,
+    remplace,
+  });
+  if (resultat === 'invite') return lire();
+  if (resultat !== 'muette') return resultat;
+  let banniereVue = guetConnexion?.vue ?? false;
+  if (!guetConnexion) {
+    changer({ etape: 'diagnostic' });
+    const guet = creerGuet(carte);
+    try {
+      try {
+        await carte.redemarrer();
+      } catch {
+        // Redémarrage refusé (DAPLink trop ancien) : la fenêtre décidera.
+      }
+      resultat = await obtenirInvite(repl, carte, {
+        fenetre: delais.demarrage,
+        guet,
+        delais,
+        remplace,
+      });
+      banniereVue = guet.vue;
+    } finally {
+      guet.fermer();
+    }
+    if (resultat === 'invite') return lire();
+    if (resultat !== 'muette') return resultat;
   }
-  if (!carte.etat.connectee) return 'perdue';
-  changer({ etape: 'diagnostic' });
-  const banniereVue = await redemarrerEtGuetter(carte, delais.banniere);
   return diagnosticSansInvite({ banniereVue }) === 'occupee' ? 'occupee' : 'muette';
 }
 
@@ -416,7 +488,12 @@ async function remettreAZero(repl, session, changer) {
 // 'daplink' (étapes de mise à jour affichées), 'occupee' (carte tenue),
 // 'installation' (flash raté ou MicroPython muet ensuite), 'deconnectee'
 // (carte partie avant d'agir dessus), 'erreur',
-// 'erreur-python' (traceback), 'arrete', 'abandonne' (essai remplacé), 'lance'.
+// 'erreur-python' (traceback), 'arrete', 'abandonne' (essai remplacé, ou
+// terminé parce que son bloc a quitté la page), 'lance'.
+//
+// Un essai terminé de l'extérieur (remplace()) ne pose plus de question et
+// n'agit plus sur la carte : la vérification précède chaque question et
+// chaque action sur la carte qui suit une attente.
 export async function essayer({ id, code, fichiers = [], confirmation }, dependances) {
   const { carte, session, demander } = dependances;
   const delais = { ...DELAIS_DEROULEMENT, ...dependances.delais };
@@ -441,14 +518,17 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     changer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE });
     return true;
   };
+  // Bannière de démarrage guettée depuis une nouvelle connexion.
+  let guetConnexion = null;
 
   try {
     // 1. Connexion, au plus près du clic (la fenêtre de choix de Chrome
-    // l'exige).
+    // l'exige). Elle redémarre la carte (voir DELAIS_DEROULEMENT) : son état
+    // est inconnu, le premier programme partira d'une remise à zéro.
     let reconnectee = false;
     if (!carte.etat.connectee) {
       session.oublierRepl();
-      session.retenir({ programmeLance: false });
+      session.retenir({ programmeLance: true });
       changer({ etape: 'connexion' });
       await carte.connecter(id, dependances.urls.dapjs);
       if (remplace()) return { fin: 'abandonne' };
@@ -458,6 +538,7 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
         return { fin: 'connexion' };
       }
       reconnectee = true;
+      guetConnexion = creerGuet(carte);
     }
     const repl = session.obtenirRepl(dependances.creerRepl);
 
@@ -465,15 +546,18 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     // tout envoi.
     if (enMarche && !reconnectee) {
       if (!(await remettreAZero(repl, session, changer))) return { fin: 'reset' };
+      if (remplace()) return { fin: 'abandonne' };
     }
 
     changer({ etape: 'verification' });
     const epingles = await dependances.epingles();
+    if (remplace()) return { fin: 'abandonne' };
     const epinglee = epingles.micropython.version;
 
     // 1. DAPLink trop ancien : mise à jour guidée, ou « Plus tard ».
     if (epingles.daplink && !session.etat.daplinkReporte) {
       const version = await carte.lireVersionDaplink();
+      if (remplace()) return { fin: 'abandonne' };
       if (decisionMiseAJour(version, epingles.daplink) === 'ancien') {
         const { release } = epingles.daplink;
         changer({ etape: 'question' });
@@ -498,7 +582,15 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     }
 
     // 2. Sondage du REPL.
-    const decision = await sonder(repl, carte, epinglee, delais, changer);
+    const decision = await sonder(repl, carte, epinglee, {
+      delais,
+      changer,
+      remplace,
+      guetConnexion,
+    });
+    guetConnexion?.fermer();
+    guetConnexion = null;
+    if (decision === 'abandonne' || remplace()) return { fin: 'abandonne' };
     if (decision === 'perdue' || !carte.etat.connectee) {
       changer({ etape: 'fini', erreur: TEXTE_CARTE_PERDUE });
       return { fin: 'deconnectee' };
@@ -539,8 +631,10 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
       } finally {
         guet.fermer();
       }
+      if (remplace()) return { fin: 'abandonne' };
       changer({ etape: 'sondage' });
       const invite = await repl.interrompre();
+      if (remplace()) return { fin: 'abandonne' };
       const version = invite ? await repl.lireVersion() : null;
       const apres = invite ? decisionFirmware({ micropython: true, version }, epinglee) : 'absent';
       if (apres === 'absent' || apres === 'ancien') {
@@ -549,10 +643,14 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
       }
     }
 
-    // Un programme a déjà tourné : remise à zéro, pour que celui-ci parte de
-    // zéro (variables, modules importés, disque en RAM).
+    // Un programme a déjà tourné, ou la carte vient d'être connectée :
+    // remise à zéro, pour que celui-ci parte de zéro (variables, modules
+    // importés, minuteries, disque en RAM). En REPL brut : main.py n'est
+    // pas relancé.
+    if (remplace()) return { fin: 'abandonne' };
     if (session.etat.programmeLance) {
       if (!(await remettreAZero(repl, session, changer))) return { fin: 'reset' };
+      if (remplace()) return { fin: 'abandonne' };
     }
 
     // 4. Fichiers annexes dans le disque en RAM.
@@ -591,6 +689,8 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
     if (stoppe()) return { fin: 'arrete' };
     changer({ etape: 'fini', erreur: messageFrancais(err, 'ecriture') });
     return { fin: 'erreur' };
+  } finally {
+    guetConnexion?.fermer();
   }
 }
 
