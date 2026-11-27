@@ -80,7 +80,7 @@ Si un autre outil utilise déjà la carte (Thonny, `mpremote`) ou si un programm
 - si MicroPython démarre sans répondre, le wiki signale que la carte est occupée, sans proposer d'installation ;
 - avec un DAPLink trop ancien, ce redémarrage n'est pas possible : l'encart d'installation peut alors apparaître même si MicroPython est installé, et il le rappelle (« Si MicroPython est déjà installé… »).
 
-Dans les deux cas, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
+Quand la carte est signalée occupée, ou quand l'encart d'installation apparaît alors que MicroPython est déjà installé, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
 
 ## Programmes qui modifient la carte
 
