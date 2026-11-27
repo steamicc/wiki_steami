@@ -17,8 +17,10 @@ import {
   messageEtape,
   operateurSurCarte,
   pileRadioVisible,
+  questionEnAttente,
   retenirCarte,
   retenirFermeture,
+  retenirOnglet,
   texteDecompte,
 } from './affichage.mjs';
 import { ETAT_INITIAL_PILE, TEXTE_CONFIRMATION_VERIFICATION } from './deroulement.mjs';
@@ -126,13 +128,42 @@ describe('doitAbandonner', () => {
   it('vrai quand une question du bloc attend une réponse', () => {
     const encart = { type: 'proposition', donnees: DONNEES };
     assert.equal(doitAbandonner(pile({ id: ID, etape: 'proposition', encart }), ID), true);
+    const premiere = { type: 'confirmation-verification', donnees: { id: ID, texte: 'x' } };
+    assert.equal(
+      doitAbandonner(pile({ id: ID, etape: 'confirmation-verification', encart: premiere }), ID),
+      true,
+    );
   });
 
-  it("faux sans question, ou pour la question d'un autre bloc", () => {
+  // Bloc quitté pendant le flash de l'operator ou la lecture : sans
+  // annulation, le parcours poserait plus tard une question sans bloc pour
+  // y répondre.
+  it('vrai pendant une étape occupée du bloc, même sans question', () => {
+    for (const etape of ['operateur', 'lecture', 'suppression', 'attente', 'relecture']) {
+      assert.equal(doitAbandonner(pile({ id: ID, etape }), ID), true, etape);
+    }
+  });
+
+  it("faux au repos, après la fin, ou pour le parcours d'un autre bloc", () => {
     const encart = { type: 'proposition', donnees: DONNEES };
-    assert.equal(doitAbandonner(pile({ id: ID, etape: 'lecture' }), ID), false);
+    for (const etape of ['repos', 'a-jour', 'fini', 'erreur']) {
+      assert.equal(doitAbandonner(pile({ id: ID, etape }), ID), false, etape);
+    }
     assert.equal(
       doitAbandonner(pile({ id: ID, etape: 'proposition', encart }), 'BLE/Autre'),
+      false,
+    );
+    assert.equal(doitAbandonner(pile({ id: ID, etape: 'lecture' }), 'BLE/Autre'), false);
+  });
+});
+
+describe('questionEnAttente', () => {
+  it('vrai seulement quand une question du bloc attend une réponse', () => {
+    const encart = { type: 'proposition', donnees: DONNEES };
+    assert.equal(questionEnAttente(pile({ id: ID, etape: 'proposition', encart }), ID), true);
+    assert.equal(questionEnAttente(pile({ id: ID, etape: 'lecture' }), ID), false);
+    assert.equal(
+      questionEnAttente(pile({ id: ID, etape: 'proposition', encart }), 'BLE/Autre'),
       false,
     );
   });
@@ -369,5 +400,54 @@ describe('retenirCarte', () => {
     parcours.poser({ etape: 'operateur' });
     parcours.poser({ etape: 'erreur' });
     assert.equal(abonnements, 0);
+  });
+});
+
+describe('retenirOnglet', () => {
+  it('demande confirmation avant de fermer, de la suppression à la relecture, sans bloc affiché', () => {
+    const parcours = fauxParcours();
+    const ecouteurs = new Set();
+    const fenetre = {
+      addEventListener(type, fn) {
+        assert.equal(type, 'beforeunload');
+        ecouteurs.add(fn);
+      },
+      removeEventListener(type, fn) {
+        assert.equal(type, 'beforeunload');
+        ecouteurs.delete(fn);
+      },
+    };
+    retenirOnglet(parcours, fenetre);
+    parcours.poser({ etape: 'operateur', id: ID });
+    parcours.poser({ etape: 'proposition' });
+    assert.equal(ecouteurs.size, 0);
+    parcours.poser({ etape: 'suppression' });
+    assert.equal(ecouteurs.size, 1);
+    parcours.poser({ etape: 'ecriture' });
+    parcours.poser({ etape: 'upgrade' });
+    parcours.poser({ etape: 'attente', decompte: 3 });
+    parcours.poser({ etape: 'attente', decompte: 2 });
+    parcours.poser({ etape: 'relecture' });
+    assert.equal(ecouteurs.size, 1);
+
+    let annule = false;
+    let valeur = null;
+    const evenement = {
+      preventDefault() {
+        annule = true;
+      },
+      set returnValue(v) {
+        valeur = v;
+      },
+    };
+    for (const fn of ecouteurs) fn(evenement);
+    assert.equal(annule, true);
+    assert.equal(valeur, '');
+
+    parcours.poser({ etape: 'fini' });
+    assert.equal(ecouteurs.size, 0);
+    parcours.poser({ etape: 'suppression' });
+    parcours.poser({ etape: 'erreur' });
+    assert.equal(ecouteurs.size, 0);
   });
 });

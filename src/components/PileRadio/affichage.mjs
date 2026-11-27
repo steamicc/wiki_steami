@@ -139,10 +139,20 @@ export function retenirFermeture(etat) {
   return RETENUES.has(etat.etape);
 }
 
-// Une question du bloc id attend une réponse : à abandonner si le bloc
-// disparaît ou si la carte est perdue (le parcours envoie START si besoin).
-export function doitAbandonner(etat, id) {
+// Une question du bloc id attend une réponse : à abandonner si la carte est
+// perdue (le parcours envoie START si besoin). Pendant une étape occupée,
+// le parcours constate lui-même la perte de la carte.
+export function questionEnAttente(etat, id) {
   return etat.id === id && etat.encart !== null;
+}
+
+// Bloc id quitté (navigation) alors que sa vérification n'est pas au repos :
+// question en attente ou étape occupée. Sinon le parcours, qui continue,
+// poserait une question sans bloc pour y répondre, et Téléverser et
+// Déconnecter resteraient grisés sur toutes les pages. Une fois DELETE
+// envoyé, annuler() est sans effet et l'installation va à son terme.
+export function doitAbandonner(etat, id) {
+  return questionEnAttente(etat, id) || (etat.id === id && estOccupee(etat));
 }
 
 // Indicateur de développement : propose l'installation même quand la pile
@@ -211,6 +221,28 @@ export function retenirCarte(parcours, carte) {
     } else if (liberer) {
       liberer();
       liberer = null;
+    }
+  });
+}
+
+// De la suppression à la relecture, fermer ou recharger l'onglet couperait
+// l'installation : le navigateur demande confirmation. L'écouteur est posé
+// au niveau du module, comme retenirCarte, pour rester actif après une
+// navigation dans le wiki qui a fait disparaître le bloc. fenetre : window.
+export function retenirOnglet(parcours, fenetre) {
+  const avertir = (evenement) => {
+    evenement.preventDefault();
+    evenement.returnValue = '';
+  };
+  let pose = false;
+  return parcours.abonner((etat) => {
+    const retenir = retenirFermeture(etat);
+    if (retenir && !pose) {
+      fenetre.addEventListener('beforeunload', avertir);
+      pose = true;
+    } else if (!retenir && pose) {
+      fenetre.removeEventListener('beforeunload', avertir);
+      pose = false;
     }
   });
 }

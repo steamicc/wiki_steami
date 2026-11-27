@@ -15,17 +15,20 @@ import {
   doitAbandonner,
   lireForcer,
   messageEtape,
+  questionEnAttente,
   retenirCarte,
-  retenirFermeture,
+  retenirOnglet,
   texteDecompte,
 } from './affichage.mjs';
 import { ETAT_INITIAL_PILE, parcoursPile } from './deroulement.mjs';
 import communs from '../EssayerExemple/styles.module.css';
 
 // Une seule vérification par page (parcoursPile, comme la carte) : la carte
-// reste retenue pendant le parcours, et l'operator écrit est suivi pour
-// l'état affiché sous l'exemple (voir affichage.mjs).
+// reste retenue pendant le parcours, l'onglet aussi pendant l'installation
+// (même si le bloc a disparu), et l'operator écrit est suivi pour l'état
+// affiché sous l'exemple (voir affichage.mjs).
 retenirCarte(parcoursPile, carte);
+if (typeof window !== 'undefined') retenirOnglet(parcoursPile, window);
 export const suiviOperateur = creerSuiviOperateur(parcoursPile);
 
 const lireStockage = () => window.localStorage;
@@ -100,8 +103,9 @@ export default function PileRadio({ id }) {
   const etapesDaplink = actif && etat.daplink !== null && etat.daplink !== daplinkFerme;
   const libre = boutonPileActif(etatCarte, etat);
 
-  // Bloc quitté (navigation) : sa question en attente ne doit pas bloquer
-  // les boutons des autres pages. Lu au démontage, pas à chaque rendu.
+  // Bloc quitté (navigation) : sa vérification, question en attente ou
+  // étape occupée, ne doit pas bloquer les boutons des autres pages. Lu au
+  // démontage, pas à chaque rendu.
   useEffect(
     () => () => {
       if (doitAbandonner(parcoursPile.etat, id)) parcoursPile.annuler();
@@ -112,21 +116,8 @@ export default function PileRadio({ id }) {
   // Carte perdue pendant une question : le parcours s'arrête avec un message,
   // au lieu d'attendre une réponse qui ne servirait plus.
   useEffect(() => {
-    if (!etatCarte.connectee && doitAbandonner(etat, id)) parcoursPile.annuler();
+    if (!etatCarte.connectee && questionEnAttente(etat, id)) parcoursPile.annuler();
   }, [etatCarte.connectee, etat, id]);
-
-  // De DELETE à la relecture, fermer ou recharger la page couperait
-  // l'installation : le navigateur demande confirmation.
-  const retenir = actif && retenirFermeture(etat);
-  useEffect(() => {
-    if (!retenir) return undefined;
-    const avertir = (evenement) => {
-      evenement.preventDefault();
-      evenement.returnValue = '';
-    };
-    window.addEventListener('beforeunload', avertir);
-    return () => window.removeEventListener('beforeunload', avertir);
-  }, [retenir]);
 
   useLayoutEffect(() => {
     if (!focaliserApresRef.current) return;
