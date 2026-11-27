@@ -102,10 +102,10 @@ test('textes : contiennent la version, la release et les consignes', () => {
   assert.match(texteMiseAJourDaplink('2026-11-25.3'), /DAPLink.*2026-11-25\.3/);
 });
 
-test('texteInstallation : carte sans MicroPython (programme Arduino)', () => {
+test('texteInstallation : carte muette, sans doute sans MicroPython (constat prudent)', () => {
   assert.equal(
     texteInstallation('v0.29.0', 'absent'),
-    "Cette carte n'a pas MicroPython. Installer MicroPython v0.29.0 pour essayer cet exemple.",
+    'Cette carte ne semble pas avoir MicroPython. Installer MicroPython v0.29.0 pour essayer cet exemple.',
   );
 });
 

@@ -68,13 +68,15 @@ export function decisionMiseAJour(version, epingle) {
 
 // --- Textes -----------------------------------------------------------------
 
-// raison : 'absent' (pas de MicroPython, un programme Arduino par exemple)
-// ou 'ancien' (MicroPython plus ancien que la version épinglée, ou sans
-// steami.version).
+// raison : 'absent' (carte muette : sans doute pas de MicroPython, un
+// programme Arduino par exemple) ou 'ancien' (MicroPython plus ancien que la
+// version épinglée, ou sans steami.version). Une carte muette peut aussi avoir
+// MicroPython, tenu par un outil ou par un programme qui ignore Ctrl-C : le
+// constat reste prudent, et TEXTE_AUTRE_CAUSE (deroulement.mjs) le complète.
 export function texteInstallation(version, raison) {
   const constat =
     raison === 'absent'
-      ? "Cette carte n'a pas MicroPython."
+      ? 'Cette carte ne semble pas avoir MicroPython.'
       : 'La version de MicroPython de cette carte est plus ancienne que celle du wiki.';
   return `${constat} Installer MicroPython ${version} pour essayer cet exemple.`;
 }
