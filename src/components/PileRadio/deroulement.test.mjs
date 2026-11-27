@@ -12,6 +12,7 @@ import {
   TEXTE_PILE_ARRETEE,
   TEXTE_PILE_PEUT_ETRE_EFFACEE,
   TEXTE_SANS_REPONSE,
+  TEXTE_TELECHARGEMENT_PILE,
   creerParcoursPile,
   estOccupee,
   parcoursPile,
@@ -115,10 +116,23 @@ function fausseCarte(journal, { daplink = { numero: 3, date: 20261125 }, flash }
   return carte;
 }
 
-function fauxRecuperer(donnees = { [URLS.index]: INDEX, [URLS.daplink]: DAPLINK_EPINGLE }) {
+const HEX_INSTALLATION = ':020000040800F2\n';
+
+function fauxRecuperer(
+  donnees = {
+    [URLS.index]: INDEX,
+    [URLS.daplink]: DAPLINK_EPINGLE,
+    [URLS.installation]: HEX_INSTALLATION,
+  },
+) {
   return async (url) => {
     if (!(url in donnees)) return { ok: false, status: 404, json: async () => null };
-    return { ok: true, status: 200, json: async () => donnees[url] };
+    return {
+      ok: true,
+      status: 200,
+      json: async () => donnees[url],
+      arrayBuffer: async () => new TextEncoder().encode(String(donnees[url])).buffer,
+    };
   };
 }
 
@@ -136,10 +150,15 @@ function preparer({ operateur = {}, carte: optionsCarte, recuperer, forcer = fal
   const parcours = creerParcoursPile();
   const etats = [];
   parcours.abonner((etat) => etats.push(etat));
+  // Seul le téléchargement du .hex d'installation est noté au journal.
+  const source = recuperer ?? fauxRecuperer();
   const deps = {
     carte,
     urls: URLS,
-    recuperer: recuperer ?? fauxRecuperer(),
+    recuperer: (url, options) => {
+      if (url === URLS.installation) journal.push(`get ${url}`);
+      return source(url, options);
+    },
     attendre: async (ms) => {
       attentes.push(ms);
     },
@@ -558,6 +577,7 @@ describe('installation', () => {
     p.parcours.confirmer('installer');
     assert.deepEqual(await fin, { fin: 'fini' });
     assert.deepEqual(p.journal.slice(avant), [
+      `get ${URLS.installation}`,
       'DELETE',
       'STATUS',
       `flash ${URLS.installation}`,
@@ -569,6 +589,7 @@ describe('installation', () => {
     // « proposition » d'abord : l'encart se ferme avant la suite.
     assert.deepEqual(etapes, [
       'proposition',
+      'telechargement',
       'suppression',
       'ecriture',
       'upgrade',
@@ -725,6 +746,101 @@ describe('installation', () => {
   });
 });
 
+describe('téléchargement avant DELETE', () => {
+  const sansInstallation = { [URLS.index]: INDEX, [URLS.daplink]: DAPLINK_EPINGLE };
+
+  for (const [nom, recuperer] of [
+    ['réponse 404', fauxRecuperer(sansInstallation)],
+    [
+      'réseau coupé',
+      async (url, options) => {
+        if (url === URLS.installation) throw new TypeError('Failed to fetch');
+        return fauxRecuperer()(url, options);
+      },
+    ],
+    [
+      'corps interrompu',
+      async (url, options) => {
+        const reponse = await fauxRecuperer()(url, options);
+        if (url !== URLS.installation) return reponse;
+        return {
+          ...reponse,
+          arrayBuffer: async () => {
+            throw new TypeError('network error');
+          },
+        };
+      },
+    ],
+  ]) {
+    it(`${nom} : ni DELETE ni flash, START, erreur qui dit que rien n a été effacé`, async () => {
+      const p = preparer({ operateur: sansPile, recuperer });
+      const fin = verifierConfirme(p);
+      await etape(p.parcours, 'proposition');
+      p.parcours.confirmer('installer');
+      assert.deepEqual(await fin, { fin: 'erreur' });
+      assert.deepEqual(apres(p.journal, `get ${URLS.installation}`), ['START']);
+      assert.ok(!p.journal.includes('DELETE'));
+      assert.ok(!p.journal.includes(`flash ${URLS.installation}`));
+      assert.equal(p.parcours.etat.etape, 'erreur');
+      assert.equal(p.parcours.etat.erreur, TEXTE_TELECHARGEMENT_PILE);
+      assert.match(TEXTE_TELECHARGEMENT_PILE, /rien n'a été effacé/);
+    });
+  }
+
+  it('le .hex est téléchargé sans cache périmé, avant DELETE', async () => {
+    const vus = [];
+    const p = preparer({
+      operateur: { version: [VERSION_SANS_PILE, VERSION_SANS_PILE, VERSION_FUS] },
+      recuperer: async (url, options) => {
+        vus.push([url, options]);
+        return fauxRecuperer()(url, options);
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'fini' });
+    assert.deepEqual(
+      vus.find(([url]) => url === URLS.installation),
+      [URLS.installation, { cache: 'no-cache' }],
+    );
+    const avantDelete = p.journal.slice(0, p.journal.indexOf('DELETE'));
+    assert.ok(avantDelete.includes(`get ${URLS.installation}`));
+  });
+
+  it('carte perdue pendant le téléchargement : ni DELETE ni flash', async () => {
+    const p = preparer({
+      operateur: sansPile,
+      recuperer: async (url, options) => {
+        if (url === URLS.installation) p.carte.etat = { ...p.carte.etat, connectee: false };
+        return fauxRecuperer()(url, options);
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'erreur' });
+    assert.ok(!p.journal.includes('DELETE'));
+    assert.ok(!p.journal.includes(`flash ${URLS.installation}`));
+  });
+
+  it('annuler() pendant le téléchargement : arrêt avant DELETE, START', async () => {
+    const p = preparer({
+      operateur: sansPile,
+      recuperer: async (url, options) => {
+        if (url === URLS.installation) p.parcours.annuler();
+        return fauxRecuperer()(url, options);
+      },
+    });
+    const fin = verifierConfirme(p);
+    await etape(p.parcours, 'proposition');
+    p.parcours.confirmer('installer');
+    assert.deepEqual(await fin, { fin: 'annule' });
+    assert.ok(!p.journal.includes('DELETE'));
+    assert.equal(p.journal.at(-1), 'START');
+  });
+});
+
 describe('occupation', () => {
   it('pendant le parcours, estOccupee est vrai et une seconde vérification est refusée', async () => {
     const p = preparer({ operateur: sansPile });
@@ -768,6 +884,7 @@ describe('occupation', () => {
       'lecture',
       'proposition',
       'daplink',
+      'telechargement',
       'suppression',
       'ecriture',
       'upgrade',

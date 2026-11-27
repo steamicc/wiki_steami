@@ -174,6 +174,7 @@ describe('messageEtape', () => {
     for (const etape of [
       'operateur',
       'lecture',
+      'telechargement',
       'suppression',
       'ecriture',
       'upgrade',

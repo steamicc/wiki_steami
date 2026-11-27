@@ -10,7 +10,8 @@
 //   lireVersionDaplink, etat ;
 // - urls : { operateur, installation, index, daplink } (/pile-radio/… et
 //   /daplink/firmware.json) ;
-// - recuperer : fetch, injectable (lecture de index.json et de firmware.json) ;
+// - recuperer : fetch, injectable (lecture de index.json et de firmware.json,
+//   téléchargement du .hex d'installation avant DELETE) ;
 // - attendre(ms) : l'attente, injectable ; creerOperateur : operateur.mjs ;
 // - delais : remplace tout ou partie de DELAIS_PILE ;
 // - forcer : propose l'installation même quand la pile est à jour. Seule
@@ -31,6 +32,8 @@
 //   FUS, DAPLink non épinglé, Annuler, Plus tard, erreur) envoie START ;
 // - l'installation exige le DAPLink épinglé (illisible : non épinglé) et un
 //   second « oui » (« Installer la pile radio ») ;
+// - le .hex d'installation est téléchargé avant DELETE : s'il manque, DELETE
+//   ne part pas (START, rien n'est effacé) ;
 // - après DELETE : plus d'annulation, jamais de nouvel essai automatique, et
 //   jamais de nouvelle proposition pendant que le FUS travaille (0x10-0x3F).
 import {
@@ -86,6 +89,9 @@ export const TEXTE_ECHEC_OPERATEUR =
 
 export const TEXTE_OPERATEUR_MUET =
   'Le programme de lecture de la pile radio ne répond pas : débrancher puis rebrancher la carte, puis cliquer de nouveau sur « Vérifier la pile radio ».';
+
+export const TEXTE_TELECHARGEMENT_PILE =
+  "Impossible de télécharger la pile radio depuis le wiki : rien n'a été effacé sur la carte. Vérifier la connexion à Internet, puis cliquer de nouveau sur « Vérifier la pile radio ».";
 
 export const TEXTE_ANNULE =
   "Vérification arrêtée. Le programme de la carte a été remplacé : téléverser l'exemple pour l'essayer.";
@@ -148,7 +154,8 @@ export function texteAutrePile(relue, attendue) {
 // - 'repos', 'a-jour', 'fini', 'erreur' : rien ne tourne ;
 // - 'confirmation-verification' : première question, rien n'est envoyé ;
 // - 'operateur' (lecture des épinglages, flash de l'operator), 'lecture',
-//   'proposition', 'daplink' (questions, la pile est arrêtée), 'suppression',
+//   'proposition', 'daplink' (questions, la pile est arrêtée),
+//   'telechargement' (le .hex d'installation, avant DELETE), 'suppression',
 //   'ecriture', 'upgrade', 'attente' (décompte), 'relecture' : la carte est
 //   prise, Téléverser et Déconnecter restent inactifs.
 const OCCUPEES = new Set([
@@ -156,6 +163,7 @@ const OCCUPEES = new Set([
   'lecture',
   'proposition',
   'daplink',
+  'telechargement',
   'suppression',
   'ecriture',
   'upgrade',
@@ -197,6 +205,19 @@ export function lirePileEpinglee(json) {
     version: json.version,
     secteurs: json.secteurs,
   };
+}
+
+// Télécharge le .hex d'installation en entier (corps compris) : true s'il est
+// là. carte.flasherFirmware le relit ensuite par son url, après DELETE.
+async function telechargerInstallation(url, recuperer) {
+  try {
+    const reponse = await recuperer(url, { cache: 'no-cache' });
+    if (!reponse.ok) return false;
+    await reponse.arrayBuffer();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function lireJson(url, recuperer) {
@@ -421,6 +442,16 @@ export function creerParcoursPile() {
       if (!carte.etat.connectee) {
         return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
       }
+      // Le .hex d'installation avant DELETE : un échec réseau après DELETE
+      // laisserait la carte sans pile.
+      poser({ etape: 'telechargement' });
+      if (!(await telechargerInstallation(urls.installation, recuperer))) {
+        return finir('erreur', { etape: 'erreur', erreur: TEXTE_TELECHARGEMENT_PILE });
+      }
+      if (annulation) return finir('annule', { etape: 'repos', message: TEXTE_ANNULE });
+      if (!carte.etat.connectee) {
+        return finir('erreur', { etape: 'erreur', erreur: TEXTE_CARTE_PERDUE_PILE });
+      }
     } catch (err) {
       return finir('erreur', { etape: 'erreur', erreur: messageLecture(err, carte) });
     }
@@ -438,7 +469,8 @@ export function creerParcoursPile() {
       await operateur.supprimer();
       await operateur.statusDouble();
       poser({ etape: 'ecriture' });
-      // Jamais de nouvel essai : une seule écriture du .hex fusionné.
+      // Jamais de nouvel essai : une seule écriture du .hex fusionné, relu
+      // par son url (déjà téléchargé avant DELETE).
       if (!(await carte.flasherFirmware(id, urls.installation))) return perdue();
       poser({ etape: 'upgrade' });
       await operateur.upgrade({ surLigne: () => {} });

@@ -21,6 +21,7 @@ export const TEXTE_DERNIERE_ETAPE_DAPLINK =
 const MESSAGES_ETAPES = Object.freeze({
   operateur: 'Écriture du programme de lecture sur la carte…',
   lecture: 'Lecture de la pile radio…',
+  telechargement: 'Téléchargement de la pile radio depuis le wiki…',
   suppression: "Effacement de l'ancienne pile radio…",
   ecriture: 'Écriture de la nouvelle pile radio sur la carte…',
   upgrade: 'Installation de la pile radio par le FUS…',
