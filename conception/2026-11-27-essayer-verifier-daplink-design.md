@@ -9,7 +9,7 @@ Le bouton **Essayer** des exemples Arduino (`src/components/EssayerExemple/`) t�
 ## Objectifs
 
 - Après **Connecter la carte**, lire la version du DAPLink et la comparer au DAPLink épinglé par le wiki (`daplink.json`, servi en `static/daplink/firmware.json`).
-- Si le DAPLink de la carte est plus ancien, afficher sous les boutons l'encart des étapes guidées (`EtapesDaplink`), avec **Mettre à jour…** et **Plus tard**. La dernière étape est adaptée au bouton Arduino : cliquer sur **Connecter la carte**, puis sur **Téléverser**.
+- Si le DAPLink de la carte est plus ancien, afficher sous les boutons l'encart des étapes guidées (`EtapesDaplink`) : les étapes de la mise à jour, directement visibles, et un bouton **Plus tard**. Contrairement au Codespace, il n'y a pas de bouton « Mettre à jour… » intermédiaire. La dernière étape est adaptée au bouton Arduino : cliquer sur **Connecter la carte**, puis sur **Téléverser**.
 - Une phrase dans la page [Premier essai](https://github.com/steamicc/wiki_steami/blob/main/docs/software/arduino/exemples/premier-essai.md) explique l'encart.
 
 ## Non-objectifs

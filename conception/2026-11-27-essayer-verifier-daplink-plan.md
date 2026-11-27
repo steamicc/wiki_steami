@@ -150,7 +150,7 @@
     - `href={useBaseUrl('/daplink/firmware.bin')}`;
     - `surPlusTard={verificationDaplink.reporter}`;
     - `derniereEtape="Cliquer sur « Connecter la carte », puis sur « Téléverser »."`.
-- [ ] **Step 3: Write the doc sentence.** In `premier-essai.md`, after the paragraph at l.43, add one neutral sentence: if the DAPLink of the board is older than the one the wiki expects, a box under the buttons offers to update it (« Mettre à jour… »), and the update can wait (« Plus tard »). Link to the Codespace section that describes the same steps (`../codespace#mettre-à-jour-le-daplink-depuis-la-page`, check that the anchor exists in `docs/software/arduino/codespace.md`).
+- [ ] **Step 3: Write the doc sentence.** In `premier-essai.md`, after the paragraph at l.43, add one neutral sentence: if the DAPLink of the board is older than the one the wiki expects, a box under the buttons gives the update steps, and the update can wait (« Plus tard »). Link to the Codespace section that describes the same steps (`../codespace#mettre-à-jour-le-daplink-depuis-la-page`, check that the anchor exists in `docs/software/arduino/codespace.md`).
 - [ ] **Step 4: Run the checks.** Run `npm run test:js`, `npm run lint:js`, `npm run format:check`, `npm run lint:md` and `npm run build`. Expected: all pass, and the build reports no broken link.
 - [ ] **Step 5: Commit.** `git commit -m "feat(software): proposer la mise à jour du DAPLink sous les exemples Arduino"`. Its body ends with `Closes #256`.
 
