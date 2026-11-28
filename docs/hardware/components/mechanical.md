@@ -25,7 +25,7 @@ Voir [Boutons et buzzer →](../main-components/buttons-audio) pour les details 
 
 ### Bouton Menu / Reset
 
-- **PTS636 SM25J SMTR LFS** : Bouton tactile unique (probablement pour le bouton menu ou reset)
+- **PTS636 SM25J SMTR LFS** : Bouton tactile unique (probablement pour le bouton Menu ou Reset)
 
 ### Boutons A, B et Menu
 

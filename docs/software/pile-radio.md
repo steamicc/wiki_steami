@@ -52,7 +52,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    ![Seconde question : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée ; l'installation dure environ une minute et demie ; consigne de ne pas débrancher la carte, de ne pas appuyer sur RESET et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
 
-   L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton télécharge d'abord la nouvelle pile depuis le wiki et vérifie son empreinte : si elle ne correspond pas, rien n'est effacé. Il efface ensuite l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page.
+   L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton télécharge d'abord la nouvelle pile depuis le wiki et vérifie son empreinte : si elle ne correspond pas, rien n'est effacé. Il efface ensuite l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur Reset et ne pas fermer la page.
 
    ![Écriture de la nouvelle pile : état « Carte : téléversement », barre de progression et message « Écriture de la nouvelle pile radio sur la carte… »](/img/software/pile-radio-wiki-05-ecriture.png)
 

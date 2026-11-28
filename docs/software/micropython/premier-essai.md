@@ -60,7 +60,7 @@ L'installation efface les fichiers enregistrés sur la carte, `main.py` compris.
 
 :::
 
-Rien n'est installé sans un clic sur **Installer MicroPython**. Si MicroPython est déjà installé sur la carte mais qu'un autre outil la tient, ne pas installer : fermer l'outil, ou appuyer sur **RESET**, puis réessayer.
+Rien n'est installé sans un clic sur **Installer MicroPython**. Si MicroPython est déjà installé sur la carte mais qu'un autre outil la tient, ne pas installer : fermer l'outil, ou appuyer sur **Reset**, puis réessayer.
 
 Après le clic, une barre de progression suit l'envoi du firmware. L'installation prend moins d'une minute (37 secondes sur une V1c). Pendant ce temps, ne pas débrancher la carte ni fermer la page.
 
@@ -104,7 +104,7 @@ La ligne `File "<stdin>", line 3` donne le numéro de la ligne du programme où 
 
 - **La fenêtre de connexion ne liste pas la carte** : vérifier le câble (un câble de charge seule ne suffit pas), puis rebrancher la carte.
 - **« Accès à la carte refusé par le système »** : sous Linux, ajouter la règle `udev` ; sinon, fermer l'autre onglet ou le Codespace qui tient la carte. Voir [Accès à la carte refusé](./essayer#accès-à-la-carte-refusé).
-- **« La carte ne répond pas »** : fermer Thonny ou `mpremote`, ou appuyer sur le bouton **RESET** de la carte, puis réessayer.
+- **« La carte ne répond pas »** : fermer Thonny ou `mpremote`, ou appuyer sur le bouton **Reset** de la carte, puis réessayer.
 - **Un encart propose de mettre à jour le DAPLink** : suivre les étapes affichées, ou cliquer sur **Plus tard**. Voir [Mise à jour du DAPLink](./essayer#mise-à-jour-du-daplink).
 
 Les autres cas sont décrits dans [Essayer le code sur la carte](./essayer#dépannage).

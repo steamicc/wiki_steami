@@ -23,7 +23,7 @@ export { controlesOccupes, erreurCarteVisible, operateurSurCarte, pileRadioVisib
 export const TEXTE_DUREE_PILE = "L'installation dure environ une minute et demie.";
 
 export const TEXTE_CONSIGNES_PILE =
-  "Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page.";
+  "Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur Reset et ne pas fermer la page.";
 
 // Dernière étape de la mise à jour guidée du DAPLink : la carte redémarre
 // avec son nouveau DAPLink, la connexion est perdue.

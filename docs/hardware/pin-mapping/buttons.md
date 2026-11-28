@@ -5,7 +5,7 @@ title: 'Boutons'
 
 # Boutons
 
-La carte STeaMi dispose de 7 boutons utilisateur plus un bouton reset.
+La carte STeaMi dispose de 7 boutons utilisateur plus un bouton Reset.
 
 ## Boutons directionnels (via MCP23009)
 
