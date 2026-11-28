@@ -67,13 +67,16 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 
 ## Signaux internes - Écran
 
-| Signal                | Broche associée | Description             |
-| --------------------- | --------------- | ----------------------- |
-| SPI1_SCK_OLED         | SPI_INT_SCK     | SPI1 Clock écran (PA1)  |
-| SPI1_MOSI_OLED        | SPI_INT_MOSI    | SPI1 MOSI écran (PB5)   |
-| D/C_OLED_OR_SPI1_MISO | SPI_INT_MISO    | SPI1 MISO écran (PB4)   |
-| CS_OLED               | CS_DISPLAY      | Chip Select écran (PD0) |
-| RST_OLED              | RST_DISPLAY     | Reset écran (PA12)      |
+| Signal                | Broche associée      | Description                    |
+| --------------------- | -------------------- | ------------------------------ |
+| SPI1_SCK_OLED         | SPI_INT_SCK          | SPI1 Clock écran (PA1)         |
+| SPI1_MOSI_OLED        | SPI_INT_MOSI         | SPI1 MOSI écran (PB5)          |
+| D/C_OLED_OR_SPI1_MISO | SPI_INT_MISO         | SPI1 MISO écran (PB4)          |
+| D/C_OLED_OR_SPI1_MISO | DATA_COMMAND_DISPLAY | Donnée ou commande écran (PB4) |
+| CS_OLED               | CS_DISPLAY           | Chip Select écran (PD0)        |
+| RST_OLED              | RST_DISPLAY          | Reset écran (PA12)             |
+
+La broche PB4 porte deux noms dans le firmware MicroPython : `SPI_INT_MISO` et `DATA_COMMAND_DISPLAY`. L'écran ne renvoie aucune donnée sur MISO : les exemples de l'écran utilisent `Pin("DATA_COMMAND_DISPLAY")` comme ligne D/C, qui indique si l'octet envoyé est une donnée ou une commande. La variante Arduino ne définit que `SPI_INT_MISO`.
 
 ## Signaux internes - Capteurs
 
@@ -92,10 +95,10 @@ Liste complète de tous les signaux de la carte STeaMi avec leurs broches associ
 
 | Signal              | Broche associée     | Description                        |
 | ------------------- | ------------------- | ---------------------------------- |
-| T_UART2_TX          | SERIAL_TX           | TX vers F103 (PB11)                |
-| T_UART2_RX          | SERIAL_RX           | RX depuis F103 (PB10)              |
-| UART2_TX            | JACDAC_DATA         | Jacdac TX (PB6)                    |
-| UART2_RX            | JACDAC_DATA         | Jacdac RX (PB7)                    |
+| T_UART2_TX          | SERIAL_TX           | LPUART1 TX vers F103 (PB11)        |
+| T_UART2_RX          | SERIAL_RX           | LPUART1 RX depuis F103 (PB10)      |
+| UART2_TX            | JACDAC_DATA_TX      | USART1 TX Jacdac (PB6)             |
+| UART2_RX            | JACDAC_DATA_RX      | USART1 RX Jacdac (PB7)             |
 | ON/OFF\_+3V3_STLINK | ACTIVATE_3V3_STLINK | Contrôle alimentation STLink (PB2) |
 
 ## Signaux JTAG

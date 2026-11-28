@@ -76,6 +76,8 @@ Les signaux sont identiques pour les trois releases, y compris pour l'écran TFT
 
 ## Communication série (STM32WB55 - STM32F103)
 
+Le net `T_UART2` du schéma correspond au périphérique LPUART1 du STM32WB55 et à l'USART2 du STM32F103 (PA2/PA3). Cette liaison porte la console série : REPL MicroPython et `Serial` en Arduino.
+
 | Signal                 | Pin STM32WB55 | Test Point |
 | ---------------------- | ------------- | ---------- |
 | T_UART2_TX (SERIAL_TX) | PB11          | TP44       |
