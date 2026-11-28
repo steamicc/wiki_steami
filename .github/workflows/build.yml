@@ -38,6 +38,14 @@ jobs:
         if: github.event_name == 'pull_request'
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
+      # Fichiers ajoutés ou modifiés par la PR : images > 2 Mo, PDF > 2 Mo et
+      # autres fichiers > 1 Mo refusés (avertissement au-delà de 500 Ko pour
+      # les images, 1 Mo pour les PDF). Exceptions dans
+      # scripts/tailles-fichiers-exceptions.txt.
+      - name: Check file sizes
+        if: github.event_name == 'pull_request'
+        run: npm run lint:file-sizes -- --base ${{ github.event.pull_request.base.sha }}
+
       - name: Check formatting
         run: npm run format:check
 
