@@ -37,7 +37,7 @@ Capteurs internes sur le bus I2C1 ; les capteurs d'environnement et de lumière 
 | -------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------- |
 | WEO128128BWPP3N00001 (V1a, V1b) ; WF0128BTYAA4DNN0 (V1c) | [Écran](./display) rond, OLED 128x128 blanc ou TFT 240x240 couleur, SPI | [Détail →](./display)       |
 | Wurth 150505M173300 + LEDs status                        | [LEDs](./leds) RGB utilisateur + indicateurs système                    | [Détail →](./leds)          |
-| ALPS SKRHABE010 + C&K PTS636                             | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piézo         | [Détail →](./buttons-audio) |
+| ALPS SKRHABE010 + C&K PTS647SM38SMTR2LFS                 | [Boutons et buzzer](./buttons-audio) — 7 boutons + buzzer piézo         | [Détail →](./buttons-audio) |
 
 ## Alimentation
 

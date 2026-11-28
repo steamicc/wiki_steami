@@ -198,13 +198,13 @@ La carte dispose de plusieurs LEDs pour le retour visuel : une LED RGB programma
 
 La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un bouton Reset. Les boutons directionnels passent par l'expandeur GPIO MCP23009 pour économiser des broches MCU.
 
-| Bouton                            | Composant       | Connexion              |
-| --------------------------------- | --------------- | ---------------------- |
-| D-pad (haut, bas, gauche, droite) | ALPS SKRHABE010 | Via MCP23009 (GP4-GP7) |
-| A                                 | C&K PTS636      | PA7 (direct GPIO)      |
-| B                                 | C&K PTS636      | PA8 (direct GPIO)      |
-| Menu                              | Bouton poussoir | PA0 (broche wake)      |
-| Reset                             | Bouton poussoir | NRST                   |
+| Bouton                            | Composant                                     | Connexion              |
+| --------------------------------- | --------------------------------------------- | ---------------------- |
+| D-pad (haut, bas, gauche, droite) | ALPS SKRHABE010                               | Via MCP23009 (GP4-GP7) |
+| A                                 | C&K PTS647SM38SMTR2LFS (SW5)                  | PA7 (direct GPIO)      |
+| B                                 | C&K PTS647SM38SMTR2LFS (SW4)                  | PA8 (direct GPIO)      |
+| Menu                              | C&K PTS647SM38SMTR2LFS (SW3)                  | PA0 (broche wake)      |
+| Reset                             | C&K PTS636 SM25J SMTR LFS (SW1), face arrière | NRST                   |
 
 | Caractéristique            | Détail                                                                                                                                                                                    |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -27,7 +27,9 @@ La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un 
 | A      | GPIO1_EDGE_BOUTON_A | PA7 (= P5)    |
 | B      | GPIO6_EDGE_BOUTON_B | PA8 (= P11)   |
 
-- **Composant** : C&K PTS636 SM25J SMTR LFS / PTS647SM38SMTR2LFS
+- **Composant** : C&K PTS647SM38SMTR2LFS (SW5 pour A, SW4 pour B), comme le bouton Menu (SW3)
+
+Le C&K PTS636 SM25J SMTR LFS des nomenclatures est le bouton Reset SW1, monté en face arrière.
 
 ### Bouton Menu
 

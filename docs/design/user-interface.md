@@ -33,15 +33,15 @@ Les exigences sont communes aux trois releases de la carte. Quand l'implémentat
 
 ## Exigences — Boutons
 
-| ID     | Nom                                  | Description                                                                                                                                                                                                                                                                                                                               | Implémentation                                       |
-| ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| FCT-20 | User buttons - BLE Pairing           | Le système doit pouvoir appairer un appareil BLE si le bouton poussoir est maintenu appuyé pendant au moins 3 secondes.                                                                                                                                                                                                                   | Bouton Menu (PA0) — appui long                       |
-| FCT-21 | User buttons - Arcade requirement    | Le système nécessite 7 boutons utilisateur au total : gauche, haut, droite, bas (en configuration d-pad), A, B et Menu.                                                                                                                                                                                                                   | D-pad via MCP23009 + A/B GPIO + Menu GPIO            |
-| FCT-22 | User buttons - Pull-up               | Les 4 boutons directionnels, les boutons A/B et le bouton Menu sont reliés à des broches GPIO du MCU, comme entrées numériques. La configuration logicielle accepte des boutons actifs à l'état haut ou à l'état bas. Si le MCU dispose de résistances de pull-up ou de pull-down internes, des pull-up externes ne sont pas nécessaires. | Résistances pull-up externes                         |
-| FCT-23 | User buttons - Placement constraints | La disposition recommandée place les boutons directionnels en « d-pad » à gauche de la carte et les boutons A et B à droite, A au-dessus et à droite de B. Le bouton Menu se place de préférence près des autres boutons, et le bouton Reset à côté du connecteur USB.                                                                    | ALPS SKRHABE010 (joystick 4 directions) + C&K PTS636 |
-| FCT-24 | User buttons - Menu function         | Une des fonctions du bouton Menu est de quitter le mode veille basse consommation. Pour un MCU avec capacité de réveil, le bouton Menu doit être connecté à une broche de réveil.                                                                                                                                                         | Menu sur PA0 (broche wake)                           |
-| FCT-25 | Reset button                         | Le système doit pouvoir redémarrer via un bouton poussoir Reset.                                                                                                                                                                                                                                                                          | Bouton Reset                                         |
-| FCT-26 | Power button                         | Le système doit pouvoir être allumé et éteint par le bouton poussoir d'alimentation si celui-ci est maintenu appuyé pendant au moins 3 secondes.                                                                                                                                                                                          | Bouton power                                         |
+| ID     | Nom                                  | Description                                                                                                                                                                                                                                                                                                                               | Implémentation                                                                                       |
+| ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| FCT-20 | User buttons - BLE Pairing           | Le système doit pouvoir appairer un appareil BLE si le bouton poussoir est maintenu appuyé pendant au moins 3 secondes.                                                                                                                                                                                                                   | Bouton Menu (PA0) — appui long                                                                       |
+| FCT-21 | User buttons - Arcade requirement    | Le système nécessite 7 boutons utilisateur au total : gauche, haut, droite, bas (en configuration d-pad), A, B et Menu.                                                                                                                                                                                                                   | D-pad via MCP23009 + A/B GPIO + Menu GPIO                                                            |
+| FCT-22 | User buttons - Pull-up               | Les 4 boutons directionnels, les boutons A/B et le bouton Menu sont reliés à des broches GPIO du MCU, comme entrées numériques. La configuration logicielle accepte des boutons actifs à l'état haut ou à l'état bas. Si le MCU dispose de résistances de pull-up ou de pull-down internes, des pull-up externes ne sont pas nécessaires. | Résistances pull-up externes                                                                         |
+| FCT-23 | User buttons - Placement constraints | La disposition recommandée place les boutons directionnels en « d-pad » à gauche de la carte et les boutons A et B à droite, A au-dessus et à droite de B. Le bouton Menu se place de préférence près des autres boutons, et le bouton Reset à côté du connecteur USB.                                                                    | ALPS SKRHABE010 (joystick 4 directions, SW2) + C&K PTS647SM38SMTR2LFS (A = SW5, B = SW4, Menu = SW3) |
+| FCT-24 | User buttons - Menu function         | Une des fonctions du bouton Menu est de quitter le mode veille basse consommation. Pour un MCU avec capacité de réveil, le bouton Menu doit être connecté à une broche de réveil.                                                                                                                                                         | Menu sur PA0 (broche wake)                                                                           |
+| FCT-25 | Reset button                         | Le système doit pouvoir redémarrer via un bouton poussoir Reset.                                                                                                                                                                                                                                                                          | Bouton Reset SW1, C&K PTS636 SM25J SMTR LFS, monté en face arrière                                   |
+| FCT-26 | Power button                         | Le système doit pouvoir être allumé et éteint par le bouton poussoir d'alimentation si celui-ci est maintenu appuyé pendant au moins 3 secondes.                                                                                                                                                                                          | **Écart** : aucun bouton d'alimentation (SW1 à SW5 seulement, voir [Alimentation](#alimentation))    |
 
 ## Exigences — Audio
 
@@ -140,7 +140,9 @@ Le système nécessite 7 boutons utilisateur au total. Les boutons directionnels
 | A_BUTTON | GPIO1_EDGE_BOUTON_A | PA7 (= P5)    |
 | B_BUTTON | GPIO6_EDGE_BOUTON_B | PA8 (= P11)   |
 
-- **Composant** : C&K PTS636 SM25J SMTR LFS / PTS647SM38SMTR2LFS
+- **Composant** : C&K PTS647SM38SMTR2LFS (SW5 pour A, SW4 pour B), comme le bouton Menu (SW3)
+
+Le C&K PTS636 SM25J SMTR LFS des nomenclatures est le bouton Reset SW1, monté en face arrière.
 
 #### Bouton Menu
 
@@ -150,6 +152,15 @@ Le système nécessite 7 boutons utilisateur au total. Les boutons directionnels
 
 - Fonction secondaire : réveil du mode basse consommation
 - Fonction secondaire : appairage BLE (appui long à l'allumage)
+
+#### Alimentation
+
+La carte n'a pas de bouton d'alimentation, sur aucune release : c'est un écart à l'exigence FCT-26. Les schémas et les nomenclatures des indices A, A1, B1 et C ne comptent que cinq boutons (SW1 Reset, SW2 joystick, SW3 Menu, SW4 B, SW5 A). Aucune source ne montre que le bouton Reset SW1 sert à l'allumage.
+
+Deux signaux touchent à l'alimentation (feuilles FP2 et FP14 des schémas) :
+
+- **VBAT_ON/OFF** : la broche PA7 (broche 17) du STM32F103 commande, par le transistor T1 (BSS119N), l'entrée SYSOFF (broche 15) du chargeur BQ24075 (U1). Ce montage est le même aux indices A, A1, B1 et C.
+- **PWR_ENn** : il commande l'entrée EN de l'interrupteur U21 (DIO7003), placé entre les rails POWER et SYST. Aux indices A et A1 (V1a), PWR_ENn vient de la broche PB15 (broche 28) du STM32F103 et R90 (100 kΩ, montée d'après la nomenclature A) le tire vers POWER. Aux indices B1 et C (V1b, V1c), PB15 ne va qu'au point de test TP76, R90 n'est pas montée et R103 (100 kΩ) tire PWR_ENn à GND : aucune broche ne commande U21.
 
 ### Sortie audio (FP10)
 
