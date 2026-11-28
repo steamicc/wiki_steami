@@ -41,6 +41,10 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 [**Voir les conventions détaillées →**](./conventions)
 
+## Tutoriels
+
+- [**Capteurs**](./capteurs) — Température, humidité, pression, mouvement, boussole, distance, lumière et batterie, avec la couche `steami`
+
 ## Installation et outils
 
 - [**Installation du firmware**](./install) — Flasher MicroPython sur la carte STeaMi
@@ -51,7 +55,7 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 ## Sections à venir
 
-- Tutoriels par composant (capteurs, écran, I/O, communication, stockage)
+- Tutoriels par composant (écran, I/O, communication, stockage)
 - Sujets avancés (limite RAM, timers, interruptions, low power)
 
 ## Voir aussi
