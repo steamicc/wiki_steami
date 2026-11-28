@@ -56,10 +56,13 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 - [**Thonny**](./thonny) — Éditeur graphique avec REPL intégré
 - [**Vittascience**](./vittascience) — IDE en ligne avec programmation par blocs
 
+## Sujets avancés
+
+- [**Sujets avancés**](./avance) — Mémoire et code gelé, timers et interruptions, `native` et `viper`, mise en veille, horloge, chien de garde, `asyncio`
+
 ## Sections à venir
 
 - Tutoriels par composant (I/O)
-- Sujets avancés (limite RAM, timers, interruptions, low power)
 
 ## Voir aussi
 
