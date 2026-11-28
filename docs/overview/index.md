@@ -3,6 +3,8 @@ sidebar_position: 1
 title: "Vue d'ensemble"
 ---
 
+import DiagrammeCliquable from '@site/src/components/DiagrammeCliquable';
+
 # Vue d'ensemble de la carte STeaMi
 
 La carte **STeaMi** (STEAM32) est une plateforme de développement IoT polyvalente, équipée d'un riche ensemble de fonctionnalités telles que l'acquisition de données multi-capteurs, la communication sans fil et des interfaces faciles à utiliser (USB, WebUSB), ce qui la rend adaptée à la fois à l'éducation et au prototypage.
@@ -31,9 +33,9 @@ La carte STeaMi repose sur deux microcontrôleurs :
 
 ### Schéma bloc
 
-![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
+<DiagrammeCliquable src="/img/diagrams/architecture-v1c.svg" width={800} height={1232} alt="Schéma bloc de la STeaMi V1c : STM32WB55RG relié à l'écran GC9A01 en SPI1, aux LED, aux boutons, au buzzer, au micro IMP34DT05 et, par le bus I2C1, aux capteurs ISM330DLC, LIS2MDL, VL53L1X et BME280, à la jauge BQ27441 et à l'expandeur MCP23009 ; STM32F103 DAPLink relié à l'USB-C, à la flash W25Q64 et au port SWD J8 ; chaîne d'alimentation BQ24075, DIO7003, TPS63000, LD3985 et AP3015" />
 
-Ce schéma bloc représente la V1b ; les différences avec la V1a et la V1c sont détaillées dans [Révisions de la carte](../hardware/revisions).
+Ce schéma bloc représente la V1c. Celui de la V1b, commun à la V1a, se trouve dans l'onglet correspondant de la page [Hardware](../hardware/#schéma-bloc) ; les différences entre releases sont détaillées dans [Révisions de la carte](../hardware/revisions).
 
 ## Blocs fonctionnels
 

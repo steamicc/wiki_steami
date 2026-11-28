@@ -4,6 +4,7 @@ title: "Vue d'ensemble du matériel"
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+import DiagrammeCliquable from '@site/src/components/DiagrammeCliquable';
 
 # Vue d'ensemble du matériel
 
@@ -69,9 +70,22 @@ Carte au circuit imprimé vert : écran OLED rond, connecteur micro-USB et conne
 
 ## Schéma bloc
 
-![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
-Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Sur la V1c, l'écran est un TFT GC9A01 alimenté en +3V3 (sans rail 14,5 V), le BME280 remplace les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960, et le connecteur USB est un USB-C (voir [Révisions](./revisions)).
+![Schéma bloc de la STeaMi V1b : STM32WB55RG relié à l'écran OLED SSD1327 en SPI1, aux capteurs du bus I2C1 (dont WSEN-PADS, WSEN-HIDS et APDS-9960), au STM32F103 DAPLink, au micro-USB et à la flash W25Q64](/img/hardware/block-diagram.svg)
+
+Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Ses blocs ne sont pas cliquables. Les différences avec la V1c sont détaillées dans [Révisions](./revisions).
+
+</Release>
+<Release releases="v1c">
+
+<DiagrammeCliquable src="/img/diagrams/architecture-v1c.svg" width={800} height={1232} alt="Schéma bloc de la STeaMi V1c : STM32WB55RG relié à l'écran GC9A01 en SPI1, aux LED, aux boutons, au buzzer, au micro IMP34DT05 et, par le bus I2C1, aux capteurs ISM330DLC, LIS2MDL, VL53L1X et BME280, à la jauge BQ27441 et à l'expandeur MCP23009 ; STM32F103 DAPLink relié à l'USB-C, à la flash W25Q64 et au port SWD J8 ; chaîne d'alimentation BQ24075, DIO7003, TPS63000, LD3985 et AP3015" />
+
+Les deux microcontrôleurs sont reliés par une liaison série (console), par le SWD (programmation du STM32WB55 par DAPLink) et par le bus I2C1 (pont DAPLink à l'adresse 0x3B). Côté alimentation (feuilles FP4 et FP14 de l'indice C), la sortie du chargeur BQ24075 alimente le convertisseur TPS63000 (+3V3 de la carte) par l'interrupteur DIO7003, et le régulateur LD3985 (+3V3_STLINK du STM32F103 et de la flash). L'élévateur AP3015 tire du +3V3 le 5 V des connecteurs Jacdac.
+
+</Release>
+</ReleaseTabs>
 
 ## Description du hardware
 

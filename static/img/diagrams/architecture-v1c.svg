@@ -1,0 +1,323 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1232" width="800" height="1232"
+     aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Schéma bloc de la STeaMi V1c</title>
+  <desc id="desc">Le STM32WB55RG pilote l'écran GC9A01 en SPI1, les LED, les boutons, le buzzer et le micro PDM. Il lit les capteurs, la jauge BQ27441 et l'expandeur MCP23009 sur le bus I2C1. Le STM32F103 (DAPLink) gère l'USB-C, la flash W25Q64 en SPI1 et le port SWD J8 ; il est relié au STM32WB55 par l'UART, le SWD et l'I2C1. L'alimentation part de la batterie et de l'USB-C (BQ24075, DIO7003, TPS63000, LD3985, AP3015). Chaque bloc est un lien vers sa page du wiki.</desc>
+  <defs>
+    <style>
+      /* Classes préfixées sch- ; palette du guide de style des schémas, section 3. */
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-capt { fill: #fff3e0; stroke: #b35400; }
+      .sch-alim { fill: #ffebee; stroke: #c62828; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-conn { fill: #f3e5f5; stroke: #7b1fa2; }
+      .sch-ihm  { fill: #e8f5e9; stroke: #2e7d32; }
+      .sch-ext  { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-i2c  { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-spi  { stroke: #303f9f; }
+      .sch-uart { stroke: #b35400; stroke-dasharray: 2 4; }
+      .sch-swd  { stroke: #6e40c9; stroke-dasharray: 10 4 2 4; }
+      .sch-usb  { stroke: #1f2328; stroke-width: 3; }
+      .sch-pwr  { stroke: #c62828; stroke-width: 2.5; }
+      .sch-gpio { stroke: #57606a; stroke-width: 1.5; }
+      .sch-sep  { stroke: #d0d7de; stroke-width: 1; }
+      /* Blocs cliquables : trait plus épais au survol et au focus clavier. */
+      .sch-a { cursor: pointer; }
+      .sch-a:hover .sch-bloc, .sch-a:focus-visible .sch-bloc { stroke-width: 3; }
+      .sch-a:focus { outline: none; }
+      .sch-a:hover .sch-section, .sch-a:focus-visible .sch-section { text-decoration: underline; }
+    </style>
+    <!-- Une flèche par couleur ; source -> destination. -->
+    <marker id="fl-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c62828"/>
+    </marker>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="1231" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Schéma bloc de la STeaMi</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+  <text class="sch-detail" x="24" y="62">Chaque bloc est un lien vers sa page du wiki.</text>
+
+  <!-- Les liens sont relatifs à l'URL du SVG (/img/diagrams/) : ils suivent le baseUrl du site.
+       target="_top" ouvre la page dans l'onglet, et non dans le cadre de l'objet. -->
+
+  <!-- ==================== Connecteurs (haut) ==================== -->
+  <a class="sch-a" href="../../docs/hardware/main-components/connectors/edge-connector" target="_top">
+    <title>Connecteur edge</title>
+    <rect class="sch-bloc sch-conn" x="168" y="88" width="160" height="56" rx="6"/>
+    <text class="sch-nom" x="248" y="112" text-anchor="middle">Connecteur edge</text>
+    <text class="sch-detail" x="248" y="130" text-anchor="middle">micro:bit, P0 à P20</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/connectors/stemma-qwiic" target="_top">
+    <title>Connecteurs STEMMA/Qwiic</title>
+    <rect class="sch-bloc sch-conn" x="344" y="88" width="136" height="56" rx="6"/>
+    <text class="sch-nom" x="412" y="112" text-anchor="middle">Qwiic J3, J4</text>
+    <text class="sch-detail" x="412" y="130" text-anchor="middle">STEMMA QT</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/connectors/jacdac" target="_top">
+    <title>Connecteur Jacdac</title>
+    <rect class="sch-bloc sch-conn" x="496" y="88" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="560" y="112" text-anchor="middle">Jacdac</text>
+    <text class="sch-detail" x="560" y="130" text-anchor="middle">J5, J6</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/pin-mapping/external-connectors#connecteur-usb" target="_top">
+    <title>Connecteur USB</title>
+    <rect class="sch-bloc sch-conn" x="640" y="88" width="136" height="56" rx="6"/>
+    <text class="sch-nom" x="708" y="112" text-anchor="middle">USB-C</text>
+    <text class="sch-detail" x="708" y="130" text-anchor="middle">J2, 5 V et données</text>
+  </a>
+
+  <path class="sch-lien sch-gpio" d="M264 144 V176"/>
+  <text class="sch-lien-txt" x="272" y="166" fill="#57606a">GPIO, SPI2, I2C3</text>
+  <path class="sch-lien sch-i2c" d="M416 144 V176"/>
+  <text class="sch-lien-txt" x="424" y="166" fill="#00796b">I2C3</text>
+  <path class="sch-lien sch-uart" d="M512 144 V176"/>
+  <text class="sch-lien-txt" x="520" y="166" fill="#b35400">UART</text>
+  <path class="sch-lien sch-usb" d="M708 144 V176"/>
+  <text class="sch-lien-txt" x="716" y="166" fill="#1f2328">USB</text>
+
+  <!-- ==================== Interface utilisateur (gauche) ==================== -->
+  <a class="sch-a" href="../../docs/hardware/main-components/display" target="_top">
+    <title>Écran</title>
+    <rect class="sch-bloc sch-ihm" x="24" y="176" width="144" height="56" rx="6"/>
+    <text class="sch-nom" x="96" y="200" text-anchor="middle">Écran GC9A01</text>
+    <text class="sch-detail" x="96" y="218" text-anchor="middle">TFT rond 240 × 240</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/leds" target="_top">
+    <title>LED</title>
+    <rect class="sch-bloc sch-ihm" x="24" y="248" width="144" height="56" rx="6"/>
+    <text class="sch-nom" x="96" y="272" text-anchor="middle">LED</text>
+    <text class="sch-detail" x="96" y="290" text-anchor="middle">RGB et Bluetooth</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/buttons-audio#boutons" target="_top">
+    <title>Boutons</title>
+    <rect class="sch-bloc sch-ihm" x="24" y="320" width="144" height="56" rx="6"/>
+    <text class="sch-nom" x="96" y="344" text-anchor="middle">Boutons</text>
+    <text class="sch-detail" x="96" y="362" text-anchor="middle">A, B et Menu</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/buttons-audio#buzzer" target="_top">
+    <title>Buzzer</title>
+    <rect class="sch-bloc sch-ihm" x="24" y="392" width="144" height="56" rx="6"/>
+    <text class="sch-nom" x="96" y="416" text-anchor="middle">Buzzer</text>
+    <text class="sch-detail" x="96" y="434" text-anchor="middle">piézo SMT-0825</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/sensors/imp34dt05" target="_top">
+    <title>Microphone IMP34DT05</title>
+    <rect class="sch-bloc sch-capt" x="24" y="464" width="144" height="56" rx="6"/>
+    <text class="sch-nom" x="96" y="488" text-anchor="middle">IMP34DT05</text>
+    <text class="sch-detail" x="96" y="506" text-anchor="middle">micro MEMS</text>
+  </a>
+
+  <path class="sch-lien sch-spi" d="M168 204 H232"/>
+  <text class="sch-lien-txt" x="200" y="198" text-anchor="middle" fill="#303f9f">SPI1</text>
+  <path class="sch-lien sch-gpio" d="M232 276 H170" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="200" y="270" text-anchor="middle" fill="#57606a">GPIO</text>
+  <path class="sch-lien sch-gpio" d="M168 348 H230" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="200" y="342" text-anchor="middle" fill="#57606a">GPIO</text>
+  <path class="sch-lien sch-gpio" d="M232 420 H170" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="200" y="414" text-anchor="middle" fill="#57606a">GPIO</text>
+  <path class="sch-lien sch-gpio" d="M168 492 H232"/>
+  <text class="sch-lien-txt" x="200" y="486" text-anchor="middle" fill="#57606a">PDM</text>
+
+  <!-- ==================== MCU applicatif (centre) ==================== -->
+  <a class="sch-a" href="../../docs/hardware/main-components/stm32wb55" target="_top">
+    <title>STM32WB55RG</title>
+    <rect class="sch-bloc sch-mcu" x="232" y="176" width="296" height="344" rx="6"/>
+    <text class="sch-nom" x="380" y="340" text-anchor="middle">STM32WB55RG</text>
+    <text class="sch-detail" x="380" y="360" text-anchor="middle">MCU applicatif, radio BLE 5.2</text>
+  </a>
+
+  <!-- ==================== MCU d'interface (droite) ==================== -->
+  <a class="sch-a" href="../../docs/hardware/main-components/stm32f103" target="_top">
+    <title>STM32F103CBT6</title>
+    <rect class="sch-bloc sch-mcu" x="600" y="176" width="176" height="128" rx="6"/>
+    <text class="sch-nom" x="688" y="236" text-anchor="middle">STM32F103CBT6</text>
+    <text class="sch-detail" x="688" y="256" text-anchor="middle">MCU d'interface, DAPLink</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/w25q64" target="_top">
+    <title>Flash W25Q64</title>
+    <rect class="sch-bloc sch-mem" x="600" y="336" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="664" y="360" text-anchor="middle">W25Q64</text>
+    <text class="sch-detail" x="664" y="378" text-anchor="middle">flash 8 Mo</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/connectors/swd" target="_top">
+    <title>Port SWD J8</title>
+    <rect class="sch-bloc sch-conn" x="600" y="408" width="176" height="56" rx="6"/>
+    <text class="sch-nom" x="688" y="432" text-anchor="middle">Port SWD J8</text>
+    <text class="sch-detail" x="688" y="450" text-anchor="middle">débogage du F103</text>
+  </a>
+
+  <path class="sch-lien sch-uart" d="M528 216 H600"/>
+  <text class="sch-lien-txt" x="564" y="208" text-anchor="middle" fill="#b35400">UART</text>
+  <path class="sch-lien sch-swd" d="M528 256 H600"/>
+  <text class="sch-lien-txt" x="564" y="248" text-anchor="middle" fill="#6e40c9">SWD</text>
+  <path class="sch-lien sch-spi" d="M664 304 V336"/>
+  <text class="sch-lien-txt" x="672" y="326" fill="#303f9f">SPI1</text>
+  <path class="sch-lien sch-swd" d="M752 304 V408"/>
+  <text class="sch-lien-txt" x="744" y="326" text-anchor="end" fill="#6e40c9">SWD</text>
+
+  <!-- ==================== Bus I2C1 interne ==================== -->
+  <path class="sch-lien sch-i2c" d="M380 520 V568"/>
+  <path class="sch-lien sch-i2c" d="M600 288 H556 V568"/>
+  <path class="sch-lien sch-i2c" d="M88 568 H712"/>
+  <text class="sch-lien-txt" x="468" y="560" text-anchor="middle" fill="#00796b">I2C1 (bus interne)</text>
+  <path class="sch-lien sch-i2c" d="M88 568 V600"/>
+  <path class="sch-lien sch-i2c" d="M338 568 V600"/>
+  <path class="sch-lien sch-i2c" d="M587 568 V600"/>
+  <path class="sch-lien sch-i2c" d="M213 568 V680"/>
+  <path class="sch-lien sch-i2c" d="M462 568 V680"/>
+  <path class="sch-lien sch-i2c" d="M712 568 V680"/>
+  <g fill="#00796b">
+    <circle cx="213" cy="568" r="3"/><circle cx="338" cy="568" r="3"/>
+    <circle cx="380" cy="568" r="3"/><circle cx="462" cy="568" r="3"/>
+    <circle cx="556" cy="568" r="3"/><circle cx="587" cy="568" r="3"/>
+  </g>
+
+  <a class="sch-a" href="../../docs/hardware/main-components/sensors/ism330dlc" target="_top">
+    <title>ISM330DLC</title>
+    <rect class="sch-bloc sch-capt" x="24" y="600" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="88" y="624" text-anchor="middle">ISM330DLC</text>
+    <text class="sch-detail" x="88" y="642" text-anchor="middle">IMU 6 axes, 0x6B</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/sensors/lis2mdl" target="_top">
+    <title>LIS2MDL</title>
+    <rect class="sch-bloc sch-capt" x="149" y="680" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="213" y="704" text-anchor="middle">LIS2MDL</text>
+    <text class="sch-detail" x="213" y="722" text-anchor="middle">magnéto., 0x1E</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/sensors/vl53l1x" target="_top">
+    <title>VL53L1X</title>
+    <rect class="sch-bloc sch-capt" x="274" y="600" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="338" y="624" text-anchor="middle">VL53L1X</text>
+    <text class="sch-detail" x="338" y="642" text-anchor="middle">distance, 0x29</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/sensors/bme280" target="_top">
+    <title>BME280</title>
+    <rect class="sch-bloc sch-capt" x="398" y="680" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="462" y="704" text-anchor="middle">BME280</text>
+    <text class="sch-detail" x="462" y="722" text-anchor="middle">P, H, T, 0x76</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power/bq27441" target="_top">
+    <title>Jauge BQ27441</title>
+    <rect class="sch-bloc sch-alim" x="523" y="600" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="587" y="624" text-anchor="middle">BQ27441</text>
+    <text class="sch-detail" x="587" y="642" text-anchor="middle">jauge, 0x55</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/buttons-audio#expandeur-gpio--mcp23009" target="_top">
+    <title>Expandeur GPIO MCP23009</title>
+    <rect class="sch-bloc sch-ext" x="648" y="680" width="128" height="56" rx="6"/>
+    <text class="sch-nom" x="712" y="704" text-anchor="middle">MCP23009</text>
+    <text class="sch-detail" x="712" y="722" text-anchor="middle">8 GPIO, 0x20</text>
+  </a>
+
+  <!-- Sorties de l'expandeur -->
+  <path class="sch-lien sch-gpio" d="M708 776 V738" marker-end="url(#fl-gpio)"/>
+  <path class="sch-lien sch-gpio" d="M672 736 V756 H556 V776"/>
+  <a class="sch-a" href="../../docs/hardware/main-components/buttons-audio#boutons-directionnels-via-mcp23009" target="_top">
+    <title>Boutons directionnels</title>
+    <rect class="sch-bloc sch-ihm" x="640" y="776" width="136" height="56" rx="6"/>
+    <text class="sch-nom" x="708" y="800" text-anchor="middle">Croix</text>
+    <text class="sch-detail" x="708" y="818" text-anchor="middle">4 directions</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/connectors/crocodile-pads" target="_top">
+    <title>Pads crocodile</title>
+    <rect class="sch-bloc sch-conn" x="488" y="776" width="136" height="56" rx="6"/>
+    <text class="sch-nom" x="556" y="800" text-anchor="middle">Pads crocodile</text>
+    <text class="sch-detail" x="556" y="818" text-anchor="middle">P24, P25, P28, P29</text>
+  </a>
+
+  <!-- ==================== Alimentation ==================== -->
+  <path class="sch-sep" d="M24 856 H776"/>
+  <a class="sch-a" href="../../docs/hardware/main-components/power" target="_top">
+    <title>Alimentation</title>
+    <text class="sch-nom sch-section" x="24" y="884">Alimentation</text>
+  </a>
+  <text class="sch-lien-txt" x="236" y="900" text-anchor="middle" fill="#c62828">5 V de l'USB-C</text>
+  <path class="sch-lien sch-pwr" d="M236 906 V926" marker-end="url(#fl-pwr)"/>
+
+  <a class="sch-a" href="../../docs/hardware/main-components/power#batterie--lipo" target="_top">
+    <title>Batterie LiPo</title>
+    <rect class="sch-bloc sch-alim" x="24" y="928" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="84" y="952" text-anchor="middle">Batterie</text>
+    <text class="sch-detail" x="84" y="970" text-anchor="middle">LiPo 1600 mAh</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power/bq24075" target="_top">
+    <title>Chargeur BQ24075</title>
+    <rect class="sch-bloc sch-alim" x="176" y="928" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="236" y="952" text-anchor="middle">BQ24075</text>
+    <text class="sch-detail" x="236" y="970" text-anchor="middle">chargeur</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power#switch-dalimentation--dio7003" target="_top">
+    <title>Interrupteur DIO7003</title>
+    <rect class="sch-bloc sch-alim" x="328" y="928" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="388" y="952" text-anchor="middle">DIO7003</text>
+    <text class="sch-detail" x="388" y="970" text-anchor="middle">interrupteur</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power#convertisseur-principal--tps63000" target="_top">
+    <title>Convertisseur TPS63000</title>
+    <rect class="sch-bloc sch-alim" x="480" y="928" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="540" y="952" text-anchor="middle">TPS63000</text>
+    <text class="sch-detail" x="540" y="970" text-anchor="middle">3,3 V, 1,2 A</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power#régulateur-linéaire--ld3985" target="_top">
+    <title>Régulateur LD3985</title>
+    <rect class="sch-bloc sch-alim" x="176" y="1016" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="236" y="1040" text-anchor="middle">LD3985</text>
+    <text class="sch-detail" x="236" y="1058" text-anchor="middle">3,3 V, 150 mA</text>
+  </a>
+  <a class="sch-a" href="../../docs/hardware/main-components/power#boost-5v-jacdac--ap3015" target="_top">
+    <title>Élévateur AP3015</title>
+    <rect class="sch-bloc sch-alim" x="480" y="1016" width="120" height="56" rx="6"/>
+    <text class="sch-nom" x="540" y="1040" text-anchor="middle">AP3015</text>
+    <text class="sch-detail" x="540" y="1058" text-anchor="middle">élévateur 5 V</text>
+  </a>
+
+  <path class="sch-lien sch-pwr" d="M146 956 H174" marker-start="url(#fl-pwr)" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M296 956 H326" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M448 956 H478" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M600 956 H630" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="638" y="952" fill="#c62828">+3V3</text>
+  <text class="sch-detail" x="638" y="970">reste de la carte</text>
+  <path class="sch-lien sch-pwr" d="M236 984 V1014" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M296 1044 H326" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="334" y="1040" fill="#c62828">+3V3_STLINK</text>
+  <text class="sch-detail" x="334" y="1058">F103, flash</text>
+  <path class="sch-lien sch-pwr" d="M540 984 V1014" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M600 1044 H630" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="638" y="1040" fill="#c62828">5 V Jacdac</text>
+  <text class="sch-detail" x="638" y="1058">J5, J6</text>
+
+  <!-- ==================== Légende ==================== -->
+  <rect x="24" y="1104" width="752" height="104" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="1128">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-i2c" d="M40 1152 H72"/><text x="80" y="1156">I2C</text>
+    <path class="sch-lien sch-spi" d="M124 1152 H156"/><text x="164" y="1156">SPI</text>
+    <path class="sch-lien sch-uart" d="M208 1152 H240"/><text x="248" y="1156">UART</text>
+    <path class="sch-lien sch-swd" d="M304 1152 H336"/><text x="344" y="1156">SWD</text>
+    <path class="sch-lien sch-usb" d="M392 1152 H424"/><text x="432" y="1156">USB</text>
+    <path class="sch-lien sch-pwr" d="M480 1152 H510" marker-end="url(#fl-pwr)"/><text x="520" y="1156">Alimentation</text>
+    <path class="sch-lien sch-gpio" d="M616 1152 H646" marker-end="url(#fl-gpio)"/><text x="656" y="1156">GPIO, autre</text>
+
+    <rect class="sch-bloc sch-mcu" x="40" y="1176" width="24" height="16" rx="3"/><text x="72" y="1189">MCU</text>
+    <rect class="sch-bloc sch-capt" x="128" y="1176" width="24" height="16" rx="3"/><text x="160" y="1189">Capteur</text>
+    <rect class="sch-bloc sch-alim" x="232" y="1176" width="24" height="16" rx="3"/><text x="264" y="1189">Alimentation</text>
+    <rect class="sch-bloc sch-mem" x="360" y="1176" width="24" height="16" rx="3"/><text x="392" y="1189">Mémoire</text>
+    <rect class="sch-bloc sch-conn" x="464" y="1176" width="24" height="16" rx="3"/><text x="496" y="1189">Connecteur</text>
+    <rect class="sch-bloc sch-ihm" x="584" y="1176" width="24" height="16" rx="3"/><text x="616" y="1189">Interface</text>
+    <rect class="sch-bloc sch-ext" x="688" y="1176" width="24" height="16" rx="3"/><text x="720" y="1189">Autre</text>
+  </g>
+</svg>
