@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 876" width="800" height="876"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Liaisons entre le STM32F103 et le STM32WB55 (STeaMi V1b et V1c)</title>
+  <desc id="desc">Cinq liaisons relient les deux microcontrôleurs. SWD : PB13 et PB14 (PB12 en
+    lecture) du STM32F103 vers PA14 et PA13 du STM32WB55, pour flasher et déboguer ; SWO de PB3
+    vers PA10, non utilisé. Reset : PB0 du STM32F103 vers NRST par la diode D7, avec le bouton
+    Reset sur le même fil. UART à 115 200 bauds : LPUART1 du STM32WB55 (PB11 TX, PB10 RX) et
+    USART2 du STM32F103 (PA3 RX, PA2 TX), console série transmise au port série USB.
+    ON/OFF_+3V3_STLINK : PB2 du STM32WB55 commande l'alimentation du STM32F103. I2C : I2C1 du
+    STM32WB55 (PB8, PB9), maître, et I2C2 du STM32F103 (PB10, PB11), esclave 0x3B, pour la
+    flash W25Q64 et la config zone.</desc>
+  <defs>
+    <style>
+      /* Classes préfixées sch- ; palette du guide de style des schémas. */
+      .sch-fond   { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc   { stroke-width: 1.5; }
+      .sch-mcu    { fill: #e0f2f1; stroke: #00796b; }
+      .sch-mem    { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-ext    { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-broche { font-size: 12px; fill: #1f2328; }
+      .sch-c      { text-anchor: middle; }
+      .sch-d      { text-anchor: end; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-t-usb  { fill: #1f2328; }
+      .sch-t-swd  { fill: #6e40c9; }
+      .sch-t-uart { fill: #b35400; }
+      .sch-t-i2c  { fill: #00796b; }
+      .sch-t-spi  { fill: #303f9f; }
+      .sch-t-gpio { fill: #57606a; }
+      .sch-lien   { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-i2c    { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-spi    { stroke: #303f9f; }
+      .sch-uart   { stroke: #b35400; stroke-dasharray: 2 4; }
+      .sch-swd    { stroke: #6e40c9; stroke-dasharray: 10 4 2 4; }
+      .sch-usb    { stroke: #1f2328; stroke-width: 3; }
+      .sch-gpio   { stroke: #57606a; stroke-width: 1.5; }
+    </style>
+    <!-- Une flèche par couleur ; source -> destination. -->
+    <marker id="fl-swd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#6e40c9"/>
+    </marker>
+    <marker id="fl-uart" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#b35400"/>
+    </marker>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="875" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Liaisons entre les deux microcontrôleurs</text>
+  <text class="sch-detail sch-d" x="776" y="40">STeaMi V1b et V1c</text>
+
+  <!-- Ordinateur, relié au STM32F103 par l'USB. -->
+  <rect class="sch-bloc sch-ext" x="24" y="64" width="180" height="52" rx="6"/>
+  <text class="sch-nom sch-c" x="114" y="86">Ordinateur</text>
+  <text class="sch-detail sch-c" x="114" y="104">HID, CDC, MSC, WebUSB</text>
+  <path class="sch-lien sch-usb" d="M114 117 V159"/>
+  <text class="sch-lien-txt sch-t-usb" x="126" y="142">USB</text>
+
+  <!-- Les deux microcontrôleurs. -->
+  <rect class="sch-bloc sch-mcu" x="24" y="160" width="180" height="480" rx="6"/>
+  <text class="sch-nom sch-c" x="114" y="186">STM32F103CBT6</text>
+  <text class="sch-detail sch-c" x="114" y="204">MCU d'interface, DAPLink</text>
+
+  <rect class="sch-bloc sch-mcu" x="596" y="160" width="180" height="480" rx="6"/>
+  <text class="sch-nom sch-c" x="686" y="186">STM32WB55RG</text>
+  <text class="sch-detail sch-c" x="686" y="204">MCU applicatif</text>
+
+  <!-- 1. SWD et SWO. -->
+  <path class="sch-lien sch-swd" d="M204 244 H596"/>
+  <text class="sch-lien-txt sch-t-swd sch-c" x="400" y="236">SWD</text>
+  <path class="sch-lien sch-swd" d="M596 272 H206" marker-end="url(#fl-swd)"/>
+  <text class="sch-detail sch-c" x="400" y="264">SWO, non utilisé par DAPLink</text>
+  <g class="sch-broche">
+    <text class="sch-d" x="196" y="240">PB13 SWCLK</text>
+    <text class="sch-d" x="196" y="256">PB14, PB12 SWDIO</text>
+    <text class="sch-d" x="196" y="276">PA10 SWO</text>
+    <text x="604" y="240">PA14 SWCLK</text>
+    <text x="604" y="256">PA13 SWDIO</text>
+    <text x="604" y="276">PB3 SWO</text>
+  </g>
+  <g class="sch-detail sch-c">
+    <text x="400" y="292">Flasher le programme déposé sur le lecteur USB</text>
+    <text x="400" y="308">et déboguer le STM32WB55 (CMSIS-DAP)</text>
+  </g>
+
+  <!-- 2. Reset. -->
+  <path class="sch-lien sch-gpio" d="M204 348 H594" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt sch-t-gpio sch-c" x="400" y="340">Reset (T_NRST)</text>
+  <g class="sch-broche">
+    <text class="sch-d" x="196" y="352">PB0 nRESET</text>
+    <text x="604" y="352">NRST, par D7</text>
+  </g>
+  <g class="sch-detail sch-c">
+    <text x="400" y="368">Redémarrer le STM32WB55 après un flashage</text>
+    <text x="400" y="384">Bouton Reset (SW1) sur ce fil, lu par DAPLink</text>
+  </g>
+
+  <!-- 3. UART de la console série. -->
+  <path class="sch-lien sch-uart" d="M596 424 H206" marker-end="url(#fl-uart)"/>
+  <path class="sch-lien sch-uart" d="M204 440 H594" marker-end="url(#fl-uart)"/>
+  <text class="sch-lien-txt sch-t-uart sch-c" x="400" y="416">UART, 115 200 bauds (T_UART2)</text>
+  <g class="sch-broche">
+    <text class="sch-d" x="196" y="428">USART2 RX PA3</text>
+    <text class="sch-d" x="196" y="444">USART2 TX PA2</text>
+    <text x="604" y="428">PB11 LPUART1 TX</text>
+    <text x="604" y="444">PB10 LPUART1 RX</text>
+  </g>
+  <g class="sch-detail sch-c">
+    <text x="400" y="462">Console série : REPL MicroPython, Serial Arduino,</text>
+    <text x="400" y="478">relayée vers l'ordinateur par le port série USB (CDC)</text>
+  </g>
+
+  <!-- 4. Commande d'alimentation du STM32F103. -->
+  <path class="sch-lien sch-gpio" d="M596 518 H206" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt sch-t-gpio sch-c" x="400" y="510">ON/OFF_+3V3_STLINK</text>
+  <g class="sch-broche">
+    <text class="sch-d" x="196" y="522">+3V3_STLINK (T4)</text>
+    <text x="604" y="522">PB2</text>
+  </g>
+  <g class="sch-detail sch-c">
+    <text x="400" y="536">Couper l'alimentation du STM32F103 sur batterie ;</text>
+    <text x="400" y="552">il reste alimenté tant que l'USB est branché</text>
+  </g>
+
+  <!-- 5. I2C : pont DAPLink, sur le bus I2C1 des capteurs. -->
+  <path class="sch-lien sch-i2c" d="M204 594 H596"/>
+  <path class="sch-lien sch-i2c" d="M540 594 V680"/>
+  <text class="sch-lien-txt sch-t-i2c sch-c" x="400" y="586">I2C : WB55 maître, F103 esclave 0x3B</text>
+  <g class="sch-broche">
+    <text class="sch-d" x="196" y="590">(I2C2) PB10 SCL</text>
+    <text class="sch-d" x="196" y="606">PB11 SDA</text>
+    <text x="604" y="590">PB8 SCL (I2C1)</text>
+    <text x="604" y="606">PB9 SDA</text>
+  </g>
+  <g class="sch-detail sch-c">
+    <text x="372" y="612">Écrire des fichiers dans la flash W25Q64,</text>
+    <text x="372" y="628">lire et écrire la config zone du F103</text>
+  </g>
+
+  <!-- Flash externe et autres esclaves du bus I2C1. -->
+  <path class="sch-lien sch-spi" d="M114 641 V679"/>
+  <text class="sch-lien-txt sch-t-spi" x="126" y="664">SPI1</text>
+  <rect class="sch-bloc sch-mem" x="24" y="680" width="180" height="52" rx="6"/>
+  <text class="sch-nom sch-c" x="114" y="702">W25Q64</text>
+  <text class="sch-detail sch-c" x="114" y="720">Flash externe, 8 Mo</text>
+
+  <rect class="sch-bloc sch-ext" x="440" y="680" width="200" height="52" rx="6"/>
+  <text class="sch-nom sch-c" x="540" y="702">Autres esclaves I2C1</text>
+  <text class="sch-detail sch-c" x="540" y="720">capteurs, jauge, expandeur</text>
+
+  <!-- Légende : seulement les types présents. -->
+  <rect x="24" y="756" width="752" height="96" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="782">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-usb" d="M40 806 H80"/><text x="88" y="810">USB</text>
+    <path class="sch-lien sch-swd" d="M168 806 H208"/><text x="216" y="810">SWD</text>
+    <path class="sch-lien sch-uart" d="M296 806 H336" marker-end="url(#fl-uart)"/><text x="344" y="810">UART (TX vers RX)</text>
+    <path class="sch-lien sch-i2c" d="M480 806 H520"/><text x="528" y="810">I2C</text>
+    <path class="sch-lien sch-spi" d="M608 806 H648"/><text x="656" y="810">SPI</text>
+    <path class="sch-lien sch-gpio" d="M40 834 H80" marker-end="url(#fl-gpio)"/><text x="88" y="838">Signal (reset, commande)</text>
+    <rect class="sch-bloc sch-mcu" x="296" y="826" width="24" height="16" rx="3"/><text x="328" y="839">MCU</text>
+    <rect class="sch-bloc sch-mem" x="408" y="826" width="24" height="16" rx="3"/><text x="440" y="839">Mémoire</text>
+    <rect class="sch-bloc sch-ext" x="536" y="826" width="24" height="16" rx="3"/><text x="568" y="839">Externe, autre</text>
+  </g>
+</svg>
