@@ -492,12 +492,22 @@ class TestReconstruction(unittest.TestCase):
         self.assertIn("`G/N`", corps)
         self.assertIn("`H/M`", corps)
 
+    def test_croquis_mis_en_attente_cites_apres_reconstruction(self):
+        nom = "suivre-croquis-sample.yml"
+        env = etape(nom, RECONSTRUCTION)["env"]
+        self.assertEqual(env["AJOUTES"], "${{ steps.epinglage.outputs.ajoutes }}")
+        res, _, appels = self.signaler(nom, {"PR": "20", "DIFFERENTS": "", "AJOUTES": "BLE/ReferenceXiaomi"},
+                                       [pr(20, ROBOTS[nom]["prefixe"] + ROBOTS[nom]["suffixe"])])
+        self.assertEqual(res.returncode, 0, res.stderr)
+        commentaire = next(a for a in appels if a[:2] == ["pr", "comment"])
+        self.assertIn("`BLE/ReferenceXiaomi`", commentaire[commentaire.index("--body") + 1])
+
     def test_croquis_differents_apres_reconstruction_pr_en_brouillon(self):
         nom = "suivre-croquis-sample.yml"
         robot = ROBOTS[nom]
         env = etape(nom, RECONSTRUCTION)["env"]
         self.assertEqual(env["DIFFERENTS"], "${{ steps.epinglage.outputs.differents }}")
-        res, _, appels = self.signaler(nom, {"PR": "20", "DIFFERENTS": "G/N H/M"},
+        res, _, appels = self.signaler(nom, {"PR": "20", "DIFFERENTS": "G/N H/M", "AJOUTES": ""},
                                        [pr(20, robot["prefixe"] + robot["suffixe"])])
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertIn(["pr", "merge", "20", "--disable-auto"], appels)

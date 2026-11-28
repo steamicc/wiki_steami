@@ -114,11 +114,22 @@ class TestSuivreCroquisSample(unittest.TestCase):
 
     def test_le_corps_de_pr_renvoie_a_la_verification_des_exemples(self):
         t = texte()
-        self.assertIn("La vérification \\`lint:arduino-examples\\` (build.yml) nomme chaque nouveau croquis", t)
+        self.assertIn("La vérification \\`lint:arduino-examples\\` (build.yml) signale encore les croquis retirés ou renommés", t)
         self.assertIn("scripts/exemples-arduino-sample-a-documenter.txt", t)
-        self.assertIn('<EssayerExemple id="G/N" source="sample" />', t)
+        self.assertIn('<EssayerExemple id=\\"G/N\\" source=\\"sample\\" />', t)
         self.assertIn("file=.external/arduino-steami-sample/examples/G/N/N.ino", t)
         self.assertNotIn("si le build échoue, il nomme les croquis en cause", t)
+
+    def test_les_nouveaux_croquis_sont_mis_en_attente_par_le_robot(self):
+        t = texte()
+        self.assertIn("completer-attente-arduino.py --source sample", t)
+        self.assertIn('unzip -p "$dl/$ARCHIVE" index.json', t)
+        # Après la conversion (qui retire de la liste les croquis utilisés).
+        self.assertLess(t.index("convertir-croquis.py"), t.index("completer-attente-arduino.py"))
+        # Le corps de la PR et le commentaire de reconstruction citent les ajouts.
+        self.assertGreaterEqual(t.count("steps.epinglage.outputs.ajoutes"), 2)
+        self.assertIn("Les nouveaux croquis de cette release, qui ne sont ni utilisés dans une page ni en attente", t)
+        self.assertNotIn("à ajouter sur cette branche avant de fusionner", t)
 
 
 if __name__ == "__main__":
