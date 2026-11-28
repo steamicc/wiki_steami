@@ -191,6 +191,6 @@ Utilisation : `except Exception` (pas de bare `except`), chaînage avec `from ex
 
 ## Voir aussi
 
-- [Table des drivers](./) — Liste complète des 16 drivers
+- [Table des drivers](./) — Liste complète des 18 drivers
 - [Code source](https://github.com/steamicc/micropython-steami-lib) — Tous les drivers
 - [Issues de refactoring](https://github.com/steamicc/micropython-steami-lib/issues?q=is%3Aissue+is%3Aclosed+label%3Arefactoring) — Historique des conventions

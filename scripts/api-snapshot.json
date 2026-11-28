@@ -72,13 +72,40 @@
       "set_proximity_int_low_threshold": ["threshold"]
     },
     "APDS9960InvalidDevId": {
-      "__init__": ["id", "valid_ids"]
+      "__init__": ["device_id", "valid_ids"]
     },
     "APDS9960InvalidMode": {
       "__init__": ["mode"]
     },
     "GestureData": {
       "__init__": []
+    }
+  },
+  "bme280": {
+    "BME280": {
+      "__init__": ["i2c", "address"],
+      "altitude": ["pressure_hpa"],
+      "data_ready": [],
+      "device_id": [],
+      "dew_point": [],
+      "humidity": [],
+      "humidity_ready": [],
+      "measurement_time_ms": [],
+      "power_off": [],
+      "power_on": [],
+      "pressure_hpa": [],
+      "pressure_ready": [],
+      "read": [],
+      "read_one_shot": [],
+      "reset": [],
+      "set_continuous": ["standby"],
+      "set_iir_filter": ["coefficient"],
+      "set_oversampling": ["temperature", "pressure", "humidity"],
+      "set_standby": ["standby"],
+      "soft_reset": [],
+      "temperature": [],
+      "temperature_ready": [],
+      "trigger_one_shot": []
     }
   },
   "bq27441": {
@@ -116,7 +143,7 @@
       "read_block_data": ["offset"],
       "read_control_word": ["function"],
       "read_extended_data": ["class_id", "offset"],
-      "read_word": ["sub_address", "format"],
+      "read_word": ["sub_address", "fmt"],
       "reset": [],
       "seal": [],
       "sealed": [],
@@ -139,6 +166,8 @@
       "state_of_charge": [],
       "state_of_health": [],
       "temperature": ["temp_measure_type"],
+      "temperature_dk": ["temp_measure_type"],
+      "temperature_k": ["temp_measure_type"],
       "unseal": [],
       "voltage_mv": [],
       "write_block_checksum": ["csum"],
@@ -165,21 +194,45 @@
       "__init__": ["value"]
     }
   },
-  "daplink_flash": {
-    "DaplinkFlash": {
+  "daplink_bridge": {
+    "DaplinkBridge": {
       "__init__": ["i2c", "address"],
       "busy": [],
       "clear_config": [],
-      "clear_flash": [],
       "device_id": [],
+      "has_config_zone": [],
+      "read_config": [],
+      "write_config": ["data", "offset"]
+    }
+  },
+  "daplink_flash": {
+    "DaplinkFlash": {
+      "__init__": ["bridge"],
+      "clear_flash": [],
       "get_filename": [],
       "read": ["length"],
-      "read_config": [],
       "read_sector": ["sector"],
       "set_filename": ["name", "ext"],
       "write": ["data"],
-      "write_config": ["data", "offset"],
       "write_line": ["text"]
+    }
+  },
+  "gc9a01": {
+    "GC9A01": {
+      "__init__": ["spi", "dc", "cs", "rst", "width", "height"],
+      "blit": ["fb", "x", "y", "key", "palette"],
+      "fill": ["i"],
+      "fill_rect": ["x", "y", "w", "h", "i"],
+      "init": [],
+      "line": ["x1", "y1", "x2", "y2", "i"],
+      "pixel": ["x", "y", "i"],
+      "power_off": [],
+      "power_on": [],
+      "rect": ["x", "y", "w", "h", "i"],
+      "reset": [],
+      "show": [],
+      "soft_reset": [],
+      "text": ["s", "x", "y", "i"]
     }
   },
   "hts221": {
@@ -219,6 +272,7 @@
       "configure_gyro": ["odr", "scale"],
       "data_ready": [],
       "device_id": [],
+      "get_accel_offset": [],
       "gyro_ready": [],
       "gyroscope_dps": [],
       "gyroscope_rads": [],
@@ -227,6 +281,7 @@
       "orientation": [],
       "power_off": [],
       "power_on": [],
+      "set_accel_offset": ["ox", "oy", "oz"],
       "set_temp_offset": ["offset_c"],
       "soft_reset": [],
       "temperature": [],
@@ -292,6 +347,7 @@
       "__init__": ["mcp", "pin_number", "mode", "pull", "value"],
       "init": ["mode", "pull", "value"],
       "irq": ["handler", "trigger", "hard"],
+      "irq_level": [],
       "mode": ["mode"],
       "off": [],
       "on": [],
@@ -338,6 +394,7 @@
       "__init__": ["mcp", "pin_number", "mode", "pull", "value"],
       "init": ["mode", "pull", "value"],
       "irq": ["handler", "trigger", "hard"],
+      "irq_level": [],
       "mode": ["mode"],
       "off": [],
       "on": [],
@@ -351,6 +408,7 @@
       "__init__": ["width", "height"],
       "contrast": ["contrast"],
       "fill": ["col"],
+      "fill_rect": ["x", "y", "w", "h", "col"],
       "init_display": [],
       "invert": ["invert"],
       "line": ["x1", "y1", "x2", "y2", "col"],
@@ -383,16 +441,186 @@
       "__init__": ["spi", "dc", "res", "cs"]
     }
   },
+  "steami": {
+    "Accelerometer": {
+      "__init__": [],
+      "begin": [],
+      "is_shaken": ["threshold_g"],
+      "read": [],
+      "strength": [],
+      "x": [],
+      "y": [],
+      "z": []
+    },
+    "Battery": {
+      "__init__": [],
+      "current": [],
+      "is_charging": [],
+      "percent": [],
+      "voltage": []
+    },
+    "Buttons": {
+      "__init__": [],
+      "begin": [],
+      "is_pressed": ["name"],
+      "wait_for_press": ["timeout_ms"],
+      "was_pressed": ["name"],
+      "was_released": ["name"]
+    },
+    "Color": {
+      "__init__": [],
+      "blue": [],
+      "green": [],
+      "read": [],
+      "red": []
+    },
+    "Compass": {
+      "__init__": [],
+      "begin": [],
+      "calibrate": ["seconds"],
+      "direction": [],
+      "heading": [],
+      "set_declination": ["deg"]
+    },
+    "Distance": {
+      "__init__": [],
+      "begin": [],
+      "cm": [],
+      "read": []
+    },
+    "Gesture": {
+      "__init__": [],
+      "begin": [],
+      "name": ["direction"],
+      "read": ["timeout_ms"]
+    },
+    "Gyroscope": {
+      "__init__": [],
+      "read": [],
+      "x": [],
+      "y": [],
+      "z": []
+    },
+    "Handle": {
+      "__init__": ["function"],
+      "begin": [],
+      "chip": [],
+      "error": [],
+      "is_available": [],
+      "status": []
+    },
+    "Humidity": {
+      "__init__": [],
+      "read": []
+    },
+    "Light": {
+      "__init__": [],
+      "read": []
+    },
+    "Magnetometer": {
+      "__init__": [],
+      "calibrate": ["seconds"],
+      "read": [],
+      "strength": [],
+      "x": [],
+      "y": [],
+      "z": []
+    },
+    "Pressure": {
+      "__init__": [],
+      "altitude": ["sea_level_hpa"],
+      "read": []
+    },
+    "Screen": {
+      "__init__": [],
+      "begin": [],
+      "error": []
+    },
+    "Temperature": {
+      "__init__": [],
+      "read": [],
+      "set_offset": ["offset_c"]
+    }
+  },
   "steami_config": {
     "SteamiConfig": {
-      "__init__": ["flash"],
+      "__init__": ["bridge"],
+      "apply_accelerometer_calibration": ["ism330dl_instance"],
+      "apply_magnetometer_calibration": ["lis2mdl_instance"],
       "apply_temperature_calibration": ["sensor_instance"],
       "board_name": ["value"],
       "board_revision": ["value"],
+      "get_accelerometer_calibration": [],
+      "get_boot_count": [],
+      "get_magnetometer_calibration": [],
       "get_temperature_calibration": ["sensor"],
+      "increment_boot_count": [],
       "load": [],
       "save": [],
+      "set_accelerometer_calibration": ["ox", "oy", "oz"],
+      "set_boot_count": ["count"],
+      "set_magnetometer_calibration": [
+        "hard_iron_x",
+        "hard_iron_y",
+        "hard_iron_z",
+        "soft_iron_x",
+        "soft_iron_y",
+        "soft_iron_z"
+      ],
       "set_temperature_calibration": ["sensor", "gain", "offset"]
+    }
+  },
+  "steami_screen": {
+    "GC9A01Display": {
+      "__init__": ["raw"],
+      "draw_glyphs": ["fc", "glyphs", "n", "bold", "color"],
+      "draw_scaled_text": ["text", "x", "y", "color", "scale"],
+      "fill": ["color"],
+      "fill_rect": ["x", "y", "w", "h", "color"],
+      "line": ["x1", "y1", "x2", "y2", "color"],
+      "native_fill": ["color"],
+      "pixel": ["x", "y", "color"],
+      "rect": ["x", "y", "w", "h", "color"],
+      "show": [],
+      "text": ["string", "x", "y", "color"]
+    },
+    "SSD1327Display": {
+      "__init__": ["raw"],
+      "draw_scaled_text": ["text", "x", "y", "color", "scale"],
+      "fill": ["color"],
+      "fill_rect": ["x", "y", "w", "h", "color"],
+      "line": ["x1", "y1", "x2", "y2", "color"],
+      "native_fill": ["color"],
+      "pixel": ["x", "y", "color"],
+      "rect": ["x", "y", "w", "h", "color"],
+      "show": [],
+      "text": ["string", "x", "y", "color"]
+    },
+    "Screen": {
+      "__init__": ["display", "width", "height"],
+      "bar": ["val", "max_val", "y_offset", "color"],
+      "center": [],
+      "circle": ["x", "y", "r", "color", "fill"],
+      "clear": ["color"],
+      "compass": ["heading", "color"],
+      "face": ["expression", "compact", "color"],
+      "gauge": ["val", "min_val", "max_val", "color", "arc_width"],
+      "graph": ["data", "min_val", "max_val", "color"],
+      "k": [],
+      "line": ["x1", "y1", "x2", "y2", "color"],
+      "max_chars": [],
+      "menu": ["items", "selected", "color"],
+      "pixel": ["x", "y", "color"],
+      "radius": [],
+      "rect": ["x", "y", "w", "h", "color", "fill"],
+      "show": [],
+      "subtitle": ["*lines", "color"],
+      "text": ["text", "at", "color", "scale"],
+      "text_height": ["scale"],
+      "title": ["text", "color"],
+      "u": ["v"],
+      "value": ["val", "unit", "at", "label", "color", "scale", "y_offset"],
+      "watch": ["hours", "minutes", "seconds", "color"]
     }
   },
   "vl53l1x": {
