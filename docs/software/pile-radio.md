@@ -50,7 +50,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
 3. Si la pile manque, est plus ancienne ou est d'un autre type, une seconde question indique la pile trouvée et celle qui sera installée, en effaçant l'ancienne, s'il y en a une. Cliquer sur **Installer la pile radio** pour lancer l'installation, ou sur **Annuler**. **Annuler** n'installe rien et ne change pas la pile radio, mais le programme de lecture occupe encore la carte : téléverser l'exemple pour l'essayer.
 
-   ![Seconde question : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée ; l'installation dure environ une minute et demie ; consigne de ne pas débrancher la carte, de ne pas appuyer sur RESET et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
+   ![Seconde question : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée ; l'installation dure environ une minute et demie ; consigne de ne pas débrancher la carte, de ne pas appuyer sur Reset et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
 
    L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton télécharge d'abord la nouvelle pile depuis le wiki et vérifie son empreinte : si elle ne correspond pas, rien n'est effacé. Il efface ensuite l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur Reset et ne pas fermer la page.
 
@@ -58,7 +58,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    Pendant que le FUS installe la pile, un décompte d'une minute indique le temps restant.
 
-   ![Attente de la fin de l'installation : « Le FUS installe la pile radio. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page. », puis « Temps restant : 60 s »](/img/software/pile-radio-wiki-06-attente.png)
+   ![Attente de la fin de l'installation : « Le FUS installe la pile radio. Pendant l'installation, ne pas débrancher la carte, ne pas appuyer sur Reset et ne pas fermer la page. », puis « Temps restant : 60 s »](/img/software/pile-radio-wiki-06-attente.png)
 
 4. Une fois la pile relue, le bouton affiche qu'elle est installée. Cliquer ensuite sur **Téléverser** sous l'exemple : le programme de lecture occupe encore la carte, et l'exemple le remplace.
 
