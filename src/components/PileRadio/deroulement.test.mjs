@@ -401,8 +401,8 @@ describe('pile restée arrêtée', () => {
     assert.equal(p.parcours.etat.etape, 'erreur');
     assert.equal(p.parcours.etat.erreur, TEXTE_PILE_ARRETEE);
     // Une réinitialisation ne relance pas la pile et une nouvelle vérification
-    // refait le même chemin : ni RESET ni nouvel essai, renvoi vers EasyFlash.
-    assert.doesNotMatch(TEXTE_PILE_ARRETEE, /RESET/);
+    // refait le même chemin : ni Reset ni nouvel essai, renvoi vers EasyFlash.
+    assert.doesNotMatch(TEXTE_PILE_ARRETEE, /reset/i);
     assert.doesNotMatch(TEXTE_PILE_ARRETEE, /Vérifier la pile radio/);
     assert.match(TEXTE_PILE_ARRETEE, /EasyFlash/);
     assert.ok(!vues.has('proposition'));

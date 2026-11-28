@@ -400,7 +400,7 @@ test('MicroPython muet après l’installation : message, pas de nouvelle propos
   assert.equal(journal.filter((l) => l === 'demander installation').length, 1);
   assert.equal(journal.filter((l) => l.startsWith('flasherFirmware')).length, 1);
   assert.ok(!journal.some((l) => l.startsWith('executer')));
-  assert.match(session.etat.erreur, /RESET/);
+  assert.match(session.etat.erreur, /Reset/);
 });
 
 test('pas d’invite mais bannière après redémarrage : message « carte occupée », pas d’installation proposée', async () => {
@@ -534,7 +534,7 @@ test('second bloc lancé pendant un programme : arreter() appelé avant', async 
   await second;
 });
 
-test('second bloc : la carte ne répond pas à l’arrêt → appuyer sur RESET', async () => {
+test('second bloc : la carte ne répond pas à l’arrêt → appuyer sur Reset', async () => {
   const { journal, dependances, session } = preparer({ bloquer: true, arreterRepond: false });
   void essayer(BLOC, dependances);
   await tic(10);
@@ -585,7 +585,7 @@ test('Arrêter : programme arrêté', async () => {
   assert.equal(session.etat.message, 'Programme arrêté.');
 });
 
-test('Arrêter : la carte ne répond pas → message « appuyer sur RESET »', async () => {
+test('Arrêter : la carte ne répond pas → message « appuyer sur Reset »', async () => {
   const { dependances, session } = preparer({ bloquer: true, arreterRepond: false });
   void essayer(BLOC, dependances);
   await tic(10);

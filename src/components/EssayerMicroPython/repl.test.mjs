@@ -396,7 +396,7 @@ test('arreter : un programme qui ignore Ctrl-C ne bloque pas executer', async ()
   const { repl } = replSur(carte);
   const execution = repl.executer('while True: pass');
   await jusqua(() => carte.mode === 'execution');
-  assert.equal(await repl.arreter(), false, 'la carte n’a pas répondu : appuyer sur RESET');
+  assert.equal(await repl.arreter(), false, 'la carte n’a pas répondu : appuyer sur Reset');
   assert.deepEqual(await execution, { erreur: null, arrete: true });
   assert.equal(carte.journal.mainPy, 0, 'pas de Ctrl-D hors du REPL brut');
   assert.equal(carte.journal.redemarrages, 0);

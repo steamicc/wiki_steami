@@ -215,7 +215,7 @@ describe('messageEtape', () => {
   it("pendant l'attente : les consignes, sans le décompte (annoncé une seule fois)", () => {
     const texte = messageEtape(pile({ etape: 'attente', decompte: 42 }));
     assert.match(texte, /ne pas débrancher/);
-    assert.match(texte, /RESET/);
+    assert.match(texte, /Reset/);
     assert.match(texte, /fermer la page/);
     assert.doesNotMatch(texte, /42/);
   });
