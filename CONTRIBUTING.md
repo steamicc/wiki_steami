@@ -32,6 +32,7 @@ Les hooks Git (husky) sont installés automatiquement via `npm ci`.
 | `npm run lint:js:fix`     | Corriger automatiquement le JavaScript                                   |
 | `npm run lint:links`      | Vérifier les liens externes (Docker requis)                              |
 | `npm run lint:file-sizes` | Vérifier la taille des fichiers ajoutés ou modifiés depuis `origin/main` |
+| `npm run optimize:image`  | Réduire le poids d'une image, format et nom conservés                    |
 
 ## Conventions de branche
 
@@ -131,6 +132,30 @@ Avant d'ajouter une image, la redimensionner et la compresser (PNG optimisé pou
 npm run lint:file-sizes            # fichiers commités depuis origin/main
 npm run lint:file-sizes -- --all   # tous les fichiers suivis
 ```
+
+### Optimiser une image
+
+`npm run optimize:image` (`scripts/optimize-image.py`) réduit le poids d'une image **en gardant son format et son nom** : les liens des pages restent valides.
+
+| Format | Traitement                                                           |
+| ------ | -------------------------------------------------------------------- |
+| PNG    | palette de 256 couleurs avec tramage (libimagequant, comme pngquant) |
+| JPEG   | réencodage progressif, qualité 85, sans métadonnées EXIF             |
+| WebP   | réencodage, qualité 85                                               |
+| SVG    | images PNG ou JPEG intégrées en base64 traitées comme ci-dessus      |
+
+```bash
+# Photo de 3000 px affichée sur 350 px de large : la ramener à 800 px
+npm run optimize:image -- --max-width 800 static/img/hardware/ma-photo.png
+
+# Voir le gain sans réécrire le fichier
+npm run optimize:image -- --dry-run static/img/pinout/*.png
+```
+
+- Viser, avec `--max-width`, environ deux fois la largeur d'affichage réelle (écrans haute densité). Pour la trouver, chercher où l'image est utilisée (`grep -rn nom-image docs src`) : attribut `width` d'une balise `<img>`, règle CSS (vignettes de la page d'accueil dans `src/css/custom.css`), ou largeur de la colonne de texte pour une image Markdown (au plus 950 px environ).
+- Le fichier n'est réécrit que s'il devient plus léger. Un résultat trop dégradé (PSNR sous 32 dB, réglable avec `--min-psnr`) est refusé.
+- Ouvrir quand même l'image avant et après, zoomée, pour vérifier qu'aucune différence n'est visible.
+- Prérequis : Pillow avec libimagequant (paquet `python3-pil` d'Ubuntu) ou la commande `pngquant`. Sans l'un ni l'autre, `--lossless` recompresse un PNG sans palette, pour un gain faible.
 
 ## Hooks automatiques
 

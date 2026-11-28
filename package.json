@@ -28,6 +28,7 @@
     "lint:inline-sketches": "python3 scripts/check-inline-sketches.py",
     "lint:micropython-blocks": "python3 scripts/check-micropython-blocks.py",
     "lint:file-sizes": "python3 scripts/check-file-sizes.py",
+    "optimize:image": "python3 scripts/optimize-image.py",
     "prepare": "husky"
   },
   "dependencies": {
