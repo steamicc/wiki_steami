@@ -22,16 +22,16 @@ Ces broches peuvent être utilisées comme entrées analogiques ou GPIO numériq
 
 ## Broches GPIO numériques
 
-| Pin | Fonctions | Signal              | Pin STM32WB55 | Notes                    |
-| --- | --------- | ------------------- | ------------- | ------------------------ |
-| P5  | GPIO      | GPIO1_EDGE_BOUTON_A | PA7           | Partagé avec bouton A    |
-| P6  | GPIO      | GPIO2_EDGE          | PC3           | -                        |
-| P7  | GPIO, PWM | GPIO3_EDGE          | PA9           | Support PWM              |
-| P8  | GPIO      | GPIO4_EDGE          | PA15          | -                        |
-| P9  | GPIO      | GPIO5_EDGE          | PC2           | -                        |
-| P11 | GPIO, PWM | GPIO6_EDGE_BOUTON_B | PA8           | Partagé avec bouton B    |
-| P12 | GPIO      | GPIO7_EDGE          | PC6           | -                        |
-| P16 | GPIO      | GPIO8_EDGE          | PE4           | Via expandeur (PCB: P16) |
+| Pin | Fonctions | Signal              | Pin STM32WB55 | Notes                 |
+| --- | --------- | ------------------- | ------------- | --------------------- |
+| P5  | GPIO      | GPIO1_EDGE_BOUTON_A | PA7           | Partagé avec bouton A |
+| P6  | GPIO      | GPIO2_EDGE          | PC3           | -                     |
+| P7  | GPIO, PWM | GPIO3_EDGE          | PA9           | Support PWM           |
+| P8  | GPIO      | GPIO4_EDGE          | PA15          | -                     |
+| P9  | GPIO      | GPIO5_EDGE          | PC2           | -                     |
+| P11 | GPIO, PWM | GPIO6_EDGE_BOUTON_B | PA8           | Partagé avec bouton B |
+| P12 | GPIO      | GPIO7_EDGE          | PC6           | -                     |
+| P16 | GPIO      | GPIO8_EDGE          | PE4           | -                     |
 
 ## Broches SPI (SPI2)
 
