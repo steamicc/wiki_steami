@@ -3,9 +3,47 @@ sidebar_position: 5
 title: 'Alimentation'
 ---
 
+import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+
 # Alimentation
 
 Le système de gestion de l'alimentation fournit les différentes tensions à partir du 5V USB ou de la batterie LiPo 3.7V.
+
+## Architecture
+
+Le schéma suit le courant depuis l'entrée USB ou la batterie jusqu'aux charges. Il est établi d'après les feuilles FP1 à FP4 et FP14 du schéma de chaque indice. Cliquer sur le schéma l'ouvre en grand.
+
+<ReleaseTabs>
+<Release releases="v1a">
+
+[![Schéma des alimentations de la STeaMi V1a, indices A et A1 : micro-USB, chargeur BQ24075, jauge BQ27441 et batterie ; le rail POWER alimente directement le LD3985 du STM32F103 et passe par le DIO7003, commandé par PB15 du STM32F103 ; le rail SYST alimente le TPS63000 (+3V3@1200mA) et le LMR62421 (+14V5 pour écran OLED) ; élévateur Jacdac AP3015 ajouté en A1](/img/diagrams/alimentation-v1a.svg)](pathname:///img/diagrams/alimentation-v1a.svg)
+
+</Release>
+<Release releases="v1b">
+
+[![Schéma des alimentations de la STeaMi V1b, indice B1 : micro-USB, chargeur BQ24075, jauge BQ27441 et batterie ; le rail POWER alimente le LD3985 du STM32F103 par le transistor T4 et passe par le DIO7003, sans commande ; le rail SYST alimente le TPS63000 (+3V3@1200mA, élévateur Jacdac AP3015 compris) et le LMR62421 (+14V5 pour écran OLED)](/img/diagrams/alimentation-v1b.svg)](pathname:///img/diagrams/alimentation-v1b.svg)
+
+</Release>
+<Release releases="v1c">
+
+[![Schéma des alimentations de la STeaMi V1c, indice C : USB-C, chargeur BQ24075, jauge BQ27441 et batterie ; le rail POWER alimente le LD3985 du STM32F103 par le transistor T4 et passe par le DIO7003, sans commande ; le rail SYST alimente le TPS63000, dont le +3V3@1200mA alimente le STM32WB55, les capteurs, écran et élévateur Jacdac AP3015 ; LMR62421 retiré](/img/diagrams/alimentation-v1c.svg)](pathname:///img/diagrams/alimentation-v1c.svg)
+
+</Release>
+</ReleaseTabs>
+
+- **Entrée et charge** (FP2, FP3, FP1) : le VBUS du connecteur J2 devient +5V_USB après la ferrite FB1 et entre dans le chargeur U1. U1 produit le rail POWER et échange le courant de charge et de décharge avec la batterie (PACK_OUT, PACK+) à travers la résistance de mesure R18 (10 mΩ) de la jauge U2. La broche PA7 du STM32F103 commande l'entrée SYSOFF de U1 par le transistor T1 (signal VBAT_ON/OFF).
+- **Branche principale** (FP14, FP4) : POWER traverse l'interrupteur U21 et devient SYST. SYST alimente le buck-boost U3, dont la sortie +3V3@1200mA alimente le STM32WB55, les capteurs, l'écran, le buzzer, le microphone, les ports et l'élévateur Jacdac U22.
+- **Branche du STM32F103** (FP14) : le régulateur U19 produit le +3V3_STLINK du STM32F103 et de la flash W25Q64 à partir de POWER, et non de SYST.
+
+Ce qui change d'une release à l'autre :
+
+| Élément                      | V1a (indices A et A1)                                             | V1b (indice B1)                                                                                                              | V1c (indice C)                  |
+| ---------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Connecteur J2                | Micro-USB (GCT USB3080-30-00-A)                                   | Micro-USB (GCT USB3080-30-00-A)                                                                                              | USB-C (UJ20-C-H-G-SMT-4-P16-TR) |
+| Entrée EN de U21             | PWR_ENn, broche PB15 du STM32F103, tirée vers POWER par R90       | Tirée à GND par R103, aucune broche ne la commande                                                                           | Comme la V1b                    |
+| Alimentation de U19 (LD3985) | POWER, directement                                                | POWER par le transistor T4 (BSS8402DW) : toujours passant sur USB, commandé sinon par PB2 du STM32WB55 (ON/OFF\_+3V3_STLINK) | Comme la V1b                    |
+| Élévateur U4 (+14V5@100mA)   | Présent                                                           | Présent                                                                                                                      | Retiré                          |
+| Élévateur U22 (5V_JD_PWR)    | Indice A1 seulement ; à l'indice A, J5 et J6 sont sur +3V3@1200mA | Présent                                                                                                                      | Présent                         |
 
 ## Sous-systèmes
 
@@ -102,12 +140,12 @@ La capacité de C87 ne change pas entre A1 et B1 : seule sa tension nominale pas
 
 ## Switch d'alimentation — DIO7003
 
-| Caractéristique | Détail                                    |
-| --------------- | ----------------------------------------- |
-| Modèle          | DIO7003LEST5                              |
-| Fabricant       | DIOO Microcircuits                        |
-| Type            | Switch de distribution basse perte        |
-| Usage           | Coupure totale en mode basse consommation |
+| Caractéristique | Détail                                     |
+| --------------- | ------------------------------------------ |
+| Modèle          | DIO7003LEST5                               |
+| Fabricant       | DIOO Microcircuits                         |
+| Type            | Switch de distribution basse perte         |
+| Usage           | Interrupteur entre les rails POWER et SYST |
 
 ## Sorties disponibles
 

@@ -3,7 +3,7 @@ sidebar_position: 2
 title: 'Alimentation'
 ---
 
-import { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
+import ReleaseTabs, { Release, ReleaseSelector, ReleaseValue } from '@site/src/components/ReleaseTabs';
 
 # Alimentation
 
@@ -61,6 +61,26 @@ La jauge BQ27441 de Texas Instruments mesure périodiquement l'énergie restante
 ### Architecture d'alimentation (FP4)
 
 Le système de gestion de l'alimentation fournit les différentes tensions et courants requis par les composants de la carte.
+
+<ReleaseTabs>
+<Release releases="v1a">
+
+[![Schéma des alimentations de la STeaMi V1a, indices A et A1 : chargeur BQ24075, jauge BQ27441 et batterie ; LD3985 du STM32F103 sur POWER ; DIO7003 commandé par PB15 du STM32F103 ; TPS63000 et LMR62421 sur SYST ; élévateur Jacdac AP3015 ajouté en A1](/img/diagrams/alimentation-v1a.svg)](pathname:///img/diagrams/alimentation-v1a.svg)
+
+</Release>
+<Release releases="v1b">
+
+[![Schéma des alimentations de la STeaMi V1b, indice B1 : chargeur BQ24075, jauge BQ27441 et batterie ; LD3985 du STM32F103 sur POWER par le transistor T4 ; DIO7003 sans commande ; TPS63000 et LMR62421 sur SYST ; élévateur Jacdac AP3015 sur +3V3@1200mA](/img/diagrams/alimentation-v1b.svg)](pathname:///img/diagrams/alimentation-v1b.svg)
+
+</Release>
+<Release releases="v1c">
+
+[![Schéma des alimentations de la STeaMi V1c, indice C : chargeur BQ24075, jauge BQ27441 et batterie ; LD3985 du STM32F103 sur POWER par le transistor T4 ; DIO7003 sans commande ; TPS63000 sur SYST ; élévateur Jacdac AP3015 sur +3V3@1200mA ; LMR62421 retiré](/img/diagrams/alimentation-v1c.svg)](pathname:///img/diagrams/alimentation-v1c.svg)
+
+</Release>
+</ReleaseTabs>
+
+La lecture du schéma et les différences entre releases sont détaillées dans [Composants principaux — Alimentation](../hardware/main-components/power/#architecture).
 
 - **Entrée** : 5V via USB ou batterie LiPo 3.7V
 - **Convertisseur principal** : TPS63000DRCT (buck-boost) — fournit 3.3V @ 1200 mA
