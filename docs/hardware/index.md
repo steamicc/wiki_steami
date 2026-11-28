@@ -216,7 +216,7 @@ La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un 
 
 | Caractéristique | Détail                                                                                                                                                                                |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Modèle          | [PUI Audio SMT-0825-S-HT-R](https://www.puiaudio.com/products/detail/SMT-0825-S-HT-R)                                                                                                 |
+| Modèle          | [PUI Audio SMT-0825-S-HT-R](https://puiaudio.com/product/transducers/smt-0825-s-ht-r)                                                                                                 |
 | Type            | Transducteur piézo SMD                                                                                                                                                                |
 | Tension         | 3.6V pic-à-pic                                                                                                                                                                        |
 | Signal          | BEEPER_OUT → PA11 (STM32WB55)                                                                                                                                                         |

@@ -48,9 +48,9 @@ L'écran ne figure ni dans le schéma ni dans la nomenclature C : sa référence
 
 ## Transducteur audio (Buzzer)
 
-| Composant                                           | Description                                           | Fabricant                                                         | Reference                                                   | Qte | Datasheet |
-| --------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
-| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piézo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/products/detail/SMT-0825-S-HT-R) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
+| Composant                                           | Description                                           | Fabricant                                                             | Reference                                                   | Qte | Datasheet |
+| --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
+| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piézo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/product/transducers/smt-0825-s-ht-r) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
 
 ### Caractéristiques du buzzer
 
