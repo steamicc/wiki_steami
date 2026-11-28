@@ -782,6 +782,10 @@ class TestFluxRobot(unittest.TestCase):
         self.assertIn("repos/steamicc/arduino-steami-sample/rules/branches/main", t)
         self.assertIn('.context == "compile"', t)
         self.assertIn("autoMergeRequest", t)
+        self.assertIn("repos/steamicc/arduino-steami-sample/rulesets/$id", t)
+        self.assertIn('.current_user_can_bypass // "inconnu"', t)
+        self.assertIn('"$contournement" != "never"', t)
+        self.assertIn('.type == "required_status_checks"', t)
 
     def test_single_branch_and_pr(self):
         t = code_robot()

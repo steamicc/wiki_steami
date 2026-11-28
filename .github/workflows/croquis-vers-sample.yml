@@ -273,6 +273,23 @@ jobs:
             echo "::warning::Fusion automatique non activée pour la PR #$PR : main du sample n'exige pas la vérification « compile ». Vérifier le ruleset de main dans arduino-steami-sample (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
             exit 0
           fi
+          # Un jeton qui peut contourner le ruleset fusionnerait sans attendre
+          # « compile » : on exige « never » pour chaque ruleset qui porte la règle.
+          ids=$(jq -r '[.[] | select(.type == "required_status_checks")
+                | select(any(.parameters.required_status_checks[]; .context == "compile"))
+                | .ruleset_id] | unique | .[]' <<<"$regles")
+          if [ -z "$ids" ]; then
+            echo "::warning::Fusion automatique non activée pour la PR #$PR : ruleset de la vérification « compile » introuvable. PR à fusionner à la main."
+            exit 0
+          fi
+          for id in $ids; do
+            contournement=$(gh api "repos/steamicc/arduino-steami-sample/rulesets/$id" \
+              --jq '.current_user_can_bypass // "inconnu"')
+            if [ "$contournement" != "never" ]; then
+              echo "::warning::Fusion automatique non activée pour la PR #$PR : le jeton de l'App peut contourner le ruleset #$id du sample (current_user_can_bypass : $contournement). Retirer l'App des contournements de ce ruleset ; PR à fusionner à la main."
+              exit 0
+            fi
+          done
           if jq -e .isDraft <<<"$etat" >/dev/null; then
             echo "La PR #$PR est en brouillon : fusion automatique non activée."
             exit 0
