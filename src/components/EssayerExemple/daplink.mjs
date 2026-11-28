@@ -25,11 +25,12 @@ export function decisionEncart({ numeroSerie, reponse, epingle }) {
 }
 
 // release : la release à proposer, null si rien n'est à proposer.
-// reporte : « Plus tard » a été choisi, dans cet encart ou dans les étapes
-// du DAPLink de « Vérifier la pile radio ».
+// reporte : « Plus tard » a été choisi, dans cet encart, ou dans la question
+// ou les étapes du DAPLink de « Vérifier la pile radio ».
 // autreEncart : les étapes du DAPLink de « Vérifier la pile radio » sont
-// affichées sur la page ; l'encart du bouton Essayer se masque pendant ce
-// temps, pour qu'un seul encart d'étapes soit visible.
+// affichées sur la page, ou une vérification relancée après elles est en
+// cours ; l'encart du bouton Essayer se masque pendant ce temps, pour qu'un
+// seul encart d'étapes soit visible.
 export const ETAT_INITIAL_DAPLINK = Object.freeze({
   release: null,
   reporte: false,
@@ -78,14 +79,16 @@ export const verificationDaplink = {
     changer({ ...etat, release });
   },
 
-  // « Plus tard », dans cet encart ou dans les étapes de PileRadio.
+  // « Plus tard », dans cet encart, ou dans la question ou les étapes du
+  // DAPLink de PileRadio.
   reporter() {
     changer({ ...etat, release: null, reporte: true });
   },
 
-  // PileRadio affiche ses étapes du DAPLink : l'encart du bouton Essayer se
-  // masque jusqu'à l'appel de la fonction rendue (étapes retirées, ou bloc
-  // démonté), sans rien perdre de release ni de reporte. Un compteur, et non
+  // PileRadio affiche ses étapes du DAPLink (masqueEncartEssayer) : l'encart
+  // du bouton Essayer se masque jusqu'à l'appel de la fonction rendue (étapes
+  // retirées hors d'une vérification relancée, ou bloc démonté), sans rien
+  // perdre de release ni de reporte. Un compteur, et non
   // un booléen : un second affichage ne doit pas être retiré par le premier.
   afficherAutreEncart() {
     autresEncarts += 1;

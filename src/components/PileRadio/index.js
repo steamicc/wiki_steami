@@ -17,9 +17,11 @@ import {
   doitAbandonner,
   issueFocus,
   lireForcer,
+  masqueEncartEssayer,
   messageEtape,
   morceauxTexte,
   questionEnAttente,
+  reporteDaplink,
   retenirCarte,
   retenirOnglet,
   texteDecompte,
@@ -72,6 +74,7 @@ function Encart({ encart, surReponse }) {
             className={principal ? communs.bouton : communs.boutonSecondaire}
             onClick={() => {
               surReponse();
+              if (reporteDaplink(encart, valeur)) verificationDaplink.reporter();
               parcoursPile.confirmer(valeur);
             }}
           >
@@ -159,12 +162,21 @@ export default function PileRadio({ id }) {
   }, [etatCarte.connectee, etat, id]);
 
   // Un seul encart d'étapes du DAPLink par page : tant que celles-ci sont
-  // affichées, celui du bouton Essayer (verificationDaplink) se masque.
-  // Avant l'affichage, pour que les deux ne soient jamais peints ensemble.
+  // affichées, et pendant une vérification relancée après elles (voir
+  // masqueEncartEssayer), celui du bouton Essayer se masque. Avant
+  // l'affichage, pour que les deux ne soient jamais peints ensemble.
+  const masqueRef = useRef(false);
+  const masque = masqueEncartEssayer({
+    actif,
+    etapesDaplink,
+    etat,
+    precedent: masqueRef.current,
+  });
   useLayoutEffect(() => {
-    if (!etapesDaplink) return undefined;
+    masqueRef.current = masque;
+    if (!masque) return undefined;
     return verificationDaplink.afficherAutreEncart();
-  }, [etapesDaplink]);
+  }, [masque]);
 
   // La demande ne vit que le temps du parcours (voir issueFocus).
   useLayoutEffect(() => {

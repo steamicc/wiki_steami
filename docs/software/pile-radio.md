@@ -68,7 +68,7 @@ Si la carte a déjà une pile plus récente que celle du wiki, la seconde questi
 
 ### Condition : le DAPLink du wiki
 
-L'installation exige que la carte ait le DAPLink proposé par le wiki, car une installation interrompue avec un autre DAPLink peut laisser la carte sans pile radio. Sinon, la question ne propose pas **Installer la pile radio** : elle propose **Mettre à jour le DAPLink…**, qui guide la mise à jour pas à pas, puis il suffit de cliquer de nouveau sur **Vérifier la pile radio**. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non conforme. **Plus tard** ferme la question : la vérification a eu lieu, l'installation est reportée.
+L'installation exige que la carte ait le DAPLink proposé par le wiki, car une installation interrompue avec un autre DAPLink peut laisser la carte sans pile radio. Sinon, la question ne propose pas **Installer la pile radio** : elle propose **Mettre à jour le DAPLink…**, qui guide la mise à jour pas à pas, puis il suffit de cliquer de nouveau sur **Vérifier la pile radio**. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non conforme. **Plus tard** ferme la question : la vérification a eu lieu, l'installation est reportée, et l'encart qui propose la mise à jour du DAPLink sous les exemples de la page ne revient plus jusqu'au rechargement.
 
 ### Limites
 
