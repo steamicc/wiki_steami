@@ -11,16 +11,25 @@ Cette page est la référence pour savoir ce que contient chaque release. Dans l
 
 ## Identifier sa version
 
-La révision et le nom de la carte sont stockés dans la zone de configuration du STM32F103 (DAPLink). Ils peuvent être lus via le module `steami_config` en MicroPython :
+La révision et le nom de la carte sont stockés dans la zone de configuration du STM32F103 (DAPLink). Ils peuvent être lus via le module `steami_config` en MicroPython, qui passe par le pont I2C `daplink_bridge` (voir [DAPLink — API MicroPython](../software/daplink#api-micropython)) :
 
 ```python
-from steami_config import SteamiConfig
 from machine import I2C
+from daplink_bridge import DaplinkBridge
+from steami_config import SteamiConfig
 
-config = SteamiConfig(I2C(1))
-print(f"Board: {config.board_name}")
-print(f"Revision: {config.board_revision}")
+bridge = DaplinkBridge(I2C(1))
+config = SteamiConfig(bridge)
+
+if bridge.has_config_zone():
+    config.load()
+    print(f"Board: {config.board_name}")
+    print(f"Revision: {config.board_revision}")
+else:
+    print("DAPLink sans config zone : mettre à jour le firmware")
 ```
+
+`board_name` et `board_revision` valent `None` quand la zone de configuration ne contient pas ces valeurs.
 
 La révision est un code décimal de trois chiffres, écrit en usine :
 

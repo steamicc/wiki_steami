@@ -61,39 +61,78 @@ Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
 
 ## API MicroPython
 
-### DaplinkFlash
+Trois modules de [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) parlent au DAPLink. `DaplinkBridge` gère la liaison I2C ; `DaplinkFlash` et `SteamiConfig` passent par lui :
+
+```text
+steami_config  ──┐
+                 ├──→  daplink_bridge  ──→  I2C (STM32F103)
+daplink_flash  ──┘
+```
+
+### DaplinkBridge
+
+Le pont gère toute la communication I2C avec le STM32F103 : identification, registres d'état et d'erreur, et accès à la config zone (1 Ko).
 
 ```python
 from machine import I2C
+from daplink_bridge import DaplinkBridge
+
+i2c = I2C(1)
+bridge = DaplinkBridge(i2c)
+
+print("WHO_AM_I:", hex(bridge.device_id()))
+print("Config zone :", bridge.has_config_zone())
+```
+
+| Méthode                            | Description                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `DaplinkBridge(i2c, address=0x3B)` | Créer le pont sur le bus I2C                                               |
+| `device_id()`                      | Retourne WHO_AM_I (0x4C)                                                   |
+| `busy()`                           | Retourne True si le pont est occupé                                        |
+| `has_config_zone()`                | Retourne True si le firmware DAPLink a la config zone                      |
+| `clear_config()`                   | Effacer la config zone                                                     |
+| `write_config(data, offset=0)`     | Écrire dans la config zone (bytes ou str, offset de 0 à 1023)              |
+| `read_config()`                    | Lire la config zone (octets jusqu'au premier 0xFF, `b""` si elle est vide) |
+
+Les anciens firmwares DAPLink n'ont pas de config zone et se bloquent sur les commandes de configuration. Appeler `has_config_zone()` avant `read_config()`, `write_config()` ou `clear_config()`. Une fois connu, le résultat est gardé en mémoire et le test ne repasse pas sur le bus ; un pont qui ne répond pas (occupé, pas de réponse) donne False et sera testé de nouveau au prochain appel. `SteamiConfig` ne fait pas ce test lui-même.
+
+### DaplinkFlash
+
+`DaplinkFlash` gère le fichier de la flash externe W25Q64, que l'ordinateur voit sur le disque USB.
+
+```python
+from machine import I2C
+from daplink_bridge import DaplinkBridge
 from daplink_flash import DaplinkFlash
 
 i2c = I2C(1)
-flash = DaplinkFlash(i2c)
+bridge = DaplinkBridge(i2c)
+flash = DaplinkFlash(bridge)
 ```
 
-| Méthode                        | Description                       |
-| ------------------------------ | --------------------------------- |
-| `device_id()`                  | Retourne WHO_AM_I (0x4C)          |
-| `set_filename(name, ext)`      | Définir le fichier (format 8.3)   |
-| `get_filename()`               | Retourne (name, ext)              |
-| `clear_flash()`                | Effacer toute la flash W25Q64     |
-| `write(data)`                  | Écrire des données (bytes ou str) |
-| `write_line(text)`             | Écrire une ligne (texte + \\n)    |
-| `read_sector(sector)`          | Lire un secteur de 256 octets     |
-| `read(length=None)`            | Lire le fichier courant           |
-| `clear_config()`               | Effacer la config zone            |
-| `write_config(data, offset=0)` | Écrire dans la config zone        |
-| `read_config()`                | Lire la config zone               |
-| `busy()`                       | Retourne True si flash occupée    |
+| Méthode                   | Description                       |
+| ------------------------- | --------------------------------- |
+| `DaplinkFlash(bridge)`    | Créer le driver sur un pont       |
+| `set_filename(name, ext)` | Définir le fichier (format 8.3)   |
+| `get_filename()`          | Retourne (name, ext)              |
+| `clear_flash()`           | Effacer toute la flash W25Q64     |
+| `write(data)`             | Écrire des données (bytes ou str) |
+| `write_line(text)`        | Écrire une ligne (texte + \\n)    |
+| `read_sector(sector)`     | Lire un secteur de 256 octets     |
+| `read(length=None)`       | Lire le fichier courant           |
+
+`clear_flash()` n'efface pas la config zone, qui se trouve dans la flash interne du STM32F103.
 
 ### Exemple : écrire des données CSV
 
 ```python
 from machine import I2C
+from daplink_bridge import DaplinkBridge
 from daplink_flash import DaplinkFlash
 
 i2c = I2C(1)
-flash = DaplinkFlash(i2c)
+bridge = DaplinkBridge(i2c)
+flash = DaplinkFlash(bridge)
 
 flash.set_filename("DATA", "CSV")
 flash.clear_flash()
@@ -111,28 +150,44 @@ Les données sont ensuite accessibles via USB Mass Storage en branchant la carte
 
 ```python
 from machine import I2C
-from daplink_flash import DaplinkFlash
+from daplink_bridge import DaplinkBridge
 from steami_config import SteamiConfig
 
 i2c = I2C(1)
-config = SteamiConfig(DaplinkFlash(i2c))
-config.load()
+bridge = DaplinkBridge(i2c)
+config = SteamiConfig(bridge)
 
-print(f"Board: {config.board_name}")
-print(f"Revision: {config.board_revision}")
+if bridge.has_config_zone():
+    config.load()
+    print(f"Board: {config.board_name}")
+    print(f"Revision: {config.board_revision}")
+else:
+    print("DAPLink sans config zone : mettre à jour le firmware")
 ```
 
-| Propriété / Méthode                                 | Description                           |
-| --------------------------------------------------- | ------------------------------------- |
-| `load()`                                            | Charger la config depuis la flash     |
-| `save()`                                            | Sauvegarder la config dans la flash   |
-| `board_revision`                                    | Numéro de révision (int ou None)      |
-| `board_name`                                        | Nom de la carte (str ou None)         |
-| `set_temperature_calibration(sensor, gain, offset)` | Stocker la calibration température    |
-| `get_temperature_calibration(sensor)`               | Lire la calibration température       |
-| `apply_temperature_calibration(sensor_instance)`    | Appliquer la calibration à un capteur |
+| Propriété / Méthode                                  | Description                                     |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| `SteamiConfig(bridge)`                               | Créer la config sur un pont                     |
+| `load()`                                             | Charger la config depuis la flash               |
+| `save()`                                             | Sauvegarder la config dans la flash             |
+| `board_revision`                                     | Code de révision (int ou None)                  |
+| `board_name`                                         | Nom de la carte (str ou None)                   |
+| `set_temperature_calibration(sensor, gain, offset)`  | Stocker la calibration température              |
+| `get_temperature_calibration(sensor)`                | Lire la calibration température                 |
+| `apply_temperature_calibration(sensor_instance)`     | Appliquer la calibration à un capteur           |
+| `set_magnetometer_calibration(hard_iron_x, …)`       | Stocker la calibration du LIS2MDL (6 valeurs)   |
+| `get_magnetometer_calibration()`                     | Lire la calibration du LIS2MDL                  |
+| `apply_magnetometer_calibration(lis2mdl_instance)`   | Appliquer la calibration au LIS2MDL             |
+| `set_accelerometer_calibration(ox, oy, oz)`          | Stocker les décalages de l'accéléromètre (en g) |
+| `get_accelerometer_calibration()`                    | Lire les décalages de l'accéléromètre           |
+| `apply_accelerometer_calibration(ism330dl_instance)` | Appliquer les décalages à l'ISM330DL            |
+| `set_boot_count(count)`                              | Fixer le compteur de démarrages                 |
+| `get_boot_count()`                                   | Lire le compteur de démarrages (int ou None)    |
+| `increment_boot_count()`                             | Ajouter 1 au compteur de démarrages             |
 
-#### Capteurs supportés pour la calibration
+Les méthodes `set_*` et `increment_boot_count()` ne modifient que la copie en mémoire : `save()` l'écrit dans la config zone. Le code de révision est décrit dans [Révisions de la carte](../hardware/revisions#identifier-sa-version).
+
+#### Capteurs supportés pour la calibration température
 
 | Clé   | Capteur   |
 | ----- | --------- |
@@ -141,16 +196,29 @@ print(f"Revision: {config.board_revision}")
 | `ism` | ISM330DL  |
 | `hid` | WSEN-HIDS |
 | `pad` | WSEN-PADS |
+| `bme` | BME280    |
 
 #### Format JSON de la config zone
 
 ```json
 {
-  "rev": 3,
+  "rev": 131,
   "name": "STeaMi-01",
-  "tc": { "hts": { "g": 1.0, "o": -0.5 }, "pad": { "g": 1.0, "o": -1.73 } }
+  "tc": { "hts": { "g": 1.0, "o": -0.5 }, "pad": { "g": 1.0, "o": -1.73 } },
+  "cm": { "hx": 12.3, "hy": -5.1, "hz": 0.8, "sx": 1.01, "sy": 0.98, "sz": 1.0 },
+  "ca": { "ox": 0.01, "oy": -0.02, "oz": 0.03 },
+  "bc": 0
 }
 ```
+
+| Clé    | Contenu                                                                  |
+| ------ | ------------------------------------------------------------------------ |
+| `rev`  | Code de révision de la carte                                             |
+| `name` | Nom de la carte                                                          |
+| `tc`   | Calibration température par capteur : gain `g`, offset `o`               |
+| `cm`   | Calibration du magnétomètre : hard-iron `hx/hy/hz`, soft-iron `sx/sy/sz` |
+| `ca`   | Décalages de l'accéléromètre en g : `ox/oy/oz`                           |
+| `bc`   | Compteur de démarrages                                                   |
 
 ## Mise à jour du firmware
 
@@ -179,10 +247,10 @@ L'outil effectue automatiquement :
 
 ### Fichiers firmware
 
-| Composant            | Lien                                                                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Bootloader STM32F103 | [stm32f103xb_bl.bin](https://github.com/letssteam/DAPLink/releases/latest/download/stm32f103xb_bl.bin)                   |
-| Firmware STeaMi      | [stm32f103xb_steami32_if.bin](https://github.com/letssteam/DAPLink/releases/latest/download/stm32f103xb_steami32_if.bin) |
+| Composant            | Lien                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Bootloader STM32F103 | [stm32f103xb_bl.bin](https://github.com/steamicc/DAPLink/releases/latest/download/stm32f103xb_bl.bin)                   |
+| Firmware STeaMi      | [stm32f103xb_steami32_if.bin](https://github.com/steamicc/DAPLink/releases/latest/download/stm32f103xb_steami32_if.bin) |
 
 Voir le [README DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash) pour les instructions détaillées et le câblage.
 
@@ -199,5 +267,6 @@ La pile radio tourne sur le second cœur du STM32WB55, pas sur le DAPLink. Les o
 - [Code source DAPLink](https://github.com/steamicc/DAPLink) — Firmware (branche `release_letssteam`)
 - [DapLink-EasyFlash](https://github.com/steamicc/DapLink-EasyFlash) — Outil d'installation initiale
 - [Pile radio Bluetooth](./pile-radio) — Choix et installation de la pile radio
+- [Code source daplink_bridge](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_bridge) — Pont I2C MicroPython
 - [Code source daplink_flash](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash) — Driver MicroPython
 - [Code source steami_config](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_config) — Module config
