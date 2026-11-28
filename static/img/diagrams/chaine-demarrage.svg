@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 908" width="800" height="908"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 924" width="800" height="924"
      role="img" aria-labelledby="titre desc"
      font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
   <title id="titre">Chaîne de démarrage de la STeaMi V1c : DAPLink puis STM32WB55</title>
@@ -37,7 +37,7 @@
     </marker>
   </defs>
 
-  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="907" rx="12"/>
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="923" rx="12"/>
   <text class="sch-titre" x="24" y="40">Chaîne de démarrage : DAPLink puis STM32WB55</text>
   <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
 
@@ -145,7 +145,7 @@
   <text class="sch-detail" x="668" y="666" text-anchor="middle">setup(), puis loop()</text>
 
   <!-- Légende -->
-  <rect x="24" y="728" width="752" height="156" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <rect x="24" y="728" width="752" height="172" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
   <text class="sch-nom" x="40" y="752">Légende</text>
   <g class="sch-detail">
     <rect class="sch-bloc sch-mcu"  x="40"  y="766" width="24" height="16" rx="3"/><text x="72"  y="779">Étape d'un MCU</text>
@@ -161,6 +161,7 @@
 
     <text x="40" y="836">V1b : même chaîne. V1a (indices A, A1) : le LD3985 prend le rail POWER sans passer par T4, et le bouton</text>
     <text x="40" y="852">Reset est placé après le tampon U18 : d'après le schéma, le bootloader ne le voit pas sur PB0. Sur une V1a,</text>
-    <text x="40" y="868">le lecteur MAINTENANCE s'obtient donc avec START_BL.ACT (non vérifié sur carte).</text>
+    <text x="40" y="868">le lecteur MAINTENANCE s'obtient donc avec START_BL.ACT (non vérifié sur carte). Enfin, R116 n'est pas</text>
+    <text x="40" y="884">montée sur la V1a : BOOT0 (partagé avec LED_BLE) n'a pas de tirage à 0.</text>
   </g>
 </svg>
