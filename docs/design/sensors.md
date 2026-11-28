@@ -132,28 +132,10 @@ Le capteur de température doit être thermiquement éloigné de tout composant 
 
 ### Bus I2C interne
 
-Le bus I2C1 du STM32WB55 relie aussi le STM32F103, qui sert de pont I2C. Côté STM32F103, les broches changent entre la V1a et la V1b.
-
-<ReleaseTabs>
-<Release releases="v1a">
-
-| Signal   | Pin STM32WB55 | Pin STM32F103 (I2C1) |
-| -------- | ------------- | -------------------- |
-| I2C1_SCL | PB8           | PB6                  |
-| I2C1_SDA | PB9           | PB7                  |
-
-</Release>
-<Release releases="v1b v1c">
-
-| Signal   | Pin STM32WB55 | Pin STM32F103 (I2C2) |
-| -------- | ------------- | -------------------- |
-| I2C1_SCL | PB8           | PB10 (broche 21)     |
-| I2C1_SDA | PB9           | PB11 (broche 22)     |
-
-Le schéma note « I2C2_STM32F103 = I2C1_STM32WB55 ». Sur ces deux releases, les broches PB6 et PB7 du STM32F103 portent USART1_TX et USART1_RX.
-
-</Release>
-</ReleaseTabs>
+| Signal   | Pin STM32WB55 | Pin STM32F103 |
+| -------- | ------------- | ------------- |
+| I2C1_SCL | PB8           | PB6           |
+| I2C1_SDA | PB9           | PB7           |
 
 ### Extension GPIO (FP7)
 
