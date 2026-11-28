@@ -73,7 +73,7 @@ Carte au circuit imprimé vert : écran OLED rond, connecteur micro-USB et conne
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-![Schéma bloc de la STeaMi V1b : STM32WB55RG relié à l'écran OLED SSD1327 en SPI1, aux capteurs du bus I2C1 (dont WSEN-PADS, WSEN-HIDS et APDS-9960), au STM32F103 DAPLink, au micro-USB et à la flash W25Q64](/img/hardware/block-diagram.svg)
+![Schéma bloc de la STeaMi V1b : STM32WB55RG relié à l'écran OLED SSD1327 en SPI1 et aux capteurs du bus I2C1 (dont WSEN-PADS, WSEN-HIDS et APDS-9960) ; STM32F103 DAPLink relié au STM32WB55RG par UART, au micro-USB et à la flash W25Q64 en SPI](/img/hardware/block-diagram.svg)
 
 Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Ses blocs ne sont pas cliquables. Les différences avec la V1c sont détaillées dans [Révisions](./revisions).
 
