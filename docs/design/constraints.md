@@ -23,11 +23,11 @@ Les exigences sont communes aux trois releases de la carte. Quand l'implémentat
 
 ## Exigences physiques
 
-| ID     | Nom                 | Description                                                                                      | Implémentation                |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------- |
-| PHY-01 | Size                | Le système doit être contenu dans un volume inférieur à 100 mm de longueur par 60 mm de largeur. | PCB < 100 x 60 mm             |
-| PHY-02 | Weight              | Le poids doit être inférieur ou égal à 100 g.                                                    | ≤ 100 g                       |
-| PHY-03 | Battery integration | Le système peut intégrer une batterie à l'arrière.                                               | LiPo 1600 mAh en face arrière |
+| ID     | Nom                 | Description                                                                                                       | Implémentation                          |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| PHY-01 | Size                | Le système doit être contenu dans un volume inférieur à 100 mm de longueur, 60 mm de largeur et 10 mm de hauteur. | PCB < 100 x 60 mm ; hauteur non mesurée |
+| PHY-02 | Weight              | Le poids doit être inférieur ou égal à 100 g.                                                                     | ≤ 100 g                                 |
+| PHY-03 | Battery integration | Le système peut intégrer une batterie à l'arrière.                                                                | LiPo 1600 mAh en face arrière           |
 
 ## Choix de conception
 
@@ -49,7 +49,7 @@ L'écran, les LEDs et les boutons sont tous placés en face avant pour une utili
 
 ### Dimensions et poids (PHY-01, PHY-02)
 
-Le format compact (< 100 x 60 mm, ≤ 100 g) est compatible avec le connecteur edge micro:bit et permet une prise en main facile dans un contexte éducatif.
+Le format compact (< 100 x 60 mm, ≤ 100 g) est compatible avec le connecteur edge micro:bit et permet une prise en main facile dans un contexte éducatif. L'exigence PHY-01 limite aussi la hauteur à 10 mm ; la hauteur de la carte équipée de sa batterie n'a pas été mesurée.
 
 ## Voir aussi
 
