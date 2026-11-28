@@ -65,15 +65,15 @@ Interface série pour modules Jacdac. Les nets `UART2_TX` et `UART2_RX` du sché
 
 ## Port JTAG / SWD
 
-Connecteur de programmation et débogage (header 1 rangée, pas 1.27 mm).
+Port de programmation et débogage du STM32F103 (J8, sérigraphie « JTAG ») : 1 rangée de 5 trous au pas de 1,27 mm, sans connecteur soudé. Le symbole du schéma compte 10 positions, dont seules les broches impaires sont reliées. Détails dans [Port SWD](../main-components/connectors/swd.md).
 
-| Broche     | Signal       | Pin STM32F103 | Test Point |
-| ---------- | ------------ | ------------- | ---------- |
-| JTAG_GND   | GND          | -             | -          |
-| JTAG_VREF  | VREF         | -             | -          |
-| JTAG_SWDIO | STLINK_SWDIO | PA13          | -          |
-| JTAG_NRST  | STLINK_NRST  | NRST          | -          |
-| JTAG_SWCLK | STLINK_SWCLK | PA14          | -          |
+| Broche     | Broche J8 | Signal       | Pin STM32F103 | Test Point |
+| ---------- | --------- | ------------ | ------------- | ---------- |
+| JTAG_GND   | 1         | GND          | -             | -          |
+| JTAG_VREF  | 3         | VREF         | -             | -          |
+| JTAG_SWDIO | 5         | STLINK_SWDIO | PA13          | -          |
+| JTAG_NRST  | 7         | STLINK_NRST  | NRST          | -          |
+| JTAG_SWCLK | 9         | STLINK_SWCLK | PA14          | -          |
 
 ## Connecteur USB
 

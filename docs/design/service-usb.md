@@ -13,12 +13,12 @@ Les exigences sont communes aux trois releases de la carte. Quand l'implémentat
 
 ## Exigences — Port de service
 
-| ID     | Nom                              | Description                                                                                                                       | Implémentation                        |
-| ------ | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| FCT-55 | Service Port                     | Le système doit intégrer un port de débogage et de chargement logiciel en usine.                                                  | Header SWD 1 rangée, pas 1.27 mm      |
-| FCT-56 | Service Port - SWD               | Le port de service doit être compatible avec les sondes SWD comme Black Magic Probe ou ST-Link.                                   | SWD (SWCLK PA14, SWDIO PA13 sur F103) |
-| FCT-57 | Service Port - One row connector | La connexion physique du port de service doit se faire uniquement par routage des signaux vers des pads du PCB (header 1 rangée). | Header 1 rangée 4 broches             |
-| FCT-58 | Service Port - Pinout            | Brochage recommandé du header 1 rangée : GND, SWCLK, 3V, SWDIO. Ne pas placer 3V et GND adjacents.                                | GND(1), SWCLK(2), 3V3(3), SWDIO(4)    |
+| ID     | Nom                              | Description                                                                                                                       | Implémentation                                                                                                                |
+| ------ | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| FCT-55 | Service Port                     | Le système doit intégrer un port de débogage et de chargement logiciel en usine.                                                  | Port SWD J8 : 1 rangée de 5 trous au pas de 1,27 mm, sans connecteur soudé                                                    |
+| FCT-56 | Service Port - SWD               | Le port de service doit être compatible avec les sondes SWD comme Black Magic Probe ou ST-Link.                                   | SWD (SWCLK PA14, SWDIO PA13 sur F103)                                                                                         |
+| FCT-57 | Service Port - One row connector | La connexion physique du port de service doit se faire uniquement par routage des signaux vers des pads du PCB (header 1 rangée). | Conforme : 5 trous métallisés en une rangée (J8), aucun connecteur monté                                                      |
+| FCT-58 | Service Port - Pinout            | Brochage recommandé du header 1 rangée : GND, SWCLK, 3V, SWDIO. Ne pas placer 3V et GND adjacents.                                | Ordre différent : GND, VREF, SWDIO, NRST, SWCLK (broches 1, 3, 5, 7 et 9 de J8) ; VREF et GND ne sont pas aux deux extrémités |
 
 ## Exigences — USB
 
@@ -36,21 +36,20 @@ Les exigences sont communes aux trois releases de la carte. Quand l'implémentat
 
 ### Interface de programmation (FP11)
 
-Le port de service utilise le protocole SWD (Serial Wire Debug) avec un connecteur minimal 4 broches au pas 1.27 mm.
+Le port de service J8 utilise le protocole SWD (Serial Wire Debug). Il se présente comme une rangée de 5 trous métallisés au pas de 1,27 mm, sans connecteur soudé.
 
-- **Compatibilité** : Sondes SWD telles que Black Magic Probe ou ST-Link
-- **Connecteur** : Header 1 rangée, pas 1.27 mm
+- **Compatibilité** : sondes SWD telles que Black Magic Probe ou ST-Link, reliées fil à fil
+- **Connecteur** : aucun ; le symbole du schéma FP11 compte 10 positions, dont seules les broches impaires sont reliées
 
-| Broche | Signal | Pin STM32F103 |
-| ------ | ------ | ------------- |
-| 1      | GND    | -             |
-| 2      | SWCLK  | PA14          |
-| 3      | 3V3    | -             |
-| 4      | SWDIO  | PA13          |
+| Broche J8 | Signal       | Pin STM32F103 |
+| --------- | ------------ | ------------- |
+| 1         | GND          | -             |
+| 3         | VREF         | -             |
+| 5         | STLINK_SWDIO | PA13          |
+| 7         | STLINK_NRST  | NRST          |
+| 9         | STLINK_SWCLK | PA14          |
 
-:::caution
-Les broches 3V3 et GND ne sont pas adjacentes pour éviter tout risque de court-circuit lors du branchement.
-:::
+VREF vient de +3V3_STLINK par R71 (0 Ω). Détails, empreinte et sources dans [Port SWD](../hardware/main-components/connectors/swd.md).
 
 ### Microcontrôleur interface (FP14)
 

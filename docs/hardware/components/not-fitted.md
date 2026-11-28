@@ -20,3 +20,4 @@ Ces composants sont prévus sur le PCB mais ne sont pas montés en production st
 
 - Les straps 0 Ohm non montés sont des emplacements réservés pour des configurations alternatives du PCB
 - Les headers SAMTEC sont destinés au port de service JTAG/SWD (debug et programmation en usine). Ils ne sont pas soudés en production standard mais peuvent être ajoutés pour le développement
+- L'empreinte de J8 (FTS-105-01-F-D) est en fait une rangée de 5 trous au pas de 1,27 mm, qui ne reçoit pas cette embase de 2 rangées (voir [Port SWD](../main-components/connectors/swd.md))
