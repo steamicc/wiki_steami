@@ -84,4 +84,4 @@ Le détail de chaque composant par langage est dans la [matrice de compatibilit�
 - [Révisions de la carte](/docs/hardware/revisions) : différences entre V1a, V1b et V1c
 - [arduino-steami-lib](https://github.com/steamicc/arduino-steami-lib) : dépôt des drivers Arduino
 - [Documentation Arduino](https://docs.arduino.cc/) : référence du langage et de l'IDE
-- [Tutoriels STM32duino](https://stm32python.gitlab.io/fr/docs/Stm32duino) : exercices et ressources
+- [Tutoriels STM32duino](https://stm32python.gitlab.io/fr/docs/Stm32duino/) : exercices et ressources
