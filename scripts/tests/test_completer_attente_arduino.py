@@ -50,12 +50,13 @@ class Bac:
             self.attente.write_text(attente, encoding="utf-8")
         self.sortie = self.dir / "sortie.txt"
 
-    def lancer(self):
+    def lancer(self, *supplementaires):
         sortie = io.StringIO()
         with contextlib.redirect_stdout(sortie):
             code = completer.main([
                 "--index", str(self.index), "--pages", str(self.pages),
                 "--attente", str(self.attente), "--sortie-github", str(self.sortie),
+                *supplementaires,
             ])
         return code, sortie.getvalue(), self.sortie.read_text(encoding="utf-8")
 
@@ -143,6 +144,61 @@ class TestCompleterAttente(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("index", erreurs.getvalue())
         self.assertFalse(bac.attente.exists())
+
+
+def section_sample(ident):
+    nom = ident.split("/")[-1]
+    return (f"## {nom}\n\n```cpp file=.external/arduino-steami-sample/examples/{ident}/{nom}.ino\n```\n\n"
+            f'<EssayerExemple id="{ident}" source="sample" />\n')
+
+
+class TestCompleterAttenteSample(unittest.TestCase):
+    """Même règle pour les croquis du sample (--source sample)."""
+
+    def verifier_sample(self, bac):
+        erreurs = io.StringIO()
+        vide = bac.dir / "index-bibliotheque.json"
+        vide.write_text(json.dumps({"version": "v0", "exemples": []}), encoding="utf-8")
+        with contextlib.redirect_stderr(erreurs), contextlib.redirect_stdout(io.StringIO()):
+            code = check.main([
+                "--index", str(vide), "--pages", str(bac.pages),
+                "--attente", str(bac.dir / "absente.txt"), "--epingle", str(bac.dir / "absent-e.json"),
+                "--index-sample", str(bac.index), "--attente-sample", str(bac.attente),
+                "--epingle-sample", str(bac.dir / "absent-es.json"),
+            ])
+        return code, erreurs.getvalue()
+
+    def test_nouveau_croquis_ble_reference_xiaomi_mis_en_attente(self):
+        bac = Bac(self, ["BLE/ReferenceXiaomi", "G/Doc", "G/Attente"],
+                  {"software/arduino/sample.md": section_sample("G/Doc")}, "G/Attente\n")
+        code, journal, sortie = bac.lancer("--source", "sample")
+        self.assertEqual(code, 0)
+        self.assertEqual(bac.attente.read_text(encoding="utf-8"), "G/Attente\nBLE/ReferenceXiaomi\n")
+        self.assertEqual(sortie, "ajoutes=BLE/ReferenceXiaomi\n")
+        self.assertIn("BLE/ReferenceXiaomi", journal)
+        self.assertEqual(self.verifier_sample(bac)[0], 0)
+
+    def test_balise_de_la_bibliotheque_ne_documente_pas_le_croquis_du_sample(self):
+        bac = Bac(self, ["G/Doc"], {"software/g.md": section("G/Doc")}, "")
+        bac.lancer("--source", "sample")
+        self.assertEqual(bac.attente.read_text(encoding="utf-8"), "G/Doc\n")
+
+    def test_croquis_retire_encore_cite_reste_bloquant(self):
+        bac = Bac(self, ["G/Nouveau"],
+                  {"software/g.md": section_sample("G/Ancien")}, "G/Retire\n")
+        code, _, _ = bac.lancer("--source", "sample")
+        self.assertEqual(code, 0)
+        self.assertEqual(bac.attente.read_text(encoding="utf-8"), "G/Retire\nG/Nouveau\n")
+        code, erreurs = self.verifier_sample(bac)
+        self.assertEqual(code, 1)
+        self.assertIn("G/Ancien", erreurs)
+        self.assertIn("G/Retire", erreurs)
+        self.assertNotIn("G/Nouveau", erreurs)
+
+    def test_source_inconnue_refusee(self):
+        bac = Bac(self, [], {})
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            bac.lancer("--source", "autre")
 
 
 if __name__ == "__main__":

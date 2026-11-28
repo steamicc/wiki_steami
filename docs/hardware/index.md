@@ -91,7 +91,7 @@ Les deux microcontrôleurs sont reliés par une liaison série (console), par le
 
 ### Microcontrôleur applicatif
 
-Le STM32WB55RG est le processeur principal sur lequel s'exécutent les programmes utilisateur (MicroPython, CODAL, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee. Toutes les broches GPIO accessibles à l'utilisateur sont fournies par ce processeur.
+Le STM32WB55RG est le processeur principal sur lequel s'exécutent les programmes utilisateur (MicroPython, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee. Toutes les broches GPIO accessibles à l'utilisateur sont fournies par ce processeur.
 
 | Caractéristique | Détail                                                                                                                                          |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |

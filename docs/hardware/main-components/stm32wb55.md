@@ -7,7 +7,7 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 # STM32WB55RG — Microcontrôleur applicatif
 
-Le STM32WB55RG est le processeur principal de la carte STeaMi. C'est sur ce microcontrôleur que s'exécutent les programmes utilisateur (MicroPython, CODAL, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee.
+Le STM32WB55RG est le processeur principal de la carte STeaMi. C'est sur ce microcontrôleur que s'exécutent les programmes utilisateur (MicroPython, Arduino). Il intègre un transceiver radio 2.4 GHz pour les communications Bluetooth, OpenThread et ZigBee.
 
 Toutes les cartes diffusées (V1a, V1b et V1c) utilisent un STM32WB55RG ; seuls les prototypes des indices A et C étaient équipés d'un STM32WB55RC (256 Ko de flash). Le brochage est identique sur les trois releases, à l'exception de la broche PB2 : `I2C_INT` sur la V1a, `ON/OFF_+3V3_STLINK` à partir de la V1b (voir [Révisions](../revisions#alimentation-et-microcontrôleurs)).
 

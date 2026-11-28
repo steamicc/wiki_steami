@@ -18,7 +18,7 @@ const features = [
   },
   {
     title: 'Programmation',
-    description: 'MicroPython, CODAL, Arduino : drivers, tutoriels et exemples.',
+    description: 'MicroPython et Arduino : drivers, tutoriels et exemples.',
     link: '/docs/software',
     image: '/img/hardware/steami-v1c-back.png',
   },

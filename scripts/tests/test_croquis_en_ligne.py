@@ -1248,7 +1248,7 @@ class TestFluxConversion(unittest.TestCase):
         self.assertIn("sample=G/N", texte)
         self.assertNotIn("point d'extension", texte)
 
-    def ouvrir_pr(self, convertis="", differents="", pousse="true"):
+    def ouvrir_pr(self, convertis="", differents="", pousse="true", ajoutes=""):
         """Lance le script de l'étape « Ouvre la PR » avec un faux gh ; renvoie
         (arguments de gh pr create, corps de la PR)."""
         etapes = yaml.safe_load(FLUX_EPINGLAGE.read_text(encoding="utf-8"))["jobs"]["suivre"]["steps"]
@@ -1272,7 +1272,7 @@ class TestFluxConversion(unittest.TestCase):
                 "GITHUB_OUTPUT": str(d / "sortie"),
                 "ACTUEL": "v1.0.1", "DERNIERE": "v1.1.0", "ARCHIVE": "steami-exemples-v1.1.0.zip",
                 "BRANCHE": "chore/croquis-sample-v1-1-0", "POUSSE": pousse,
-                "CONVERTIS": convertis, "DIFFERENTS": differents,
+                "CONVERTIS": convertis, "DIFFERENTS": differents, "AJOUTES": ajoutes,
             }
             r = subprocess.run(["bash", "-e", "-c", etape["run"]], env=env,
                                capture_output=True, text=True, check=False)
@@ -1286,6 +1286,19 @@ class TestFluxConversion(unittest.TestCase):
         self.assertIn("`PREMIERS/LireBoutons`", corps)
         self.assertNotIn("À vérifier", corps)
         self.assertIn("La fusion automatique (squash) est activée", corps)
+
+    def test_new_sketches_put_on_the_waitlist_are_named_in_the_pr(self):
+        # Nouveau croquis du sample ni utilisé ni en attente (BLE/ReferenceXiaomi) :
+        # le robot l'a ajouté à la liste d'attente, la PR le dit et reste fusionnable.
+        args, corps = self.ouvrir_pr(ajoutes="BLE/ReferenceXiaomi MOTEUR/Nouveau")
+        self.assertNotIn("--draft", args)
+        self.assertIn("`BLE/ReferenceXiaomi`, `MOTEUR/Nouveau`", corps)
+        self.assertIn("sont ajoutés à `scripts/exemples-arduino-sample-a-documenter.txt`", corps)
+        self.assertIn("La fusion automatique (squash) est activée", corps)
+
+    def test_no_waitlist_paragraph_without_new_sketches(self):
+        _, corps = self.ouvrir_pr()
+        self.assertNotIn("sont ajoutés à `scripts/exemples-arduino-sample-a-documenter.txt`", corps)
 
     def test_published_sketch_different_from_page_opens_a_draft(self):
         # Modification faite dans le wiki après la fusion de la PR du sample :
