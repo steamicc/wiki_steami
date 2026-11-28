@@ -6,7 +6,7 @@ sidebar_label: BLE (Bluetooth)
 import EssayerExemple from '@site/src/components/EssayerExemple';
 import TOCInline from '@theme/TOCInline';
 
-<!-- cspell:ignore rssi trilaterate -->
+<!-- cspell:ignore rssi trilaterate pvvx bthome mibeacon humidite Ramenee Ecart -->
 
 # Exemples BLE : Bluetooth Low Energy
 
@@ -22,9 +22,9 @@ La radio est intégrée au microcontrôleur principal, le [STM32WB55](/docs/hard
 
 Le STM32WB55 a deux cœurs : le programme Arduino tourne sur le premier, le second fait fonctionner la radio avec son propre firmware, la **pile radio** (_wireless stack_). Les exemples ont donc besoin d'une pile Bluetooth installée sur la carte. Pour les STM32WB, le [README de la bibliothèque STM32duinoBLE](https://github.com/stm32duino/STM32duinoBLE#readme) demande le firmware **BLE HCILayer** (fichier `stm32wbxx_BLE_HCILayer_fw.bin`). Il s'installe depuis Chrome ou Edge avec le bouton **Vérifier la pile radio** (voir [Depuis le wiki](/docs/software/pile-radio#depuis-le-wiki)), ou, avec un autre navigateur, avec DapLink-EasyFlash (voir [Installer la pile](/docs/software/pile-radio#installer-la-pile)). Sur une V1c où ce firmware était installé (version 1.20.0), `BLE.begin()` a réussi dans tous les exemples qui l'atteignent : la console a continué jusqu'au menu ou jusqu'à la ligne `Scanning...` (`Scanning for beacons...` pour certains). Seul BleBeacon s'est arrêté avant, faute de capteur WSEN-HIDS. Si `BLE.begin()` échoue, il renvoie `0` : les exemples écrivent alors `BLE init failed!` et s'arrêtent. Sans pile radio, ce message n'arrive pas tout de suite : d'après le code de la bibliothèque, elle attend jusqu'à 10 s la réponse du second cœur avant d'abandonner, et certaines de ses attentes n'ont pas de limite, si bien que la console peut aussi rester muette. Quand, après une dizaine de secondes, la console n'est pas allée jusqu'au menu, jusqu'à cette ligne `Scanning` ou, pour BleBeacon, jusqu'à `BLE Beacon ready.`, ou que `BLE init failed!` apparaît, cliquer d'abord sur **Vérifier la pile radio**, sous l'exemple (Chrome ou Edge ; sinon, DapLink-EasyFlash).
 
-Ces exemples sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → BLE** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent ni l'écran, qui garde l'image laissée par le programme précédent, ni la LED Bluetooth. La section [Bluetooth](../capteurs#bluetooth) de la page Capteurs les présente en une phrase ; ici, chacun est détaillé.
+Ces exemples, sauf le dernier, sont ceux de la bibliothèque STeaMi, dans **Fichier → Exemples → STeaMi → BLE** de l'Arduino IDE. Ils écrivent leurs messages en anglais. Ils n'utilisent ni l'écran, qui garde l'image laissée par le programme précédent, ni la LED Bluetooth. La section [Bluetooth](../capteurs#bluetooth) de la page Capteurs les présente en une phrase ; ici, chacun est détaillé. Le dernier, [ReferenceXiaomi](#referencexiaomi), vient du dépôt des croquis du wiki, [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample) : il écrit en français et affiche ses mesures sur l'écran.
 
-Sauf BleBeacon, tous ces exemples demandent **plusieurs cartes** : des balises qui émettent, et une carte qui écoute. Les récepteurs reconnaissent les balises à leur nom :
+Sauf BleBeacon et ReferenceXiaomi, tous ces exemples demandent **plusieurs cartes** : des balises qui émettent, et une carte qui écoute. Les récepteurs reconnaissent les balises à leur nom :
 
 | Exemple          | Rôle de la carte              | Nom émis ou cherché               | Cartes en tout                      |
 | ---------------- | ----------------------------- | --------------------------------- | ----------------------------------- |
@@ -34,6 +34,7 @@ Sauf BleBeacon, tous ces exemples demandent **plusieurs cartes** : des balises q
 | BleRssiMapper    | récepteur                     | cherche `Beacon_M1` à `Beacon_M3` | 3 ou 4 : 2 ou 3 balises + celle-ci  |
 | BleTrilateration | récepteur                     | cherche `Beacon_M1` à `Beacon_M3` | 4 : 3 balises + celle-ci            |
 | BleIndoorMap     | récepteur                     | cherche `Beacon_M1` à `Beacon_M3` | 4 : 3 balises + celle-ci            |
+| ReferenceXiaomi  | récepteur                     | cherche un thermomètre Xiaomi     | 1, avec un Xiaomi LYWSD03MMC        |
 
 Aucun exemple de la bibliothèque n'émet tels quels les noms `Beacon_M1`, `Beacon_M2` et `Beacon_M3`. Pour BleRssiMapper, BleTrilateration et BleIndoorMap, les balises exécutent une copie modifiée de BleBeacon, dans un [Codespace](../codespace) ou dans l'[Arduino IDE](../arduino-ide) : remplacer le nom `STeaMi-Beacon` par `Beacon_M1`, `Beacon_M2` ou `Beacon_M3`, un par balise.
 
@@ -221,3 +222,58 @@ Chaque carte commence par les codes `\033[2J\033[H`, qui, dans un terminal qui l
 - La colonne d'un point vaut 1 + x / 10 et sa ligne est comptée à partir du bas ; un point hors du cadre est ramené contre son bord.
 
 <EssayerExemple id="BLE/BleIndoorMap" />
+
+## ReferenceXiaomi {#referencexiaomi}
+
+Ce croquis sert à **contrôler les capteurs de la carte** : il compare la température et l'humidité qu'elle mesure à celles d'un thermo-hygromètre du commerce, un Xiaomi **LYWSD03MMC** posé à côté d'elle, qui diffuse ses mesures dans ses annonces BLE. La carte écoute ces annonces, sans se connecter au thermomètre, et affiche les deux mesures et leur écart sur son écran : une photo de la carte suffit ensuite pour garder la trace de la comparaison. Le croquis vient du dépôt [arduino-steami-sample](https://github.com/steamicc/arduino-steami-sample/tree/main/examples/BLE/ReferenceXiaomi), et non de la bibliothèque STeaMi : il n'est pas dans le menu **Fichier → Exemples** de l'Arduino IDE.
+
+**Ce qu'on observe** : l'écran porte le titre `Référence BLE`, puis la ligne `Carte` avec la température et l'humidité de la carte, par exemple `26.1C 25.0%`. L'écran est redessiné chaque seconde. Tant qu'aucun thermomètre n'est reçu, il affiche en dessous `Xiaomi ?` et `recherche...` ; ensuite, il affiche :
+
+| Ligne de l'écran                  | Contenu                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `Carte`, puis `26.1C 25.0%`       | température et humidité relative mesurées par la carte                                                       |
+| nom du thermomètre, ou fin de MAC | nom BLE diffusé par le thermomètre, par exemple `ATC_A1B2C3`, sinon les trois derniers octets de son adresse |
+| `21.1C 38.3%`                     | température et humidité reçues du thermomètre                                                                |
+| `HR à Tc 28.4%`                   | humidité qu'aurait l'air du thermomètre à la température de la carte (Tc), voir plus bas                     |
+| `Ecart`, puis `+5.0C -3.4%`       | carte moins thermomètre : d'abord la température, puis l'humidité de la carte moins « HR à Tc »              |
+| `-62dB 3s`                        | force du signal reçu du thermomètre (RSSI) et âge de sa dernière annonce, en secondes                        |
+
+`--` marque une mesure absente. Les mesures du tableau viennent d'un essai sur une V1c, avec deux thermomètres, décrit dans la [PR du croquis](https://github.com/steamicc/arduino-steami-sample/pull/30) : carte à 26,1 °C et 25,0 %, thermomètre à 21,1 °C et 38,3 %, « HR à Tc » à 28,4 %. Le nom, le RSSI et l'âge de la dernière ligne ne sont que des exemples.
+
+La console écrit d'abord l'en-tête d'un tableau CSV, `t_s;adresse;rssi;format;T_ref;HR_ref;T_carte;HR_carte;HR_ref_a_T_carte`, puis, toutes les 5 secondes, une ligne de valeurs séparées par des points-virgules : temps écoulé en secondes, adresse et RSSI du thermomètre affiché, format de ses annonces (voir plus bas), sa température et son humidité, celles de la carte, puis « HR à Tc ». Chaque nouveau thermomètre entendu est signalé par une ligne qui commence par `#`, par exemple `# capteur A4:C1:38:A1:B2:C3 ATC_A1B2C3 pvvx`. Pour enregistrer ce tableau dans un fichier, utiliser un moniteur série qui sait le faire, à 115200 bauds, après avoir quitté cette page (voir plus haut).
+
+**Matériel** : une carte, de n'importe quelle release, et un thermomètre Xiaomi LYWSD03MMC équipé du firmware **pvvx** ([ATC_MiThermometer](https://github.com/pvvx/ATC_MiThermometer)), qui remplace le firmware d'origine. Le croquis lit les trois formats d'annonce que ce firmware sait diffuser : « custom » (celui de pvvx), « atc1441 » et **BTHome v2** non chiffré. Le firmware d'origine de Xiaomi **chiffre** ses mesures : le croquis signale un tel thermomètre dans la console (format `mibeacon`), mais ne peut ni le lire ni l'afficher. Le README du projet pvvx explique comment installer son firmware sans ouvrir le thermomètre, depuis un navigateur qui gère le Web Bluetooth, et comment choisir le format des annonces. Le programme est le même sur les trois releases : la température et l'humidité de la carte viennent du capteur WSEN-HIDS sur une V1a ou une V1b, du BME280 sur une V1c (voir [Pression, humidité et température](../capteurs#pression-humidité-et-température)). Il n'a été essayé que sur une V1c, avec son écran rond GC9A01 ; sur une V1a ou une V1b, il doit afficher les mêmes lignes sur l'écran SSD1327, en niveaux de gris.
+
+Poser la carte et le thermomètre côte à côte et attendre une dizaine de minutes avant de comparer : la carte s'échauffe en fonctionnant, et les deux capteurs ne réagissent pas à la même vitesse.
+
+```cpp file=.external/arduino-steami-sample/examples/BLE/ReferenceXiaomi/ReferenceXiaomi.ino
+
+```
+
+**Comment ça marche** : `setup()` démarre l'écran, les capteurs de la carte (`SteamiTemperature` et `SteamiHumidity`, voir [Reconnaître la carte](../carte)), puis la radio, et lance l'écoute avec `BLE.scan(true)`, qui rend chaque nouvelle annonce d'un appareil, donc chaque nouvelle mesure. Contrairement aux exemples de la bibliothèque, le croquis ne s'arrête pas si `BLE.begin()` échoue : il écrit `BLE indisponible : vérifier la pile radio de la carte` et continue d'afficher les mesures de la carte, avec `Xiaomi ?` et `recherche...` à la place du thermomètre. Ce message demande de cliquer sur **Vérifier la pile radio**, sous l'exemple.
+
+À chaque tour de `loop()`, `ecouter()` vide la liste des appareils entendus et lit, pour chacun, les octets bruts de son annonce avec `advertisementData()`, 31 octets au plus. Une annonce est une suite de champs : un octet de longueur, un octet de type, puis les données. Le croquis ne garde que les champs de type `0x16`, les **données de service** : un identifiant de service sur deux octets, l'UUID, l'octet de poids faible d'abord, suivi des données du service. L'UUID et la taille des données indiquent le format :
+
+| UUID     | Format (colonne `format` du CSV) | Contenu lu par le croquis                                                                                                                                                                                                                                                                |
+| -------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0x181A` | `pvvx`, 15 octets ou plus        | adresse MAC sur 6 octets, à l'envers ; température en centièmes de °C et humidité en centièmes de %, sur deux octets chacune, l'octet de poids faible d'abord                                                                                                                            |
+| `0x181A` | `atc1441`, 13 ou 14 octets       | adresse MAC sur 6 octets, dans l'ordre ; température en dixièmes de °C sur deux octets, l'octet de poids fort d'abord ; humidité en % entiers sur un octet                                                                                                                               |
+| `0xFCD2` | `bthome`                         | BTHome v2 : un octet d'information (bit 0 à 1 si chiffré : l'annonce est ignorée), puis des objets, chacun un identifiant suivi de sa valeur ; le croquis lit la température (`0x02`, centièmes de °C, ou `0x45`, dixièmes) et l'humidité (`0x03`, centièmes de %, ou `0x2E`, % entiers) |
+| `0xFE95` | `mibeacon`                       | firmware d'origine de Xiaomi : données chiffrées, non lues                                                                                                                                                                                                                               |
+
+Le reste de l'annonce (tension de la batterie, compteur…) n'est pas lu. Une annonce BTHome ne porte pas d'adresse MAC : le croquis prend alors l'adresse BLE de l'appareil. Il lit un objet BTHome après l'autre, grâce à une table de la taille de chaque objet, et s'arrête au premier objet inconnu, en gardant ce qu'il a déjà lu.
+
+Le croquis garde en mémoire jusqu'à 8 thermomètres ; au-delà, un nouveau remplace celui entendu il y a le plus longtemps. Avec `CIBLE` vide (`""`), il affiche le thermomètre le mieux reçu, en pratique le plus proche, parmi ceux entendus dans les 60 dernières secondes (`OUBLI_MS`). Pour ne pas sauter d'un thermomètre à l'autre quand deux sont côte à côte, avec presque le même RSSI, il garde celui qu'il affiche jusqu'à ce qu'un autre soit reçu au moins 6 dB plus fort (`HYSTERESIS`). Pour imposer un thermomètre, donner à `CIBLE` son adresse MAC ou son nom BLE, puis recompiler : le croquis téléversé depuis cette page garde `CIBLE` vide.
+
+**La ligne « HR à Tc »** corrige l'échauffement de la carte. Son capteur mesure un air un peu plus chaud que celui de la pièce ; or, pour une même quantité de vapeur d'eau, l'humidité relative baisse quand la température monte. Comparer directement les deux humidités mélangerait donc l'erreur du capteur et cet échauffement. `humiditeRamenee()` calcule l'humidité qu'aurait l'air du thermomètre s'il était porté à la température de la carte, avec la **formule de Magnus**, qui donne la pression de vapeur saturante en hPa : E(t) = 6,112 × exp(17,62 × t / (243,12 + t)). L'humidité ramenée vaut HR × E(T thermomètre) / E(T carte). Dans l'exemple ci-dessus, 38,3 % × E(21,1) / E(26,1) donne 28,4 % : l'écart de -3,4 % qui reste est le désaccord entre les deux capteurs, sans l'effet de l'échauffement.
+
+**Limites** :
+
+- Le firmware d'origine du LYWSD03MMC ne convient pas : il faut d'abord installer le firmware pvvx, et choisir un format d'annonce non chiffré. Les annonces BTHome chiffrées sont ignorées.
+- Lors de l'essai décrit dans la PR, les annonces d'un thermomètre arrivaient par à-coups, toutes les 5 à 15 secondes : certaines se perdent pendant le rafraîchissement de l'écran. La dernière ligne de l'écran montre l'âge de la dernière annonce ; il dépasse donc souvent quelques secondes sans que ce soit une panne.
+- Le thermomètre a lui aussi sa propre erreur de mesure : il sert de **référence** pour repérer un décalage de la carte, pas d'étalon. Pour corriger la température de la carte, voir [Calibrations](../carte#calibrations).
+- L'écran n'affiche pas le symbole °, et `Ecart` est écrit sans accent : seules les lignes `Référence BLE` et `HR à Tc` en portent.
+
+Le même programme existe en MicroPython, dans le dossier [ble/xiaomi_reference](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/xiaomi_reference) du dépôt micropython-steami-sample.
+
+<EssayerExemple id="BLE/ReferenceXiaomi" source="sample" />
