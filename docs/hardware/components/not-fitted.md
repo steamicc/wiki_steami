@@ -7,7 +7,7 @@ title: 'Non montés (DNP)'
 
 Ces composants sont prévus sur le PCB mais ne sont pas montés en production standard.
 
-| Composant             | Description                                           | Fabricant | Reference      | Qte | Repères                                                                             |
+| Composant             | Description                                           | Fabricant | Référence      | Qté | Repères                                                                             |
 | --------------------- | ----------------------------------------------------- | --------- | -------------- | --- | ----------------------------------------------------------------------------------- |
 | Resistor 0 Ohm - 0603 | Strap non monté                                       | -         | -              | 17  | R3, R7, R9, R29, R32, R51, R70, R75, R76, R77, R78, R82, R85, R92, R107, R109, R115 |
 | Resistor 0 Ohm - 0402 | Strap non monté                                       | NC        | NC             | 2   | R90, R101                                                                           |

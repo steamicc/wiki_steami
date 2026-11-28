@@ -13,7 +13,7 @@ Les repères sont ceux de la nomenclature de l'indice B1 (V1b). Les composants r
 
 ## Boutons et interrupteurs
 
-| Composant                                      | Description                                             | Fabricant                             | Reference                                                         | Qte | Repères       | Datasheet |
+| Composant                                      | Description                                             | Fabricant                             | Référence                                                         | Qté | Repères       | Datasheet |
 | ---------------------------------------------- | ------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- | --- | ------------- | --------- |
 | PTS636 SM25J SMTR LFS                          | Interrupteur tactile montage en surface                 | [C&K](https://www.ckswitches.com/)    | PTS636 SM25J SMTR LFS <br/><OctopartButton q="PTS636 SM25J" />    | 1   | SW1           | —         |
 | PTS647SM38SMTR2LFS                             | Interrupteur tactile 50 mA 12 VDC, 1.8N, hauteur 3.8 mm | [C&K](https://www.ckswitches.com/)    | PTS647SM38SMTR2LFS <br/><OctopartButton q="PTS647SM38SMTR2LFS" /> | 3   | SW3, SW4, SW5 | —         |

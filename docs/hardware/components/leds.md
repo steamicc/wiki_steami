@@ -11,7 +11,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 Les repères du tableau sont ceux de la nomenclature de l'indice B1 (V1b). Ceux de la V1c sont différents (voir [plus bas](#utilisation)).
 :::
 
-| Composant                                | Description                | Fabricant                                                         | Reference                                                         | Couleur    | Qte | Repères    | Datasheet |
+| Composant                                | Description                | Fabricant                                                         | Référence                                                         | Couleur    | Qté | Repères    | Datasheet |
 | ---------------------------------------- | -------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ---------- | --- | ---------- | --------- |
 | 150060RS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060RS75000 <br/><OctopartButton q="150060RS75000" />           | Rouge      | 1   | LED2       | —         |
 | 150060BS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060BS75000 <br/><OctopartButton q="150060BS75000" />           | Bleu       | 2   | LED3, LED6 | —         |

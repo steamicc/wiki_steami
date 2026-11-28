@@ -11,7 +11,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 Les repères sont ceux de la nomenclature de l'indice B1 (V1b). Les composants retirés ou modifiés sur la V1c sont listés dans [BOM complète](./#différences-selon-la-release).
 :::
 
-| Composant    | Description                  | Fabricant                                                         | Reference                                             | Qte | Repères | Datasheet |
+| Composant    | Description                  | Fabricant                                                         | Référence                                             | Qté | Repères | Datasheet |
 | ------------ | ---------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------- | --- | ------- | --------- |
 | 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm  | [Wurth](https://www.we-online.com/en/components/products/WE-XTAL) | 830103552209 <br/><OctopartButton q="830103552209" /> | 1   | X1      | —         |
 | 830062558    | Quartz 32 kHz, 12 pF, 30 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-XTAL) | 830062558 <br/><OctopartButton q="830062558" />       | 1   | X2      | —         |

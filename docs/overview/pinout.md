@@ -19,7 +19,7 @@ Vue détaillée des connecteurs disponibles sur la carte :
 
 ### Connecteur Edge (compatible micro:bit)
 
-Le connecteur edge expose les broches P0 a P20 ainsi que l'alimentation (3V3, GND). Il est compatible avec les accessoires micro:bit.
+Le connecteur edge expose les broches P0 à P20 ainsi que l'alimentation (3V3, GND). Il est compatible avec les accessoires micro:bit.
 
 | Broche  | Fonction            | Signal              | Pin STM32WB55 |
 | ------- | ------------------- | ------------------- | ------------- |

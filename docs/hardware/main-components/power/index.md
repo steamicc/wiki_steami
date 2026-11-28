@@ -88,7 +88,15 @@ L'élévateur LMR62421 (U4) n'équipe que la V1a et la V1b : il fournit le +14V5
 
 ## Schémas
 
+Les deux feuilles ci-dessous viennent du schéma de l'indice B1 (V1b), publié dans le [reference design](https://github.com/steamicc/steami-reference-design).
+
+Feuille FP4, alimentation. Elle comporte l'élévateur LMR62421 (U4) et le rail +14V5 de l'écran OLED, retirés dans le schéma de l'indice C (V1c) :
+
 [![Schéma FP4-Alimentation](/img/schematics/FP4-Alimentation.png)](/docs/schematics/FP4-Alimentation.pdf)
+
+Feuille FP1, connecteur de batterie J1. Son contenu est le même dans le schéma de l'indice C (V1c) ; seul le cartouche change :
+
+[![Schéma FP1-Batterie](/img/schematics/FP1-Batterie.png)](/docs/schematics/FP1-Batterie.pdf)
 
 - [Schéma Altium — FP4](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP4-Alimentation.SchDoc)
 - [Schéma Altium — FP1](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP1-Batterie.SchDoc)

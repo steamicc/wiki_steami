@@ -34,7 +34,7 @@ Le brochage est le même pour les trois releases :
 | STEMMA_SCL | I2C3_SCL_EDGE | PC0           |
 
 :::info
-Le bus I2C3 est partage entre le connecteur STEMMA/Qwiic et les broches P19/P20 du connecteur edge.
+Le bus I2C3 est partagé entre le connecteur STEMMA/Qwiic et les broches P19/P20 du connecteur edge.
 :::
 
 ## Bus I2C externe (I2C3)

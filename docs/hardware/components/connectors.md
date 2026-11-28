@@ -11,7 +11,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 Les repères sont ceux de la nomenclature de l'indice B1 (V1b), sauf pour les lignes marquées V1c, qui donnent ceux de la nomenclature de l'indice C. Les composants retirés ou modifiés sur la V1c sont listés dans [BOM complète](./#différences-selon-la-release).
 :::
 
-| Composant               | Description                                                                | Fabricant                                                           | Reference                                                                   | Qte | Repères | Datasheet |
+| Composant               | Description                                                                | Fabricant                                                           | Référence                                                                   | Qté | Repères | Datasheet |
 | ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --- | ------- | --------- |
 | USB3080-30-00-A         | Connecteur micro-USB B, Bottom-SMT (V1a, V1b)                              | [GCT](https://gct.co/)                                              | USB3080-30-00-A <br/><OctopartButton q="USB3080-30-00-A" />                 | 1   | J2      | —         |
 | 10114830-10102LF        | Connecteur batterie SMD 2 positions, pas 1.25 mm                           | [Amphenol](https://www.amphenol-cs.com/)                            | 10114830-10102LF <br/><OctopartButton q="10114830-10102LF" />               | 1   | J1      | —         |
