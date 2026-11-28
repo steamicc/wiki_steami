@@ -11,8 +11,9 @@
 # examples/<GROUPE>/<Nom>/<Nom>.ino = en-tête qui nomme la page + code du
 # bloc. Le workflow pousse la branche et ouvre l'unique PR du robot, titrée
 # « feat(examples): Add the wiki sketches. » (fusion squash : c'est ce titre
-# que lit semantic-release). La CI du sample compile les croquis ; un humain
-# relit et fusionne : le robot ne fusionne jamais.
+# que lit semantic-release). La CI du sample compile les croquis ; le robot
+# active la fusion automatique (squash) de cette PR : elle fusionne seule dès
+# que la vérification obligatoire `compile` est verte.
 #
 # Rejeu : si la PR du robot est déjà ouverte, la branche distante est
 # reprise (--reprendre) : un croquis déjà présent n'est pas rajouté, un
@@ -37,7 +38,10 @@
 # Prérequis :
 # - secrets RELEASE_APP_ID et RELEASE_APP_SECRET visibles de ce dépôt ;
 # - App installée sur steamicc/arduino-steami-sample, avec Contents et Pull
-#   requests en écriture.
+#   requests en écriture ;
+# - « Allow auto-merge » activé dans les réglages de arduino-steami-sample
+#   (Settings > General > Pull Requests), et la vérification `compile`
+#   exigée sur sa branche main par un ruleset.
 #
 # Essai à blanc : Actions > croquis-vers-sample > Run workflow, case
 # « essai » cochée : la branche est préparée et affichée, rien n'est poussé.
@@ -99,7 +103,7 @@ jobs:
         id: app
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
+          client-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_SECRET }}
           # Jeton limité au dépôt sample.
           owner: ${{ github.repository_owner }}
@@ -211,6 +215,7 @@ jobs:
       # Aussi sans commit à pousser quand la PR est ouverte : son corps peut
       # avoir changé (croquis qui n'est plus marqué sample= dans le wiki).
       - name: Ouvre ou met à jour la PR
+        id: ouverture
         if: ${{ !inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '') }}
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
@@ -225,9 +230,59 @@ jobs:
               gh pr edit "$PR" --repo steamicc/arduino-steami-sample --body-file "$RUNNER_TEMP/corps.md"
               echo "PR mise à jour : https://github.com/$DEPOT_SAMPLE/pull/$PR"
             fi
+            echo "pr=$PR" >> "$GITHUB_OUTPUT"
           else
             url=$(gh pr create --repo steamicc/arduino-steami-sample --base main --head "$BRANCHE" \
               --title "feat(examples): Add the wiki sketches." \
               --body-file "$RUNNER_TEMP/corps.md")
             echo "PR ouverte : $url"
+            echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Active la fusion automatique
+        if: ${{ !inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '') }}
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
+          # ou ouverte par quelqu'un d'autre que le robot.
+          etat=$(gh pr view "$PR" --repo steamicc/arduino-steami-sample \
+            --json isCrossRepository,author,isDraft,autoMergeRequest)
+          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
+            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
+            exit 1
+          fi
+          auteur=$(jq -r .author.login <<<"$etat")
+          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
+            exit 1
+          fi
+          # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
+          # tout de suite, même avec un CI rouge : on exige la vérification « compile ».
+          regles=$(gh api repos/steamicc/arduino-steami-sample/rules/branches/main)
+          if ! jq -e 'any(.[]; .type == "required_status_checks"
+                and any(.parameters.required_status_checks[]; .context == "compile"))' \
+                <<<"$regles" >/dev/null; then
+            echo "::warning::Fusion automatique non activée pour la PR #$PR : main du sample n'exige pas la vérification « compile ». Vérifier le ruleset de main dans arduino-steami-sample (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
+            exit 0
+          fi
+          if jq -e .isDraft <<<"$etat" >/dev/null; then
+            echo "La PR #$PR est en brouillon : fusion automatique non activée."
+            exit 0
+          fi
+          if jq -e '.autoMergeRequest != null' <<<"$etat" >/dev/null; then
+            echo "La fusion automatique de la PR #$PR est déjà activée."
+            exit 0
+          fi
+          if ! gh pr merge "$PR" --repo steamicc/arduino-steami-sample --auto --squash; then
+            echo "::error::Échec de l'activation de la fusion automatique de la PR #$PR : vérifier « Allow auto-merge » et la fusion squash dans les réglages de arduino-steami-sample (Settings > General > Pull Requests)."
+            exit 1
+          fi
+          echo "Fusion automatique (squash) activée pour la PR #$PR : fusion dès que « compile » est vert."
