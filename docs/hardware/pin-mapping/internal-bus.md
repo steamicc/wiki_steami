@@ -22,10 +22,12 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur GPIO.
 
-| Signal   | Pin STM32WB55 | Pin STM32F103 |
-| -------- | ------------- | ------------- |
-| I2C1_SCL | PB8           | PB6           |
-| I2C1_SDA | PB9           | PB7           |
+| Signal   | Pin STM32WB55 | Pin STM32F103 (V1b, V1c) | Pin STM32F103 (V1a) |
+| -------- | ------------- | ------------------------ | ------------------- |
+| I2C1_SCL | PB8           | PB10                     | PB6                 |
+| I2C1_SDA | PB9           | PB11                     | PB7                 |
+
+Côté STM32F103, le bus arrive sur PB10/PB11 à partir de l'indice B1 (V1b, V1c) : c'est le périphérique I2C2 du STM32F103, relié à l'I2C1 du STM32WB55 (encadré « I2C2_STM32F103 = I2C1_STM32WB55 » de la feuille FP14). Sur ces releases, PB6/PB7 portent USART1_TX/RX vers le connecteur J9. Sur les indices A et A1 (V1a), le bus arrive sur PB6/PB7, l'I2C1 du STM32F103.
 
 ### Périphériques sur I2C1
 
@@ -37,18 +39,38 @@ Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur 
 | APDS-9960                                   | Capteur optique                       | Lumière, couleur, geste, proximité              | V1a (à confirmer), V1b |
 | 2511020213301                               | Capteur de pression                   | Baromètre absolu                                | V1a (à confirmer), V1b |
 | 2525020210001                               | Capteur humidité/température          | Humidité + température                          | V1a (à confirmer), V1b |
-| [BME280](../main-components/sensors/bme280) | Capteur pression/humidité/température | Pression, humidité + température (adresse 0x76) | V1c                    |
+| [BME280](../main-components/sensors/bme280) | Capteur pression/humidité/température | Pression, humidité + température (adresse 0x76) | V1a (à confirmer), V1c |
+| BNO055                                      | Centrale inertielle 9 axes            | Accéléromètre, gyroscope, magnétomètre          | V1a (à confirmer)      |
 | BQ27441DRZR-G1A                             | Jauge de batterie                     | État de charge                                  | V1a, V1b, V1c          |
 | MCP23009-E/MG                               | Expandeur GPIO                        | 8 GPIO supplémentaires                          | V1a, V1b, V1c          |
 
-Les capteurs d'environnement réellement montés sur la V1a restent à confirmer (voir [Révisions](../revisions#capteurs-internes)). Sur la V1a, les résistances de pull-up R15/R16 du bus I2C1 ne sont pas montées ; elles valent 4,7 kΩ à partir de la V1b.
+La nomenclature de l'indice A (V1a) liste l'APDS-9960, le WSEN-PADS, le WSEN-HIDS, le BME280 et le BNO055, et les schémas des indices A et A1 les câblent sur le bus. Les capteurs réellement montés sur les cartes V1a restent à confirmer (voir [Révisions](../revisions#capteurs-internes)). Sur la V1a, les résistances de pull-up R15/R16 du bus I2C1 ne sont pas montées ; elles valent 4,7 kΩ à partir de la V1b.
 
 ### Adresses I2C
 
 Les adresses sont données au format 7 bits, celui qu'attendent MicroPython (`I2C.scan()`, `readfrom_mem()`) et Arduino (`Wire.beginTransmission()`). Le format 8 bits, employé par certaines fiches techniques, ajoute le bit de lecture/écriture : il double l'adresse (0x6B devient 0xD6 en écriture et 0xD7 en lecture).
 
 <ReleaseTabs>
-<Release releases="v1a v1b">
+<Release releases="v1a">
+
+| Adresse | Composant                                           | Fonction                             |
+| ------- | --------------------------------------------------- | ------------------------------------ |
+| 0x1E    | [LIS2MDL](../main-components/sensors/lis2mdl)       | Magnétomètre                         |
+| 0x20    | [MCP23009](../main-components/buttons-audio)        | Expandeur GPIO                       |
+| 0x28    | BNO055                                              | Centrale inertielle 9 axes           |
+| 0x29    | [VL53L1X](../main-components/sensors/vl53l1x)       | Distance                             |
+| 0x39    | [APDS-9960](../main-components/sensors/apds9960)    | Lumière, couleur, geste, proximité   |
+| 0x3B    | [STM32F103](../main-components/stm32f103) (DAPLink) | Accès à la flash et à la config zone |
+| 0x55    | [BQ27441](../main-components/power/bq27441)         | Jauge de batterie                    |
+| 0x5D    | [WSEN-PADS](../main-components/sensors/wsen-pads)   | Pression                             |
+| 0x5F    | [WSEN-HIDS](../main-components/sensors/wsen-hids)   | Humidité et température              |
+| 0x6B    | [ISM330DLC](../main-components/sensors/ism330dlc)   | Accéléromètre et gyroscope           |
+| 0x76    | [BME280](../main-components/sensors/bme280)         | Pression, humidité, température      |
+
+La nomenclature de l'indice A liste l'APDS-9960 (0x39), le WSEN-PADS (0x5D, broche SAO reliée au 3V3), le WSEN-HIDS (0x5F), le BNO055 (0x28) et le BME280 (0x76 ; le schéma indique « BME280 ou BME680 », à la même adresse). Les schémas des indices A et A1 (feuille FP12) confirment le câblage de ces adresses. Pour l'APDS-9960, l'annotation 8 bits du schéma (0x38/0x39) est fausse, mais l'adresse 7 bits 0x39 est correcte. Le BNO055 partage INT_ACC (sur sa broche NRESET) et INT_MAG (sur sa broche INT) avec l'ISM330DLC et le LIS2MDL : le BNO055 et le BME280 sont des variantes du schéma. Le montage effectif de ces capteurs sur les cartes V1a reste à confirmer (voir [Révisions](../revisions#capteurs-internes)).
+
+</Release>
+<Release releases="v1b">
 
 | Adresse | Composant                                           | Fonction                             |
 | ------- | --------------------------------------------------- | ------------------------------------ |
@@ -62,7 +84,7 @@ Les adresses sont données au format 7 bits, celui qu'attendent MicroPython (`I2
 | 0x5F    | [WSEN-HIDS](../main-components/sensors/wsen-hids)   | Humidité et température              |
 | 0x6B    | [ISM330DLC](../main-components/sensors/ism330dlc)   | Accéléromètre et gyroscope           |
 
-Pour la V1a, le montage de l'APDS-9960, du WSEN-PADS et du WSEN-HIDS reste à confirmer (voir [Révisions](../revisions#capteurs-internes)).
+Le BME280 et le BNO055 sont barrés sur le schéma de l'indice B1 et absents de sa nomenclature : les adresses 0x76 et 0x28 ne figurent donc pas dans cette liste.
 
 </Release>
 <Release releases="v1c">
@@ -100,15 +122,16 @@ Les signaux sont identiques pour les trois releases, y compris pour l'écran TFT
 
 ## Signaux d'interruption des capteurs
 
-| Signal                        | Pin STM32WB55 | Capteur                             | Test Point |
-| ----------------------------- | ------------- | ----------------------------------- | ---------- |
-| INT_ACC                       | PC13          | ISM330DLCTR (Accéléromètre)         | TP28       |
-| INT_MAG                       | PD1           | LIS2MDLTR (Magnétomètre)            | TP29       |
-| INT_DIST                      | PB12          | VL53L1X (Distance)                  | TP27       |
-| INT_PRESSURE                  | -             | WSEN-PADS (Pression), V1a et V1b    | TP30       |
-| INT_TEMPERATURE               | -             | WSEN-HIDS (Température), V1a et V1b | TP31       |
-| INT_PROXIMITY                 | -             | APDS-9960 (Proximité), V1a et V1b   | TP32       |
-| INT_TEMPERATURE_HUMIDITY_BOSH | -             | Bosch (Température)                 | TP45       |
+| Signal          | Pin STM32WB55 | Capteur                             | Test Point |
+| --------------- | ------------- | ----------------------------------- | ---------- |
+| INT_ACC         | PC13          | ISM330DLCTR (Accéléromètre)         | TP28       |
+| INT_MAG         | PD1           | LIS2MDLTR (Magnétomètre)            | TP29       |
+| INT_DIST        | PB12          | VL53L1X (Distance)                  | TP27       |
+| INT_PRESSURE    | -             | WSEN-PADS (Pression), V1a et V1b    | TP30       |
+| INT_TEMPERATURE | -             | WSEN-HIDS (Température), V1a et V1b | TP31       |
+| INT_PROXIMITY   | -             | APDS-9960 (Proximité), V1a et V1b   | TP32       |
+
+Le point de test TP45 (feuille FP12) n'est pas une interruption : il est relié à la broche CSB (2) du BME280 (U14). Cette broche est tirée au rail d'alimentation du capteur, alimenté en 3V3 par R80 (0 Ω), ce qui impose le mode I2C. Le BME280 n'a pas de sortie d'interruption. TP45 figure sur les schémas des indices A/A1, B1 et C ; sur l'indice B1, le BME280 est barré mais TP45 reste sur ce nœud.
 
 ## Expandeur GPIO (MCP23009)
 
