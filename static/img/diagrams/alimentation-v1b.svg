@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 720" width="800" height="720"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Architecture d'alimentation (STeaMi V1b)</title>
+  <desc id="desc">Même architecture que la V1c, avec un connecteur micro-USB et l'élévateur LMR62421 (U4) qui produit le +14V5@100mA de l'écran OLED à partir du rail SYST.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-capt { fill: #fff3e0; stroke: #b35400; }
+      .sch-alim { fill: #ffebee; stroke: #c62828; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-conn { fill: #f3e5f5; stroke: #7b1fa2; }
+      .sch-absent { fill: #ffffff; stroke: #57606a; stroke-dasharray: 6 4; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-txt-pwr  { fill: #c62828; }
+      .sch-txt-gpio { fill: #57606a; }
+      .sch-txt-i2c  { fill: #00796b; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-i2c  { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-pwr  { stroke: #c62828; stroke-width: 2.5; }
+      .sch-gpio { stroke: #57606a; stroke-width: 1.5; }
+      .sch-noeud-pwr { fill: #c62828; }
+    </style>
+    <marker id="fl-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c62828"/>
+    </marker>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="719" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Architecture d'alimentation</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1b (indice B1)</text>
+
+  <!-- Ligne 1 : USB, chargeur, jauge, batterie (FP2, FP3, FP1). -->
+  <rect class="sch-bloc sch-conn" x="24" y="72" width="120" height="56" rx="6"/>
+  <text class="sch-nom" x="84" y="96" text-anchor="middle">J2 micro-USB</text>
+  <text class="sch-detail" x="84" y="114" text-anchor="middle">VBUS 5 V</text>
+  <rect class="sch-bloc sch-alim" x="216" y="72" width="150" height="56" rx="6"/>
+  <text class="sch-nom" x="291" y="96" text-anchor="middle">U1 BQ24075</text>
+  <text class="sch-detail" x="291" y="114" text-anchor="middle">chargeur, PowerPath</text>
+  <rect class="sch-bloc sch-alim" x="446" y="72" width="130" height="56" rx="6"/>
+  <text class="sch-nom" x="511" y="96" text-anchor="middle">U2 BQ27441</text>
+  <text class="sch-detail" x="511" y="114" text-anchor="middle">jauge, R18 10 mΩ</text>
+  <rect class="sch-bloc sch-alim" x="648" y="72" width="128" height="56" rx="6"/>
+  <text class="sch-nom" x="712" y="96" text-anchor="middle">Batterie J1</text>
+  <text class="sch-detail" x="712" y="114" text-anchor="middle">LiPo 3,7 V</text>
+  <path class="sch-lien sch-pwr" d="M144 100 H214" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="180" y="92" text-anchor="middle">+5V_USB</text>
+  <path class="sch-lien sch-pwr" d="M368 100 H444" marker-start="url(#fl-pwr)" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="406" y="92" text-anchor="middle">PACK_OUT</text>
+  <path class="sch-lien sch-pwr" d="M578 100 H646" marker-start="url(#fl-pwr)" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="612" y="92" text-anchor="middle">PACK+</text>
+  <path class="sch-lien sch-gpio" d="M340 180 V130" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt sch-txt-gpio" x="348" y="176" text-anchor="start">SYSOFF ← VBAT_ON/OFF (PA7 du F103)</text>
+  <path class="sch-lien sch-i2c" d="M511 128 V150"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="519" y="148" text-anchor="start">I2C1 (WB55)</text>
+
+  <!-- POWER (sortie du BQ24075) : vers U21 et vers la branche du STM32F103 (FP14). -->
+  <path class="sch-lien sch-pwr" d="M291 128 V206" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M291 168 H104 V206" marker-end="url(#fl-pwr)"/>
+  <circle class="sch-noeud-pwr" cx="291" cy="168" r="3.5"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="197" y="160" text-anchor="middle">POWER</text>
+
+  <!-- Ligne 2 : T4 (V1b, V1c) et interrupteur U21 (FP14). -->
+  <rect class="sch-bloc sch-alim" x="24" y="208" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="104" y="232" text-anchor="middle">T4 BSS8402DW</text>
+  <text class="sch-detail" x="104" y="250" text-anchor="middle">PB2 du WB55 ou +5V_USB</text>
+  <path class="sch-lien sch-pwr" d="M104 264 V310" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="112" y="292" text-anchor="start">POWER_ST_LINK</text>
+  <rect class="sch-bloc sch-alim" x="211" y="208" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="291" y="232" text-anchor="middle">U21 DIO7003</text>
+  <text class="sch-detail" x="291" y="250" text-anchor="middle">EN à GND par R103</text>
+  <path class="sch-lien sch-pwr" d="M291 264 V310" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M291 288 H696 V310" marker-end="url(#fl-pwr)"/>
+  <circle class="sch-noeud-pwr" cx="291" cy="288" r="3.5"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="299" y="282" text-anchor="start">SYST</text>
+
+  <!-- Ligne 3 : régulateurs (FP4 et FP14). -->
+  <rect class="sch-bloc sch-alim" x="24" y="312" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="104" y="336" text-anchor="middle">U19 LD3985</text>
+  <text class="sch-detail" x="104" y="354" text-anchor="middle">LDO 3,3 V, 150 mA</text>
+  <rect class="sch-bloc sch-alim" x="211" y="312" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="291" y="336" text-anchor="middle">U3 TPS63000</text>
+  <text class="sch-detail" x="291" y="354" text-anchor="middle">buck-boost 3,3 V</text>
+  <rect class="sch-bloc sch-alim" x="616" y="312" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="696" y="336" text-anchor="middle">U4 LMR62421</text>
+  <text class="sch-detail" x="696" y="354" text-anchor="middle">élévateur 14,5 V</text>
+
+  <!-- +3V3_STLINK : STM32F103 (U17) et flash W25Q64 (U20). -->
+  <path class="sch-lien sch-pwr" d="M104 368 V414" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M104 392 H198 V548 H186" marker-end="url(#fl-pwr)"/>
+  <circle class="sch-noeud-pwr" cx="104" cy="392" r="3.5"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="151" y="384" text-anchor="middle">+3V3_STLINK</text>
+
+  <!-- +3V3@1200mA (sortie de U3) : WB55, U22, capteurs et périphériques. -->
+  <path class="sch-lien sch-pwr" d="M291 368 V414" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M291 392 H499 V414" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M395 392 V548 H373" marker-end="url(#fl-pwr)"/>
+  <circle class="sch-noeud-pwr" cx="291" cy="392" r="3.5"/>
+  <circle class="sch-noeud-pwr" cx="395" cy="392" r="3.5"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="343" y="384" text-anchor="middle">+3V3@1200mA</text>
+  <path class="sch-lien sch-pwr" d="M696 368 V414" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="688" y="396" text-anchor="end">+14V5@100mA</text>
+
+  <!-- Lignes 4 et 5 : charges. -->
+  <rect class="sch-bloc sch-mcu" x="24" y="416" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="104" y="440" text-anchor="middle">U17 STM32F103</text>
+  <text class="sch-detail" x="104" y="458" text-anchor="middle">DAPLink</text>
+  <rect class="sch-bloc sch-mem" x="24" y="520" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="104" y="544" text-anchor="middle">U20 W25Q64</text>
+  <text class="sch-detail" x="104" y="562" text-anchor="middle">flash SPI</text>
+  <rect class="sch-bloc sch-mcu" x="211" y="416" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="291" y="440" text-anchor="middle">STM32WB55</text>
+  <text class="sch-detail" x="291" y="458" text-anchor="middle">MCU applicatif</text>
+  <rect class="sch-bloc sch-capt" x="211" y="520" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="291" y="544" text-anchor="middle">Capteurs, écran</text>
+  <text class="sch-detail" x="291" y="562" text-anchor="middle">buzzer, micro, ports</text>
+  <rect class="sch-bloc sch-alim" x="419" y="416" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="499" y="440" text-anchor="middle">U22 AP3015</text>
+  <text class="sch-detail" x="499" y="458" text-anchor="middle">élévateur 5 V, 100 mA</text>
+  <path class="sch-lien sch-pwr" d="M499 472 V518" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt sch-txt-pwr" x="507" y="500" text-anchor="start">5V_JD_PWR</text>
+  <rect class="sch-bloc sch-conn" x="419" y="520" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="499" y="544" text-anchor="middle">Jacdac J5, J6</text>
+  <text class="sch-detail" x="499" y="562" text-anchor="middle">connecteurs</text>
+  <rect class="sch-bloc sch-capt" x="616" y="416" width="160" height="56" rx="6"/>
+  <text class="sch-nom" x="696" y="440" text-anchor="middle">Écran OLED</text>
+  <text class="sch-detail" x="696" y="458" text-anchor="middle">connecteur J7</text>
+
+  <!-- Légende : seulement les types présents. -->
+  <rect x="24" y="600" width="752" height="96" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="624">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-pwr" d="M40 648 H80" marker-end="url(#fl-pwr)"/><text x="88" y="652">Alimentation, vers la charge</text>
+    <path class="sch-lien sch-pwr" d="M272 648 H312" marker-start="url(#fl-pwr)" marker-end="url(#fl-pwr)"/><text x="320" y="652">Charge et décharge</text>
+    <path class="sch-lien sch-gpio" d="M466 648 H506" marker-end="url(#fl-gpio)"/><text x="514" y="652">Commande</text>
+    <path class="sch-lien sch-i2c" d="M610 648 H650"/><text x="658" y="652">I2C</text>
+    <rect class="sch-bloc sch-alim" x="40" y="668" width="24" height="16" rx="3"/><text x="72" y="681">Alimentation</text>
+    <rect class="sch-bloc sch-conn" x="160" y="668" width="24" height="16" rx="3"/><text x="192" y="681">Connecteur</text>
+    <rect class="sch-bloc sch-mcu" x="272" y="668" width="24" height="16" rx="3"/><text x="304" y="681">MCU</text>
+    <rect class="sch-bloc sch-mem" x="344" y="668" width="24" height="16" rx="3"/><text x="376" y="681">Mémoire</text>
+    <rect class="sch-bloc sch-capt" x="440" y="668" width="24" height="16" rx="3"/><text x="472" y="681">Périphériques</text>
+  </g>
+</svg>
