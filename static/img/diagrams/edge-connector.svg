@@ -271,7 +271,7 @@
   <!-- Accolades des bus -->
   <path class="sch-lien" stroke="#303f9f" d="M596 492 H604 V556 H596"/>
   <text class="sch-nom" x="614" y="529">Bus SPI2</text>
-  <path class="sch-lien" stroke="#00796b" d="M596 680 H604 V720 H596"/>
+  <path class="sch-lien" stroke="#00796b" stroke-dasharray="6 4" d="M596 680 H604 V720 H596"/>
   <text class="sch-nom" x="614" y="697">Bus I2C3</text>
   <text class="sch-detail" x="614" y="713">partagé avec J3 et J4</text>
 
@@ -285,7 +285,7 @@
     <rect class="sch-bloc sch-i2c" x="402" y="880" width="24" height="16" rx="3"/><text x="434" y="892">I2C3</text>
     <rect class="sch-bloc sch-pwr" x="486" y="880" width="24" height="16" rx="3"/><text x="518" y="892">Alimentation 3,3 V</text>
     <rect class="sch-bloc sch-gnd" x="650" y="880" width="24" height="16" rx="3"/><text x="682" y="892">Masse (GND)</text>
-    <rect class="sch-bloc sch-pwm" x="40" y="908" width="24" height="16" rx="8"/><text x="72" y="920">PWM (canal de timer)</text>
+    <rect class="sch-bloc sch-pwm" x="40" y="908" width="24" height="16" rx="8"/><text x="72" y="920">PWM</text>
     <rect class="sch-bloc sch-btn" x="226" y="908" width="24" height="16" rx="8"/><text x="258" y="920">Partagé avec un bouton de la carte</text>
     <rect class="sch-bloc sch-ana" x="486" y="906" width="32" height="20" rx="5"/><circle class="sch-trou" cx="497" cy="916" r="6" stroke="#b35400"/><text x="526" y="920">Anneau pour pince crocodile</text>
     <text x="40" y="948">Contacts fins 3V3 et GND : P17 et P18 (3V3), P21 et P22 (GND) dans la numérotation micro:bit.</text>
