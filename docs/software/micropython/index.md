@@ -41,6 +41,10 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 [**Voir les conventions détaillées →**](./conventions)
 
+## Par fonction
+
+- [**Écran**](./ecran) — Dessiner, écrire et afficher des widgets avec `steami.Screen`, le même programme sur V1a, V1b et V1c
+
 ## Installation et outils
 
 - [**Installation du firmware**](./install) — Flasher MicroPython sur la carte STeaMi
