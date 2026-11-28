@@ -53,9 +53,13 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 - [**Thonny**](./thonny) — Éditeur graphique avec REPL intégré
 - [**Vittascience**](./vittascience) — IDE en ligne avec programmation par blocs
 
+## Par fonction
+
+- [**Communication**](./communication) — Bluetooth, bus I2C et SPI, liaisons série (UART)
+
 ## Sections à venir
 
-- Tutoriels par composant (capteurs, écran, I/O, communication, stockage)
+- Tutoriels par composant (capteurs, écran, I/O, stockage)
 - Sujets avancés (limite RAM, timers, interruptions, low power)
 
 ## Voir aussi
