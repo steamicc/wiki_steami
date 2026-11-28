@@ -20,6 +20,13 @@
 # dans ce dépôt (les PR de forks sont ignorées), et la fusion automatique
 # n'est activée que pour une PR ouverte par l'App.
 #
+# Les PR `chore/micropython-*` plus anciennes encore ouvertes, ouvertes par
+# l'App dans ce dépôt, sont fermées (branche supprimée) avec le commentaire
+# « Superseded by #n. » une fois la PR de la version la plus récente ouverte
+# ou reprise : elles épingleraient une version dépassée et entreraient en
+# conflit. Si la version la plus récente est déjà épinglée, elles sont fermées
+# avec « Superseded: vX.Y.Z is already pinned. ». Rien d'autre n'est fermé.
+#
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
 # une PR ouverte avec ce jeton déclenche build.yml (pull_request) sans
@@ -127,7 +134,11 @@ jobs:
           plus_recente=$(printf '%s\n%s\n' "${actuel#v}" "${derniere#v}" | sort -V | tail -n1)
           if [ "$actuel" = "$derniere" ] || [ "v$plus_recente" != "$derniere" ]; then
             echo "Le firmware épinglé est à jour."
-            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "nouvelle=false"
+              echo "a_jour=true"
+              echo "epinglee=$actuel"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           binaire="steami-micropython-firmware-$derniere.bin"
@@ -165,6 +176,7 @@ jobs:
               echo "pousser=false"
               echo "ouvrir=false"
               echo "pr=$pr"
+              echo "branche=$branche"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -253,6 +265,56 @@ jobs:
             --body-file "$corps")
           echo "PR ouverte : $url"
           echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
+
+      # Une PR d'une version plus ancienne épinglerait un firmware dépassé et
+      # entrerait en conflit avec celle-ci. Seules les PR de l'App, dans ce dépôt,
+      # et dont la branche est chore/micropython-*, sont fermées.
+      - name: Ferme les PR des versions dépassées
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Pas de --author (index de recherche en retard) : filtre sur l'auteur en jq.
+          anciennes=$(gh pr list --state open --limit 200 \
+            --json number,headRefName,isCrossRepository,author \
+            | jq -r --arg branche "$BRANCHE" --arg a1 "app/$APP_SLUG" --arg a2 "${APP_SLUG}[bot]" \
+              '.[] | select((.isCrossRepository | not)
+                and (.headRefName | startswith("chore/micropython-"))
+                and .headRefName != $branche
+                and (.author.login == $a1 or .author.login == $a2)) | .number')
+          for n in $anciennes; do
+            echo "Fermeture de la PR #$n (version dépassée)."
+            gh pr close "$n" --delete-branch --comment "Superseded by #$PR."
+          done
+
+      # Version la plus récente déjà épinglée : toute PR du robot encore ouverte
+      # est dépassée.
+      - name: Ferme les PR des versions dépassées (version déjà épinglée)
+        if: steps.comparaison.outputs.a_jour == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          EPINGLEE: ${{ steps.comparaison.outputs.epinglee }}
+        run: |
+          set -euo pipefail
+          anciennes=$(gh pr list --state open --limit 200 \
+            --json number,headRefName,isCrossRepository,author \
+            | jq -r --arg a1 "app/$APP_SLUG" --arg a2 "${APP_SLUG}[bot]" \
+              '.[] | select((.isCrossRepository | not)
+                and (.headRefName | startswith("chore/micropython-"))
+                and (.author.login == $a1 or .author.login == $a2)) | .number')
+          for n in $anciennes; do
+            echo "Fermeture de la PR #$n (version dépassée)."
+            gh pr close "$n" --delete-branch --comment "Superseded: $EPINGLEE is already pinned."
+          done
 
       - name: Active la fusion automatique
         if: steps.comparaison.outputs.nouvelle == 'true'
