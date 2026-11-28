@@ -22,6 +22,26 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur GPIO.
 
+Le schéma résume le bus de chaque release : le STM32WB55 en maître, chaque esclave avec son adresse 7 bits et les lignes d'interruption reliées au STM32WB55. Les tableaux des sections suivantes en donnent le détail. Cliquer sur le schéma pour l'ouvrir en grand.
+
+<ReleaseTabs>
+<Release releases="v1a">
+
+[![Schéma du bus I2C1 interne de la STeaMi V1a : le STM32WB55 (PB8, PB9) est maître ; ISM330DLC 0x6B, LIS2MDL 0x1E, VL53L1X 0x29, MCP23009 0x20, BQ27441 0x55 et pont DAPLink du STM32F103 0x3B (PB6, PB7) ; APDS-9960 0x39, WSEN-PADS 0x5D, WSEN-HIDS 0x5F, BME280 0x76 et BNO055 0x28 câblés au schéma, montage à confirmer ; interruptions INT_ACC (PC13), INT_MAG (PD1), INT_DIST (PB12) et INT_EXPANDER (PB0)](/img/diagrams/bus-i2c-v1a.svg)](pathname:///img/diagrams/bus-i2c-v1a.svg)
+
+</Release>
+<Release releases="v1b">
+
+[![Schéma du bus I2C1 interne de la STeaMi V1b : le STM32WB55 (PB8, PB9) est maître ; ISM330DLC 0x6B, LIS2MDL 0x1E, VL53L1X 0x29, MCP23009 0x20, BQ27441 0x55, pont DAPLink du STM32F103 0x3B (PB10, PB11), APDS-9960 0x39, WSEN-PADS 0x5D et WSEN-HIDS 0x5F ; pull-up R15 et R16 de 4,7 kΩ ; interruptions INT_ACC (PC13), INT_MAG (PD1), INT_DIST (PB12) et INT_EXPANDER (PB0)](/img/diagrams/bus-i2c-v1b.svg)](pathname:///img/diagrams/bus-i2c-v1b.svg)
+
+</Release>
+<Release releases="v1c">
+
+[![Schéma du bus I2C1 interne de la STeaMi V1c : le STM32WB55 (PB8, PB9) est maître ; ISM330DLC 0x6B, LIS2MDL 0x1E, VL53L1X 0x29, MCP23009 0x20, BQ27441 0x55, pont DAPLink du STM32F103 0x3B (PB10, PB11) et BME280 0x76 ; pull-up R15 et R16 de 4,7 kΩ ; interruptions INT_ACC (PC13), INT_MAG (PD1), INT_DIST (PB12) et INT_EXPANDER (PB0)](/img/diagrams/bus-i2c-v1c.svg)](pathname:///img/diagrams/bus-i2c-v1c.svg)
+
+</Release>
+</ReleaseTabs>
+
 | Signal   | Pin STM32WB55 | Pin STM32F103 (V1b, V1c) | Pin STM32F103 (V1a) |
 | -------- | ------------- | ------------------------ | ------------------- |
 | I2C1_SCL | PB8           | PB10                     | PB6                 |
@@ -168,4 +188,4 @@ Le net `T_UART2` du schéma correspond au périphérique LPUART1 du STM32WB55 et
 | ------------------- | ------------- | ------------- |
 | ON/OFF\_+3V3_STLINK | PB2           | PB2           |
 
-Ce signal existe à partir de la V1b. Sur la V1a, la broche PB2 du STM32WB55 porte le signal `I2C_INT` (voir [Révisions](../revisions#alimentation-et-microcontrôleurs)).
+Ce signal existe à partir de la V1b. Sur la V1a, la broche PB2 du STM32WB55 porte le signal `I2C_INT`, que les schémas des indices A et A1 relient à la broche PB2 du STM32F103 (U17, broche 20). Voir [Révisions](../revisions#alimentation-et-microcontrôleurs).
