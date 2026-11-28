@@ -18,6 +18,10 @@ Le STM32F103 exécute le firmware [DAPLink](https://github.com/steamicc/DAPLink)
 | Flash externe       | I2C (0x3B)          | Accès à la mémoire W25Q64 (8 Mo)         |
 | Config persistante  | I2C (0x3B)          | Lecture/écriture config zone (1 Ko)      |
 
+Les quatre fonctions USB forment un seul périphérique composite. Le schéma montre par quelle liaison chacune atteint le STM32WB55 ou la flash ; les interfaces, endpoints et broches sont détaillés dans [STM32F103 — Interfaces USB](../hardware/main-components/stm32f103#interfaces-usb).
+
+[![Schéma des interfaces USB du DAPLink de la STeaMi V1c : port série CDC vers le LPUART1 du STM32WB55, CMSIS-DAP en HID, WebUSB et lecteur STEAMI vers le SWD du STM32WB55, fichier du lecteur dans la W25Q64 par SPI1, écrit par le STM32WB55 sur l'I2C à l'adresse 0x3B](/img/diagrams/daplink-usb.svg)](pathname:///img/diagrams/daplink-usb.svg)
+
 ## Protocole I2C
 
 Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
