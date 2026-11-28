@@ -4,8 +4,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
 import { ETAT_INITIAL_DAPLINK, verificationDaplink } from './daplink.mjs';
 import EtapesDaplink from './EtapesDaplink';
+import { LimiteChargement } from './limite.mjs';
 import {
   ETAT_INITIAL_PILE,
+  TEXTE_PILE_INDISPONIBLE,
   controlesOccupes,
   erreurCarteVisible,
   estOccupee,
@@ -33,7 +35,8 @@ import styles from './styles.module.css';
 // exemple BLE/… (pileRadioVisible). Les autres pages n'en chargent ni le
 // code ni les effets de module (retenue de la carte et de l'onglet). Une
 // fois chargé, il branche son parcours sur relaisPile (etat.mjs), que lisent
-// les blocs de la page.
+// les blocs de la page. S'il ne se charge pas, LimiteChargement le remplace
+// par un message et l'exemple reste utilisable.
 const PileRadio = lazy(() => import('../PileRadio'));
 
 function Telechargement({ id, href }) {
@@ -302,9 +305,11 @@ function Controles({ id, href }) {
           règle udev) : après une erreur, le .bin reste accessible. */}
       {erreur && <Telechargement id={id} href={href} />}
       {pileRadioVisible(id) && (
-        <Suspense fallback={null}>
-          <PileRadio id={id} />
-        </Suspense>
+        <LimiteChargement message={TEXTE_PILE_INDISPONIBLE} className={styles.erreur}>
+          <Suspense fallback={null}>
+            <PileRadio id={id} />
+          </Suspense>
+        </LimiteChargement>
       )}
       {montrerConsole && (
         // Région nommée et accessible au clavier pour défiler ; pas role="log",
