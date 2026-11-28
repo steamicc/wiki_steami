@@ -9,10 +9,12 @@ La carte STeaMi intègre des capteurs couvrant distance, mouvement, environnemen
 
 ## Bus I2C interne
 
-| Signal   | Pin STM32WB55 | Pin STM32F103 |
-| -------- | ------------- | ------------- |
-| I2C1_SCL | PB8           | PB6           |
-| I2C1_SDA | PB9           | PB7           |
+| Signal   | Pin STM32WB55 | Pin STM32F103 (V1b, V1c) | Pin STM32F103 (V1a) |
+| -------- | ------------- | ------------------------ | ------------------- |
+| I2C1_SCL | PB8           | PB10                     | PB6                 |
+| I2C1_SDA | PB9           | PB11                     | PB7                 |
+
+Côté STM32F103, le bus arrive sur PB10/PB11 à partir de l'indice B1 (V1b, V1c) : c'est le périphérique I2C2 du STM32F103, relié à l'I2C1 du STM32WB55 (encadré « I2C2_STM32F103 = I2C1_STM32WB55 » de la feuille FP14). Sur ces releases, PB6/PB7 portent USART1_TX/RX vers le connecteur J9. Sur les indices A et A1 (V1a), le bus arrive sur PB6/PB7, l'I2C1 du STM32F103.
 
 Les adresses I2C des capteurs, release par release, sont regroupées dans [Capteurs et bus internes](../../pin-mapping/internal-bus#adresses-i2c).
 
