@@ -10,11 +10,11 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 Un programme MicroPython peut garder des données d'un démarrage à l'autre à trois endroits de la carte STeaMi :
 
-| Stockage                                                | Mémoire                                                                                                      | Taille                | Depuis le programme                | Depuis l'ordinateur                        |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- | ---------------------------------- | ------------------------------------------ |
-| [Fichiers de la carte](#les-fichiers-de-la-carte-flash) | flash interne du [STM32WB55](/docs/hardware/main-components/stm32wb55), qui exécute MicroPython              | 256 Ko                | `open()`, module `os`              | [Thonny](./thonny), [mpremote](./mpremote) |
-| [Fichier du disque USB](#le-fichier-du-disque-usb)      | flash externe [W25Q64](/docs/hardware/main-components/w25q64), gérée par le DAPLink                          | 8 Mo, un seul fichier | `daplink_flash`                    | lecteur **STEAMI**, en lecture seule       |
-| [Zone de configuration](#la-zone-de-configuration)      | flash interne du [STM32F103](/docs/hardware/main-components/stm32f103), qui exécute le [DAPLink](../daplink) | 1 Ko                  | `Steami.config()`, `steami_config` | aucun accès direct                         |
+| Stockage                                                | Mémoire                                                                                                      | Taille                | Depuis le programme                | Depuis l'ordinateur                                   |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- | ---------------------------------- | ----------------------------------------------------- |
+| [Fichiers de la carte](#les-fichiers-de-la-carte-flash) | flash interne du [STM32WB55](/docs/hardware/main-components/stm32wb55), qui exécute MicroPython              | 256 Ko                | `open()`, module `os`              | [Thonny](./thonny), [mpremote](./mpremote)            |
+| [Fichier du disque USB](#le-fichier-du-disque-usb)      | flash externe [W25Q64](/docs/hardware/main-components/w25q64), gérée par le DAPLink                          | 8 Mo, un seul fichier | `daplink_flash`                    | lecteur **STEAMI**, en lecture (le supprimer le vide) |
+| [Zone de configuration](#la-zone-de-configuration)      | flash interne du [STM32F103](/docs/hardware/main-components/stm32f103), qui exécute le [DAPLink](../daplink) | 1 Ko                  | `Steami.config()`, `steami_config` | aucun accès direct                                    |
 
 Les fichiers de la carte servent aux programmes (`main.py`) et aux données du programme ; le fichier du disque USB, à un relevé de mesures que l'ordinateur ouvre comme un fichier ordinaire ; la zone de configuration, au code de révision de la carte, à son nom et aux [calibrations des capteurs](#les-calibrations-des-capteurs).
 
@@ -28,7 +28,7 @@ Les programmes de cette page qui écrivent dans une mémoire flash n'ont pas de 
 
 :::
 
-Les exemples de cette page tournent sans changement sur une V1a, une V1b ou une V1c : les trois releases ont le même STM32WB55, la même flash W25Q64 et le même STM32F103. Seules les [calibrations de la température](#calibrer-la-température) changent de capteur d'une release à l'autre.
+Les trois releases (V1a, V1b, V1c) ont le même STM32WB55, la même flash W25Q64 et le même STM32F103 : les exemples de cette page tournent sans changement sur chacune, sauf deux. Le programme qui écrit le code de révision ([Modifier la configuration](#modifier-la-configuration)) a une version par release, et les [calibrations de la température](#calibrer-la-température) changent de capteur d'une release à l'autre.
 
 ## Les fichiers de la carte (/flash)
 
@@ -137,8 +137,14 @@ Ce qu'il faut savoir sur ce fichier :
 
 - **Un seul fichier.** `set_filename()` le renomme sans effacer son contenu : un autre programme écrit dans ce même fichier. Le nom compte 8 caractères au plus et l'extension 3 ; les minuscules deviennent des majuscules.
 - **Les lignes s'ajoutent.** Chaque lancement du programme ajoute ses lignes après les précédentes, et le compteur repart à 0 : l'en-tête `secondes;temperature` sépare les séries. Le fichier peut atteindre 8 Mo moins 4 Ko (le dernier secteur de 4 Ko garde le nom) ; au-delà, `write()` lève une erreur `OSError`.
-- **Voir le fichier à jour.** Le lecteur **STEAMI** montre le fichier tel qu'il était au démarrage du DAPLink, en lecture seule, et ne le montre pas s'il est vide. Pour voir les nouvelles lignes, débrancher le câble USB, et aussi la batterie si elle est branchée (elle garde le DAPLink alimenté), puis rebrancher. Le bouton **Reset** ne suffit pas.
+- **Voir le fichier à jour.** Le lecteur **STEAMI** montre le fichier tel qu'il était au démarrage du DAPLink, en lecture seule (mais le supprimer le vide, voir plus bas), et ne le montre pas s'il est vide. Pour voir les nouvelles lignes, débrancher le câble USB, et aussi la batterie si elle est branchée (elle garde le DAPLink alimenté), puis rebrancher. Le bouton **Reset** ne suffit pas.
 - **Vider le fichier.** `fichier.clear_flash()` efface le contenu et garde le nom. L'appeler volontairement, et pas au début d'un programme qui démarre seul (`main.py`) : le relevé serait effacé à chaque démarrage. L'effacement prend de moins d'une seconde à une vingtaine de secondes selon la taille du fichier ; la commande suivante attend sa fin.
+
+:::warning
+
+Supprimer le fichier sur le lecteur **STEAMI**, ou le mettre à la corbeille, efface aussi son contenu dans la W25Q64 : le DAPLink voit la suppression et lance le même effacement que `clear_flash()`, le nom est gardé (voir `vfs_user_file_change_handler_hook` dans [`steami32.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami32.c)). L'attribut lecture seule n'empêche pas la suppression : Linux la permet, Windows demande seulement une confirmation. Copier le fichier sur l'ordinateur avant de le supprimer du lecteur.
+
+:::
 
 `clear_flash()` ne touche ni aux fichiers de `/flash`, ni à la zone de configuration.
 
@@ -146,14 +152,14 @@ Ce qu'il faut savoir sur ce fichier :
 
 Dans [lib/daplink_flash/examples](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash/examples) :
 
-| Exemple                                                                                                                    | Ce qu'il fait                                                                      | Modifie la carte                                                   |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [`flash_info.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/flash_info.py)   | Affiche l'identifiant du pont, ses registres d'état et le nom du fichier           | non                                                                |
-| [`read_file.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/read_file.py)     | Affiche le fichier                                                                 | non                                                                |
-| [`write_csv.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/write_csv.py)     | Nomme le fichier `DATA.CSV`, l'efface, puis y écrit quatre lignes                  | **oui** : le fichier précédent est effacé                          |
-| [`sensor_log.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/sensor_log.py)   | Nomme le fichier `SENSORS.CSV`, l'efface, y écrit 200 lignes simulées et les relit | **oui** : le fichier précédent est effacé                          |
-| [`erase_flash.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/erase_flash.py) | Efface le fichier                                                                  | **oui** : le fichier est effacé                                    |
-| [`config_zone.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/config_zone.py) | Teste la zone de configuration                                                     | **oui** : efface **toute la zone de configuration**, voir plus bas |
+| Exemple                                                                                                                    | Ce qu'il fait                                                                      | Modifie la carte                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [`flash_info.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/flash_info.py)   | Affiche l'identifiant du pont, ses registres d'état et le nom du fichier           | non                                                                                                       |
+| [`read_file.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/read_file.py)     | Affiche le fichier                                                                 | non                                                                                                       |
+| [`write_csv.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/write_csv.py)     | Nomme le fichier `DATA.CSV`, l'efface, puis y écrit quatre lignes                  | **oui** : le fichier précédent est effacé                                                                 |
+| [`sensor_log.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/sensor_log.py)   | Nomme le fichier `SENSORS.CSV`, l'efface, y écrit 200 lignes simulées et les relit | **oui** : le fichier précédent est effacé                                                                 |
+| [`erase_flash.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/erase_flash.py) | Efface le fichier                                                                  | **oui** : le fichier est effacé                                                                           |
+| [`config_zone.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/config_zone.py) | Teste la zone de configuration                                                     | **oui** : efface **toute la zone de configuration** et le contenu du fichier du disque USB, voir plus bas |
 
 ## La zone de configuration
 
@@ -204,7 +210,10 @@ Ce programme crée lui-même le pont et la configuration : `SteamiConfig(Daplink
 
 :::
 
-Les méthodes `set_…` et les affectations comme `config.board_name = "…"` ne changent que la copie en mémoire ; `save()` l'écrit dans la zone. Ce programme corrige le code de révision et le nom de la carte. Choisir le code de la carte dans le tableau [Identifier sa version](/docs/hardware/revisions#identifier-sa-version) (`111`, `121` ou `131` pour une carte de série) :
+Les méthodes `set_…` et les affectations comme `config.board_name = "…"` ne changent que la copie en mémoire ; `save()` l'écrit dans la zone. Ce programme corrige le code de révision et le nom de la carte. Le code dépend de la release : reconnaître d'abord la carte avec [Identifier sa version](/docs/hardware/revisions#identifier-sa-version), puis prendre le programme de son onglet. Un code faux fait prendre la carte pour une autre release : sur une V1a ou une V1b enregistrée en `131`, `Temperature()` cherche le BME280 de la V1c et ne mesure plus rien.
+
+<ReleaseTabs>
+<Release releases="v1a">
 
 ```python
 from steami import Steami
@@ -214,13 +223,56 @@ if config is None:
     print("Pas de zone de configuration : mettre à jour le DAPLink")
 else:
     print("Avant :", config.board_revision, config.board_name)
-    config.board_revision = 131  # code de CETTE carte
+    config.board_revision = 111  # V1a de série
     config.board_name = "STeaMi-07"
     config.save()  # réécrit toute la zone
     print("Enregistré")
 ```
 
-Le code de révision s'écrit une seule fois, par exemple par l'enseignant. Au démarrage suivant, `Steami.begin()` affiche `[STeaMi] Board V1c (read from the board config, revision 131)`.
+Au démarrage suivant, `Steami.begin()` affiche `[STeaMi] Board V1a (read from the board config, revision 111)`.
+
+</Release>
+<Release releases="v1b">
+
+```python
+from steami import Steami
+
+config = Steami.config()
+if config is None:
+    print("Pas de zone de configuration : mettre à jour le DAPLink")
+else:
+    print("Avant :", config.board_revision, config.board_name)
+    config.board_revision = 121  # V1b de série
+    config.board_name = "STeaMi-07"
+    config.save()  # réécrit toute la zone
+    print("Enregistré")
+```
+
+Au démarrage suivant, `Steami.begin()` affiche `[STeaMi] Board V1b (read from the board config, revision 121)`.
+
+</Release>
+<Release releases="v1c">
+
+```python
+from steami import Steami
+
+config = Steami.config()
+if config is None:
+    print("Pas de zone de configuration : mettre à jour le DAPLink")
+else:
+    print("Avant :", config.board_revision, config.board_name)
+    config.board_revision = 131  # V1c de série
+    config.board_name = "STeaMi-07"
+    config.save()  # réécrit toute la zone
+    print("Enregistré")
+```
+
+Au démarrage suivant, `Steami.begin()` affiche `[STeaMi] Board V1c (read from the board config, revision 131)`.
+
+</Release>
+</ReleaseTabs>
+
+Ces programmes écrivent le code d'une carte de série. Un prototype a son propre code (`110`, `120` ou `130`, dans le même tableau). Le code de révision s'écrit une seule fois, par exemple par l'enseignant.
 
 Les autres méthodes de `SteamiConfig` (calibrations, compteur de démarrages) sont listées dans [DAPLink — SteamiConfig](../daplink#steamiconfig) et dans le [README de `steami_config`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami_config/README.md).
 
@@ -294,7 +346,7 @@ L'outil [`calibrate_magnetometer.py`](https://github.com/steamicc/micropython-st
 
 Ces exemples écrivent dans la zone de configuration sans calibrer :
 
-- [`daplink_flash/examples/config_zone.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/config_zone.py) efface **toute** la zone de configuration et y laisse des données de test : le code de révision, le nom et les calibrations sont perdus ;
+- [`daplink_flash/examples/config_zone.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/examples/config_zone.py) efface **toute** la zone de configuration et y laisse des données de test : le code de révision, le nom et les calibrations sont perdus. Il efface aussi le contenu du [fichier du disque USB](#le-fichier-du-disque-usb) (son test 5 appelle la commande `CLEAR_FLASH`, celle de `clear_flash()`) : copier d'abord le relevé sur l'ordinateur ;
 - [`steami_config/examples/populate_demo_config.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami_config/examples/populate_demo_config.py) remplace toute la configuration par des valeurs fictives, réservées aux essais ;
 - [`steami_config/examples/boot_counter.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami_config/examples/boot_counter.py) ajoute 1 au compteur de démarrages et réécrit toute la zone à chaque lancement. Enregistré comme `main.py`, il réécrit la zone à chaque démarrage : la flash du STM32F103 ne supporte qu'un nombre limité d'effacements.
 
@@ -304,16 +356,17 @@ Avant de les lancer, noter ce qu'affiche `show_config.py` : les valeurs se réé
 
 Chaque mémoire a son propre microcontrôleur : une mise à jour n'efface que la mémoire du microcontrôleur qu'elle reprogramme.
 
-| Données                                   | Installation de MicroPython | Mise à jour du DAPLink | `clear_flash()`               |
-| ----------------------------------------- | --------------------------- | ---------------------- | ----------------------------- |
-| Fichiers de `/flash` (`main.py`, relevés) | **effacés**                 | gardés                 | gardés                        |
-| Fichier du disque USB (W25Q64)            | gardé                       | gardé                  | **contenu effacé**, nom gardé |
-| Zone de configuration (calibrations)      | gardée                      | gardée                 | gardée                        |
-| [Pile radio Bluetooth](../pile-radio)     | gardée                      | gardée                 | gardée                        |
+| Données                                   | Installation de MicroPython | Mise à jour du DAPLink | `clear_flash()` ou fichier supprimé du lecteur **STEAMI** |
+| ----------------------------------------- | --------------------------- | ---------------------- | --------------------------------------------------------- |
+| Fichiers de `/flash` (`main.py`, relevés) | **effacés**                 | gardés                 | gardés                                                    |
+| Fichier du disque USB (W25Q64)            | gardé                       | gardé                  | **contenu effacé**, nom gardé                             |
+| Zone de configuration (calibrations)      | gardée                      | gardée                 | gardée                                                    |
+| [Pile radio Bluetooth](../pile-radio)     | gardée                      | gardée                 | gardée                                                    |
 
 - **Installation de MicroPython** (par le bouton du wiki, voir [Installation de MicroPython](./essayer#installation-de-micropython), ou en déposant le fichier `.hex` sur le lecteur **STEAMI**, voir [Installation du firmware](./install)). Elle efface toute la flash du STM32WB55 avant d'écrire le firmware, sauf la pile radio : `main.py` et les autres fichiers de `/flash` disparaissent, et MicroPython crée un système de fichiers neuf au démarrage suivant. Le DAPLink fait cet effacement complet pour tout fichier déposé sur le lecteur ([`flash_manager.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/daplink/drag-n-drop/flash_manager.c) : la STeaMi n'active pas l'effacement page par page). Il en va de même quand un programme Arduino remplace MicroPython, ou pour la [vérification de la pile radio](../pile-radio) depuis le wiki. Copier d'abord les fichiers sur l'ordinateur, par exemple avec `mpremote cp :main.py .` ou avec [Thonny](./thonny#gérer-les-fichiers).
 - **Mise à jour du DAPLink** depuis le lecteur **MAINTENANCE** (voir [DAPLink — Mise à jour du firmware](../daplink#mise-à-jour-du-firmware)). Elle remplace le firmware d'interface du STM32F103 sans effacer la zone de configuration, placée hors de cette partie de la flash (voir [Architecture flash F103](../daplink#architecture-flash-f103)). Elle ne touche ni la flash du STM32WB55 ni la W25Q64.
 - **Installation initiale avec DapLink-EasyFlash** (voir [DAPLink — Installation initiale](../daplink#installation-initiale-daplink-easyflash)). Elle déverrouille et efface toute la flash du STM32F103 : la zone de configuration est perdue, avec le code de révision et les calibrations. Noter d'abord ce qu'affiche `show_config.py` pour les réécrire ensuite.
+- **Fichier supprimé du lecteur STEAMI** (ou mis à la corbeille). Le DAPLink efface alors le contenu du fichier dans la W25Q64, comme `clear_flash()` (voir [Écrire dans le fichier](#écrire-dans-le-fichier)). Copier d'abord le fichier sur l'ordinateur.
 
 ## Voir aussi
 
