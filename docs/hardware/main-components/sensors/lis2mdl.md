@@ -15,6 +15,7 @@ Magnétomètre 3 axes magnétorésistif pour la mesure du champ magnétique et l
 | Fabricant       | STMicroelectronics                                               |
 | Type            | 3 axes magnétorésistif                                           |
 | Interface       | I2C                                                              |
+| Adresse I2C     | 0x1E (7 bits)                                                    |
 | Interruption    | INT_MAG → PD1                                                    |
 | Boîtier         | 12-LGA (2x2)                                                     |
 | Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/lis2mdl.pdf)      |

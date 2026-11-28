@@ -195,6 +195,10 @@ STLINK
 
 # Misc
 Supercapacité
+supercapacité
+Cellevia
+Elna
+Digi
 
 Octopart
 favicon

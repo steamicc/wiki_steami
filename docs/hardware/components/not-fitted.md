@@ -7,12 +7,12 @@ title: 'Non montés (DNP)'
 
 Ces composants sont prévus sur le PCB mais ne sont pas montés en production standard.
 
-| Composant             | Description                                           | Fabricant | Référence      | Qté |
-| --------------------- | ----------------------------------------------------- | --------- | -------------- | --- |
-| Resistor 0 Ohm - 0603 | Strap non monté                                       | -         | -              | 17  |
-| Resistor 0 Ohm - 0402 | Strap non monté                                       | NC        | NC             | 2   |
-| FTS-103-01-F-S        | Header bas profil 3 positions 1 rangée, pas 1.27 mm   | SAMTEC    | FTS-103-01-F-S | 1   |
-| FTS-105-01-F-D        | Header bas profil 10 positions 2 rangées, pas 1.27 mm | SAMTEC    | FTS-105-01-F-D | 1   |
+| Composant             | Description                                           | Fabricant | Référence      | Qté | Repères                                                                             |
+| --------------------- | ----------------------------------------------------- | --------- | -------------- | --- | ----------------------------------------------------------------------------------- |
+| Resistor 0 Ohm - 0603 | Strap non monté                                       | -         | -              | 17  | R3, R7, R9, R29, R32, R51, R70, R75, R76, R77, R78, R82, R85, R92, R107, R109, R115 |
+| Resistor 0 Ohm - 0402 | Strap non monté                                       | NC        | NC             | 2   | R90, R101                                                                           |
+| FTS-103-01-F-S        | Header bas profil 3 positions 1 rangée, pas 1.27 mm   | SAMTEC    | FTS-103-01-F-S | 1   | J9                                                                                  |
+| FTS-105-01-F-D        | Header bas profil 10 positions 2 rangées, pas 1.27 mm | SAMTEC    | FTS-105-01-F-D | 1   | J8                                                                                  |
 
 ## Notes
 

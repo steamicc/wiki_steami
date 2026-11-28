@@ -13,9 +13,9 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-| Composant                                          | Description                                                        | Fabricant                              | Référence                                                             | Qté | Datasheet |
-| -------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------- | --------------------------------------------------------------------- | --- | --------- |
-| [WEO128128BWPP3N00001](../main-components/display) | Module OLED graphique blanc 128x128, COG (Chip on Glass), Longlife | [Winstar](https://www.winstar.com.tw/) | WEO128128BWPP3N00001 <br/><OctopartButton q="WEO128128BWPP3N00001" /> | 1   | —         |
+| Composant                                          | Description                                                        | Fabricant                              | Référence                                                             | Qté | Repères | Datasheet |
+| -------------------------------------------------- | ------------------------------------------------------------------ | -------------------------------------- | --------------------------------------------------------------------- | --- | ------- | --------- |
+| [WEO128128BWPP3N00001](../main-components/display) | Module OLED graphique blanc 128x128, COG (Chip on Glass), Longlife | [Winstar](https://www.winstar.com.tw/) | WEO128128BWPP3N00001 <br/><OctopartButton q="WEO128128BWPP3N00001" /> | 1   | —       | —         |
 
 ### Caractéristiques de l'écran OLED
 
@@ -30,9 +30,9 @@ L'écran ne figure dans aucune nomenclature : sa référence vient du dossier de
 </Release>
 <Release releases="v1c">
 
-| Composant                                      | Description                                | Fabricant                              | Référence                                                     | Qté | Datasheet |
-| ---------------------------------------------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------------------- | --- | --------- |
-| [WF0128BTYAA4DNN0](../main-components/display) | Écran TFT rond 1,28 pouce, 240x240, GC9A01 | [Winstar](https://www.winstar.com.tw/) | WF0128BTYAA4DNN0 <br/><OctopartButton q="WF0128BTYAA4DNN0" /> | 1   | —         |
+| Composant                                      | Description                                | Fabricant                              | Référence                                                     | Qté | Repères | Datasheet |
+| ---------------------------------------------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------------------- | --- | ------- | --------- |
+| [WF0128BTYAA4DNN0](../main-components/display) | Écran TFT rond 1,28 pouce, 240x240, GC9A01 | [Winstar](https://www.winstar.com.tw/) | WF0128BTYAA4DNN0 <br/><OctopartButton q="WF0128BTYAA4DNN0" /> | 1   | —       | —         |
 
 ### Caractéristiques de l'écran TFT
 
@@ -48,9 +48,9 @@ L'écran ne figure ni dans le schéma ni dans la nomenclature C : sa référence
 
 ## Transducteur audio (Buzzer)
 
-| Composant                                           | Description                                           | Fabricant                                                             | Référence                                                   | Qté | Datasheet |
-| --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- | --- | --------- |
-| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piézo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/product/transducers/smt-0825-s-ht-r) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | —         |
+| Composant                                           | Description                                           | Fabricant                                                             | Référence                                                   | Qté | Repères | Datasheet |
+| --------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------- | --- | ------- | --------- |
+| [SMT-0825-S-HT-R](../main-components/buttons-audio) | Transducteur piézo montage en surface, 3.6V pic-a-pic | [PUI Audio](https://puiaudio.com/product/transducers/smt-0825-s-ht-r) | SMT-0825-S-HT-R <br/><OctopartButton q="SMT-0825-S-HT-R" /> | 1   | LS1     | —         |
 
 ### Caractéristiques du buzzer
 
