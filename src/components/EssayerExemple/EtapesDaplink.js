@@ -48,7 +48,9 @@ export default function EtapesDaplink({
         <li>
           Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton{' '}
           <strong>Reset</strong> enfoncé : un lecteur <strong>MAINTENANCE</strong> apparaît à la
-          place du lecteur de la carte (<strong>STEAMI</strong>). Relâcher alors le bouton.
+          place du lecteur de la carte (<strong>STEAMI</strong>). Relâcher alors le bouton. Si une
+          batterie est branchée, la débrancher aussi : sinon la carte reste alimentée et le lecteur{' '}
+          <strong>MAINTENANCE</strong> n&apos;apparaît pas.
         </li>
         <li>
           Copier le fichier téléchargé sur le lecteur <strong>MAINTENANCE</strong>, puis attendre
@@ -57,9 +59,9 @@ export default function EtapesDaplink({
         <li>{derniereEtape}</li>
       </ol>
       <p>
-        Si le lecteur <strong>MAINTENANCE</strong> n&apos;apparaît pas, créer un fichier vide nommé{' '}
-        <code>START_BL.ACT</code> sur le lecteur de la carte (<strong>STEAMI</strong>) : la carte
-        redémarre sur le lecteur <strong>MAINTENANCE</strong> (
+        Si le lecteur <strong>MAINTENANCE</strong> n&apos;apparaît pas, ou pour ne pas débrancher la
+        batterie, créer un fichier vide nommé <code>START_BL.ACT</code> sur le lecteur de la carte (
+        <strong>STEAMI</strong>) : la carte redémarre sur le lecteur <strong>MAINTENANCE</strong> (
         <Link to="/docs/software/arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas">
           voir le dépannage
         </Link>
