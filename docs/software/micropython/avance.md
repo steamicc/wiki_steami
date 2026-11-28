@@ -35,9 +35,9 @@ Le STM32WB55RG a 256 Ko de SRAM, en trois blocs : SRAM1 (192 Ko), SRAM2a et SRAM
 | Réserve au-dessus de la pile                     | 8 octets         |
 | **Total**                                        | 196 608 octets   |
 
-Le tas reçoit tous les objets Python : variables, listes, chaînes, modules importés, tampons de l'écran. Le ramasse-miettes y garde ses propres tables : il reste **155 328 octets** pour les objets. Ce chiffre est la somme `gc.mem_free() + gc.mem_alloc()` : il est calculé à partir du firmware de la release v0.38.5 (adresses de fin des variables et de la pile lues dans le binaire, puis découpage du tas fait par `gc_init()`). Le même calcul donne la même valeur pour la v0.28.0.
+Le tas reçoit tous les objets Python : variables, listes, chaînes, modules importés, tampons de l'écran. Le ramasse-miettes y garde ses propres tables : il reste **155 328 octets** pour les objets. Ce chiffre est la somme `gc.mem_free() + gc.mem_alloc()` : il est calculé à partir du firmware de la release v0.38.5 (adresses de fin des variables et de la pile lues dans le binaire, puis découpage du tas fait par `gc_init()`). Le même calcul donne la même valeur pour la v0.27.3, le firmware des mesures ci-dessous.
 
-Une partie du tas est déjà prise au démarrage, puis chaque import et chaque objet en prend un peu plus. Sur une V1c, avec le firmware de la v0.28.0, la [PR #447](https://github.com/steamicc/micropython-steami-lib/pull/447) de micropython-steami-lib a mesuré ces valeurs de `gc.mem_free()`, après `gc.collect()` :
+Une partie du tas est déjà prise au démarrage, puis chaque import et chaque objet en prend un peu plus. Sur une V1c, la [PR #447](https://github.com/steamicc/micropython-steami-lib/pull/447) de micropython-steami-lib a mesuré ces valeurs de `gc.mem_free()`, après `gc.collect()`. Le firmware était celui de la release **v0.27.3**, qui ne contenait pas encore le paquet `steami` : `steami` et `daplink_bridge` étaient **copiés sur la carte** en fichiers `.py`, donc non gelés.
 
 | Situation                                                      | Octets libres   |
 | -------------------------------------------------------------- | --------------- |
@@ -46,7 +46,9 @@ Une partie du tas est déjà prise au démarrage, puis chaque import et chaque o
 | Les 13 classes de `steami` importées                           | 121 984         |
 | Exemple Bluetooth `ble/beacon` en marche, lisant `Temperature` | environ 102 750 |
 
-La [PR #454](https://github.com/steamicc/micropython-steami-lib/pull/454) a mesuré 91 808 octets libres avec ce même exemple Bluetooth en marche et l'écran de la V1c démarré : l'écran et le Bluetooth tiennent ensemble.
+Seule la première ligne vaut telle quelle pour le firmware actuel. Les trois autres comptent la compilation de `steami` dans la RAM (voir [Le code gelé dans le firmware](#le-code-gelé-dans-le-firmware)) : avec la v0.38.5, où `steami` est gelé, un import coûte moins que ce que montre ce tableau. Le programme de [Mesurer la mémoire libre](#mesurer-la-mémoire-libre) donne la valeur sur la carte.
+
+La [PR #454](https://github.com/steamicc/micropython-steami-lib/pull/454) a mesuré 91 808 octets libres avec l'exemple `ble/beacon` en marche et l'écran de la V1c démarré par `Screen().begin()`, sur un firmware construit pour l'essai où `gc9a01`, `steami` et `steami_screen` étaient gelés : l'écran et le Bluetooth tiennent ensemble.
 
 ### Mesurer la mémoire libre
 
@@ -90,7 +92,9 @@ Importer un module gelé ne coûte que les objets qu'il crée (fonctions, classe
 
 Les modules gelés sont compilés avec l'option `-O3` de `mpy-cross` ([mpconfigboard.mk](https://github.com/steamicc/micropython-steami/blob/stm32-steami-rev1d-final/ports/stm32/boards/STEAM32_WB55RG/mpconfigboard.mk)) : leurs `assert` sont retirés. La zone de la flash réservée au firmware fait 528 Ko ; le système de fichiers de la carte (`/flash`) a 256 Ko.
 
-L'ordre de recherche des modules est `sys.path` : `['', '.frozen', '/flash', '/flash/lib']`, où `''` désigne le dossier courant, `/flash` au démarrage. Un fichier `steami_screen.py` posé à la racine de `/flash` passe donc **avant** la version gelée, ce qui permet d'essayer une version modifiée d'un driver ; dans `/flash/lib`, il serait ignoré, car la version gelée est trouvée d'abord. Pour revenir à la version gelée, supprimer le fichier.
+L'ordre de recherche des modules est `sys.path` : `['', '.frozen', '/flash', '/flash/lib']`, où `''` désigne le dossier courant, `/flash` au démarrage. Un module posé à la racine de `/flash` passe donc **avant** la version gelée, ce qui permet d'essayer une version modifiée d'un driver ; dans `/flash/lib`, il serait ignoré, car la version gelée est trouvée d'abord.
+
+La plupart des drivers sont des paquets de plusieurs fichiers, et non un fichier unique : `steami_screen`, par exemple, en a huit (`__init__.py`, `device.py`, `gc9a01.py`, `ssd1327.py`, `fonts.py`, `spleen.py`, `colors.py`, `const.py`). Pour en essayer une version modifiée, copier **tout le dossier du paquet**, ici [`lib/steami_screen/steami_screen/`](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen/steami_screen), à la racine de `/flash`, pour obtenir `/flash/steami_screen/`. Un fichier `steami_screen.py` seul masquerait tout le paquet gelé : ses sous-modules ne seraient plus trouvés, et `steami.Screen`, qui importe `steami_screen`, ne marcherait plus. Pour revenir à la version gelée, supprimer le dossier.
 
 Pour un gros programme personnel, deux moyens d'économiser la RAM de compilation :
 
