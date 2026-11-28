@@ -21,7 +21,7 @@ La carte existe en trois releases, **V1a**, **V1b** et **V1c**, qui diffèrent p
 - **Alimentation** : batterie LiPo 3.7V 1600 mAh, chargeur USB (BQ24075), jauge de batterie (BQ27441)
 - **Connectivité** : connecteur edge micro:bit, 2 connecteurs I2C (JST PH sur la V1a et la V1b, Qwiic/STEMMA QT sur la V1c), Jacdac, SPI, UART, GPIO
 - **USB** : micro-USB sur la V1a et la V1b, USB-C sur la V1c
-- **Stockage** : flash QSPI 64 Mbit (W25Q64)
+- **Stockage** : flash SPI 64 Mbit (W25Q64), reliée au STM32F103
 - **Interface utilisateur** : 7 boutons (4 directions + A/B + Menu), LED RGB, buzzer
 
 ## Architecture du système
@@ -55,7 +55,7 @@ Ce schéma bloc représente la V1c. Celui de la V1b, commun à la V1a, se trouve
 | FP12 | [Capteurs internes](../design/sensors)              | Distance, accélération, gyroscope, magnétomètre                              |
 | FP13 | [Ports E/S spécifiques](../design/sensors)          | Edge connector, STEMMA, Jacdac, clips crocodile                              |
 | FP14 | [Microcontrôleur interface](../design/service-usb)  | STM32F103, DAPLink, USB, WebUSB                                              |
-| FP15 | [Mémoire flash](../design/communication)            | Flash QSPI 64 Mbit, stockage de données                                      |
+| FP15 | [Mémoire flash](../design/communication)            | Flash SPI 64 Mbit sur le STM32F103, stockage de données                      |
 
 ## Liens utiles
 

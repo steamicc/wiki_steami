@@ -33,7 +33,7 @@ Le schéma suit le courant depuis l'entrée USB ou la batterie jusqu'aux charges
 
 - **Entrée et charge** (FP2, FP3, FP1) : le VBUS du connecteur J2 devient +5V_USB après la ferrite FB1 et entre dans le chargeur U1. U1 produit le rail POWER et échange le courant de charge et de décharge avec la batterie (PACK_OUT, PACK+) à travers la résistance de mesure R18 (10 mΩ) de la jauge U2. La broche PA7 du STM32F103 commande l'entrée SYSOFF de U1 par le transistor T1 (signal VBAT_ON/OFF).
 - **Branche principale** (FP14, FP4) : POWER traverse l'interrupteur U21 et devient SYST. SYST alimente le buck-boost U3, dont la sortie +3V3@1200mA alimente le STM32WB55, les capteurs, l'écran, le buzzer, le microphone, les ports et l'élévateur Jacdac U22.
-- **Branche du STM32F103** (FP14) : le régulateur U19 produit le +3V3_STLINK du STM32F103 et de la flash W25Q64 à partir de POWER, et non de SYST.
+- **Branche du STM32F103** (FP14) : le régulateur U19 produit le +3V3_STLINK du STM32F103 et de la flash W25Q64 à partir de POWER, et non de SYST. Sur la V1b et la V1c, il passe par l'interrupteur T4 (voir [Régulateur linéaire — LD3985](#régulateur-linéaire--ld3985)).
 
 Ce qui change d'une release à l'autre :
 
@@ -87,12 +87,46 @@ L'entrée peut être 3.7V (batterie) ou 5V (USB). Le TPS63000 peut monter ET des
 
 ## Régulateur linéaire — LD3985
 
-| Caractéristique | Détail                                                            |
-| --------------- | ----------------------------------------------------------------- |
-| Modèle          | LD3985M33R                                                        |
-| Fabricant       | STMicroelectronics                                                |
-| Sortie          | 3.3V @ 150 mA                                                     |
-| Usage           | Alimentation MCU interface (STM32F103) / DAPLink, rails sensibles |
+Le LD3985 (repère U19, feuille FP14) produit le rail `+3V3_STLINK`, celui du côté DAPLink de la carte. Il ne dépend pas du rail SYST : il prend son entrée sur POWER, avant l'interrupteur DIO7003.
+
+| Caractéristique | Détail                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| Repère          | U19                                                                                                 |
+| Modèle          | [LD3985M33R](https://www.st.com/en/power-management/ld3985.html)                                    |
+| Fabricant       | STMicroelectronics                                                                                  |
+| Entrée          | POWER sur la V1a ; POWER_ST_LINK, après l'interrupteur T4, sur la V1b et la V1c                     |
+| Sortie          | 3.3V @ 150 mA, rail `+3V3_STLINK` par la résistance R111 (0 Ω)                                      |
+| Charges         | STM32F103 (U17, firmware DAPLink), flash W25Q64 (U20), tension VREF du port SWD J8 (par R71)        |
+| Mise en marche  | Broche INHIBIT reliée à VIN : le régulateur fonctionne dès que son entrée est alimentée             |
+| Liaison NI      | R109, non montée, relierait `+3V3_STLINK` au rail +3V3@1200mA ; les deux rails restent donc séparés |
+
+Ce qui alimente l'entrée du LD3985 change entre la V1a et les releases suivantes :
+
+<ReleaseTabs>
+<Release releases="v1b v1c">
+
+L'interrupteur T4 (BSS8402DW, un MOSFET canal P et un canal N dans le même boîtier) se place entre POWER et l'entrée VIN du LD3985 (net POWER_ST_LINK). Le montage est identique sur les indices B1 et C ; le cartouche de la zone indique « Power mode of STM32F103CBT6. Always ON by USB cable and ON/OFF by WB55. VER B only ».
+
+- Le **MOSFET P** relie POWER à POWER_ST_LINK. La résistance R63 (100 kΩ) tire sa grille vers POWER, ce qui le bloque par défaut.
+- Le **MOSFET N** tire cette grille à la masse, ce qui rend le MOSFET P passant, quand sa propre grille est à l'état haut.
+- La grille du MOSFET N reçoit deux commandes en OU, par les diodes Schottky D26 et D27 (CDBQR0140R-HF) : le rail `+5V_USB` et le signal `ON/OFF_+3V3_STLINK`, broche PB2 du STM32WB55. La résistance R102 (100 kΩ) la tire à la masse quand aucune des deux n'est active.
+
+D'après le schéma :
+
+- **câble USB branché** : le rail `+5V_USB` rend T4 passant, et le STM32F103 et la flash sont alimentés quel que soit l'état de PB2 ;
+- **sur batterie** : le STM32F103 et la flash ne sont alimentés que si le STM32WB55 met PB2 à l'état haut. PB2 à l'état bas ou en haute impédance, R102 bloque T4 et le côté DAPLink reste éteint.
+
+La broche PB2 du STM32WB55 est décrite dans [STM32WB55](../stm32wb55.md) et la chaîne de démarrage dans [STM32F103](../stm32f103.md#chaîne-de-démarrage).
+
+</Release>
+<Release releases="v1a">
+
+Sur les indices A et A1, il n'y a ni T4, ni D26, ni D27, ni R63 : l'entrée VIN du LD3985 est reliée directement au rail POWER. Le STM32F103 et la flash sont donc alimentés dès que POWER est présent, sur USB comme sur batterie : aucune broche du STM32WB55 ne commande cette alimentation. Sa broche PB2 porte ici le signal `I2C_INT`, et non `ON/OFF_+3V3_STLINK`.
+
+La commande va dans l'autre sens : la broche PB15 du STM32F103 pilote l'entrée `PWR_ENn` du DIO7003 (U21), tirée vers POWER par R90 (100 kΩ). C'est donc le STM32F103 qui commande le rail SYST du STM32WB55. Sur la V1b et la V1c, R90 n'est pas montée, R103 (100 kΩ) tire `PWR_ENn` à la masse et PB15 du STM32F103 ne va plus qu'au point de test TP76.
+
+</Release>
+</ReleaseTabs>
 
 ## Boost écran OLED — LMR62421
 
@@ -149,12 +183,12 @@ La capacité de C87 ne change pas entre A1 et B1 : seule sa tension nominale pas
 
 ## Sorties disponibles
 
-| Tension | Courant max | Utilisation                                   |
-| ------- | ----------- | --------------------------------------------- |
-| 3.3V    | 1200 mA     | MCU, capteurs, affichage                      |
-| 3.3V    | 150 mA      | Régulateur linéaire (MCU interface / DAPLink) |
-| 14.5V   | 100 mA      | Écran OLED (V1a, V1b)                         |
-| 5V      | 100 mA      | Jacdac (rail 5V_JD_PWR, V1b, V1c)             |
+| Tension | Courant max | Utilisation                                              |
+| ------- | ----------- | -------------------------------------------------------- |
+| 3.3V    | 1200 mA     | MCU, capteurs, affichage                                 |
+| 3.3V    | 150 mA      | Rail `+3V3_STLINK` : STM32F103 (DAPLink) et flash W25Q64 |
+| 14.5V   | 100 mA      | Écran OLED (V1a, V1b)                                    |
+| 5V      | 100 mA      | Jacdac (rail 5V_JD_PWR, V1b, V1c)                        |
 
 À l'indice A de la V1a, celui de la nomenclature VerA, il n'y a pas de rail 5V : Jacdac y est alimenté par le 3.3V @ 1200 mA. L'indice A1 de la V1a a déjà le rail 5V_JD_PWR@100mA.
 

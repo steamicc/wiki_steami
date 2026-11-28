@@ -23,6 +23,9 @@
     </style>
   </defs>
 
+  <!-- Fond propre : lisible en thème clair et sombre (guide de style des schémas). -->
+  <rect x="0.5" y="-19.5" width="899" height="504" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+
   <!-- Title -->
   <text x="450" y="-5" text-anchor="middle" class="title">STeaMi — Schema bloc</text>
 
