@@ -176,7 +176,7 @@ Cliquer sur **Mettre à jour…** affiche les étapes :
 
 Jusqu'à la version 2026.11.11 de l'image, la page propose plutôt à l'étape 2 de créer un fichier vide `START_BL.ACT` : cette méthode fonctionne aussi.
 
-![Page Téléverser pendant la mise à jour, carte connectée : encart « Une mise à jour du DAPLink de cette carte est disponible » avec le bouton Plus tard, les quatre étapes (Télécharger le firmware, rebrancher le câble en maintenant le bouton Reset, copie sur MAINTENANCE, reconnexion) et le secours START_BL.ACT suivi du lien « Plus d'aide sur le wiki »](/img/software/arduino/codespace-15-mise-a-jour-daplink.png)
+![Page Téléverser pendant la mise à jour, carte connectée : encart « Une mise à jour du DAPLink de cette carte est disponible » avec le bouton Plus tard, les quatre étapes (Télécharger le firmware, rebrancher le câble en maintenant le bouton Reset et débrancher aussi une batterie, copie sur MAINTENANCE, reconnexion) et le secours START_BL.ACT, aussi pour ne pas débrancher la batterie, suivi du lien « Plus d'aide sur le wiki »](/img/software/arduino/codespace-15-mise-a-jour-daplink.png)
 
 Cette mise à jour n'efface pas le programme de la carte. Si le lecteur **MAINTENANCE** n'apparaît pas, ou pour ne pas débrancher la batterie, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Voir aussi [le dépannage](#le-bouton-redémarrer-la-carte-ne-fonctionne-pas).
 
