@@ -100,12 +100,12 @@ La plupart des points de test sont communs aux trois releases. D'après les sch�
 
 ## Communication série et Jacdac
 
-| Test Point | Signal     | Description                    |
-| ---------- | ---------- | ------------------------------ |
-| TP43       | T_UART2_RX | UART RX entre F103 et WB55     |
-| TP44       | T_UART2_TX | UART TX entre F103 et WB55     |
-| TP73       | UART2_TX   | UART TX vers connecteur Jacdac |
-| TP74       | UART2_RX   | UART RX vers connecteur Jacdac |
+| Test Point | Signal     | Description                                     |
+| ---------- | ---------- | ----------------------------------------------- |
+| TP43       | T_UART2_RX | RX du LPUART1 du WB55, lien avec le F103 (PB10) |
+| TP44       | T_UART2_TX | TX du LPUART1 du WB55, lien avec le F103 (PB11) |
+| TP73       | UART2_TX   | TX de l'USART1 du WB55 vers le Jacdac (PB6)     |
+| TP74       | UART2_RX   | RX de l'USART1 du WB55 depuis le Jacdac (PB7)   |
 
 ## Interface Microcontrôleur (STM32F103)
 

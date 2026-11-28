@@ -193,7 +193,7 @@ Deux connecteurs JST SH 4 broches (SM04B-SRSS-TB, pas 1 mm), compatibles Qwiic/S
 
 Interface série pour la connexion de modules Jacdac.
 
-- JACDAC_DATA (UART2_TX/RX) → PB6/PB7
+- JACDAC_DATA (nets UART2_TX/RX du schéma) → PB6/PB7, périphérique USART1 du STM32WB55
 - JACDAC_P : alimentation 5V
 
 #### Pads crocodile
@@ -213,6 +213,8 @@ Pads accessibles avec des pinces crocodile autour de la carte :
 | SPI2_MOSI_EDGE (P15) | PB15          |
 
 #### Bus UART série
+
+Ces deux broches ne sortent pas sur le connecteur edge : elles relient le STM32WB55 au STM32F103 (DAPLink). Le net `T_UART2` du schéma correspond au périphérique LPUART1 du STM32WB55, qui porte la console série (REPL MicroPython, `Serial` en Arduino), et à l'USART2 du STM32F103.
 
 | Signal                 | Pin STM32WB55 |
 | ---------------------- | ------------- |

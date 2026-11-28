@@ -30,13 +30,14 @@ Toutes les cartes diffusées (V1a, V1b et V1c) utilisent un STM32WB55RG ; seuls 
 
 Le MCU organise ses périphériques sur plusieurs bus pour séparer les usages internes et externes :
 
-| Bus            | Usage                                    | Signaux                           |
-| -------------- | ---------------------------------------- | --------------------------------- |
-| I2C1 (interne) | Capteurs, jauge batterie, expandeur GPIO | SCL: PB8, SDA: PB9                |
-| I2C3 (externe) | Connecteur edge, STEMMA/Qwiic            | SCL: PC0, SDA: PC1                |
-| SPI1 (interne) | Écran (OLED ou TFT selon la release)     | SCK: PA1, MOSI: PB5, MISO: PB4    |
-| SPI2 (externe) | Connecteur edge                          | SCK: PB13, MISO: PB14, MOSI: PB15 |
-| UART           | Communication avec STM32F103             | TX: PB11, RX: PB10                |
+| Bus            | Usage                                                    | Signaux                           |
+| -------------- | -------------------------------------------------------- | --------------------------------- |
+| I2C1 (interne) | Capteurs, jauge batterie, expandeur GPIO                 | SCL: PB8, SDA: PB9                |
+| I2C3 (externe) | Connecteur edge, STEMMA/Qwiic                            | SCL: PC0, SDA: PC1                |
+| SPI1 (interne) | Écran (OLED ou TFT selon la release)                     | SCK: PA1, MOSI: PB5, MISO: PB4    |
+| SPI2 (externe) | Connecteur edge                                          | SCK: PB13, MISO: PB14, MOSI: PB15 |
+| LPUART1        | Console série vers le STM32F103 (DAPLink), net `T_UART2` | TX: PB11, RX: PB10                |
+| USART1         | Connecteur Jacdac, net `UART2`                           | TX: PB6, RX: PB7                  |
 
 :::info
 Le bus I2C1 est partagé entre le STM32WB55 et le STM32F103 (DAPLink), permettant au processeur d'interface d'accéder aux capteurs et à la jauge de batterie.
