@@ -5,8 +5,12 @@ Lit l'état simulé dans le fichier JSON $FAUX_GH :
   {"release": {...}, "prs": [{"number", "state", "headRefName",
    "isCrossRepository", "author": {"login"}, "mergeable" (chaîne ou liste
    lue dans l'ordre des appels), "headRefOid", "isDraft", "autoMergeRequest",
-   "commits": [{"sha", "author": {"login"}}]}]}
+   "commits": [{"sha", "author": {"login"}}]}],
+   pour la garde commune .github/scripts/garde-fusion-auto.sh :
+   "depot" (repos/<r>), "regles" (rules/branches/<b>), "rulesets" ({id: ...}),
+   "check_runs" (commits/<sha>/check-runs), "jobs" ({id: ...})}
 et note chaque appel (une ligne JSON par appel) dans $FAUX_GH_LOG.
+"pr create" répond par l'URL de la PR "numero_cree" (99 par défaut).
 """
 
 import json
@@ -59,7 +63,23 @@ def main():
     prs = etat.get("prs", [])
 
     if args[0] == "api":
-        chemin = args[1]
+        # Le chemin est le premier argument qui n'est pas une option (--paginate avant ou après).
+        chemin = next(a for a in args[1:] if not a.startswith("-"))
+        chemin = chemin.split("?")[0]
+        morceaux = chemin.split("/")
+        if len(morceaux) == 3 and morceaux[0] == "repos":
+            return sortir(etat.get("depot", {"default_branch": "main"}), jq)
+        if "/rules/branches/" in chemin:
+            return sortir(etat.get("regles", []), jq)
+        if "/rulesets/" in chemin:
+            ruleset = etat.get("rulesets", {}).get(morceaux[-1])
+            if ruleset is None:
+                sys.exit(f"faux gh : ruleset inconnu {chemin}")
+            return sortir(ruleset, jq)
+        if chemin.endswith("/check-runs"):
+            return sortir({"check_runs": etat.get("check_runs", [])}, jq)
+        if "/actions/jobs/" in chemin:
+            return sortir(etat.get("jobs", {})[morceaux[-1]], jq)
         if chemin.endswith("/releases/latest"):
             return sortir(etat["release"], jq)
         if chemin.startswith("users/"):
@@ -87,6 +107,13 @@ def main():
         return sortir(projeter(pr, option(args, "--json"), appels), jq)
 
     if args[0] == "pr" and args[1] in {"close", "comment", "merge", "ready", "edit"}:
+        return None
+
+    if args[:2] == ["pr", "create"]:
+        print(f"https://github.com/steamicc/wiki_steami/pull/{etat.get('numero_cree', 99)}")
+        return None
+
+    if args[:2] == ["run", "rerun"]:
         return None
 
     sys.exit(f"faux gh : commande inconnue {args}")

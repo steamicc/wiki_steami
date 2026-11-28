@@ -777,15 +777,12 @@ class TestFluxRobot(unittest.TestCase):
         self.assertEqual(fusion["if"], etapes["Ouvre ou met à jour la PR"]["if"])
         self.assertGreater(noms.index("Active la fusion automatique"), noms.index("Ouvre ou met à jour la PR"))
         self.assertEqual(fusion["env"]["PR"], "${{ steps.ouverture.outputs.pr }}")
-        t = code_robot()
-        self.assertIn('gh pr merge "$PR" --repo steamicc/arduino-steami-sample --auto --squash', t)
-        self.assertIn("repos/steamicc/arduino-steami-sample/rules/branches/main", t)
-        self.assertIn('.context == "compile"', t)
-        self.assertIn("autoMergeRequest", t)
-        self.assertIn("repos/steamicc/arduino-steami-sample/rulesets/$id", t)
-        self.assertIn('.current_user_can_bypass // "inconnu"', t)
-        self.assertIn('"$contournement" != "never"', t)
-        self.assertIn('.type == "required_status_checks"', t)
+        # Garde commune (fork, auteur, « compile » exigé sur le sample sans
+        # contournement, brouillon) : voir test_garde_fusion_auto.
+        self.assertEqual(
+            fusion["run"].strip(),
+            'bash .github/scripts/garde-fusion-auto.sh steamicc/arduino-steami-sample "$PR" "$APP_SLUG" compile',
+        )
 
     def test_single_branch_and_pr(self):
         t = code_robot()
@@ -1311,10 +1308,11 @@ class TestFluxConversion(unittest.TestCase):
         self.assertIn("exécution précédente", corps)
 
     def test_auto_merge_skipped_for_a_draft(self):
+        # La garde commune laisse une PR en brouillon telle quelle
+        # (test_garde_fusion_auto.TestGardeExecutee.test_brouillon_laisse_aux_humains).
         etapes = yaml.safe_load(FLUX_EPINGLAGE.read_text(encoding="utf-8"))["jobs"]["suivre"]["steps"]
         (etape,) = [e for e in etapes if e.get("name") == "Active la fusion automatique"]
-        run = etape["run"]
-        self.assertLess(run.index("jq -e .isDraft"), run.index('gh pr merge "$PR" --auto --squash'))
+        self.assertIn("bash .github/scripts/garde-fusion-auto.sh", etape["run"])
 
 
 if __name__ == "__main__":

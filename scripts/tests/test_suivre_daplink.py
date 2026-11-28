@@ -78,9 +78,11 @@ class TestSuivreDaplink(unittest.TestCase):
         self.assertIn("Version épinglée : $actuel ; dernière release DAPLink : $derniere", c)
 
     def test_fusion_automatique_seulement_si_build_exige(self):
-        c = code()
-        self.assertIn('.context == "build"', c)
-        self.assertIn("gh pr merge", c)
+        # Garde commune, avec le check « build » : voir test_garde_fusion_auto.
+        self.assertIn(
+            'bash .github/scripts/garde-fusion-auto.sh "$GITHUB_REPOSITORY" "$PR" "$APP_SLUG" build',
+            code(),
+        )
 
     def test_prs_identifiees_par_numero_et_auteur(self):
         c = code()
