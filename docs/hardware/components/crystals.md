@@ -7,7 +7,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Cristaux et oscillateurs
 
-| Composant    | Description                  | Fabricant                                                         | Reference                                             | Qte | Datasheet |
+| Composant    | Description                  | Fabricant                                                         | Référence                                             | Qté | Datasheet |
 | ------------ | ---------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------- | --- | --------- |
 | 830103552209 | Quartz 32 MHz, 9 pF, 10 ppm  | [Wurth](https://www.we-online.com/en/components/products/WE-XTAL) | 830103552209 <br/><OctopartButton q="830103552209" /> | 1   | —         |
 | 830062558    | Quartz 32 kHz, 12 pF, 30 ppm | [Wurth](https://www.we-online.com/en/components/products/WE-XTAL) | 830062558 <br/><OctopartButton q="830062558" />       | 1   | —         |

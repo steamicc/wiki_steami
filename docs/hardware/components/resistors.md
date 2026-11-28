@@ -13,7 +13,7 @@ Cette liste reprend la nomenclature de l'indice B1 (V1b). Les composants retiré
 
 Toutes les résistances de la carte STeaMi, principalement en boîtier 0402.
 
-| Valeur                         | Description                | Fabricant                                                                                   | Référence                                                         | Qte |
+| Valeur                         | Description                | Fabricant                                                                                   | Référence                                                         | Qté |
 | ------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --- |
 | 0 Ohm - 0402                   | Strap 0R 5% 0.0625W        | [Yageo](https://www.yageo.com/)                                                             | RC0402JR-100RL <br/><OctopartButton q="RC0402JR-100RL" />         | 27  |
 | 0 Ohm - 0402                   | Strap NI 0% 0W (non monté) | NC                                                                                          | NC                                                                | 2   |

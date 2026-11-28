@@ -7,7 +7,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # LEDs
 
-| Composant                                | Description                | Fabricant                                                         | Reference                                                         | Couleur    | Qte | Datasheet |
+| Composant                                | Description                | Fabricant                                                         | Référence                                                         | Couleur    | Qté | Datasheet |
 | ---------------------------------------- | -------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ---------- | --- | --------- |
 | 150060RS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060RS75000 <br/><OctopartButton q="150060RS75000" />           | Rouge      | 1   | —         |
 | 150060BS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060BS75000 <br/><OctopartButton q="150060BS75000" />           | Bleu       | 2   | —         |

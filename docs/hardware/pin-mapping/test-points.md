@@ -123,7 +123,7 @@ La plupart des points de test sont communs aux trois releases. D'après les sch�
 | TP76       | PB15@STM32F103 | Broche PB15 (V1b, V1c)               |
 | TP47       | PA4@STM32F103  | Broche PA4                           |
 | TP48       | PA1@STM32F103  | Broche PA1                           |
-| TP56       | AIN_1          | Entree analogique F103 (V1b, V1c)    |
+| TP56       | AIN_1          | Entrée analogique F103 (V1b, V1c)    |
 
 ## Masse (GND)
 

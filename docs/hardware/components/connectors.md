@@ -7,7 +7,7 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Connecteurs
 
-| Composant               | Description                                                                | Fabricant                                                           | Reference                                                                   | Qte | Datasheet |
+| Composant               | Description                                                                | Fabricant                                                           | Référence                                                                   | Qté | Datasheet |
 | ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --- | --------- |
 | USB3080-30-00-A         | Connecteur micro-USB B, Bottom-SMT (V1a, V1b)                              | [GCT](https://gct.co/)                                              | USB3080-30-00-A <br/><OctopartButton q="USB3080-30-00-A" />                 | 1   | —         |
 | 10114830-10102LF        | Connecteur batterie SMD 2 positions, pas 1.25 mm                           | [Amphenol](https://www.amphenol-cs.com/)                            | 10114830-10102LF <br/><OctopartButton q="10114830-10102LF" />               | 1   | —         |
