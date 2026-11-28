@@ -80,17 +80,17 @@ La plupart des points de test sont communs aux trois releases. D'après les sch�
 
 ## Capteurs internes (I2C1)
 
-| Test Point | Signal                        | Description                                          |
-| ---------- | ----------------------------- | ---------------------------------------------------- |
-| TP25       | I2C1_SDA                      | Bus I2C SDA capteurs internes                        |
-| TP26       | I2C1_SCL                      | Bus I2C SCL capteurs internes                        |
-| TP27       | INT_DIST                      | Interruption VL53L1X (distance)                      |
-| TP28       | INT_ACC                       | Interruption ISM330DLCTR (accéléromètre)             |
-| TP29       | INT_MAG                       | Interruption LIS2MDLTR (magnétomètre)                |
-| TP30       | INT_PRESSURE                  | Interruption capteur de pression (V1a, V1b)          |
-| TP31       | INT_TEMPERATURE               | Interruption capteur température/humidité (V1a, V1b) |
-| TP32       | INT_PROXIMITY                 | Interruption capteur proximité (APDS-9960, V1a, V1b) |
-| TP45       | INT_TEMPERATURE_HUMIDITY_BOSH | Interruption capteur température Bosch               |
+| Test Point | Signal              | Description                                                                                                                                    |
+| ---------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| TP25       | I2C1_SDA            | Bus I2C SDA capteurs internes                                                                                                                  |
+| TP26       | I2C1_SCL            | Bus I2C SCL capteurs internes                                                                                                                  |
+| TP27       | INT_DIST            | Interruption VL53L1X (distance)                                                                                                                |
+| TP28       | INT_ACC             | Interruption ISM330DLCTR (accéléromètre)                                                                                                       |
+| TP29       | INT_MAG             | Interruption LIS2MDLTR (magnétomètre)                                                                                                          |
+| TP30       | INT_PRESSURE        | Interruption capteur de pression (V1a, V1b)                                                                                                    |
+| TP31       | INT_TEMPERATURE     | Interruption capteur température/humidité (V1a, V1b)                                                                                           |
+| TP32       | INT_PROXIMITY       | Interruption capteur proximité (APDS-9960, V1a, V1b)                                                                                           |
+| TP45       | CSB du BME280 (U14) | Sélection du mode I2C, tirée au 3V3 (pas une interruption, voir [Capteurs et bus internes](./internal-bus#signaux-dinterruption-des-capteurs)) |
 
 ## Buzzer
 
