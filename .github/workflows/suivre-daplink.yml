@@ -1,0 +1,325 @@
+# =====================================================================
+# suivre-daplink.yml : suit les releases du firmware DAPLink de la STeaMi
+# (steamicc/DAPLink), dont la release et le sha256 du fichier
+# stm32f103xb_steami32_if_crc.bin sont épinglés dans daplink.json. Le check
+# `build` (npm run prebuild, scripts/fetch-firmwares.sh) télécharge ce
+# firmware et revérifie le sha256.
+#
+# Une fois par jour, à la demande et après chaque release DAPLink (déclenché
+# par le dépôt DAPLink), le workflow lit la dernière release publiée
+# (/releases/latest). Si elle est différente de la release épinglée et plus
+# récente (date, puis numéro : AAAA-MM-JJ.N), si elle contient le fichier
+# stm32f103xb_steami32_if_crc.bin (sinon il attend le passage suivant) et si
+# GitHub publie son empreinte sha256 (obligatoire), il télécharge le fichier,
+# vérifie son sha256 contre cette empreinte, met à jour daplink.json et ouvre
+# la PR `chore/daplink-<release>` (points remplacés par des tirets). Toutes les
+# releases sont épinglées, sans validation humaine : seul le check `build`
+# garde la fusion.
+#
+# La PR d'un passage précédent pour la même release est réutilisée. Les PR
+# `chore/daplink-*` plus anciennes encore ouvertes, ouvertes par l'App dans ce
+# dépôt, sont fermées avec le commentaire « Superseded by #n. » : elles
+# épingleraient une release dépassée. Rien d'autre n'est fermé.
+#
+# Fusion automatique (squash) : seulement si les règles de main exigent le
+# check « build » ; sans check exigé, GitHub fusionnerait tout de suite. Une
+# PR en brouillon n'est pas fusionnée automatiquement.
+#
+# Prérequis : secrets RELEASE_APP_ID et RELEASE_APP_SECRET ; App installée sur
+# steamicc/wiki_steami (Contents et Pull requests en écriture) ; « Allow
+# auto-merge » coché ; ruleset sur main exigeant le check « build ».
+#
+# Neutralisé dans les forks.
+# =====================================================================
+name: suivre-daplink
+
+on:
+  schedule:
+    - cron: '47 5 * * *'
+  workflow_dispatch:
+
+# GITHUB_TOKEN ne sert pas : tout passe par le jeton de la GitHub App.
+permissions:
+  contents: read
+
+# Une seule exécution à la fois : deux lancements simultanés créeraient la même branche.
+concurrency:
+  group: suivre-daplink
+  cancel-in-progress: false
+
+jobs:
+  suivre:
+    name: nouvelle release DAPLink ?
+    # Ne pas tourner dans les forks.
+    if: github.repository == 'steamicc/wiki_steami'
+    runs-on: ubuntu-latest
+    steps:
+      # Pas de repli sur GITHUB_TOKEN : ses PR attendent une approbation du CI.
+      - name: Vérifie les secrets de la GitHub App
+        env:
+          APP_ID: ${{ secrets.RELEASE_APP_ID }}
+          APP_SECRET: ${{ secrets.RELEASE_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          manquants=()
+          [ -n "$APP_ID" ] || manquants+=(RELEASE_APP_ID)
+          [ -n "$APP_SECRET" ] || manquants+=(RELEASE_APP_SECRET)
+          if [ "${#manquants[@]}" -gt 0 ]; then
+            echo "::error::Secret(s) manquant(s) : ${manquants[*]}. Ajouter dans ce dépôt (Settings > Secrets and variables > Actions) les secrets RELEASE_APP_ID et RELEASE_APP_SECRET de la GitHub App de l'organisation (ceux de steamicc/arduino-steami-lib), et installer l'App sur steamicc/wiki_steami."
+            exit 1
+          fi
+
+      - name: Crée le jeton de la GitHub App
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_SECRET }}
+          # Jeton limité à ce dépôt.
+          owner: ${{ github.repository_owner }}
+          repositories: wiki_steami
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Explique l'échec du jeton
+        if: failure() && steps.app.outcome == 'failure'
+        run: |
+          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/wiki_steami avec les droits Contents et Pull requests en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
+          exit 1
+
+      # Le jeton de l'App reste dans .git/config : git ls-remote et git push s'en servent.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Compare la dernière release à la version épinglée
+        id: comparaison
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          # Format exigé par le Dockerfile de l'image et par fetch-firmwares.sh :
+          # le numéro est ce qui suit le dernier point.
+          format='^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$'
+          actuel=$(jq -r .release daplink.json)
+          release=$(gh api repos/steamicc/DAPLink/releases/latest)
+          derniere=$(jq -r .tag_name <<<"$release")
+          for t in "$actuel" "$derniere"; do
+            if ! printf '%s' "$t" | grep -Eq "$format"; then
+              echo "::error::Release « $t » invalide : le format attendu est AAAA-MM-JJ.N"
+              exit 1
+            fi
+          done
+          echo "Version épinglée : $actuel ; dernière release DAPLink : $derniere"
+          # Comparaison de versions (sort -V : date, puis numéro), pas de chaînes.
+          plus_recente=$(printf '%s\n%s\n' "$actuel" "$derniere" | sort -V | tail -n1)
+          if [ "$actuel" = "$derniere" ] || [ "$plus_recente" != "$derniere" ]; then
+            echo "Le firmware épinglé est à jour."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          binaire="stm32f103xb_steami32_if_crc.bin"
+          if ! jq -e --arg a "$binaire" 'any(.assets[]; .name == $a)' <<<"$release" >/dev/null; then
+            echo "::warning::La release $derniere n'a pas (encore) le fichier $binaire : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Empreinte publiée par GitHub pour le fichier (« sha256:<hex> ») : obligatoire.
+          empreinte=$(jq -r --arg a "$binaire" \
+            'first(.assets[] | select(.name == $a)) | .digest // ""' <<<"$release")
+          if [ -z "$empreinte" ]; then
+            echo "::error::GitHub ne publie pas d'empreinte sha256 pour $binaire dans la release $derniere : épinglage refusé."
+            exit 1
+          fi
+          # Points remplacés par des tirets : .validate-branch-namerc.js refuse les points
+          # après chore/, et le hook pre-commit bloquerait les commits faits sur la branche.
+          branche="chore/daplink-${derniere//./-}"
+          # --head filtre sur le seul nom de branche : il trouve aussi les PR venues
+          # d'un fork avec une branche du même nom. On ne garde que les PR dont la
+          # branche est dans ce dépôt (isCrossRepository faux).
+          prs=$(gh pr list --state all --head "$branche" --limit 100 \
+            --json number,state,isCrossRepository,author \
+            --jq '[.[] | select(.isCrossRepository | not)]')
+          # PR déjà ouverte pour cette release : on la réutilise, seulement si c'est
+          # le robot qui l'a ouverte (gh écrit app/<slug>).
+          ouverte=$(jq -c 'first(.[] | select(.state == "OPEN")) // empty' <<<"$prs")
+          if [ -n "$ouverte" ]; then
+            pr=$(jq -r .number <<<"$ouverte")
+            auteur=$(jq -r .author.login <<<"$ouverte")
+            if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+              echo "::warning::La PR #$pr ($branche) a été ouverte par $auteur, pas par le robot : rien à faire."
+              echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "La PR #$pr est déjà ouverte pour $branche : vérification de sa fusion automatique."
+            {
+              echo "nouvelle=true"
+              echo "pousser=false"
+              echo "ouvrir=false"
+              echo "pr=$pr"
+              echo "branche=$branche"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # PR fermée ou fusionnée : on ne recommence pas.
+          if [ "$(jq length <<<"$prs")" -gt 0 ]; then
+            echo "Une PR fermée ou fusionnée existe déjà pour $branche : rien à faire."
+            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Branche sans PR : une exécution précédente a poussé la branche, puis
+          # l'ouverture de la PR a échoué. On garde la branche et on ouvre la PR.
+          pousser=true
+          if git ls-remote --exit-code --heads origin "$branche" >/dev/null 2>&1; then
+            echo "::warning::La branche $branche existe sans PR : ouverture de la PR sur cette branche."
+            pousser=false
+          fi
+          {
+            echo "nouvelle=true"
+            echo "pousser=$pousser"
+            echo "ouvrir=true"
+            echo "actuel=$actuel"
+            echo "derniere=$derniere"
+            echo "binaire=$binaire"
+            echo "empreinte=$empreinte"
+            echo "branche=$branche"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Crée la branche et épingle le nouveau firmware
+        if: steps.comparaison.outputs.nouvelle == 'true' && steps.comparaison.outputs.pousser == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          BINAIRE: ${{ steps.comparaison.outputs.binaire }}
+          EMPREINTE: ${{ steps.comparaison.outputs.empreinte }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          # Le sha256 est calculé sur le fichier reçu, pas sur les métadonnées de la release.
+          dl="$RUNNER_TEMP/daplink"
+          mkdir -p "$dl"
+          curl -fL --retry 3 --silent --show-error -o "$dl/$BINAIRE" \
+            "https://github.com/steamicc/DAPLink/releases/download/$DERNIERE/$BINAIRE"
+          sha=$(sha256sum "$dl/$BINAIRE" | cut -d' ' -f1)
+          echo "sha256 de $BINAIRE : $sha"
+          # L'empreinte publiée par GitHub est obligatoire et doit correspondre au fichier reçu.
+          if [ -z "$EMPREINTE" ] || [ "$EMPREINTE" != "sha256:$sha" ]; then
+            echo "::error::sha256 différent de l'empreinte publiée par GitHub (« $EMPREINTE »)"
+            exit 1
+          fi
+          # Même forme que le fichier actuel (indentation 2, saut de ligne final) : Prettier l'accepte.
+          jq -n --arg r "$DERNIERE" --arg s "$sha" '{release: $r, sha256: $s}' > daplink.json
+          # Commit au nom du compte robot de l'App (<slug>[bot]).
+          bot_id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git switch -c "$BRANCHE"
+          git add daplink.json
+          git commit -m "chore(configs): épingler le firmware DAPLink $DERNIERE"
+          git push origin "$BRANCHE"
+
+      - name: Ouvre la PR
+        id: ouverture
+        if: steps.comparaison.outputs.nouvelle == 'true' && steps.comparaison.outputs.ouvrir == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          ACTUEL: ${{ steps.comparaison.outputs.actuel }}
+          DERNIERE: ${{ steps.comparaison.outputs.derniere }}
+          BINAIRE: ${{ steps.comparaison.outputs.binaire }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          corps="$RUNNER_TEMP/corps.md"
+          cat > "$corps" <<EOT
+          Le firmware DAPLink de la STeaMi a une nouvelle release : \`$DERNIERE\` (le wiki épingle \`$ACTUEL\`).
+          https://github.com/steamicc/DAPLink/releases/tag/$DERNIERE
+
+          Cette PR change seulement \`daplink.json\` : la release et le sha256 du fichier \`$BINAIRE\`, calculé sur le fichier de la release.
+
+          Le check \`build\` télécharge le firmware et revérifie le sha256 (\`scripts/fetch-firmwares.sh\`, lancé par \`npm run prebuild\`). Un échec indique un firmware illisible ou un sha256 incohérent : ne pas fusionner.
+
+          La fusion automatique (squash) est activée : la PR est fusionnée dès que le check \`build\` est vert. Pour l'éviter, passer la PR en brouillon : désactiver seulement la fusion automatique ne suffit pas, le robot la réactive à son passage suivant.
+          EOT
+          url=$(gh pr create --base main --head "$BRANCHE" \
+            --title "chore(configs): épingler le firmware DAPLink $DERNIERE" \
+            --body-file "$corps")
+          echo "PR ouverte : $url"
+          echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
+
+      # Une PR d'une release plus ancienne épinglerait un firmware dépassé et
+      # entrerait en conflit avec celle-ci. Seules les PR de l'App, dans ce dépôt,
+      # et dont la branche est chore/daplink-*, sont fermées.
+      - name: Ferme les PR des releases dépassées
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Pas de --author (index de recherche en retard) : filtre sur l'auteur en jq.
+          anciennes=$(gh pr list --state open --limit 200 \
+            --json number,headRefName,isCrossRepository,author \
+            | jq -r --arg branche "$BRANCHE" --arg a1 "app/$APP_SLUG" --arg a2 "${APP_SLUG}[bot]" \
+              '.[] | select((.isCrossRepository | not)
+                and (.headRefName | startswith("chore/daplink-"))
+                and .headRefName != $branche
+                and (.author.login == $a1 or .author.login == $a2)) | .number')
+          for n in $anciennes; do
+            echo "Fermeture de la PR #$n (release dépassée)."
+            gh pr close "$n" --delete-branch --comment "Superseded by #$PR."
+          done
+
+      - name: Active la fusion automatique
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
+          # ou ouverte par quelqu'un d'autre que le robot.
+          etat=$(gh pr view "$PR" --json isCrossRepository,author,isDraft,autoMergeRequest)
+          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
+            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
+            exit 1
+          fi
+          auteur=$(jq -r .author.login <<<"$etat")
+          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
+            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
+            exit 1
+          fi
+          # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
+          # tout de suite, même avec un CI rouge : on exige la vérification « build ».
+          regles=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main")
+          if ! jq -e 'any(.[]; .type == "required_status_checks"
+                and any(.parameters.required_status_checks[]; .context == "build"))' \
+                <<<"$regles" >/dev/null; then
+            echo "::warning::Fusion automatique non activée pour la PR #$PR : main n'exige pas la vérification « build ». Créer d'abord un ruleset « CI verte avant fusion » sur main qui exige la vérification « build » (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
+            exit 0
+          fi
+          if jq -e .isDraft <<<"$etat" >/dev/null; then
+            echo "La PR #$PR est en brouillon : fusion automatique non activée."
+            exit 0
+          fi
+          if jq -e '.autoMergeRequest != null' <<<"$etat" >/dev/null; then
+            echo "La fusion automatique de la PR #$PR est déjà activée."
+            exit 0
+          fi
+          if ! gh pr merge "$PR" --auto --squash; then
+            echo "::error::Échec de l'activation de la fusion automatique de la PR #$PR : vérifier « Allow auto-merge » et la fusion squash (Settings > General > Pull Requests)."
+            exit 1
+          fi
+          echo "Fusion automatique (squash) activée pour la PR #$PR : fusion dès que le CI est vert."
