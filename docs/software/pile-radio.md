@@ -52,7 +52,7 @@ Sous chaque [exemple BLE Arduino](/docs/software/arduino/exemples/ble), le bouto
 
    ![Seconde question : la pile BLE HCI Layer 1.20.0 sera installée à la place de l'ancienne, qui sera effacée ; l'installation dure environ une minute et demie ; consigne de ne pas débrancher la carte, de ne pas appuyer sur RESET et de ne pas fermer la page ; boutons « Installer la pile radio » et « Annuler »](/img/software/pile-radio-wiki-04-proposition.png)
 
-   L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton télécharge d'abord la nouvelle pile depuis le wiki et vérifie son empreinte : si elle ne correspond pas, rien n'est effacé. Il efface ensuite l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur RESET et ne pas fermer la page.
+   L'installation dure une minute et demie (94 secondes sur une V1c). Le bouton télécharge d'abord la nouvelle pile depuis le wiki et vérifie son empreinte : si elle ne correspond pas, rien n'est effacé. Il efface ensuite l'ancienne pile, écrit la nouvelle sur la carte (une barre de progression suit l'écriture), puis le FUS l'installe. Pendant tout ce temps, ne pas débrancher la carte, ne pas appuyer sur Reset et ne pas fermer la page.
 
    ![Écriture de la nouvelle pile : état « Carte : téléversement », barre de progression et message « Écriture de la nouvelle pile radio sur la carte… »](/img/software/pile-radio-wiki-05-ecriture.png)
 
@@ -68,7 +68,7 @@ Si la carte a déjà une pile plus récente que celle du wiki, la seconde questi
 
 ### Condition : le DAPLink du wiki
 
-L'installation exige que la carte ait le DAPLink proposé par le wiki, car une installation interrompue avec un autre DAPLink peut laisser la carte sans pile radio. Sinon, la question ne propose pas **Installer la pile radio** : elle propose **Mettre à jour le DAPLink…**, qui guide la mise à jour pas à pas, puis il suffit de cliquer de nouveau sur **Vérifier la pile radio**. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non conforme. **Plus tard** ferme la question : la vérification a eu lieu, l'installation est reportée.
+L'installation exige que la carte ait le DAPLink proposé par le wiki, car une installation interrompue avec un autre DAPLink peut laisser la carte sans pile radio. Sinon, la question ne propose pas **Installer la pile radio** : elle propose **Mettre à jour le DAPLink…**, qui guide la mise à jour pas à pas, puis il suffit de cliquer de nouveau sur **Vérifier la pile radio**. Un DAPLink d'origine, dont la version ne se lit pas, compte comme non conforme. **Plus tard** ferme la question : la vérification a eu lieu, l'installation est reportée, et l'encart qui propose la mise à jour du DAPLink sous les exemples de la page ne revient plus jusqu'au rechargement.
 
 ### Limites
 

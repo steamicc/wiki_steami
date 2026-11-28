@@ -20,11 +20,13 @@ import {
   erreurCarteVisible,
   issueFocus,
   lireForcer,
+  masqueEncartEssayer,
   messageEtape,
   morceauxTexte,
   operateurSurCarte,
   pileRadioVisible,
   questionEnAttente,
+  reporteDaplink,
   retenirCarte,
   retenirFermeture,
   retenirOnglet,
@@ -215,7 +217,7 @@ describe('messageEtape', () => {
   it("pendant l'attente : les consignes, sans le décompte (annoncé une seule fois)", () => {
     const texte = messageEtape(pile({ etape: 'attente', decompte: 42 }));
     assert.match(texte, /ne pas débrancher/);
-    assert.match(texte, /RESET/);
+    assert.match(texte, /Reset/);
     assert.match(texte, /fermer la page/);
     assert.doesNotMatch(texte, /42/);
   });
@@ -306,6 +308,94 @@ describe('issueFocus', () => {
         etape,
       );
     }
+  });
+});
+
+describe('masqueEncartEssayer', () => {
+  const repos = pile({ etape: 'fini', daplink: { release: '2026-11-25.3' } });
+
+  it('étapes du DAPLink affichées sous le bloc actif : masque', () => {
+    for (const precedent of [false, true]) {
+      assert.equal(
+        masqueEncartEssayer({ actif: true, etapesDaplink: true, etat: repos, precedent }),
+        true,
+      );
+    }
+  });
+
+  it('bloc inactif : jamais de masque', () => {
+    const etat = pile({ etape: 'lecture' });
+    assert.equal(
+      masqueEncartEssayer({ actif: false, etapesDaplink: false, etat, precedent: true }),
+      false,
+    );
+  });
+
+  it('vérification sans étapes affichées avant : pas de masque', () => {
+    for (const etape of ['confirmation-verification', 'operateur', 'daplink']) {
+      assert.equal(
+        masqueEncartEssayer({
+          actif: true,
+          etapesDaplink: false,
+          etat: pile({ etape }),
+          precedent: false,
+        }),
+        false,
+        etape,
+      );
+    }
+  });
+
+  it("vérification relancée après les étapes : masque gardé jusqu'au repos", () => {
+    // Rendus successifs, chacun avec le masque du rendu d'avant.
+    const suite = [
+      [true, repos],
+      // Nouveau clic sur « Vérifier la pile radio » : les étapes disparaissent.
+      [false, pile({ etape: 'confirmation-verification', encart: { type: 'x' } })],
+      // Réponse donnée : l'encart part avant l'étape suivante.
+      [false, pile({ etape: 'confirmation-verification' })],
+      [false, pile({ etape: 'operateur' })],
+      [false, pile({ etape: 'daplink', encart: { type: 'daplink' } })],
+      [false, pile({ etape: 'repos', message: TEXTE_PLUS_TARD })],
+    ];
+    let precedent = false;
+    const masques = suite.map(([etapesDaplink, etat]) => {
+      precedent = masqueEncartEssayer({ actif: true, etapesDaplink, etat, precedent });
+      return precedent;
+    });
+    assert.deepEqual(masques, [true, true, true, true, true, false]);
+  });
+
+  it('étapes fermées par « Plus tard », parcours fini : masque retiré', () => {
+    for (const etape of ['fini', 'repos', 'a-jour', 'erreur']) {
+      assert.equal(
+        masqueEncartEssayer({
+          actif: true,
+          etapesDaplink: false,
+          etat: pile({ etape }),
+          precedent: true,
+        }),
+        false,
+        etape,
+      );
+    }
+  });
+});
+
+describe('reporteDaplink', () => {
+  const question = (release) => ({ type: 'daplink', donnees: { ...DONNEES, release } });
+
+  it('« Plus tard » à la question du DAPLink avec release : reporté pour la page', () => {
+    assert.equal(reporteDaplink(question('2026-11-25.3'), 'plus-tard'), true);
+  });
+
+  it('autres réponses ou questions : rien de reporté', () => {
+    assert.equal(reporteDaplink(question('2026-11-25.3'), 'mettre-a-jour'), false);
+    assert.equal(reporteDaplink(question(null), 'plus-tard'), false);
+    const proposition = { type: 'proposition', donnees: DONNEES };
+    assert.equal(reporteDaplink(proposition, 'annuler'), false);
+    const confirmation = { type: 'confirmation-verification', donnees: { id: ID, texte: 'x' } };
+    assert.equal(reporteDaplink(confirmation, 'annuler'), false);
   });
 });
 
