@@ -156,6 +156,7 @@ Le dépôt [micropython-steami-sample](https://github.com/steamicc/micropython-s
 
 - [`beacon`](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/beacon) : balise qui diffuse son nom et la température dans ses annonces, sans connexion ;
 - [`rssi_proximity`](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/rssi_proximity) et [`hot_cold`](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/hot_cold) : estimer la distance entre deux cartes par la force du signal ;
+- [`xiaomi_reference`](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/xiaomi_reference) : comparer la température et l'humidité de la carte à celles d'un thermomètre Xiaomi LYWSD03MMC reçues dans ses annonces, l'équivalent du croquis Arduino [ReferenceXiaomi](../arduino/exemples/ble#referencexiaomi) ;
 - [`STeaMi_talk`](https://github.com/steamicc/micropython-steami-sample/tree/main/ble/STeaMi_talk) : deux cartes qui échangent des données par une connexion, l'une centrale, l'autre périphérique.
 
 Les [exemples d'aioble](https://github.com/micropython/micropython-lib/tree/master/micropython/bluetooth/aioble/examples) montrent aussi le côté central : se connecter à un appareil et lire ses caractéristiques.
