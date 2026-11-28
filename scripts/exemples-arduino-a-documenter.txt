@@ -1,0 +1,14 @@
+BQ27441/battery_logger
+BQ27441/charging_monitor
+DAPLINK_BRIDGE/bridge_info
+DAPLINK_FLASH/flash_info
+DAPLINK_FLASH/gated_clear_flash
+DAPLINK_FLASH/read_back
+IM34DT05/SoundLogger
+IM34DT05/VoiceActivityDetector
+ISM330DL/DigitalLevel
+ISM330DL/TiltMaze
+STEAMI_BOARD/Pads
+STEAMI_CONFIG/calibrate_accelerometer
+STEAMI_CONFIG/calibrate_magnetometer
+STEAMI_CONFIG/calibrate_temperature
