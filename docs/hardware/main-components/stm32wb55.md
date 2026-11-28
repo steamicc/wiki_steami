@@ -40,7 +40,7 @@ Le MCU organise ses périphériques sur plusieurs bus pour séparer les usages i
 | USART1         | Connecteur Jacdac, net `UART2`                           | TX: PB6, RX: PB7                  |
 
 :::info
-Le bus I2C1 est partagé entre le STM32WB55 et le STM32F103 (DAPLink), permettant au processeur d'interface d'accéder aux capteurs et à la jauge de batterie.
+Le STM32WB55 est le maître du bus I2C1. Le STM32F103 (DAPLink) y est esclave, à l'adresse 0x3B : le firmware [DAPLink](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_i2c.c) ne fait que répondre, il n'interroge ni les capteurs ni la jauge de batterie. Ce pont donne au STM32WB55 l'accès à la flash externe et à la config zone. Le [schéma du bus I2C1](../pin-mapping/internal-bus#bus-i2c-interne-i2c1) montre les adresses et les interruptions de chaque release.
 :::
 
 ## Broches GPIO directes
