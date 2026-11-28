@@ -45,6 +45,7 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 - [**Capteurs**](./capteurs) — Température, humidité, pression, mouvement, boussole, distance, lumière et batterie, avec la couche `steami`
 - [**Écran**](./ecran) — Dessiner, écrire et afficher des widgets avec `steami.Screen`, le même programme sur V1a, V1b et V1c
+- [**Entrées et sorties**](./io) — Boutons et D-PAD avec `steami.Buttons`, LED RGB, buzzer, pads de l'expandeur et broches du connecteur edge (GPIO, ADC, PWM)
 - [**Communication**](./communication) — Bluetooth, bus I2C et SPI, liaisons série (UART)
 - [**Stockage**](./stockage) — Fichiers de la carte, fichier du disque USB, zone de configuration et calibrations
 
@@ -59,10 +60,6 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 ## Sujets avancés
 
 - [**Sujets avancés**](./avance) — Mémoire et code gelé, timers et interruptions, `native` et `viper`, mise en veille, horloge, chien de garde, `asyncio`
-
-## Sections à venir
-
-- Tutoriels par composant (I/O)
 
 ## Voir aussi
 
