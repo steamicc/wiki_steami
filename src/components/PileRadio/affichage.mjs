@@ -177,8 +177,34 @@ export function boutonPileActif(etatCarte, etatPile, microPythonOccupe = false) 
 export function issueFocus({ libre, question, etat }) {
   if (question) return 'oublier';
   if (libre) return 'focaliser';
-  if (estOccupee(etat) || etat.etape === 'confirmation-verification') return 'attendre';
+  if (enCours(etat)) return 'attendre';
   return 'oublier';
+}
+
+// Le parcours tient la carte, ou attend la première réponse.
+function enCours(etat) {
+  return estOccupee(etat) || etat.etape === 'confirmation-verification';
+}
+
+// Un seul encart d'étapes du DAPLink par page : celui du bouton Essayer
+// (verificationDaplink) se masque tant que le bloc affiche les siennes
+// (etapesDaplink, sous le bloc actif). Il reste masqué pendant une
+// vérification relancée depuis ce bloc après leur affichage (precedent : le
+// masque du rendu d'avant) : sinon il reviendrait, et prendrait le focus,
+// pendant les questions de cette vérification, qui peut reposer celle du
+// DAPLink.
+export function masqueEncartEssayer({ actif, etapesDaplink, etat, precedent }) {
+  if (!actif) return false;
+  if (etapesDaplink) return true;
+  return precedent && enCours(etat);
+}
+
+// « Plus tard » à la question du DAPLink, quand elle propose « Mettre à jour
+// le DAPLink… » (release lue) : il vaut aussi pour l'encart du bouton
+// Essayer, jusqu'au rechargement, comme celui des étapes. Sans release, la
+// question ne propose pas de mise à jour : rien n'est reporté.
+export function reporteDaplink(encart, valeur) {
+  return encart.type === 'daplink' && valeur === 'plus-tard' && Boolean(encart.donnees.release);
 }
 
 // Fermer ou recharger la page couperait l'installation : de DELETE à la

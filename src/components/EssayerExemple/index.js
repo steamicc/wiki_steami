@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useLayoutEffect, useRef, useSyncExternalStore } 
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from './carte.mjs';
-import { ETAT_INITIAL_DAPLINK, verificationDaplink } from './daplink.mjs';
+import { ETAT_INITIAL_DAPLINK, encartVisible, verificationDaplink } from './daplink.mjs';
 import EtapesDaplink from './EtapesDaplink';
 import { LimiteChargement } from './limite.mjs';
 import {
@@ -125,7 +125,9 @@ function Controles({ id, href }) {
   );
   // DAPLink plus ancien que celui du wiki : un seul encart pour la page,
   // affiché sous l'exemple cliqué en dernier. Il reste après une
-  // déconnexion (redémarrage en MAINTENANCE pendant la mise à jour).
+  // déconnexion (redémarrage en MAINTENANCE pendant la mise à jour). Sur une
+  // page BLE, il se masque tant que « Vérifier la pile radio » affiche ses
+  // propres étapes du DAPLink (encartVisible).
   const etatDaplink = useSyncExternalStore(
     verificationDaplink.abonner,
     () => verificationDaplink.etat,
@@ -293,7 +295,7 @@ function Controles({ id, href }) {
         {statut && <p className={styles.statut}>{statut}</p>}
         {erreur && <p className={styles.erreur}>{erreur}</p>}
       </div>
-      {etatDaplink.release !== null && clique && (
+      {encartVisible(etatDaplink, clique) && (
         <EtapesDaplink
           release={etatDaplink.release}
           href={urlFirmwareBin}

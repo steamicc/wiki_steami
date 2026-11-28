@@ -1185,6 +1185,18 @@ test('numéro de série : celui du périphérique connecté, null après déconn
   await quitter(t, desabonner);
 });
 
+// Un DAPLink peut ne pas donner de numéro de série (serialNumber absent) :
+// null, et non undefined, pour estSteami et l'encart du DAPLink.
+test('numéro de série : null si le périphérique connecté n’en donne pas', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const sansNumero = { vendorId: VENDOR_ID_DAPLINK, async close() {} };
+  const desabonner = await connecterAvec([sansNumero]);
+  assert.equal(carte.etat.connectee, true);
+  assert.equal(derniere.transport.device, sansNumero);
+  assert.equal(carte.numeroSerie, null);
+  await quitter(t, desabonner);
+});
+
 const URL_FIRMWARE = '/micropython/firmware.bin';
 
 // Remplace fetch le temps du test.

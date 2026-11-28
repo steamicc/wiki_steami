@@ -24,16 +24,35 @@ export function decisionEncart({ numeroSerie, reponse, epingle }) {
   return { proposer: true, release: epingle.release };
 }
 
-export const ETAT_INITIAL_DAPLINK = Object.freeze({ release: null, reporte: false });
+// release : la release à proposer, null si rien n'est à proposer.
+// reporte : « Plus tard » a été choisi, dans cet encart, ou dans la question
+// ou les étapes du DAPLink de « Vérifier la pile radio ».
+// autreEncart : les étapes du DAPLink de « Vérifier la pile radio » sont
+// affichées sur la page, ou une vérification relancée après elles est en
+// cours ; l'encart du bouton Essayer se masque pendant ce temps, pour qu'un
+// seul encart d'étapes soit visible.
+export const ETAT_INITIAL_DAPLINK = Object.freeze({
+  release: null,
+  reporte: false,
+  autreEncart: false,
+});
 
 // État partagé par toute la page : « Plus tard » vaut jusqu'au rechargement,
 // et une déconnexion ne le modifie pas (seuls verifier et reporter le font).
 let etat = ETAT_INITIAL_DAPLINK;
+// Étapes de « Vérifier la pile radio » affichées (voir afficherAutreEncart).
+let autresEncarts = 0;
 const abonnes = new Set();
 
 function changer(suivant) {
   etat = Object.freeze(suivant);
   for (const fn of [...abonnes]) fn();
+}
+
+// L'encart du bouton Essayer sous le bloc cliqué en dernier (clique) : une
+// release à proposer, et pas d'autre encart d'étapes sur la page.
+export function encartVisible(etatDaplink, clique) {
+  return clique && etatDaplink.release !== null && !etatDaplink.autreEncart;
 }
 
 export const verificationDaplink = {
@@ -57,15 +76,35 @@ export const verificationDaplink = {
     } catch {
       release = null;
     }
-    changer({ release, reporte: etat.reporte });
+    changer({ ...etat, release });
   },
 
+  // « Plus tard », dans cet encart, ou dans la question ou les étapes du
+  // DAPLink de PileRadio.
   reporter() {
-    changer({ release: null, reporte: true });
+    changer({ ...etat, release: null, reporte: true });
+  },
+
+  // PileRadio affiche ses étapes du DAPLink (masqueEncartEssayer) : l'encart
+  // du bouton Essayer se masque jusqu'à l'appel de la fonction rendue (étapes
+  // retirées hors d'une vérification relancée, ou bloc démonté), sans rien
+  // perdre de release ni de reporte. Un compteur, et non
+  // un booléen : un second affichage ne doit pas être retiré par le premier.
+  afficherAutreEncart() {
+    autresEncarts += 1;
+    changer({ ...etat, autreEncart: true });
+    let retire = false;
+    return () => {
+      if (retire) return;
+      retire = true;
+      autresEncarts -= 1;
+      changer({ ...etat, autreEncart: autresEncarts > 0 });
+    };
   },
 
   // Pour les tests uniquement.
   reinitialiser() {
+    autresEncarts = 0;
     changer(ETAT_INITIAL_DAPLINK);
   },
 };
