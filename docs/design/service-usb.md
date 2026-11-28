@@ -84,7 +84,7 @@ Le microcontrôleur d'interface supporte WebUSB, qui permet aux utilisateurs d'i
 
 #### Support DAPLink
 
-Comme le micro:bit, la carte STeaMi utilise le firmware DAPLink, qui permet la programmation et le débogage faciles de la carte via USB. Les utilisateurs peuvent flasher du nouveau firmware ou du code en utilisant des outils de développement standard tels que MicroPython, Mbed Studio ou Microsoft MakeCode.
+Comme le micro:bit, la carte STeaMi utilise le firmware DAPLink, qui permet la programmation et le débogage faciles de la carte via USB. Les utilisateurs peuvent flasher du nouveau firmware ou du code en utilisant des outils de développement standard tels que MicroPython, l'Arduino IDE ou Mbed Studio.
 
 #### Communication série
 

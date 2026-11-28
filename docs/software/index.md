@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # Programmation
 
-La carte STeaMi est programmable en plusieurs langages. Cette section documente les environnements de développement, les drivers et les exemples d'utilisation pour chaque composant.
+La carte STeaMi se programme en MicroPython ou en Arduino (C++). Cette section documente les environnements de développement, les drivers et les exemples d'utilisation pour chaque composant.
 
 ## Premiers pas
 
@@ -15,11 +15,12 @@ Nouveau sur la carte STeaMi ? Commencez ici :
 
 ## Langages
 
-| Langage                           | Maturité  | Description                                        |
-| --------------------------------- | --------- | -------------------------------------------------- |
-| [**MicroPython**](./micropython/) | Complète  | 18 drivers, 111 exemples, framework de test        |
-| [**CODAL**](./codal/)             | Partielle | Runtime C++ avec support des principaux composants |
-| [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 15 drivers STeaMi        |
+| Langage                           | Maturité  | Description                                 |
+| --------------------------------- | --------- | ------------------------------------------- |
+| [**MicroPython**](./micropython/) | Complète  | 18 drivers, 111 exemples, framework de test |
+| [**Arduino**](./arduino/)         | Partielle | Arduino IDE (STM32duino), 15 drivers STeaMi |
+
+MicroPython et Arduino sont les deux environnements maintenus. CODAL et MakeCode ne sont plus suivis pour la STeaMi : leur page [CODAL et MakeCode](./codal/) est conservée à titre historique.
 
 ## Outils et éditeurs
 
