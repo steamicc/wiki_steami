@@ -20,6 +20,7 @@ Capteur de pression absolue avec haute résolution 24 bits. Permet de mesurer la
 | Plage           | 26 kPa à 126 kPa (absolu)                                                     |
 | Résolution      | 24 bits                                                                       |
 | Interface       | I2C / SPI                                                                     |
+| Adresse I2C     | 0x5D (7 bits)                                                                 |
 | Boîtier         | 10-WFLGA                                                                      |
 | Datasheet       | [WSEN-PADS](https://www.we-online.com/en/components/products/WSEN-PADS_1)     |
 

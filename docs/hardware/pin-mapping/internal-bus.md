@@ -3,7 +3,20 @@ sidebar_position: 5
 title: 'Capteurs et bus internes'
 ---
 
+import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+
 # Capteurs et bus internes
+
+## Sommaire
+
+- [Bus I2C interne (I2C1)](#bus-i2c-interne-i2c1), avec les [adresses I2C](#adresses-i2c) de chaque release
+- [Bus SPI interne (SPI1) - Écran](#bus-spi-interne-spi1---écran)
+- [Signaux d'interruption des capteurs](#signaux-dinterruption-des-capteurs)
+- [Expandeur GPIO (MCP23009)](#expandeur-gpio-mcp23009)
+- [Microphone](#microphone)
+- [Buzzer](#buzzer)
+- [Communication série (STM32WB55 - STM32F103)](#communication-série-stm32wb55---stm32f103)
+- [Contrôle alimentation STLink](#contrôle-alimentation-stlink)
 
 ## Bus I2C interne (I2C1)
 
@@ -29,6 +42,49 @@ Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur 
 | MCP23009-E/MG                               | Expandeur GPIO                        | 8 GPIO supplémentaires                          | V1a, V1b, V1c          |
 
 Les capteurs d'environnement réellement montés sur la V1a restent à confirmer (voir [Révisions](../revisions#capteurs-internes)). Sur la V1a, les résistances de pull-up R15/R16 du bus I2C1 ne sont pas montées ; elles valent 4,7 kΩ à partir de la V1b.
+
+### Adresses I2C
+
+Les adresses sont données au format 7 bits, celui qu'attendent MicroPython (`I2C.scan()`, `readfrom_mem()`) et Arduino (`Wire.beginTransmission()`). Le format 8 bits, employé par certaines fiches techniques, ajoute le bit de lecture/écriture : il double l'adresse (0x6B devient 0xD6 en écriture et 0xD7 en lecture).
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+| Adresse | Composant                                           | Fonction                             |
+| ------- | --------------------------------------------------- | ------------------------------------ |
+| 0x1E    | [LIS2MDL](../main-components/sensors/lis2mdl)       | Magnétomètre                         |
+| 0x20    | [MCP23009](../main-components/buttons-audio)        | Expandeur GPIO                       |
+| 0x29    | [VL53L1X](../main-components/sensors/vl53l1x)       | Distance                             |
+| 0x39    | [APDS-9960](../main-components/sensors/apds9960)    | Lumière, couleur, geste, proximité   |
+| 0x3B    | [STM32F103](../main-components/stm32f103) (DAPLink) | Accès à la flash et à la config zone |
+| 0x55    | [BQ27441](../main-components/power/bq27441)         | Jauge de batterie                    |
+| 0x5D    | [WSEN-PADS](../main-components/sensors/wsen-pads)   | Pression                             |
+| 0x5F    | [WSEN-HIDS](../main-components/sensors/wsen-hids)   | Humidité et température              |
+| 0x6B    | [ISM330DLC](../main-components/sensors/ism330dlc)   | Accéléromètre et gyroscope           |
+
+Pour la V1a, le montage de l'APDS-9960, du WSEN-PADS et du WSEN-HIDS reste à confirmer (voir [Révisions](../revisions#capteurs-internes)).
+
+</Release>
+<Release releases="v1c">
+
+| Adresse | Composant                                           | Fonction                             |
+| ------- | --------------------------------------------------- | ------------------------------------ |
+| 0x1E    | [LIS2MDL](../main-components/sensors/lis2mdl)       | Magnétomètre                         |
+| 0x20    | [MCP23009](../main-components/buttons-audio)        | Expandeur GPIO                       |
+| 0x29    | [VL53L1X](../main-components/sensors/vl53l1x)       | Distance                             |
+| 0x3B    | [STM32F103](../main-components/stm32f103) (DAPLink) | Accès à la flash et à la config zone |
+| 0x55    | [BQ27441](../main-components/power/bq27441)         | Jauge de batterie                    |
+| 0x6B    | [ISM330DLC](../main-components/sensors/ism330dlc)   | Accéléromètre et gyroscope           |
+| 0x76    | [BME280](../main-components/sensors/bme280)         | Pression, humidité, température      |
+
+</Release>
+</ReleaseTabs>
+
+Ces adresses sont celles des pilotes de [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) (dictionnaire `ADDRESS` de [`lib/steami/steami/const.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami/steami/const.py)) et du firmware [DAPLink](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_i2c.h) pour le pont 0x3B. Pour reconnaître la release, la bibliothèque lit l'identifiant du BME280 (V1c), puis ceux du WSEN-HIDS, du WSEN-PADS et de l'APDS-9960 (V1a ou V1b).
+
+:::warning Ne pas confondre 0x3B et 0x76
+L'adresse 8 bits du pont DAPLink (0x76) a la même valeur que l'adresse 7 bits du BME280. En 7 bits, les deux composants sont bien distincts sur le bus : 0x3B pour le pont, 0x76 pour le BME280.
+:::
 
 ## Bus SPI interne (SPI1) - Écran
 

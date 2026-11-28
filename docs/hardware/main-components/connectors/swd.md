@@ -41,9 +41,7 @@ La carte n'offre donc pas le connecteur Cortex Debug standard (2 × 5 broches). 
 
 ## Releases
 
-Le port est identique sur la V1b et la V1c : même feuille FP11 dans les schémas B1 et C, même position et même empreinte dans les fichiers de placement des deux indices. Les fichiers de la V1a n'ont pas été vérifiés.
-
-Sources : schéma FP11 et nomenclatures des indices B1 et C, fichiers de perçage et de cuivre du [reference design](https://github.com/steamicc/steami-reference-design/tree/main/Manufacturing) (indice B1), photos de la V1c.
+Le port est identique sur la V1b et la V1c : même feuille FP11 dans les schémas B1 et C, même position et même empreinte dans les fichiers de placement des deux indices.
 
 ## Schémas
 
