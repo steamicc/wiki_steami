@@ -690,6 +690,27 @@ class TestRobotSample(unittest.TestCase):
         self.assertEqual(sorties["pousser"], "false")
         self.assertIn("| `PREMIERS/ClignoterLed` | no longer marked `sample=` in the wiki |", self.corps)
 
+    # Boucle wiki -> sample -> wiki
+
+    def test_page_converted_by_the_pin_opens_nothing(self):
+        # Le croquis est publié au tag v1.0.2 et la page d'épinglage l'inclut :
+        # le push de cette page sur main relance le robot, qui ne doit rien ouvrir.
+        self.ecrire(self.graine, "examples/PREMIERS/ClignoterLed/ClignoterLed.ino", entete() + CROQUIS)
+        git(self.graine, "add", ".")
+        git(self.graine, "commit", "-q", "-m", "feat(examples): Add the wiki sketches. (#9)")
+        git(self.graine, "tag", "v1.0.2")
+        git(self.graine, "push", "-q", "origin", "HEAD:refs/heads/main", "--tags")
+        self.epingle.write_text(json.dumps({"version": "v1.0.2"}), encoding="utf-8")
+        texte = ENTETE_PAGE + "# Premiers pas\n\n" + bloc_md("sample=PREMIERS/ClignoterLed")
+        convertie = charger_conversion().convertir_texte(texte, {"PREMIERS/ClignoterLed"})[0]
+        (self.dossier / PAGE_ROBOT).write_text(convertie, encoding="utf-8")
+        clone = self.cloner()
+        code, out, err, sorties = self.lancer(clone)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(sorties["pousser"], "false")
+        self.assertEqual(sorties.get("croquis", ""), "")
+        self.assertEqual(git_sortie(clone, "rev-parse", "HEAD"), git_sortie(clone, "rev-parse", "origin/main"))
+
 
 class TestTitreDePage(unittest.TestCase):
     def setUp(self):
@@ -739,16 +760,32 @@ class TestFluxRobot(unittest.TestCase):
         etapes = flux_robot()["jobs"]["croquis"]["steps"]
         (app,) = [e for e in etapes if "create-github-app-token" in e.get("uses", "")]
         self.assertEqual(app["with"]["repositories"], "arduino-steami-sample")
-        self.assertEqual(app["with"]["app-id"], "${{ secrets.RELEASE_APP_ID }}")
+        self.assertEqual(app["with"]["client-id"], "${{ secrets.RELEASE_APP_ID }}")
         self.assertEqual(app["with"]["private-key"], "${{ secrets.RELEASE_APP_SECRET }}")
         self.assertEqual(flux_robot()["permissions"], {"contents": "read"})
 
-    def test_never_github_token_never_merge(self):
+    def test_never_github_token(self):
         t = code_robot()
         self.assertNotIn("GITHUB_TOKEN", t)
         self.assertNotIn("github.token", t)
-        self.assertNotIn("gh pr merge", t)
-        self.assertNotIn("--auto", t)
+
+    def test_auto_merge_guarded(self):
+        etapes = {e.get("name"): e for e in flux_robot()["jobs"]["croquis"]["steps"]}
+        noms = list(etapes)
+        self.assertEqual(etapes["Ouvre ou met à jour la PR"]["id"], "ouverture")
+        fusion = etapes["Active la fusion automatique"]
+        self.assertEqual(fusion["if"], etapes["Ouvre ou met à jour la PR"]["if"])
+        self.assertGreater(noms.index("Active la fusion automatique"), noms.index("Ouvre ou met à jour la PR"))
+        self.assertEqual(fusion["env"]["PR"], "${{ steps.ouverture.outputs.pr }}")
+        t = code_robot()
+        self.assertIn('gh pr merge "$PR" --repo steamicc/arduino-steami-sample --auto --squash', t)
+        self.assertIn("repos/steamicc/arduino-steami-sample/rules/branches/main", t)
+        self.assertIn('.context == "compile"', t)
+        self.assertIn("autoMergeRequest", t)
+        self.assertIn("repos/steamicc/arduino-steami-sample/rulesets/$id", t)
+        self.assertIn('.current_user_can_bypass // "inconnu"', t)
+        self.assertIn('"$contournement" != "never"', t)
+        self.assertIn('.type == "required_status_checks"', t)
 
     def test_single_branch_and_pr(self):
         t = code_robot()
