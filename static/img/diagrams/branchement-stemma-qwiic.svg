@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 740" width="800" height="740"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Brancher des capteurs STEMMA QT / Qwiic (STeaMi V1c)</title>
+  <desc id="desc">Les connecteurs J3 et J4 de la STeaMi sont câblés en parallèle sur le bus I2C3 du STM32WB55RG (PC1 SDA, PC0 SCL) et sur le 3V3 de la carte. Un câble Qwiic relie J3 à un premier module capteur, qui se chaîne à un second. Brochage : 1 GND, 2 3V3, 3 SDA, 4 SCL.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-carte { fill: #fafbfc; stroke: #d0d7de; stroke-width: 1.5; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-alim { fill: #ffebee; stroke: #c62828; }
+      .sch-conn { fill: #f3e5f5; stroke: #7b1fa2; }
+      .sch-ext  { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-texte  { font-size: 12px; fill: #1f2328; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-i2c  { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-pwr  { stroke: #c62828; stroke-width: 2.5; }
+      .sch-gnd  { stroke: #57606a; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c62828"/>
+    </marker>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="739" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Brancher des capteurs STEMMA QT / Qwiic</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+  <text class="sch-detail" x="24" y="64">I2C3 : second bus I2C, réservé aux capteurs externes (FCT-52). Les capteurs internes sont sur l'I2C1.</text>
+
+  <!-- Carte STeaMi -->
+  <rect class="sch-carte" x="24" y="84" width="392" height="400" rx="10"/>
+  <text class="sch-nom" x="40" y="106">Carte STeaMi</text>
+
+  <rect class="sch-bloc sch-alim" x="72" y="120" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="156" y="140" text-anchor="middle">Alimentation</text>
+  <text class="sch-detail" x="156" y="158" text-anchor="middle">3V3 et GND</text>
+
+  <rect class="sch-bloc sch-mcu" x="72" y="256" width="168" height="56" rx="6"/>
+  <text class="sch-nom" x="156" y="279" text-anchor="middle">STM32WB55RG</text>
+  <text class="sch-detail" x="156" y="298" text-anchor="middle">PC1 = SDA, PC0 = SCL</text>
+
+  <!-- J3 -->
+  <rect class="sch-bloc sch-conn" x="296" y="120" width="104" height="144" rx="6"/>
+  <text class="sch-nom" x="348" y="140" text-anchor="middle">J3</text>
+  <text class="sch-detail" x="348" y="157" text-anchor="middle">JST SH, 1 mm</text>
+  <g class="sch-texte">
+    <text x="308" y="186">1  GND</text>
+    <text x="308" y="208">2  3V3</text>
+    <text x="308" y="230">3  SDA</text>
+    <text x="308" y="252">4  SCL</text>
+  </g>
+
+  <!-- J4 -->
+  <rect class="sch-bloc sch-conn" x="296" y="300" width="104" height="144" rx="6"/>
+  <text class="sch-nom" x="348" y="320" text-anchor="middle">J4</text>
+  <text class="sch-detail" x="348" y="337" text-anchor="middle">JST SH, 1 mm</text>
+  <g class="sch-texte">
+    <text x="308" y="366">1  GND</text>
+    <text x="308" y="388">2  3V3</text>
+    <text x="308" y="410">3  SDA</text>
+    <text x="308" y="432">4  SCL</text>
+  </g>
+
+  <!-- I2C3 : MCU vers J3 et J4, en parallèle. -->
+  <path class="sch-lien sch-i2c" d="M240 284 H256 V237 H294"/>
+  <path class="sch-lien sch-i2c" d="M256 284 V417 H294"/>
+  <text class="sch-lien-txt" x="262" y="290" fill="#00796b">I2C3</text>
+
+  <!-- 3V3 et GND vers J3 -->
+  <path class="sch-lien sch-gnd" d="M240 132 H282 V182 H294"/>
+  <path class="sch-lien sch-pwr" d="M240 150 H272 V204 H294" marker-end="url(#fl-pwr)"/>
+
+  <!-- 3V3 et GND vers J4, par la gauche et le bas. -->
+  <path class="sch-lien sch-gnd" d="M72 138 H40 V472 H368 V446"/>
+  <path class="sch-lien sch-pwr" d="M72 156 H52 V460 H332 V446" marker-end="url(#fl-pwr)"/>
+
+  <!-- Câble Qwiic J3 vers module 1 -->
+  <text class="sch-lien-txt" x="460" y="152" text-anchor="middle" fill="#57606a">câble Qwiic</text>
+  <path class="sch-lien sch-gnd" d="M400 182 H520"/>
+  <path class="sch-lien sch-pwr" d="M400 204 H518" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-i2c" d="M400 226 H520"/>
+  <path class="sch-lien sch-i2c" d="M400 248 H520"/>
+  <text class="sch-lien-txt" x="460" y="177" text-anchor="middle" fill="#57606a">GND · noir</text>
+  <text class="sch-lien-txt" x="460" y="199" text-anchor="middle" fill="#c62828">3V3 · rouge</text>
+  <text class="sch-lien-txt" x="460" y="221" text-anchor="middle" fill="#00796b">SDA · bleu</text>
+  <text class="sch-lien-txt" x="460" y="243" text-anchor="middle" fill="#00796b">SCL · jaune</text>
+
+  <!-- J4 libre -->
+  <g class="sch-detail" text-anchor="middle">
+    <text x="460" y="362">J4 libre :</text>
+    <text x="460" y="380">un autre module</text>
+    <text x="460" y="398">sur le même bus</text>
+  </g>
+
+  <!-- Modules externes -->
+  <rect class="sch-bloc sch-ext" x="520" y="120" width="176" height="144" rx="6"/>
+  <text class="sch-nom" x="608" y="186" text-anchor="middle">Module capteur 1</text>
+  <text class="sch-detail" x="608" y="206" text-anchor="middle">ex. BME280</text>
+
+  <rect class="sch-bloc sch-ext" x="520" y="300" width="176" height="144" rx="6"/>
+  <text class="sch-nom" x="608" y="366" text-anchor="middle">Module capteur 2</text>
+  <text class="sch-detail" x="608" y="386" text-anchor="middle">ex. SHT40</text>
+
+  <!-- Chaînage : second câble Qwiic, même ordre de fils. -->
+  <path class="sch-lien sch-gnd" d="M568 264 V300"/>
+  <path class="sch-lien sch-pwr" d="M590 264 V298" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-i2c" d="M612 264 V300"/>
+  <path class="sch-lien sch-i2c" d="M634 264 V300"/>
+  <text class="sch-lien-txt" x="648" y="286" fill="#57606a">chaînage</text>
+
+  <!-- Remarques -->
+  <g class="sch-texte">
+    <text x="24" y="512">• Brochage commun aux trois releases. Câble Qwiic : fils noir (GND), rouge (3V3), bleu (SDA), jaune (SCL).</text>
+    <text x="24" y="532">• Aucune résistance de pull-up sur l'I2C3 de la carte : celles des modules tirent SDA et SCL au 3V3.</text>
+    <text x="24" y="552">• Modules chaînés : adresses I2C différentes. L'I2C3 sort aussi sur P19 (SCL) et P20 (SDA) du connecteur edge.</text>
+  </g>
+
+  <!-- Variante V1a et V1b -->
+  <rect x="24" y="568" width="752" height="40" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-texte" x="40" y="593"><tspan font-weight="600">V1a, V1b :</tspan> J3 et J4 en JST PH, pas de 2 mm (écart à FCT-52). Même brochage, avec un câble adaptateur PH vers SH.</text>
+
+  <!-- Légende : seulement les types présents. -->
+  <rect x="24" y="624" width="752" height="92" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="648">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-i2c" d="M40 672 H80"/><text x="88" y="676">I2C3 (SDA, SCL)</text>
+    <path class="sch-lien sch-pwr" d="M240 672 H280" marker-end="url(#fl-pwr)"/><text x="288" y="676">3V3, vers la charge</text>
+    <path class="sch-lien sch-gnd" d="M460 672 H500"/><text x="508" y="676">GND</text>
+    <rect class="sch-bloc sch-mcu" x="40" y="690" width="24" height="16" rx="3"/><text x="72" y="703">MCU</text>
+    <rect class="sch-bloc sch-alim" x="140" y="690" width="24" height="16" rx="3"/><text x="172" y="703">Alimentation</text>
+    <rect class="sch-bloc sch-conn" x="280" y="690" width="24" height="16" rx="3"/><text x="312" y="703">Connecteur de la carte</text>
+    <rect class="sch-bloc sch-ext" x="480" y="690" width="24" height="16" rx="3"/><text x="512" y="703">Module externe</text>
+  </g>
+</svg>

@@ -7,6 +7,8 @@ title: 'Edge connector'
 
 Le connecteur edge fournit un accès aux broches P0-P20, compatible avec l'écosystème micro:bit.
 
+[![Brochage du connecteur edge de la STeaMi V1c, contacts de gauche à droite : P3, P0, P4 à P7, P1, P8 à P12, P2, P13 à P16, 3V3, P19, P20 et GND, avec la broche du STM32WB55 de chaque contact. Entrées analogiques sur P0 à P4 et P10, SPI2 sur P13 à P15, I2C3 sur P19 et P20, boutons A et B sur P5 et P11, anneaux pour pince crocodile sur P0, P1, P2, 3V3 et GND.](/img/diagrams/edge-connector.svg)](pathname:///img/diagrams/edge-connector.svg)
+
 ## Fonctionnalités
 
 - 6 entrées analogiques (P0-P4, P10)

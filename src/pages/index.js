@@ -8,7 +8,7 @@ const features = [
     title: "Vue d'ensemble",
     description: 'Architecture, pinout, schéma bloc et caractéristiques principales.',
     link: '/docs/overview',
-    image: '/img/hardware/block-diagram.svg',
+    image: '/img/diagrams/architecture-v1c.svg',
   },
   {
     title: 'Hardware',

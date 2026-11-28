@@ -13,9 +13,23 @@
 # sha256, met à jour exemples-arduino.json et ouvre la PR. Si la branche
 # existe déjà sans PR (ouverture de la PR échouée lors d'une exécution
 # précédente), il ouvre seulement la PR sur cette branche. Si la PR est
-# déjà ouverte, il vérifie seulement sa fusion automatique. Seules comptent
+# déjà ouverte, il vérifie sa fusion automatique ; si elle est en conflit
+# avec main (un autre épinglage y a été fusionné entre-temps) et que sa
+# branche ne porte que des commits du robot, il refait la branche depuis
+# main, la pousse avec un bail sur l'ancienne tête et le signale dans un
+# commentaire de la PR. Une branche qui porte un commit ajouté à la main
+# (section d'une page d'exemples, par exemple) n'est pas refaite : un
+# avertissement demande de résoudre le conflit à la main. Seules comptent
 # les PR dont la branche est dans ce dépôt (les PR de forks sont ignorées),
 # et la fusion automatique n'est activée que pour une PR ouverte par l'App.
+#
+# Les PR `chore/exemples-arduino-*` plus anciennes encore ouvertes, ouvertes
+# par l'App dans ce dépôt, sont fermées avec le commentaire « Superseded by
+# #n. » une fois la PR de la release la plus récente ouverte ou reprise :
+# elles épingleraient une release dépassée et entreraient en conflit. Si la
+# release la plus récente est déjà épinglée, elles sont fermées avec
+# « Superseded: vX.Y.Z is already pinned. ». Leur branche est supprimée,
+# sauf si elle porte un commit ajouté à la main. Rien d'autre n'est fermé.
 #
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
@@ -122,7 +136,11 @@ jobs:
           plus_recente=$(printf '%s\n%s\n' "${actuel#v}" "${derniere#v}" | sort -V | tail -n1)
           if [ "$actuel" = "$derniere" ] || [ "v$plus_recente" != "$derniere" ]; then
             echo "Les exemples sont à jour."
-            echo "nouvelle=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "nouvelle=false"
+              echo "a_jour=true"
+              echo "epinglee=$actuel"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           archive="steami-exemples-$derniere.zip"
@@ -154,12 +172,56 @@ jobs:
               echo "nouvelle=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "La PR #$pr est déjà ouverte pour $branche : vérification de sa fusion automatique."
+            echo "La PR #$pr est déjà ouverte pour $branche."
+            # PR en conflit avec main (un autre épinglage y a été fusionné
+            # entre-temps) : elle ne fusionnerait jamais. GitHub calcule
+            # « mergeable » en différé (UNKNOWN juste après un changement de
+            # main) : quelques relectures.
+            for _ in 1 2 3 4 5 6; do
+              vue=$(gh pr view "$pr" --json mergeable,headRefOid)
+              mergeable=$(jq -r .mergeable <<<"$vue")
+              if [ "$mergeable" != "UNKNOWN" ]; then
+                break
+              fi
+              sleep 5
+            done
+            reconstruire=false
+            if [ "$mergeable" = "CONFLICTING" ]; then
+              # Seule une branche faite des seuls commits du robot est refaite :
+              # un commit ajouté à la main serait perdu.
+              etrangers=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr/commits" --paginate \
+                | jq -r --arg bot "${APP_SLUG}[bot]" '.[] | select(.author.login != $bot) | .sha')
+              if [ -n "$etrangers" ]; then
+                echo "::warning::La PR #$pr ($branche) est en conflit avec main et porte des commits qui ne sont pas du robot : résoudre le conflit à la main."
+              else
+                echo "::warning::La PR #$pr ($branche) est en conflit avec main : sa branche est reconstruite depuis main."
+                reconstruire=true
+              fi
+            fi
+            if [ "$reconstruire" = "true" ]; then
+              tete=$(jq -r .headRefOid <<<"$vue")
+              {
+                echo "nouvelle=true"
+                echo "pousser=true"
+                echo "ouvrir=false"
+                echo "reconstruire=true"
+                echo "tete=$tete"
+                echo "pr=$pr"
+                echo "actuel=$actuel"
+                echo "derniere=$derniere"
+                echo "archive=$archive"
+                echo "empreinte=$empreinte"
+                echo "branche=$branche"
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Vérification de sa fusion automatique."
             {
               echo "nouvelle=true"
               echo "pousser=false"
               echo "ouvrir=false"
               echo "pr=$pr"
+              echo "branche=$branche"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -196,6 +258,9 @@ jobs:
           ARCHIVE: ${{ steps.comparaison.outputs.archive }}
           EMPREINTE: ${{ steps.comparaison.outputs.empreinte }}
           BRANCHE: ${{ steps.comparaison.outputs.branche }}
+          # PR en conflit : branche refaite depuis main, poussée avec un bail sur TETE.
+          RECONSTRUIRE: ${{ steps.comparaison.outputs.reconstruire }}
+          TETE: ${{ steps.comparaison.outputs.tete }}
         run: |
           set -euo pipefail
           # L'archive n'est pas décompressée ici : seul son sha256 est utile.
@@ -219,7 +284,12 @@ jobs:
           git switch -c "$BRANCHE"
           git add exemples-arduino.json
           git commit -m "chore(configs): exemples Arduino $DERNIERE"
-          git push origin "$BRANCHE"
+          if [ "$RECONSTRUIRE" = "true" ]; then
+            # Le bail refuse la poussée si la branche a changé depuis la lecture de la PR.
+            git push --force-with-lease="refs/heads/$BRANCHE:$TETE" origin "$BRANCHE"
+          else
+            git push origin "$BRANCHE"
+          fi
 
       - name: Ouvre la PR
         id: ouverture
@@ -248,6 +318,82 @@ jobs:
             --body-file "$corps")
           echo "PR ouverte : $url"
           echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
+
+      # PR en conflit reconstruite depuis main : un commentaire le dit sur la PR.
+      - name: Signale la reconstruction de la branche
+        if: steps.comparaison.outputs.reconstruire == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ steps.comparaison.outputs.pr }}
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR" --body "Branche reconstruite depuis main par le robot : la PR était en conflit avec main (un autre épinglage y a été fusionné entre-temps)."
+
+      # Une PR d'une release plus ancienne épinglerait une archive dépassée et
+      # entrerait en conflit avec celle-ci. Seules les PR de l'App, dans ce
+      # dépôt, et dont la branche est chore/exemples-arduino-*, sont fermées.
+      # Une branche qui porte des commits ajoutés à la main (pages du wiki) est
+      # gardée.
+      - name: Ferme les PR des releases dépassées
+        if: steps.comparaison.outputs.nouvelle == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
+          BRANCHE: ${{ steps.comparaison.outputs.branche }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::Numéro de PR introuvable (« $PR »)"
+            exit 1
+          fi
+          # Pas de --author (index de recherche en retard) : filtre sur l'auteur en jq.
+          anciennes=$(gh pr list --state open --limit 200 \
+            --json number,headRefName,isCrossRepository,author \
+            | jq -r --arg branche "$BRANCHE" --arg a1 "app/$APP_SLUG" --arg a2 "${APP_SLUG}[bot]" \
+              '.[] | select((.isCrossRepository | not)
+                and (.headRefName | startswith("chore/exemples-arduino-"))
+                and .headRefName != $branche
+                and (.author.login == $a1 or .author.login == $a2)) | .number')
+          for n in $anciennes; do
+            etrangers=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n/commits" --paginate \
+              | jq -r --arg bot "${APP_SLUG}[bot]" '.[] | select(.author.login != $bot) | .sha')
+            if [ -z "$etrangers" ]; then
+              echo "Fermeture de la PR #$n (release dépassée)."
+              gh pr close "$n" --delete-branch --comment "Superseded by #$PR."
+            else
+              echo "::warning::Fermeture de la PR #$n (release dépassée) : sa branche porte des commits ajoutés à la main, elle est gardée."
+              gh pr close "$n" --comment "Superseded by #$PR. The branch is kept: it has commits not made by the robot."
+            fi
+          done
+
+      # Release la plus récente déjà épinglée : toute PR du robot encore ouverte
+      # est dépassée.
+      - name: Ferme les PR des releases dépassées (release déjà épinglée)
+        if: steps.comparaison.outputs.a_jour == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          EPINGLEE: ${{ steps.comparaison.outputs.epinglee }}
+        run: |
+          set -euo pipefail
+          anciennes=$(gh pr list --state open --limit 200 \
+            --json number,headRefName,isCrossRepository,author \
+            | jq -r --arg a1 "app/$APP_SLUG" --arg a2 "${APP_SLUG}[bot]" \
+              '.[] | select((.isCrossRepository | not)
+                and (.headRefName | startswith("chore/exemples-arduino-"))
+                and (.author.login == $a1 or .author.login == $a2)) | .number')
+          for n in $anciennes; do
+            etrangers=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n/commits" --paginate \
+              | jq -r --arg bot "${APP_SLUG}[bot]" '.[] | select(.author.login != $bot) | .sha')
+            if [ -z "$etrangers" ]; then
+              echo "Fermeture de la PR #$n (release dépassée)."
+              gh pr close "$n" --delete-branch --comment "Superseded: $EPINGLEE is already pinned."
+            else
+              echo "::warning::Fermeture de la PR #$n (release dépassée) : sa branche porte des commits ajoutés à la main, elle est gardée."
+              gh pr close "$n" --comment "Superseded: $EPINGLEE is already pinned. The branch is kept: it has commits not made by the robot."
+            fi
+          done
 
       - name: Active la fusion automatique
         if: steps.comparaison.outputs.nouvelle == 'true'

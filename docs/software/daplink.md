@@ -18,6 +18,10 @@ Le STM32F103 exécute le firmware [DAPLink](https://github.com/steamicc/DAPLink)
 | Flash externe       | I2C (0x3B)          | Accès à la mémoire W25Q64 (8 Mo)         |
 | Config persistante  | I2C (0x3B)          | Lecture/écriture config zone (1 Ko)      |
 
+Les quatre fonctions USB forment un seul périphérique composite. Le schéma montre par quelle liaison chacune atteint le STM32WB55 ou la flash ; les interfaces, endpoints et broches sont détaillés dans [STM32F103 — Interfaces USB](../hardware/main-components/stm32f103#interfaces-usb).
+
+[![Schéma des interfaces USB du DAPLink de la STeaMi V1c : port série CDC vers le LPUART1 du STM32WB55, CMSIS-DAP en HID, WebUSB et lecteur STEAMI vers le SWD du STM32WB55, fichier du lecteur dans la W25Q64 par SPI1, écrit par le STM32WB55 sur l'I2C à l'adresse 0x3B](/img/diagrams/daplink-usb.svg)](pathname:///img/diagrams/daplink-usb.svg)
+
 ## Protocole I2C
 
 Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
@@ -50,7 +54,38 @@ Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
 | FILENAME_LEN    | 8      | Longueur max du nom de fichier     |
 | EXT_LEN         | 3      | Longueur max de l'extension        |
 
+### Trames
+
+[![Trames I2C du pont DAPLink 0x3B sur la STeaMi V1c : commande suivie de 0 à 31 octets, lecture de registre après un redémarrage, lecture de bloc de 256 octets dans une seconde transaction](/img/diagrams/daplink-i2c-trames.svg)](pathname:///img/diagrams/daplink-i2c-trames.svg)
+
+Le STM32WB55 est le maître du bus et fixe donc sa vitesse. Le fork MicroPython n'a pas de pilote I2C matériel pour le STM32WB55 : `I2C(1)` y est un I2C logiciel, réglé par défaut à `freq=400000` ([`machine_i2c.c`](https://github.com/steamicc/micropython-steami/blob/stm32-steami-rev1d-final/ports/stm32/machine_i2c.c)), et la bibliothèque l'ouvre sans préciser `freq`. Côté STM32F103, l'esclave est le périphérique I2C2 (PB10/PB11). Chaque échange commence par l'octet de commande ; le nombre d'octets qui le suivent est fixé par la commande ([`steami_i2c.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_i2c.c)).
+
+| Trame                                                  | Commandes et octets envoyés après le code                                                                                                                                                                   | Réponse                                                                                                 |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Commande, avec ou sans arguments                       | CLEAR_FLASH, CLEAR_CONFIG : aucun ; SET_FILENAME : 11 (nom 8.3 complété par des espaces) ; WRITE_DATA : 31 (nombre n, puis 30 octets) ; WRITE_CONFIG : 31 (décalage sur 2 octets, nombre n, puis 28 octets) | Aucune                                                                                                  |
+| Lecture d'un registre (redémarrage après la commande)  | WHO_AM_I, GET_FILENAME, STATUS, ERROR : aucun                                                                                                                                                               | WHO_AM_I : 1 octet (0x4C) ; GET_FILENAME : 11 octets ; STATUS : 1 octet, bit 7 = BUSY ; ERROR : 1 octet |
+| Lecture d'un bloc (commande, puis seconde transaction) | READ_SECTOR : 2 (secteur 0 à 32767, poids fort en premier) ; READ_CONFIG : 2 (décalage 0 à 768)                                                                                                             | 256 octets                                                                                              |
+
+Le STM32F103 exécute les commandes et prépare les réponses toutes les 30 ms. Pendant une lecture, il retient l'horloge SCL jusqu'à ce que la réponse soit prête ; sans réponse au bout de 500 ms, il renvoie 0xFF. Tant que le bit BUSY de STATUS vaut 1, il ignore toute commande autre que WHO_AM_I, STATUS et ERROR, sans le signaler dans le registre d'erreur. Avant la lecture d'un bloc, `daplink_flash` marque une pause de 200 ms pour un secteur, et `daplink_bridge` de 100 ms pour la config zone.
+
+Le registre ERROR est remis à 0 après chaque lecture :
+
+| Bit | Signification                                                                        |
+| --- | ------------------------------------------------------------------------------------ |
+| 0   | Paramètre invalide                                                                   |
+| 1   | Nom de fichier invalide                                                              |
+| 2   | Fichier plein (remis à 0 par CLEAR_FLASH)                                            |
+| 7   | Échec de la dernière commande ; remis à 0 dès la commande suivante, STATUS y compris |
+
+### Séquence d'un enregistrement
+
+[![Diagramme de séquence sur la STeaMi V1c : le STM32WB55 lit STATUS puis envoie SET_FILENAME au STM32F103 et rend la main, lit le BME280 pendant que le STM32F103 écrit le nom dans la W25Q64 par SPI, puis, dans write(), attend que BUSY retombe avant chaque morceau de 30 octets envoyé avec WRITE_DATA, attend encore et lit ERROR](/img/diagrams/daplink-i2c-sequence.svg)](pathname:///img/diagrams/daplink-i2c-sequence.svg)
+
+Ce diagramme suit `set_filename()` puis `write()` de [`DaplinkFlash`](#daplinkflash), avec une mesure lue entre les deux. Avant chaque commande, la bibliothèque lit STATUS toutes les 5 ms tant que BUSY vaut 1. `set_filename()` rend la main dès SET_FILENAME envoyé : c'est `write()` qui attend la fin de cette commande, avant son premier WRITE_DATA. `write()` attend aussi la fin du dernier morceau, puis lit ERROR.
+
 ## Architecture flash F103
+
+[![Schéma de la flash interne de 128 Ko du STM32F103 de la STeaMi : bootloader DAPLink de 47 Ko à 0x08000000, config zone STeaMi de 1 Ko à 0x0800BC00, firmware d'interface DAPLink de 79 Ko à 0x0800C000, paramètres DAPLink de 1 Ko à 0x0801FC00](/img/diagrams/flash-stm32f103.svg)](pathname:///img/diagrams/flash-stm32f103.svg)
 
 | Zone               | Adresse                 | Taille | Description                        |
 | ------------------ | ----------------------- | ------ | ---------------------------------- |
@@ -58,6 +93,12 @@ Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
 | Config zone        | 0x0800BC00 — 0x0800BFFF | 1 Ko   | Données usine persistantes         |
 | Interface firmware | 0x0800C000 — 0x0801FBFF | 79 Ko  | Firmware DAPLink                   |
 | DAPLink settings   | 0x0801FC00 — 0x0801FFFF | 1 Ko   | Paramètres DAPLink                 |
+
+Les adresses viennent de [`daplink_addr.h`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/hic_hal/stm32/stm32f103xb/daplink_addr.h) et de [`steami_config.h`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_config.h). Elles sont les mêmes sur les trois releases, qui portent toutes un STM32F103CBT6. La flash s'efface par pages de 1 Ko : la config zone et les paramètres DAPLink occupent chacun une page.
+
+La config zone occupe l'intervalle laissé entre le bootloader et le firmware d'interface. Une mise à jour depuis le lecteur **MAINTENANCE** remplace le firmware d'interface sans l'effacer. Le firmware d'interface, lui, ne réécrit jamais le bootloader (option `DAPLINK_BOOTLOADER_UPDATE` absente de la configuration STeaMi).
+
+Les paramètres DAPLink gardent les options choisies en copiant un fichier de configuration sur le lecteur **STEAMI** : `AUTO_RST.CFG` ou `HARD_RST.CFG`, `AUTO_ON.CFG` ou `AUTO_OFF.CFG`, `OVFL_ON.CFG` ou `OVFL_OFF.CFG`, `COMP_ON.CFG` ou `COMP_OFF.CFG` ([`settings_rom.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/daplink/settings/settings_rom.c), [`vfs_user.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/daplink/drag-n-drop/vfs_user.c)). DAPLink ne prend ces fichiers en compte que si l'automatisation est déjà autorisée ou si le bouton de reset est appuyé pendant la copie.
 
 ## API MicroPython
 

@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 990" width="800" height="990"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Enregistrer une mesure dans la flash par le pont DAPLink (STeaMi V1c)</title>
+  <desc id="desc">Diagramme de séquence : avec set_filename(), le STM32WB55 lit STATUS puis choisit
+    le fichier DATA.CSV avec SET_FILENAME et rend la main aussitôt. Il lit le BME280 pendant que le
+    STM32F103 travaille. Dans write(), il attend que le bit BUSY retombe avant chaque morceau de
+    30 octets envoyé avec WRITE_DATA, attend encore, puis lit le registre ERROR. Le STM32F103 écrit
+    dans la flash W25Q64 par SPI.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-capt { fill: #fff3e0; stroke: #b35400; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-txt-i2c { fill: #00796b; }
+      .sch-txt-spi { fill: #303f9f; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-req  { stroke: #00796b; }
+      .sch-rep  { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-spi  { stroke: #303f9f; }
+      .sch-vie  { fill: none; stroke: #6e7781; stroke-width: 1; stroke-dasharray: 3 4; }
+      .sch-phase { fill: #f6f8fa; stroke: #d0d7de; }
+      .sch-cadre { fill: none; stroke: #57606a; stroke-width: 1; }
+      .sch-onglet { fill: #ffffff; stroke: #57606a; stroke-width: 1; }
+      .sch-occupe { fill: #e0f2f1; stroke: #00796b; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-i2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#00796b"/>
+    </marker>
+    <marker id="fl-spi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#303f9f"/>
+    </marker>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="989" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Enregistrer une mesure par le pont DAPLink</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+  <text class="sch-detail" x="24" y="62">Exemple : une ligne CSV dans DATA.CSV avec daplink_flash (MicroPython)</text>
+
+  <!-- Lignes de vie -->
+  <path class="sch-vie" d="M100 136 V890"/>
+  <path class="sch-vie" d="M300 136 V890"/>
+  <path class="sch-vie" d="M520 136 V890"/>
+  <path class="sch-vie" d="M705 136 V890"/>
+
+  <rect class="sch-bloc sch-capt" x="30" y="84" width="140" height="52" rx="6"/>
+  <text class="sch-nom" x="100" y="106" text-anchor="middle">BME280</text>
+  <text class="sch-detail" x="100" y="124" text-anchor="middle">capteur, 0x76</text>
+  <rect class="sch-bloc sch-mcu" x="225" y="84" width="150" height="52" rx="6"/>
+  <text class="sch-nom" x="300" y="106" text-anchor="middle">STM32WB55</text>
+  <text class="sch-detail" x="300" y="124" text-anchor="middle">maître I2C1</text>
+  <rect class="sch-bloc sch-mcu" x="440" y="84" width="160" height="52" rx="6"/>
+  <text class="sch-nom" x="520" y="106" text-anchor="middle">STM32F103</text>
+  <text class="sch-detail" x="520" y="124" text-anchor="middle">DAPLink, esclave 0x3B</text>
+  <rect class="sch-bloc sch-mem" x="640" y="84" width="130" height="52" rx="6"/>
+  <text class="sch-nom" x="705" y="106" text-anchor="middle">W25Q64</text>
+  <text class="sch-detail" x="705" y="124" text-anchor="middle">flash SPI, 8 Mo</text>
+
+  <!-- Barres d'activité du F103 (BUSY = 1), dessinées sous les flèches -->
+  <rect class="sch-occupe" x="515" y="270" width="10" height="340"/>
+  <rect class="sch-occupe" x="515" y="650" width="10" height="130"/>
+
+  <!-- 1. set_filename() -->
+  <rect class="sch-phase" x="24" y="150" width="200" height="24" rx="12"/>
+  <text class="sch-nom" x="40" y="167">1. set_filename()</text>
+
+  <path class="sch-lien sch-req" d="M300 200 H518" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="192" text-anchor="middle">STATUS 0x80</text>
+  <path class="sch-lien sch-rep" d="M520 230 H302" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="224" text-anchor="middle">0x00 : libre</text>
+
+  <path class="sch-lien sch-req" d="M300 270 H513" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="262" text-anchor="middle">SET_FILENAME 0x03</text>
+  <text class="sch-detail" x="410" y="286" text-anchor="middle">« DATA&#160;&#160;&#160;&#160;CSV », 11 octets</text>
+  <text class="sch-detail" x="292" y="300" text-anchor="end">rend la main aussitôt</text>
+  <path class="sch-lien sch-spi" d="M525 314 H703" marker-end="url(#fl-spi)"/>
+  <text class="sch-lien-txt sch-txt-spi" x="614" y="306" text-anchor="middle">efface et écrit le nom</text>
+
+  <!-- 2. Lire le capteur -->
+  <rect class="sch-phase" x="24" y="344" width="200" height="24" rx="12"/>
+  <text class="sch-nom" x="40" y="361">2. Lire le capteur</text>
+
+  <path class="sch-lien sch-req" d="M300 402 H102" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="200" y="394" text-anchor="middle">lecture des registres</text>
+  <text class="sch-detail" x="200" y="418" text-anchor="middle">même bus I2C1</text>
+  <path class="sch-lien sch-rep" d="M100 446 H298" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="200" y="438" text-anchor="middle">mesure</text>
+
+  <!-- 3. write() -->
+  <rect class="sch-phase" x="24" y="474" width="200" height="24" rx="12"/>
+  <text class="sch-nom" x="40" y="491">3. write()</text>
+
+  <rect class="sch-cadre" x="256" y="510" width="520" height="196"/>
+  <rect class="sch-onglet" x="256" y="510" width="232" height="20"/>
+  <text class="sch-detail" x="264" y="524">boucle : morceaux de 30 octets au plus</text>
+
+  <rect class="sch-cadre" x="272" y="540" width="292" height="84"/>
+  <rect class="sch-onglet" x="272" y="540" width="214" height="20"/>
+  <text class="sch-detail" x="280" y="554">tant que BUSY = 1, toutes les 5 ms</text>
+  <path class="sch-lien sch-req" d="M300 580 H513" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="574" text-anchor="middle">STATUS 0x80</text>
+  <path class="sch-lien sch-rep" d="M515 610 H302" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="604" text-anchor="middle">bit 7 = BUSY</text>
+
+  <path class="sch-lien sch-req" d="M300 650 H513" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="642" text-anchor="middle">WRITE_DATA 0x11</text>
+  <text class="sch-detail" x="410" y="666" text-anchor="middle">n, puis 30 octets</text>
+  <path class="sch-lien sch-spi" d="M525 688 H703" marker-end="url(#fl-spi)"/>
+  <text class="sch-lien-txt sch-txt-spi" x="614" y="680" text-anchor="middle">ajoute n octets</text>
+
+  <rect class="sch-cadre" x="272" y="720" width="292" height="84"/>
+  <rect class="sch-onglet" x="272" y="720" width="214" height="20"/>
+  <text class="sch-detail" x="280" y="734">tant que BUSY = 1, toutes les 5 ms</text>
+  <path class="sch-lien sch-req" d="M300 760 H513" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="754" text-anchor="middle">STATUS 0x80</text>
+  <path class="sch-lien sch-rep" d="M520 790 H302" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="784" text-anchor="middle">0x00 : libre</text>
+
+  <path class="sch-lien sch-req" d="M300 830 H518" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="822" text-anchor="middle">ERROR 0x81</text>
+  <path class="sch-lien sch-rep" d="M520 866 H302" marker-end="url(#fl-i2c)"/>
+  <text class="sch-lien-txt sch-txt-i2c" x="410" y="858" text-anchor="middle">0x00 : aucune erreur</text>
+  <text class="sch-detail" x="410" y="882" text-anchor="middle">registre remis à 0 après lecture</text>
+
+  <!-- Légende -->
+  <rect x="24" y="904" width="752" height="62" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="928">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-req" d="M40 950 H78" marker-end="url(#fl-i2c)"/>
+    <text x="86" y="954">requête I2C</text>
+    <path class="sch-lien sch-rep" d="M184 950 H222" marker-end="url(#fl-i2c)"/>
+    <text x="230" y="954">réponse I2C</text>
+    <path class="sch-lien sch-spi" d="M326 950 H364" marker-end="url(#fl-spi)"/>
+    <text x="372" y="954">SPI</text>
+    <rect class="sch-occupe" x="410" y="942" width="10" height="16"/>
+    <text x="428" y="954">tâche en cours (BUSY = 1)</text>
+    <rect class="sch-cadre" x="604" y="942" width="24" height="16"/>
+    <text x="636" y="954">boucle</text>
+  </g>
+</svg>

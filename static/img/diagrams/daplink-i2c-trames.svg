@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700" width="800" height="700"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Trames I2C du pont DAPLink, adresse 0x3B (STeaMi V1c)</title>
+  <desc id="desc">Les trois formes de trame entre le STM32WB55 (maître) et le STM32F103 (esclave 0x3B) :
+    commande avec ou sans arguments, lecture d'un registre avec redémarrage, lecture d'un bloc
+    de 256 octets après la commande. Règles de temps, bit BUSY et registre d'erreur.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-ext  { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-octet  { font-size: 12px; font-weight: 600; fill: #1f2328; text-anchor: middle; }
+      .sch-code   { font-weight: 600; fill: #1f2328; }
+      .sch-lien { fill: none; stroke-width: 1.5; stroke-linecap: round; }
+      .sch-pause { stroke: #57606a; stroke-dasharray: 2 4; }
+    </style>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="699" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Trames I2C du pont DAPLink (0x3B)</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+  <text class="sch-detail" x="24" y="62">STM32WB55 maître (I2C1), qui fixe l'horloge SCL ; STM32F103 esclave (I2C2, PB10/PB11)</text>
+
+  <!-- 1. Commande, avec ou sans arguments -->
+  <text class="sch-nom" x="24" y="98">1. Commande, avec ou sans arguments</text>
+  <rect class="sch-bloc sch-ext" x="40" y="110" width="32" height="32"/>
+  <text class="sch-octet" x="56" y="130">S</text>
+  <rect class="sch-bloc sch-mcu" x="72" y="110" width="84" height="32"/>
+  <text class="sch-octet" x="114" y="130">0x3B W</text>
+  <rect class="sch-bloc sch-mcu" x="156" y="110" width="96" height="32"/>
+  <text class="sch-octet" x="204" y="130">Commande</text>
+  <rect class="sch-bloc sch-mcu" x="252" y="110" width="200" height="32"/>
+  <text class="sch-octet" x="352" y="130">Arguments (0 à 31 octets)</text>
+  <rect class="sch-bloc sch-ext" x="452" y="110" width="32" height="32"/>
+  <text class="sch-octet" x="468" y="130">P</text>
+  <g class="sch-detail">
+    <text x="40" y="166"><tspan class="sch-code">CLEAR_FLASH 0x10</tspan>, <tspan class="sch-code">CLEAR_CONFIG 0x32</tspan> : sans argument</text>
+    <text x="40" y="184"><tspan class="sch-code">SET_FILENAME 0x03</tspan> : 11 octets, nom 8.3 complété par des espaces</text>
+    <text x="40" y="202"><tspan class="sch-code">WRITE_DATA 0x11</tspan> : 31 octets, nombre n puis 30 octets (n utiles, le reste à 0)</text>
+    <text x="40" y="220"><tspan class="sch-code">WRITE_CONFIG 0x30</tspan> : 31 octets, décalage (2), nombre n, puis 28 octets</text>
+  </g>
+
+  <!-- 2. Lecture d'un registre -->
+  <text class="sch-nom" x="24" y="258">2. Lecture d'un registre : commande, redémarrage, lecture</text>
+  <rect class="sch-bloc sch-ext" x="40" y="270" width="32" height="32"/>
+  <text class="sch-octet" x="56" y="290">S</text>
+  <rect class="sch-bloc sch-mcu" x="72" y="270" width="84" height="32"/>
+  <text class="sch-octet" x="114" y="290">0x3B W</text>
+  <rect class="sch-bloc sch-mcu" x="156" y="270" width="96" height="32"/>
+  <text class="sch-octet" x="204" y="290">Commande</text>
+  <rect class="sch-bloc sch-ext" x="252" y="270" width="32" height="32"/>
+  <text class="sch-octet" x="268" y="290">Sr</text>
+  <rect class="sch-bloc sch-mcu" x="284" y="270" width="84" height="32"/>
+  <text class="sch-octet" x="326" y="290">0x3B R</text>
+  <rect class="sch-bloc sch-mem" x="368" y="270" width="120" height="32"/>
+  <text class="sch-octet" x="428" y="290">Réponse</text>
+  <rect class="sch-bloc sch-ext" x="488" y="270" width="32" height="32"/>
+  <text class="sch-octet" x="504" y="290">P</text>
+  <g class="sch-detail">
+    <text x="40" y="326"><tspan class="sch-code">WHO_AM_I 0x01</tspan> : 1 octet, 0x4C ; <tspan class="sch-code">GET_FILENAME 0x04</tspan> : 11 octets</text>
+    <text x="40" y="344"><tspan class="sch-code">STATUS 0x80</tspan> : 1 octet, bit 7 = BUSY ; <tspan class="sch-code">ERROR 0x81</tspan> : 1 octet, remis à 0 après lecture</text>
+  </g>
+
+  <!-- 3. Lecture d'un bloc -->
+  <text class="sch-nom" x="24" y="382">3. Lecture d'un bloc : commande et numéro, puis lecture séparée</text>
+  <rect class="sch-bloc sch-ext" x="40" y="394" width="32" height="32"/>
+  <text class="sch-octet" x="56" y="414">S</text>
+  <rect class="sch-bloc sch-mcu" x="72" y="394" width="84" height="32"/>
+  <text class="sch-octet" x="114" y="414">0x3B W</text>
+  <rect class="sch-bloc sch-mcu" x="156" y="394" width="96" height="32"/>
+  <text class="sch-octet" x="204" y="414">Commande</text>
+  <rect class="sch-bloc sch-mcu" x="252" y="394" width="128" height="32"/>
+  <text class="sch-octet" x="316" y="414">Numéro (2 octets)</text>
+  <rect class="sch-bloc sch-ext" x="380" y="394" width="32" height="32"/>
+  <text class="sch-octet" x="396" y="414">P</text>
+  <path class="sch-lien sch-pause" d="M418 418 H474"/>
+  <text class="sch-detail" x="446" y="408" text-anchor="middle">pause</text>
+  <rect class="sch-bloc sch-ext" x="480" y="394" width="32" height="32"/>
+  <text class="sch-octet" x="496" y="414">S</text>
+  <rect class="sch-bloc sch-mcu" x="512" y="394" width="84" height="32"/>
+  <text class="sch-octet" x="554" y="414">0x3B R</text>
+  <rect class="sch-bloc sch-mem" x="596" y="394" width="104" height="32"/>
+  <text class="sch-octet" x="648" y="414">256 octets</text>
+  <rect class="sch-bloc sch-ext" x="700" y="394" width="32" height="32"/>
+  <text class="sch-octet" x="716" y="414">P</text>
+  <g class="sch-detail">
+    <text x="40" y="450"><tspan class="sch-code">READ_SECTOR 0x20</tspan> : secteur 0 à 32767 de la W25Q64, octet de poids fort en premier</text>
+    <text x="40" y="468"><tspan class="sch-code">READ_CONFIG 0x31</tspan> : décalage 0 à 768 dans la config zone de 1 Ko</text>
+    <text x="40" y="486">Pause de la bibliothèque MicroPython : 200 ms pour un secteur, 100 ms pour la config zone</text>
+  </g>
+
+  <!-- Règles -->
+  <rect x="24" y="508" width="752" height="98" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="532">Règles du F103</text>
+  <g class="sch-detail">
+    <text x="40" y="552">Il traite les commandes toutes les 30 ms ; pendant une lecture, il retient SCL jusqu'à la réponse (0xFF après 500 ms).</text>
+    <text x="40" y="570">Tant que BUSY = 1, il ignore sans erreur toute commande sauf WHO_AM_I, STATUS et ERROR.</text>
+    <text x="40" y="588">ERROR : bit 0 paramètre, bit 1 nom, bit 2 fichier plein, bit 7 échec (effacé par la commande suivante).</text>
+  </g>
+
+  <!-- Légende -->
+  <rect x="24" y="622" width="752" height="62" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="646">Légende</text>
+  <g class="sch-detail">
+    <rect class="sch-bloc sch-ext" x="40" y="658" width="24" height="16" rx="3"/>
+    <text x="72" y="671">S, Sr, P : début, redémarrage, fin</text>
+    <rect class="sch-bloc sch-mcu" x="290" y="658" width="24" height="16" rx="3"/>
+    <text x="322" y="671">envoyé par le WB55</text>
+    <rect class="sch-bloc sch-mem" x="460" y="658" width="24" height="16" rx="3"/>
+    <text x="492" y="671">envoyé par le F103</text>
+    <text x="620" y="671">W, R : octet 0x76, 0x77</text>
+  </g>
+</svg>

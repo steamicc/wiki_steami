@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 576" width="800" height="576"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Mémoire flash interne du STM32F103CBT6 (STeaMi V1c)</title>
+  <desc id="desc">Les 128 Ko de flash du STM32F103 se répartissent en quatre zones : bootloader DAPLink de 47 Ko à partir de 0x08000000, config zone STeaMi de 1 Ko à 0x0800BC00, firmware d'interface DAPLink de 79 Ko à 0x0800C000 et paramètres DAPLink de 1 Ko à 0x0801FC00, jusqu'à 0x0801FFFF.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-texte  { font-size: 12px; fill: #1f2328; }
+      .sch-sep    { stroke: #d0d7de; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="575" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Mémoire flash interne du STM32F103CBT6</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c (V1a, V1b identiques)</text>
+  <text class="sch-detail" x="24" y="64">128 Ko en pages de 1 Ko, adresses du firmware DAPLink (branche release_letssteam)</text>
+
+  <!-- En-têtes de colonnes. -->
+  <text class="sch-nom" x="24" y="94">Zone, adresses et taille</text>
+  <text class="sch-nom" x="448" y="94">Contenu et écriture</text>
+
+  <!-- Zones de la flash, de l'adresse basse (en haut) à l'adresse haute (en bas). -->
+  <rect class="sch-bloc sch-mcu" x="24" y="104" width="400" height="88"/>
+  <text class="sch-nom" x="40" y="144">Bootloader DAPLink</text>
+  <text class="sch-detail" x="40" y="164">0x08000000 – 0x0800BBFF · 47 Ko</text>
+
+  <rect class="sch-bloc sch-mem" x="24" y="192" width="400" height="72"/>
+  <text class="sch-nom" x="40" y="224">Config zone STeaMi</text>
+  <text class="sch-detail" x="40" y="244">0x0800BC00 – 0x0800BFFF · 1 Ko</text>
+
+  <rect class="sch-bloc sch-mcu" x="24" y="264" width="400" height="104"/>
+  <text class="sch-nom" x="40" y="312">Firmware d'interface DAPLink</text>
+  <text class="sch-detail" x="40" y="332">0x0800C000 – 0x0801FBFF · 79 Ko</text>
+
+  <rect class="sch-bloc sch-mem" x="24" y="368" width="400" height="64"/>
+  <text class="sch-nom" x="40" y="396">Paramètres DAPLink</text>
+  <text class="sch-detail" x="40" y="416">0x0801FC00 – 0x0801FFFF · 1 Ko</text>
+
+  <!-- Séparateurs de la colonne de droite, alignés sur les limites des zones. -->
+  <path class="sch-sep" d="M440 192 H776 M440 264 H776 M440 368 H776"/>
+
+  <!-- Contenu et écriture de chaque zone. -->
+  <g class="sch-texte">
+    <text x="448" y="143">Présente le lecteur MAINTENANCE.</text>
+    <text x="448" y="161">Jamais réécrit par le firmware d'interface.</text>
+
+    <text x="448" y="214">Révision, nom, calibration (JSON de steami_config).</text>
+    <text x="448" y="232">Écrite par le STM32WB55 en I2C (0x3B, 0x30 à 0x32).</text>
+    <text x="448" y="250">Conservée quand le firmware d'interface change.</text>
+
+    <text x="448" y="311">Fournit CMSIS-DAP, port série, lecteur STEAMI.</text>
+    <text x="448" y="329">Remplacé par un .bin copié sur MAINTENANCE.</text>
+
+    <text x="448" y="395">Options des fichiers .CFG copiés sur le lecteur</text>
+    <text x="448" y="413">(AUTO_RST.CFG, OVFL_ON.CFG, COMP_ON.CFG…).</text>
+  </g>
+
+  <!-- Légende : seulement les types présents. -->
+  <rect x="24" y="456" width="752" height="96" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="482">Légende</text>
+  <g class="sch-detail">
+    <rect class="sch-bloc sch-mcu" x="40" y="496" width="24" height="16" rx="3"/>
+    <text x="72" y="509">Code exécuté (firmware)</text>
+    <rect class="sch-bloc sch-mem" x="260" y="496" width="24" height="16" rx="3"/>
+    <text x="292" y="509">Données persistantes (une page de 1 Ko)</text>
+    <text x="40" y="536">Hauteurs non proportionnelles aux tailles. Sources : daplink_addr.h (stm32f103xb) et steami_config.h.</text>
+  </g>
+</svg>

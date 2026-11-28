@@ -4,6 +4,7 @@ title: "Vue d'ensemble du matériel"
 ---
 
 import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
+import DiagrammeCliquable from '@site/src/components/DiagrammeCliquable';
 
 # Vue d'ensemble du matériel
 
@@ -69,9 +70,22 @@ Carte au circuit imprimé vert : écran OLED rond, connecteur micro-USB et conne
 
 ## Schéma bloc
 
-![Schéma bloc STeaMi](/img/hardware/block-diagram.svg)
+<ReleaseTabs>
+<Release releases="v1a v1b">
 
-Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Sur la V1c, l'écran est un TFT GC9A01 alimenté en +3V3 (sans rail 14,5 V), le BME280 remplace les capteurs WSEN-PADS, WSEN-HIDS et APDS-9960, et le connecteur USB est un USB-C (voir [Révisions](./revisions)).
+![Schéma bloc de la STeaMi V1b : STM32WB55RG relié à l'écran OLED SSD1327 en SPI1 et aux capteurs du bus I2C1 (dont WSEN-PADS, WSEN-HIDS et APDS-9960) ; STM32F103 DAPLink relié au STM32WB55RG par UART, au micro-USB et à la flash W25Q64 en SPI](/img/hardware/block-diagram.svg)
+
+Ce schéma bloc représente la V1b (indice B1), dont l'architecture est commune à la V1a. Ses blocs ne sont pas cliquables. Les différences avec la V1c sont détaillées dans [Révisions](./revisions).
+
+</Release>
+<Release releases="v1c">
+
+<DiagrammeCliquable src="/img/diagrams/architecture-v1c.svg" width={800} height={1232} alt="Schéma bloc de la STeaMi V1c : STM32WB55RG relié à l'écran GC9A01 en SPI1, aux LED, aux boutons, au buzzer, au micro IMP34DT05 et, par le bus I2C1, aux capteurs ISM330DLC, LIS2MDL, VL53L1X et BME280, à la jauge BQ27441 et à l'expandeur MCP23009 ; STM32F103 DAPLink relié à l'USB-C, à la flash W25Q64 et au port SWD J8 ; chaîne d'alimentation BQ24075, DIO7003, TPS63000, LD3985 et AP3015" />
+
+Les deux microcontrôleurs sont reliés par une liaison série (console), par le SWD (programmation du STM32WB55 par DAPLink) et par le bus I2C1 (pont DAPLink à l'adresse 0x3B). Côté alimentation (feuilles FP4 et FP14 de l'indice C), la sortie du chargeur BQ24075 alimente le convertisseur TPS63000 (+3V3 de la carte) par l'interrupteur DIO7003, et le régulateur LD3985 (+3V3_STLINK du STM32F103 et de la flash). L'élévateur AP3015 tire du +3V3 le 5 V des connecteurs Jacdac.
+
+</Release>
+</ReleaseTabs>
 
 ## Description du hardware
 
@@ -275,6 +289,21 @@ Le processeur d'interface (STM32F103) gère les communications USB. Il exécute 
 | USB MSC         | Stockage de masse (drag-and-drop programming)                                                                                                                                                                                                                   |
 | USB WebUSB      | Interface web directe                                                                                                                                                                                                                                           |
 | Plus d'infos    | [Conception — Service et USB](../design/service-usb), [Schéma — FP14](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP14-Microcontroleur_interface.SchDoc), [Datasheet](https://www.st.com/resource/en/datasheet/stm32f103cb.pdf) |
+
+Les deux microcontrôleurs sont reliés par le SWD, le reset, la console série, une commande d'alimentation (V1b, V1c) et le pont I2C. Le rôle de chaque liaison et le brochage sont détaillés dans [STM32WB55 — Liaisons avec le STM32F103](./main-components/stm32wb55#liaisons-avec-le-stm32f103).
+
+<ReleaseTabs>
+<Release releases="v1b v1c">
+
+[![Schéma des liaisons entre les deux microcontrôleurs de la STeaMi V1b et V1c : SWD de PB13 et PB14 du STM32F103 vers PA14 et PA13 du STM32WB55 pour flasher et déboguer, reset par PB0, console série UART à 115 200 bauds entre l'USART2 (PA2, PA3) et le LPUART1 (PB10, PB11), commande d'alimentation du STM32F103 par PB2, et I2C avec le STM32F103 esclave 0x3B pour la flash W25Q64 et la config zone](/img/diagrams/liaisons-mcu-v1c.svg)](pathname:///img/diagrams/liaisons-mcu-v1c.svg)
+
+</Release>
+<Release releases="v1a">
+
+[![Schéma des liaisons entre les deux microcontrôleurs de la STeaMi V1a : SWD, reset par le tampon 74LVC1G07 et console série UART comme en V1b, ligne I2C_INT entre les broches PB2 des deux microcontrôleurs, et bus I2C arrivant sur PB6 et PB7 du STM32F103 alors que le firmware DAPLink l'attend sur PB10 et PB11](/img/diagrams/liaisons-mcu-v1a.svg)](pathname:///img/diagrams/liaisons-mcu-v1a.svg)
+
+</Release>
+</ReleaseTabs>
 
 ### Mémoire flash externe
 

@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 696" width="800" height="696"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Interfaces USB du DAPLink (STeaMi V1c)</title>
+  <desc id="desc">Le firmware DAPLink du STM32F103 présente à l'ordinateur un périphérique USB composite : port série CDC, CMSIS-DAP v1 en HID, WebUSB et stockage de masse. Le port série passe par l'USART2 vers le LPUART1 du STM32WB55 ; CMSIS-DAP, WebUSB et la programmation par glisser-déposer passent par le SWD ; le fichier du lecteur est lu dans la flash W25Q64 par SPI1 et écrit par le STM32WB55 sur l'I2C, à l'adresse 0x3B.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-fw   { fill: #ffffff; stroke: #00796b; }
+      .sch-mem  { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-ext  { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-i2c  { stroke: #00796b; stroke-dasharray: 6 4; }
+      .sch-spi  { stroke: #303f9f; }
+      .sch-uart { stroke: #b35400; stroke-dasharray: 2 4; }
+      .sch-swd  { stroke: #6e40c9; stroke-dasharray: 10 4 2 4; }
+      .sch-usb  { stroke: #1f2328; stroke-width: 3; }
+      .sch-gpio { stroke: #57606a; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="695" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Interfaces USB du DAPLink</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+
+  <!-- Ordinateur -->
+  <rect class="sch-bloc sch-ext" x="300" y="56" width="200" height="52" rx="6"/>
+  <text class="sch-nom" x="400" y="78" text-anchor="middle">Ordinateur</text>
+  <text class="sch-detail" x="400" y="96" text-anchor="middle">pilotes standard, navigateur</text>
+
+  <!-- STM32F103 : conteneur -->
+  <rect class="sch-bloc sch-mcu" x="24" y="136" width="752" height="244" rx="6"/>
+  <text class="sch-nom" x="40" y="160">STM32F103CBT6</text>
+  <text class="sch-detail" x="760" y="160" text-anchor="end">DAPLink : périphérique USB composite 0D28:0204</text>
+
+  <!-- USB : ordinateur vers les quatre fonctions -->
+  <path class="sch-lien sch-usb" d="M400 108 V174"/>
+  <path class="sch-lien sch-usb" d="M124 174 H676 M124 174 V188 M308 174 V188 M492 174 V188 M676 174 V188"/>
+  <text class="sch-lien-txt" x="410" y="126" fill="#1f2328">USB (USB-C)</text>
+
+  <!-- Fonctions USB du firmware -->
+  <rect class="sch-bloc sch-fw" x="40" y="188" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="124" y="208" text-anchor="middle">CDC ACM</text>
+  <text class="sch-detail" x="124" y="226" text-anchor="middle">port série · EP3, EP4</text>
+
+  <rect class="sch-bloc sch-fw" x="224" y="188" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="308" y="208" text-anchor="middle">HID</text>
+  <text class="sch-detail" x="308" y="226" text-anchor="middle">CMSIS-DAP v1 · EP1</text>
+
+  <rect class="sch-bloc sch-fw" x="408" y="188" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="492" y="208" text-anchor="middle">WebUSB</text>
+  <text class="sch-detail" x="492" y="226" text-anchor="middle">CMSIS-DAP · EP0 seul</text>
+
+  <rect class="sch-bloc sch-fw" x="592" y="188" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="676" y="208" text-anchor="middle">MSC</text>
+  <text class="sch-detail" x="676" y="226" text-anchor="middle">lecteur STEAMI · EP2</text>
+
+  <!-- Flux internes du firmware -->
+  <path class="sch-lien sch-gpio" d="M124 236 V298" marker-end="url(#fl-gpio)"/>
+  <path class="sch-lien sch-gpio" d="M308 236 V298" marker-end="url(#fl-gpio)"/>
+  <path class="sch-lien sch-gpio" d="M492 236 V298" marker-end="url(#fl-gpio)"/>
+  <path class="sch-lien sch-gpio" d="M616 236 V268 H552 V298" marker-end="url(#fl-gpio)"/>
+  <path class="sch-lien sch-gpio" d="M708 236 V298" marker-end="url(#fl-gpio)"/>
+  <text class="sch-detail" x="716" y="272">fichier</text>
+  <text class="sch-detail" x="600" y="262" text-anchor="end">.hex/.bin</text>
+
+  <!-- Périphériques du STM32F103 -->
+  <rect class="sch-bloc sch-fw" x="40" y="300" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="124" y="320" text-anchor="middle">USART2</text>
+  <text class="sch-detail" x="124" y="338" text-anchor="middle">TX PA2, RX PA3</text>
+
+  <rect class="sch-bloc sch-fw" x="224" y="300" width="352" height="48" rx="6"/>
+  <text class="sch-nom" x="400" y="320" text-anchor="middle">Programmation et débogage SWD</text>
+  <text class="sch-detail" x="400" y="338" text-anchor="middle">SWCLK PB13, SWDIO PB14/PB12, NRST PB0</text>
+
+  <rect class="sch-bloc sch-fw" x="592" y="300" width="168" height="48" rx="6"/>
+  <text class="sch-nom" x="676" y="320" text-anchor="middle">Fichier W25Q64</text>
+  <text class="sch-detail" x="676" y="338" text-anchor="middle">SPI1, I2C2 esclave</text>
+
+  <!-- Liaisons vers le STM32WB55 et la flash -->
+  <path class="sch-lien sch-uart" d="M124 348 V440"/>
+  <text class="sch-lien-txt" x="132" y="414" fill="#b35400">UART (T_UART2)</text>
+
+  <path class="sch-lien sch-swd" d="M400 348 V440"/>
+  <text class="sch-lien-txt" x="408" y="414" fill="#6e40c9">SWD + NRST</text>
+
+  <path class="sch-lien sch-i2c" d="M616 348 V440"/>
+  <text class="sch-lien-txt" x="608" y="414" text-anchor="end" fill="#00796b">I2C 0x3B</text>
+
+  <path class="sch-lien sch-spi" d="M712 348 V440"/>
+  <text class="sch-lien-txt" x="720" y="414" fill="#303f9f">SPI1</text>
+
+  <!-- STM32WB55 -->
+  <rect class="sch-bloc sch-mcu" x="40" y="440" width="592" height="80" rx="6"/>
+  <text class="sch-detail" x="124" y="460" text-anchor="middle">LPUART1 PB10/PB11</text>
+  <text class="sch-detail" x="400" y="460" text-anchor="middle">PA13, PA14, NRST</text>
+  <text class="sch-detail" x="624" y="460" text-anchor="end">I2C1 PB8/PB9</text>
+  <text class="sch-nom" x="336" y="488" text-anchor="middle">STM32WB55RG</text>
+  <text class="sch-detail" x="336" y="506" text-anchor="middle">MCU applicatif : REPL MicroPython, Serial Arduino</text>
+
+  <!-- W25Q64 -->
+  <rect class="sch-bloc sch-mem" x="648" y="440" width="128" height="80" rx="6"/>
+  <text class="sch-nom" x="712" y="476" text-anchor="middle">W25Q64</text>
+  <text class="sch-detail" x="712" y="494" text-anchor="middle">flash SPI 8 Mo</text>
+
+  <!-- Légende -->
+  <rect x="24" y="544" width="752" height="128" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="570">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-usb"  d="M40 592 H80"/><text x="88" y="596">USB</text>
+    <path class="sch-lien sch-uart" d="M170 592 H210"/><text x="218" y="596">UART</text>
+    <path class="sch-lien sch-swd"  d="M300 592 H340"/><text x="348" y="596">SWD</text>
+    <path class="sch-lien sch-i2c"  d="M430 592 H470"/><text x="478" y="596">I2C</text>
+    <path class="sch-lien sch-spi"  d="M560 592 H600"/><text x="608" y="596">SPI</text>
+
+    <rect class="sch-bloc sch-mcu" x="40" y="612" width="24" height="16" rx="3"/><text x="72" y="625">MCU</text>
+    <rect class="sch-bloc sch-mem" x="170" y="612" width="24" height="16" rx="3"/><text x="202" y="625">Mémoire</text>
+    <rect class="sch-bloc sch-fw" x="300" y="612" width="24" height="16" rx="3"/><text x="332" y="625">Fonction du firmware</text>
+    <rect class="sch-bloc sch-ext" x="480" y="612" width="24" height="16" rx="3"/><text x="512" y="625">Ordinateur</text>
+    <path class="sch-lien sch-gpio" d="M610 620 H650" marker-end="url(#fl-gpio)"/><text x="658" y="625">Flux interne</text>
+
+    <text x="40" y="656">V1a : I2C du STM32F103 sur PB6/PB7, reset par le tampon U18. V1a et V1b : prise micro-USB.</text>
+  </g>
+</svg>

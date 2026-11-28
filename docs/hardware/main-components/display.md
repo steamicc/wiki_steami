@@ -52,20 +52,50 @@ La référence de l'écran ne figure ni dans le schéma ni dans la nomenclature 
 
 Les signaux et les broches du STM32WB55 sont identiques pour les trois releases. Sur la V1c, les noms de signaux conservent le suffixe `_OLED` bien que l'écran soit un TFT.
 
-| Signal                | Pin STM32WB55 |
-| --------------------- | ------------- |
-| SPI1_SCK_OLED         | PA1           |
-| SPI1_MOSI_OLED        | PB5           |
-| D/C_OLED_OR_SPI1_MISO | PB4           |
-| CS_OLED               | PD0           |
-| RST_OLED              | PA12          |
+| Signal                | Pin STM32WB55 | Test Point |
+| --------------------- | ------------- | ---------- |
+| SPI1_SCK_OLED         | PA1           | TP22       |
+| SPI1_MOSI_OLED        | PB5           | TP23       |
+| D/C_OLED_OR_SPI1_MISO | PB4           | TP24       |
+| CS_OLED               | PD0           | TP20       |
+| RST_OLED              | PA12          | TP21       |
+
+L'écran ne renvoie aucune donnée : PB4 sert de ligne D/C (donnée ou commande) et non de MISO (voir [Signaux](../pin-mapping/signals)). Le schéma suivant relie ces broches au connecteur J7, dont le brochage change avec l'écran. Cliquer sur l'image pour l'ouvrir en grand.
+
+<ReleaseTabs>
+<Release releases="v1a v1b">
+
+[![Schéma du câblage SPI1 des STeaMi V1a et V1b : le STM32WB55 pilote un écran OLED SSD1327 par le bus SPI1 (SCK PA1, MOSI PB5, CS PD0) et les GPIO D/C (PB4) et RST (PA12), à travers les broches 10, 11, 12, 15 et 16 du connecteur J7 à 24 positions ; écran alimenté en +3V3 et en +14V5 (élévateur U4)](/img/diagrams/ecran-spi-v1a-v1b.svg)](pathname:///img/diagrams/ecran-spi-v1a-v1b.svg)
+
+</Release>
+<Release releases="v1c">
+
+[![Schéma du câblage SPI1 de la STeaMi V1c : le STM32WB55 pilote un écran TFT GC9A01 par le bus SPI1 (SCK PA1, MOSI PB5, CS PD0) et les GPIO D/C (PB4) et RST (PA12), à travers les broches 10 à 13 et 15 du connecteur J7 à 18 positions ; rétroéclairage toujours allumé, relié au +3V3 par R57 et à la masse par R62, sans broche du microcontrôleur](/img/diagrams/ecran-spi-v1c.svg)](pathname:///img/diagrams/ecran-spi-v1c.svg)
+
+</Release>
+</ReleaseTabs>
 
 ## Connecteur J7
 
 <ReleaseTabs>
 <Release releases="v1a v1b">
 
-Connecteur Molex 52435-2471, 24 positions au pas de 0,50 mm. Il reçoit les signaux SPI ci-dessus ainsi que les alimentations +3V3 et +14V5.
+Connecteur Molex 52435-2471, 24 positions au pas de 0,50 mm. Il reçoit les signaux SPI ci-dessus ainsi que les alimentations +3V3 et +14V5. Brochage d'après les schémas des indices A, A1 et B1, identiques pour J7 :
+
+| Broche J7                 | Signal                | Remarque                   |
+| ------------------------- | --------------------- | -------------------------- |
+| 2, 23                     | +14V5                 | Élévateur LMR62421 (U4)    |
+| 3                         | —                     | Vers GND par C45 (4,7 µF)  |
+| 4, 5                      | +3V3                  |                            |
+| 9                         | —                     | Vers GND par R57 (1,15 MΩ) |
+| 10                        | CS_OLED               |                            |
+| 11                        | RST_OLED              |                            |
+| 12                        | D/C_OLED_OR_SPI1_MISO |                            |
+| 13                        | —                     | Vers GND par R62 (0 Ω)     |
+| 15                        | SPI1_SCK_OLED         |                            |
+| 16                        | SPI1_MOSI_OLED        |                            |
+| 1, 6 à 8, 14, 18 à 22, 24 | GND                   |                            |
+| 17                        | —                     | Non connectée              |
 
 </Release>
 <Release releases="v1c">
@@ -76,12 +106,16 @@ Connecteur F32R-1A7H1-11018, 18 positions. Broches utilisées d'après le schém
 | --------- | --------------------- | ---------------------------- |
 | 7         | VLED+                 | Vers +3V3 par R57            |
 | 8         | VLED-                 | Vers GND par R62             |
+| 9, 18     | GND                   |                              |
 | 10        | CS_OLED               |                              |
 | 11        | SPI1_SCK_OLED         |                              |
 | 12        | SPI1_MOSI_OLED        |                              |
 | 13        | D/C_OLED_OR_SPI1_MISO |                              |
 | 14        | TE                    | Non relié au microcontrôleur |
 | 15        | RST_OLED              |                              |
+| 16        | +3V3                  |                              |
+
+Aucune broche du STM32WB55 ne commande le rétroéclairage : il est toujours allumé (voir le [README du driver gc9a01](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/gc9a01/README.md)).
 
 :::caution À confirmer
 
