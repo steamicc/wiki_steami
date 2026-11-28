@@ -41,9 +41,12 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 [**Voir les conventions détaillées →**](./conventions)
 
-## Tutoriels
+## Par fonction
 
 - [**Capteurs**](./capteurs) — Température, humidité, pression, mouvement, boussole, distance, lumière et batterie, avec la couche `steami`
+- [**Écran**](./ecran) — Dessiner, écrire et afficher des widgets avec `steami.Screen`, le même programme sur V1a, V1b et V1c
+- [**Communication**](./communication) — Bluetooth, bus I2C et SPI, liaisons série (UART)
+- [**Stockage**](./stockage) — Fichiers de la carte, fichier du disque USB, zone de configuration et calibrations
 
 ## Installation et outils
 
@@ -55,11 +58,12 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 ## Sections à venir
 
-- Tutoriels par composant (écran, I/O, communication, stockage)
+- Tutoriels par composant (I/O)
 - Sujets avancés (limite RAM, timers, interruptions, low power)
 
 ## Voir aussi
 
 - [Premiers pas](../getting-started) — Premier programme
 - [DAPLink](../daplink) — Flash externe et config persistante
+- [Stockage](./stockage) — Fichiers de la carte, fichier du disque USB, zone de configuration et calibrations
 - [Code source](https://github.com/steamicc/micropython-steami-lib) — Tous les drivers
