@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # MicroPython
 
-MicroPython est le langage le mieux supporté sur la carte STeaMi, avec 18 drivers couvrant tous les capteurs et périphériques.
+MicroPython est le langage le mieux supporté sur la carte STeaMi, avec 17 drivers couvrant tous les capteurs et périphériques.
 
 ## Drivers disponibles
 
@@ -23,7 +23,6 @@ MicroPython est le langage le mieux supporté sur la carte STeaMi, avec 18 drive
 | [daplink_bridge](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_bridge) | Pont I2C du DAPLink (config zone)                                   | 0        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_bridge/README.md) |
 | [daplink_flash](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/daplink_flash)   | Fichier sur le disque USB (flash externe)                           | 6        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_flash/README.md)  |
 | [steami_config](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_config)   | Config persistante                                                  | 6        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami_config/README.md)  |
-| [hts221](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/hts221)                 | Humidité (ancien)                                                   | 1        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/hts221/README.md)         |
 | [gc9a01](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/gc9a01)                 | Écran rond TFT (V1c), depuis la v0.30.0                             | 1        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/gc9a01/README.md)         |
 | [steami_screen](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/steami_screen)   | Écran, même programme sur V1a, V1b et V1c (`steami.Screen`)         | 8        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/steami_screen/README.md)  |
 | [bme280](https://github.com/steamicc/micropython-steami-lib/tree/main/lib/bme280)                 | Pression/Humidité/Température (V1c)                                 | 2        | [README](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/bme280/README.md)         |

@@ -20,7 +20,7 @@ Sur cette page :
 
 Le bouton apparaît sous les programmes MicroPython complets, qui peuvent tourner seuls :
 
-- les exemples de la bibliothèque [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) repris dans le wiki, par exemple celui de l'accéléromètre dans [Premiers pas](../getting-started#lire-un-capteur). Ils reçoivent le bouton automatiquement, sauf ceux qui ont besoin d'un driver absent du firmware MicroPython (comme `hts221`) : ils ne pourraient pas tourner tels quels ;
+- les exemples de la bibliothèque [micropython-steami-lib](https://github.com/steamicc/micropython-steami-lib) repris dans le wiki, par exemple celui de l'accéléromètre dans [Premiers pas](../getting-started#lire-un-capteur). Ils reçoivent le bouton automatiquement, sauf ceux qui ont besoin d'un driver absent du firmware MicroPython (comme `im34dt05`, le driver du microphone) : ils ne pourraient pas tourner tels quels ;
 - les programmes écrits directement dans une page et marqués comme exécutables par ses auteurs (voir [Marquer un bloc exécutable](#marquer-un-bloc-exécutable)).
 
 Les extraits de code (quelques lignes qui ne tournent pas seules), les sessions du REPL (lignes qui commencent par `>>>`) et les commandes à taper dans un terminal n'ont pas de bouton.
