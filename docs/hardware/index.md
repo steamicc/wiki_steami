@@ -313,7 +313,7 @@ La mémoire flash externe est connectée au processeur d'interface (STM32F103) p
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Modèle          | [W25Q64JVZPIM](https://www.winbond.com/hq/new-online-purchasing-guide/?__locale=en&pLine=/product/code-storage-flash/qspi-nor/&pNo=W25Q64JV)                                  |
 | Capacité        | 64 Mbit (8 Mo)                                                                                                                                                                |
-| Interface       | SPI / Quad-SPI (QPI, DTR)                                                                                                                                                     |
+| Interface       | SPI simple, sur le SPI1 du STM32F103 ; le composant accepte aussi le Quad-SPI (QPI, DTR), non câblé sur la carte                                                              |
 | Fréquence       | Jusqu'à 133 MHz                                                                                                                                                               |
 | Boîtier         | 8-WSON (6x5)                                                                                                                                                                  |
 | Accès           | USB Mass Storage via DAPLink                                                                                                                                                  |

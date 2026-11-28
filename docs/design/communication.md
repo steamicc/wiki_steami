@@ -22,6 +22,8 @@ title: 'Communication'
 | FCT-33 | QSPI Flash                    | Le système doit intégrer un stockage flash Quad-SPI de 64 Mbit.            | Winbond W25Q64JVZPIM             |
 | FCT-34 | QSPI Flash - USB Mass Storage | Le stockage flash interne doit être accessible à travers USB Mass Storage. | STM32F103 DAPLink (endpoint MSC) |
 
+L'exigence FCT-33 demande du Quad-SPI. Sur les quatre indices de schéma (A, A1, B1 et C), la W25Q64 est câblée en SPI simple sur le SPI1 du STM32F103 (PB3, PB4, PB5, /CS sur PC15) : ses broches IO2 et IO3 servent de /WP et de reset (feuilles FP14 et FP15). Le détail des signaux est dans [Flash W25Q64](../hardware/main-components/w25q64#signaux-spi-vers-stm32f103).
+
 ## Choix de conception
 
 ### Communication sans fil (FP6)
@@ -39,7 +41,7 @@ La mémoire flash externe est connectée au microcontrôleur d'interface (STM32F
 
 - **Composant** : Winbond W25Q64JVZPIM
 - **Capacité** : 64 Mbit (8 Mo)
-- **Interface** : SPI / Quad-SPI (QPI, DTR)
+- **Interface** : SPI simple, sur le SPI1 du STM32F103 ; le composant accepte aussi le Quad-SPI (QPI, DTR), non câblé sur la carte
 - **Fréquence** : jusqu'à 133 MHz
 - **Temps d'accès** : 6 ns
 - **Boîtier** : 8-WSON (6x5)
