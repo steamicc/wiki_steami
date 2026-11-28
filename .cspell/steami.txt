@@ -116,6 +116,9 @@ Prettier
 prebuild
 ESLint
 lychee
+pngquant
+libimagequant
+psnr
 venv
 usbmodem
 adafruit
