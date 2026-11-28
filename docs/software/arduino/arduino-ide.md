@@ -101,7 +101,7 @@ Le port série passe par le microcontrôleur d'interface (DAPLink), qui le relie
 ### Le moniteur série n'affiche rien
 
 - Vérifier la vitesse : **115200 bauds**.
-- Les messages écrits dans `setup()` partent avant l'ouverture du moniteur. Appuyer sur le bouton reset de la carte une fois le moniteur ouvert pour les revoir.
+- Les messages écrits dans `setup()` partent avant l'ouverture du moniteur. Appuyer sur le bouton Reset de la carte une fois le moniteur ouvert pour les revoir.
 
 ### Accès au port série refusé sous Linux
 
