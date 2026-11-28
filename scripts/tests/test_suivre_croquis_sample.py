@@ -97,8 +97,7 @@ class TestSuivreCroquisSample(unittest.TestCase):
             "isCrossRepository",
             "sha256:$sha",
             'git push origin "$BRANCHE"',
-            'gh pr merge "$PR" --auto --squash',
-            "required_status_checks",
+            'bash .github/scripts/garde-fusion-auto.sh "$GITHUB_REPOSITORY" "$PR" "$APP_SLUG" build',
             "github.repository == 'steamicc/wiki_steami'",
             "RELEASE_APP_SECRET",
         ):

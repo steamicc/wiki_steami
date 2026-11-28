@@ -16,17 +16,25 @@
 # releases sont épinglées, sans validation humaine : seul le check `build`
 # garde la fusion.
 #
-# La PR d'un passage précédent pour la même release est réutilisée. Les PR
-# `chore/daplink-*` plus anciennes encore ouvertes, ouvertes par l'App dans ce
-# dépôt, sont fermées avec le commentaire « Superseded by #n. » : elles
-# épingleraient une release dépassée. Rien d'autre n'est fermé.
+# La PR d'un passage précédent pour la même release est réutilisée. Si elle
+# est en conflit avec main et que sa branche ne porte que des commits du
+# robot, la branche est refaite depuis main, poussée avec un bail sur
+# l'ancienne tête, et un commentaire le signale sur la PR ; avec un commit
+# ajouté à la main, un avertissement demande de résoudre le conflit à la
+# main. Les PR `chore/daplink-*` plus anciennes encore ouvertes, ouvertes par
+# l'App dans ce dépôt, sont fermées avec le commentaire « Superseded by #n. » :
+# elles épingleraient une release dépassée. Leur branche est supprimée, sauf
+# si elle porte un commit ajouté à la main. Rien d'autre n'est fermé.
 #
 # Fusion automatique (squash) : seulement si les règles de main exigent le
 # check « build » ; sans check exigé, GitHub fusionnerait tout de suite. Une
 # PR en brouillon n'est pas fusionnée automatiquement.
+# Ces contrôles sont ceux de la garde commune .github/scripts/garde-fusion-auto.sh,
+# qui refuse aussi un ruleset que le jeton pourrait contourner et relance une
+# fois un check exigé rouge, puis fait échouer le run s'il le reste.
 #
 # Prérequis : secrets RELEASE_APP_ID et RELEASE_APP_SECRET ; App installée sur
-# steamicc/wiki_steami (Contents et Pull requests en écriture) ; « Allow
+# steamicc/wiki_steami (Contents, Pull requests et Actions en écriture) ; « Allow
 # auto-merge » coché ; ruleset sur main exigeant le check « build ».
 #
 # Neutralisé dans les forks.
@@ -80,11 +88,13 @@ jobs:
           repositories: wiki_steami
           permission-contents: write
           permission-pull-requests: write
+          # La garde de fusion automatique relance une fois un check exigé rouge.
+          permission-actions: write
 
       - name: Explique l'échec du jeton
         if: failure() && steps.app.outcome == 'failure'
         run: |
-          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/wiki_steami avec les droits Contents et Pull requests en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
+          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/wiki_steami avec les droits Contents, Pull requests et Actions en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
           exit 1
 
       # Le jeton de l'App reste dans .git/config : git ls-remote et git push s'en servent.
@@ -152,7 +162,50 @@ jobs:
               echo "nouvelle=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "La PR #$pr est déjà ouverte pour $branche : vérification de sa fusion automatique."
+            echo "La PR #$pr est déjà ouverte pour $branche."
+            # PR en conflit avec main (un autre épinglage y a été fusionné
+            # entre-temps) : elle ne fusionnerait jamais. GitHub calcule
+            # « mergeable » en différé (UNKNOWN juste après un changement de
+            # main) : quelques relectures.
+            for _ in 1 2 3 4 5 6; do
+              vue=$(gh pr view "$pr" --json mergeable,headRefOid)
+              mergeable=$(jq -r .mergeable <<<"$vue")
+              if [ "$mergeable" != "UNKNOWN" ]; then
+                break
+              fi
+              sleep 5
+            done
+            reconstruire=false
+            if [ "$mergeable" = "CONFLICTING" ]; then
+              # Seule une branche faite des seuls commits du robot est refaite :
+              # un commit ajouté à la main serait perdu.
+              etrangers=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr/commits" --paginate \
+                | jq -r --arg bot "${APP_SLUG}[bot]" '.[] | select(.author.login != $bot) | .sha')
+              if [ -n "$etrangers" ]; then
+                echo "::warning::La PR #$pr ($branche) est en conflit avec main et porte des commits qui ne sont pas du robot : résoudre le conflit à la main."
+              else
+                echo "::warning::La PR #$pr ($branche) est en conflit avec main : sa branche est reconstruite depuis main."
+                reconstruire=true
+              fi
+            fi
+            if [ "$reconstruire" = "true" ]; then
+              tete=$(jq -r .headRefOid <<<"$vue")
+              {
+                echo "nouvelle=true"
+                echo "pousser=true"
+                echo "ouvrir=false"
+                echo "reconstruire=true"
+                echo "tete=$tete"
+                echo "pr=$pr"
+                echo "actuel=$actuel"
+                echo "derniere=$derniere"
+                echo "binaire=$binaire"
+                echo "empreinte=$empreinte"
+                echo "branche=$branche"
+              } >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Vérification de sa fusion automatique."
             {
               echo "nouvelle=true"
               echo "pousser=false"
@@ -195,6 +248,9 @@ jobs:
           BINAIRE: ${{ steps.comparaison.outputs.binaire }}
           EMPREINTE: ${{ steps.comparaison.outputs.empreinte }}
           BRANCHE: ${{ steps.comparaison.outputs.branche }}
+          # PR en conflit : branche refaite depuis main, poussée avec un bail sur TETE.
+          RECONSTRUIRE: ${{ steps.comparaison.outputs.reconstruire }}
+          TETE: ${{ steps.comparaison.outputs.tete }}
         run: |
           set -euo pipefail
           # Le sha256 est calculé sur le fichier reçu, pas sur les métadonnées de la release.
@@ -218,7 +274,12 @@ jobs:
           git switch -c "$BRANCHE"
           git add daplink.json
           git commit -m "chore(configs): épingler le firmware DAPLink $DERNIERE"
-          git push origin "$BRANCHE"
+          if [ "$RECONSTRUIRE" = "true" ]; then
+            # Le bail refuse la poussée si la branche a changé depuis la lecture de la PR.
+            git push --force-with-lease="refs/heads/$BRANCHE:$TETE" origin "$BRANCHE"
+          else
+            git push origin "$BRANCHE"
+          fi
 
       - name: Ouvre la PR
         id: ouverture
@@ -248,6 +309,16 @@ jobs:
           echo "PR ouverte : $url"
           echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
 
+      # PR en conflit reconstruite depuis main : un commentaire le dit sur la PR.
+      - name: Signale la reconstruction de la branche
+        if: steps.comparaison.outputs.reconstruire == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ steps.comparaison.outputs.pr }}
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR" --body "Branche reconstruite depuis main par le robot : la PR était en conflit avec main (un autre épinglage y a été fusionné entre-temps)."
+
       # Une PR d'une release plus ancienne épinglerait un firmware dépassé et
       # entrerait en conflit avec celle-ci. Seules les PR de l'App, dans ce dépôt,
       # et dont la branche est chore/daplink-*, sont fermées.
@@ -273,53 +344,27 @@ jobs:
                 and .headRefName != $branche
                 and (.author.login == $a1 or .author.login == $a2)) | .number')
           for n in $anciennes; do
-            echo "Fermeture de la PR #$n (release dépassée)."
-            gh pr close "$n" --delete-branch --comment "Superseded by #$PR."
+            etrangers=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$n/commits" --paginate \
+              | jq -r --arg bot "${APP_SLUG}[bot]" '.[] | select(.author.login != $bot) | .sha')
+            if [ -z "$etrangers" ]; then
+              echo "Fermeture de la PR #$n (release dépassée)."
+              gh pr close "$n" --delete-branch --comment "Superseded by #$PR."
+            else
+              echo "::warning::Fermeture de la PR #$n (release dépassée) : sa branche porte des commits ajoutés à la main, elle est gardée."
+              gh pr close "$n" --comment "Superseded by #$PR. The branch is kept: it has commits not made by the robot."
+            fi
           done
 
+      # Garde commune .github/scripts/garde-fusion-auto.sh (copiée à l'identique
+      # dans chaque dépôt steamicc qui a un robot) : PR ouverte par le robot dans
+      # ce dépôt, check « build » exigé sur sa branche par défaut sans contournement
+      # possible, ni brouillon ni étiquette « garder-ouverte », puis fusion
+      # automatique (squash). Si elle est déjà activée et qu'un check exigé est
+      # rouge, la garde le relance une fois, puis fait échouer le run du robot.
       - name: Active la fusion automatique
         if: steps.comparaison.outputs.nouvelle == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           PR: ${{ steps.ouverture.outputs.pr || steps.comparaison.outputs.pr }}
-        run: |
-          set -euo pipefail
-          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
-            echo "::error::Numéro de PR introuvable (« $PR »)"
-            exit 1
-          fi
-          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
-          # ou ouverte par quelqu'un d'autre que le robot.
-          etat=$(gh pr view "$PR" --json isCrossRepository,author,isDraft,autoMergeRequest)
-          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
-            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
-            exit 1
-          fi
-          auteur=$(jq -r .author.login <<<"$etat")
-          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
-            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
-            exit 1
-          fi
-          # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
-          # tout de suite, même avec un CI rouge : on exige la vérification « build ».
-          regles=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main")
-          if ! jq -e 'any(.[]; .type == "required_status_checks"
-                and any(.parameters.required_status_checks[]; .context == "build"))' \
-                <<<"$regles" >/dev/null; then
-            echo "::warning::Fusion automatique non activée pour la PR #$PR : main n'exige pas la vérification « build ». Créer d'abord un ruleset « CI verte avant fusion » sur main qui exige la vérification « build » (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
-            exit 0
-          fi
-          if jq -e .isDraft <<<"$etat" >/dev/null; then
-            echo "La PR #$PR est en brouillon : fusion automatique non activée."
-            exit 0
-          fi
-          if jq -e '.autoMergeRequest != null' <<<"$etat" >/dev/null; then
-            echo "La fusion automatique de la PR #$PR est déjà activée."
-            exit 0
-          fi
-          if ! gh pr merge "$PR" --auto --squash; then
-            echo "::error::Échec de l'activation de la fusion automatique de la PR #$PR : vérifier « Allow auto-merge » et la fusion squash (Settings > General > Pull Requests)."
-            exit 1
-          fi
-          echo "Fusion automatique (squash) activée pour la PR #$PR : fusion dès que le CI est vert."
+        run: bash .github/scripts/garde-fusion-auto.sh "$GITHUB_REPOSITORY" "$PR" "$APP_SLUG" build

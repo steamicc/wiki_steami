@@ -37,8 +37,8 @@
 #
 # Prérequis :
 # - secrets RELEASE_APP_ID et RELEASE_APP_SECRET visibles de ce dépôt ;
-# - App installée sur steamicc/arduino-steami-sample, avec Contents et Pull
-#   requests en écriture ;
+# - App installée sur steamicc/arduino-steami-sample, avec Contents, Pull
+#   requests et Actions (relance d'un check rouge par la garde) en écriture ;
 # - « Allow auto-merge » activé dans les réglages de arduino-steami-sample
 #   (Settings > General > Pull Requests), et la vérification `compile`
 #   exigée sur sa branche main par un ruleset.
@@ -110,11 +110,13 @@ jobs:
           repositories: arduino-steami-sample
           permission-contents: write
           permission-pull-requests: write
+          # La garde de fusion automatique relance une fois un check exigé rouge.
+          permission-actions: write
 
       - name: Explique l'échec du jeton
         if: failure() && steps.app.outcome == 'failure'
         run: |
-          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/arduino-steami-sample avec les droits Contents et Pull requests en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
+          echo "::error::Impossible de créer le jeton de la GitHub App : vérifier que l'App est installée sur steamicc/arduino-steami-sample avec les droits Contents, Pull requests et Actions en écriture, et que RELEASE_APP_ID et RELEASE_APP_SECRET sont ceux de cette App."
           exit 1
 
       # Le wiki (pages et exemples-arduino-sample.json), lu avec GITHUB_TOKEN.
@@ -239,67 +241,17 @@ jobs:
             echo "pr=${url##*/}" >> "$GITHUB_OUTPUT"
           fi
 
+      # Garde commune .github/scripts/garde-fusion-auto.sh (copiée à l'identique
+      # dans chaque dépôt steamicc qui a un robot) : PR ouverte par le robot dans
+      # arduino-steami-sample (règles lues sur ce dépôt, pas sur le wiki), check
+      # « compile » exigé sur sa branche par défaut sans contournement possible,
+      # ni brouillon ni étiquette « garder-ouverte », puis fusion automatique
+      # (squash). Si elle est déjà activée et qu'un check exigé est rouge, la
+      # garde le relance une fois, puis fait échouer le run du robot.
       - name: Active la fusion automatique
         if: ${{ !inputs.essai && (steps.preparation.outputs.pousser == 'true' || steps.pr.outputs.pr != '') }}
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           PR: ${{ steps.ouverture.outputs.pr }}
-        run: |
-          set -euo pipefail
-          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
-            echo "::error::Numéro de PR introuvable (« $PR »)"
-            exit 1
-          fi
-          # Garde-fou : jamais de fusion automatique pour une PR venue d'un fork
-          # ou ouverte par quelqu'un d'autre que le robot.
-          etat=$(gh pr view "$PR" --repo steamicc/arduino-steami-sample \
-            --json isCrossRepository,author,isDraft,autoMergeRequest)
-          if jq -e .isCrossRepository <<<"$etat" >/dev/null; then
-            echo "::error::La PR #$PR vient d'un fork : fusion automatique refusée."
-            exit 1
-          fi
-          auteur=$(jq -r .author.login <<<"$etat")
-          if [ "$auteur" != "app/$APP_SLUG" ] && [ "$auteur" != "${APP_SLUG}[bot]" ]; then
-            echo "::error::La PR #$PR a été ouverte par $auteur, pas par le robot : fusion automatique refusée."
-            exit 1
-          fi
-          # Sans vérification exigée sur main, « gh pr merge --auto » fusionnerait
-          # tout de suite, même avec un CI rouge : on exige la vérification « compile ».
-          regles=$(gh api repos/steamicc/arduino-steami-sample/rules/branches/main)
-          if ! jq -e 'any(.[]; .type == "required_status_checks"
-                and any(.parameters.required_status_checks[]; .context == "compile"))' \
-                <<<"$regles" >/dev/null; then
-            echo "::warning::Fusion automatique non activée pour la PR #$PR : main du sample n'exige pas la vérification « compile ». Vérifier le ruleset de main dans arduino-steami-sample (Settings > Rules > Rulesets), puis fusionner cette PR à la main."
-            exit 0
-          fi
-          # Un jeton qui peut contourner le ruleset fusionnerait sans attendre
-          # « compile » : on exige « never » pour chaque ruleset qui porte la règle.
-          ids=$(jq -r '[.[] | select(.type == "required_status_checks")
-                | select(any(.parameters.required_status_checks[]; .context == "compile"))
-                | .ruleset_id] | unique | .[]' <<<"$regles")
-          if [ -z "$ids" ]; then
-            echo "::warning::Fusion automatique non activée pour la PR #$PR : ruleset de la vérification « compile » introuvable. PR à fusionner à la main."
-            exit 0
-          fi
-          for id in $ids; do
-            contournement=$(gh api "repos/steamicc/arduino-steami-sample/rulesets/$id" \
-              --jq '.current_user_can_bypass // "inconnu"')
-            if [ "$contournement" != "never" ]; then
-              echo "::warning::Fusion automatique non activée pour la PR #$PR : le jeton de l'App peut contourner le ruleset #$id du sample (current_user_can_bypass : $contournement). Retirer l'App des contournements de ce ruleset ; PR à fusionner à la main."
-              exit 0
-            fi
-          done
-          if jq -e .isDraft <<<"$etat" >/dev/null; then
-            echo "La PR #$PR est en brouillon : fusion automatique non activée."
-            exit 0
-          fi
-          if jq -e '.autoMergeRequest != null' <<<"$etat" >/dev/null; then
-            echo "La fusion automatique de la PR #$PR est déjà activée."
-            exit 0
-          fi
-          if ! gh pr merge "$PR" --repo steamicc/arduino-steami-sample --auto --squash; then
-            echo "::error::Échec de l'activation de la fusion automatique de la PR #$PR : vérifier « Allow auto-merge » et la fusion squash dans les réglages de arduino-steami-sample (Settings > General > Pull Requests)."
-            exit 1
-          fi
-          echo "Fusion automatique (squash) activée pour la PR #$PR : fusion dès que « compile » est vert."
+        run: bash .github/scripts/garde-fusion-auto.sh steamicc/arduino-steami-sample "$PR" "$APP_SLUG" compile
