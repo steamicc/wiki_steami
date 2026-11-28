@@ -13,12 +13,12 @@ Cette liste reprend la nomenclature de l'indice B1 (V1b). Les composants retiré
 
 ## Inductances
 
-| Valeur | Description                                   | Fabricant                                                        | Référence                                                     | Qté | Repères |
-| ------ | --------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- | --- | ------- |
-| 2.2 uH | Inductance fixe 2.2 uH +/- 20% 1.4A 3x3x1.2mm | [TDK](https://www.tdk.com/)                                      | VLS3012CX-2R2M-1 <br/><OctopartButton q="VLS3012CX-2R2M-1" /> | 1   | L2      |
-| 10 uH  | Inductance fixe 10 uH +/- 20% 1.4A 5.8mm      | [Wurth](https://www.we-online.com/en/components/products/WE-LQS) | 74404043150A <br/><OctopartButton q="74404043150A" />         | 1   | L3      |
-| 10 uH  | Inductance fixe 10 uH +/- 20% 0.1A 0805       | [Murata](https://www.murata.com/)                                | LQM21FN100M70L <br/><OctopartButton q="LQM21FN100M70L" />     | 1   | L4      |
-| 10 uH  | Inductance fixe 10 uH +/- 20% 1.12A 3x3x1.2mm | [TDK](https://www.tdk.com/)                                      | VLS3012CX-100M-1 <br/><OctopartButton q="VLS3012CX-100M-1" /> | 1   | L5      |
+| Valeur | Description                                                             | Fabricant                                                        | Référence                                                     | Qté | Repères |
+| ------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- | --- | ------- |
+| 2.2 uH | Inductance fixe 2,2 uH ±20 %, 1,89 A, 74 mΩ, 3x3x1,2 mm                 | [TDK](https://www.tdk.com/)                                      | VLS3012CX-2R2M-1 <br/><OctopartButton q="VLS3012CX-2R2M-1" /> | 1   | L2      |
+| 15 uH  | Inductance fixe 15 uH ±20 %, 0,84 A, 132 mΩ (V1a, V1b ; absente en V1c) | [Wurth](https://www.we-online.com/en/components/products/WE-LQS) | 74404043150A <br/><OctopartButton q="74404043150A" />         | 1   | L3      |
+| 10 uH  | Inductance fixe 10 uH +/- 20% 0.1A 0805                                 | [Murata](https://www.murata.com/)                                | LQM21FN100M70L <br/><OctopartButton q="LQM21FN100M70L" />     | 1   | L4      |
+| 10 uH  | Inductance fixe 10 uH +/- 20% 1.12A 3x3x1.2mm                           | [TDK](https://www.tdk.com/)                                      | VLS3012CX-100M-1 <br/><OctopartButton q="VLS3012CX-100M-1" /> | 1   | L5      |
 
 ## Ferrites
 
