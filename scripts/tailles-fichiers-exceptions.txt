@@ -1,0 +1,16 @@
+# Fichiers tolérés au-delà du seuil d'erreur de scripts/check-file-sizes.py.
+#
+# Format : chemin taille_max  (K = 1024 octets, M = 1024 K)
+# Un fichier listé ne lève qu'un avertissement tant qu'il reste sous son
+# plafond, et une erreur au-delà. Retirer la ligne quand le fichier est
+# compressé sous le seuil (https://github.com/steamicc/wiki_steami/issues/71).
+
+# Fichiers déjà présents au-dessus de 2 Mo (seuil des images), plafond juste
+# au-dessus de leur taille actuelle.
+static/img/pinout/connectors_steami.svg 3.8M  # 3,74 Mo
+static/img/pinout/indicators_steami.png 4.3M  # 4,24 Mo
+static/img/pinout/pinout_steami.svg 2.7M  # 2,69 Mo
+
+# Fichier généré par npm, proche du seuil de 1 Mo des autres fichiers : une
+# mise à jour des dépendances ne doit pas faire échouer la CI.
+package-lock.json 2M  # 867 Ko

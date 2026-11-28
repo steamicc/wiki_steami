@@ -27,6 +27,7 @@
     "lint:arduino-examples": "python3 scripts/check-arduino-examples.py",
     "lint:inline-sketches": "python3 scripts/check-inline-sketches.py",
     "lint:micropython-blocks": "python3 scripts/check-micropython-blocks.py",
+    "lint:file-sizes": "python3 scripts/check-file-sizes.py",
     "prepare": "husky"
   },
   "dependencies": {
