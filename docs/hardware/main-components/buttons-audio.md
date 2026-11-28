@@ -51,6 +51,7 @@ L'expandeur MCP23009 fournit 8 GPIO supplémentaires sur le bus I2C1 interne. Il
 | Modèle             | [MCP23009-E/MG](https://www.microchip.com/en-us/product/MCP23009)                       |
 | Fabricant          | Microchip                                                                               |
 | Interface          | I2C (bus I2C1 interne)                                                                  |
+| Adresse I2C        | 0x20 (7 bits)                                                                           |
 | GPIO               | 8 (GP0-GP7)                                                                             |
 | Reset              | RST_EXPANDER → PB1                                                                      |
 | Interruption       | INT_EXPANDER → PB0                                                                      |

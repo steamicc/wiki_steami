@@ -16,6 +16,7 @@ Capteur de distance Time-of-Flight (ToF) utilisant un laser infrarouge.
 | Type            | Time-of-Flight (ToF)                                                                 |
 | Portée          | Jusqu'à 4 m                                                                          |
 | Interface       | I2C                                                                                  |
+| Adresse I2C     | 0x29 (7 bits)                                                                        |
 | Interruption    | INT_DIST → PB12                                                                      |
 | Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/vl53l1x.pdf)                          |
 

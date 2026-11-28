@@ -14,6 +14,8 @@ La carte STeaMi intègre des capteurs couvrant distance, mouvement, environnemen
 | I2C1_SCL | PB8           | PB6           |
 | I2C1_SDA | PB9           | PB7           |
 
+Les adresses I2C des capteurs, release par release, sont regroupées dans [Capteurs et bus internes](../../pin-mapping/internal-bus#adresses-i2c).
+
 ## Liste des capteurs
 
 | Capteur                                   | Modèle    | Mesures                        | Releases               | Page                    |

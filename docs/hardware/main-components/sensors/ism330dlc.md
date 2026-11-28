@@ -15,6 +15,7 @@ IMU 6 axes mesurant accélération, rotation et température. L'orientation de l
 | Fabricant       | STMicroelectronics                                                   |
 | Type            | 6 axes (accéléromètre + gyroscope + température)                     |
 | Interface       | I2C / SPI                                                            |
+| Adresse I2C     | 0x6B (7 bits)                                                        |
 | Interruption    | INT_ACC → PC13                                                       |
 | Boîtier         | LGA-14 (2.5x3)                                                       |
 | Datasheet       | [PDF](https://www.st.com/resource/en/datasheet/ism330dlc.pdf)        |
