@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 808" width="800" height="808"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Écran sur le bus SPI1 (STeaMi V1a et V1b)</title>
+  <desc id="desc">Câblage de l'écran OLED SSD1327 des STeaMi V1a et V1b : le STM32WB55 pilote l'écran par le bus SPI1 (SCK sur PA1, MOSI sur PB5, CS sur PD0) et par deux GPIO (D/C sur PB4, RST sur PA12), à travers le connecteur FPC 24 positions J7 (Molex 52435-2471). L'écran reçoit le +3V3 et le +14V5 de l'élévateur U4 ; trois broches vont à la masse par C45, R57 et R62.</desc>
+  <defs>
+    <style>
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-mcu  { fill: #e0f2f1; stroke: #00796b; }
+      .sch-alim { fill: #ffebee; stroke: #c62828; }
+      .sch-conn { fill: #f3e5f5; stroke: #7b1fa2; }
+      .sch-ihm  { fill: #e8f5e9; stroke: #2e7d32; }
+      .sch-ext  { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-broche { font-size: 12px; font-weight: 600; fill: #1f2328; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-spi  { stroke: #303f9f; }
+      .sch-pwr  { stroke: #c62828; stroke-width: 2.5; }
+      .sch-gpio { stroke: #57606a; stroke-width: 1.5; }
+      .sch-tp   { fill: #ffffff; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c62828"/>
+    </marker>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="807" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Écran sur le bus SPI1</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1a et V1b</text>
+
+  <!-- Blocs de gauche : microcontrôleur, +3V3, +14V5, masse. -->
+  <rect class="sch-bloc sch-mcu" x="24" y="72" width="180" height="248" rx="6"/>
+  <text class="sch-nom" x="114" y="96" text-anchor="middle">STM32WB55</text>
+  <text class="sch-detail" x="114" y="114" text-anchor="middle">SPI1 (« SPIINT »)</text>
+  <g class="sch-broche" text-anchor="end">
+    <text x="192" y="144">PD0</text>
+    <text x="192" y="184">PA12</text>
+    <text x="192" y="224">PB4</text>
+    <text x="192" y="264">PA1</text>
+    <text x="192" y="304">PB5</text>
+  </g>
+
+  <rect class="sch-bloc sch-alim" x="24" y="336" width="180" height="48" rx="6"/>
+  <text class="sch-nom" x="114" y="356" text-anchor="middle">+3V3</text>
+  <text class="sch-detail" x="114" y="374" text-anchor="middle">rail 3,3 V</text>
+
+  <rect class="sch-bloc sch-alim" x="24" y="400" width="180" height="48" rx="6"/>
+  <text class="sch-nom" x="114" y="420" text-anchor="middle">+14V5</text>
+  <text class="sch-detail" x="114" y="438" text-anchor="middle">élévateur U4 (LMR62421)</text>
+
+  <rect class="sch-bloc sch-ext" x="24" y="464" width="180" height="156" rx="6"/>
+  <text class="sch-nom" x="114" y="538" text-anchor="middle">GND</text>
+  <text class="sch-detail" x="114" y="556" text-anchor="middle">masse</text>
+
+  <!-- Connecteur J7 et écran. -->
+  <rect class="sch-bloc sch-conn" x="496" y="72" width="120" height="548" rx="6"/>
+  <text class="sch-nom" x="556" y="96" text-anchor="middle">J7</text>
+  <text class="sch-detail" x="556" y="114" text-anchor="middle">FPC 24 pos.</text>
+  <g class="sch-broche" text-anchor="middle">
+    <text x="556" y="144">10</text>
+    <text x="556" y="184">11</text>
+    <text x="556" y="224">12</text>
+    <text x="556" y="264">15</text>
+    <text x="556" y="304">16</text>
+    <text x="556" y="364">4, 5</text>
+    <text x="556" y="428">2, 23</text>
+    <text x="556" y="492">3</text>
+    <text x="556" y="528">9</text>
+    <text x="556" y="564">13</text>
+    <text x="556" y="600">11 broches</text>
+  </g>
+
+  <rect class="sch-bloc sch-ihm" x="640" y="72" width="136" height="548" rx="6"/>
+  <text class="sch-nom" x="708" y="96" text-anchor="middle">Écran SSD1327</text>
+  <text class="sch-detail" x="708" y="114" text-anchor="middle">OLED 128 × 128</text>
+
+  <!-- Bus SPI1 et GPIO, dans l'ordre des broches de J7. -->
+  <path class="sch-lien sch-spi" d="M204 140 H496 M616 140 H640"/>
+  <text class="sch-lien-txt" x="216" y="132" fill="#303f9f">CS_OLED</text>
+  <path class="sch-lien sch-gpio" d="M204 180 H496"/>
+  <path class="sch-lien sch-gpio" d="M616 180 H640" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="216" y="172" fill="#57606a">RST_OLED</text>
+  <path class="sch-lien sch-gpio" d="M204 220 H496"/>
+  <path class="sch-lien sch-gpio" d="M616 220 H640" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="216" y="212" fill="#57606a">D/C_OLED_OR_SPI1_MISO</text>
+  <path class="sch-lien sch-spi" d="M204 260 H496 M616 260 H640"/>
+  <text class="sch-lien-txt" x="216" y="252" fill="#303f9f">SPI1_SCK_OLED</text>
+  <path class="sch-lien sch-spi" d="M204 300 H496 M616 300 H640"/>
+  <text class="sch-lien-txt" x="216" y="292" fill="#303f9f">SPI1_MOSI_OLED</text>
+
+  <!-- Points de test. -->
+  <g class="sch-detail" text-anchor="middle">
+    <circle class="sch-tp" cx="448" cy="140" r="4" stroke="#303f9f"/><text x="448" y="131">TP20</text>
+    <circle class="sch-tp" cx="448" cy="180" r="4" stroke="#57606a"/><text x="448" y="171">TP21</text>
+    <circle class="sch-tp" cx="448" cy="220" r="4" stroke="#57606a"/><text x="448" y="211">TP24</text>
+    <circle class="sch-tp" cx="448" cy="260" r="4" stroke="#303f9f"/><text x="448" y="251">TP22</text>
+    <circle class="sch-tp" cx="448" cy="300" r="4" stroke="#303f9f"/><text x="448" y="291">TP23</text>
+  </g>
+
+  <!-- Alimentations. -->
+  <path class="sch-lien sch-pwr" d="M204 360 H496"/>
+  <path class="sch-lien sch-pwr" d="M616 360 H640" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="216" y="352" fill="#c62828">+3V3</text>
+  <path class="sch-lien sch-pwr" d="M204 424 H496"/>
+  <path class="sch-lien sch-pwr" d="M616 424 H640" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="216" y="416" fill="#c62828">+14V5 (dalle OLED)</text>
+
+  <!-- Masse : directe ou par un composant. -->
+  <path class="sch-lien sch-pwr" d="M204 488 H496 M616 488 H640"/>
+  <text class="sch-lien-txt" x="216" y="480" fill="#c62828">par C45 (4,7 µF)</text>
+  <path class="sch-lien sch-pwr" d="M204 524 H496 M616 524 H640"/>
+  <text class="sch-lien-txt" x="216" y="516" fill="#c62828">par R57 (1,15 MΩ)</text>
+  <path class="sch-lien sch-pwr" d="M204 560 H496 M616 560 H640"/>
+  <text class="sch-lien-txt" x="216" y="552" fill="#c62828">par R62 (0 Ω)</text>
+  <path class="sch-lien sch-pwr" d="M204 596 H496 M616 596 H640"/>
+  <text class="sch-lien-txt" x="216" y="588" fill="#c62828">GND : 1, 6 à 8, 14, 18 à 22, 24</text>
+
+  <!-- Notes. -->
+  <text class="sch-detail" x="24" y="648">Broche 17 de J7 non connectée. Câblage relevé sur le schéma indice B1, identique sur les indices A et A1 (V1a).</text>
+  <text class="sch-detail" x="24" y="668">Mêmes broches du STM32WB55 que sur la V1c ; le connecteur J7, l'ordre de ses broches et l'écran changent.</text>
+
+  <!-- Légende. -->
+  <rect x="24" y="688" width="752" height="96" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="712">Légende</text>
+  <g class="sch-detail">
+    <path class="sch-lien sch-spi" d="M40 738 H80"/><text x="88" y="742">Bus SPI1 : SCK, MOSI, CS</text>
+    <path class="sch-lien sch-gpio" d="M290 738 H330" marker-end="url(#fl-gpio)"/><text x="338" y="742">GPIO : D/C, RST</text>
+    <path class="sch-lien sch-pwr" d="M530 738 H570" marker-end="url(#fl-pwr)"/><text x="578" y="742">Alimentation, masse</text>
+    <circle class="sch-tp" cx="48" cy="766" r="4" stroke="#57606a"/><text x="60" y="770">Point de test</text>
+    <rect class="sch-bloc sch-mcu" x="180" y="758" width="24" height="16" rx="3"/><text x="212" y="771">MCU</text>
+    <rect class="sch-bloc sch-conn" x="290" y="758" width="24" height="16" rx="3"/><text x="322" y="771">Connecteur</text>
+    <rect class="sch-bloc sch-ihm" x="430" y="758" width="24" height="16" rx="3"/><text x="462" y="771">Écran</text>
+    <rect class="sch-bloc sch-alim" x="530" y="758" width="24" height="16" rx="3"/><text x="562" y="771">Alimentation</text>
+    <rect class="sch-bloc sch-ext" x="670" y="758" width="24" height="16" rx="3"/><text x="702" y="771">Masse</text>
+  </g>
+</svg>
