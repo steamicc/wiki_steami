@@ -227,13 +227,13 @@ La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un 
 
 La carte offre plusieurs options de connectivité externe pour les capteurs, actionneurs et accessoires.
 
-| Connecteur     | Type                                                        | Signaux                          |
-| -------------- | ----------------------------------------------------------- | -------------------------------- |
-| Edge connector | Compatible micro:bit, P0-P20                                | GPIO, analogique, SPI, I2C, PWM  |
-| STEMMA/Qwiic   | 2x JST 4-pin : PH, pas 2 mm (V1a, V1b) ; SH, pas 1 mm (V1c) | I2C3 (SCL: PC0, SDA: PC1)        |
-| Jacdac         | Interface série                                             | USART1 (PB6/PB7, net UART2), 5V  |
-| Pads crocodile | P0, P1, P2 + P24-P29 + 3V3/GND                              | Analogique + GPIO (via MCP23009) |
-| SWD (J8)       | 1 rangée de 5 trous, pas de 1,27 mm, sans connecteur soudé  | GND, VREF, SWDIO, NRST, SWCLK    |
+| Connecteur     | Type                                                                                    | Signaux                          |
+| -------------- | --------------------------------------------------------------------------------------- | -------------------------------- |
+| Edge connector | Compatible micro:bit, P0-P20                                                            | GPIO, analogique, SPI, I2C, PWM  |
+| STEMMA/Qwiic   | 2x JST 4-pin : PH, pas 2 mm (V1a, V1b) ; SH, pas 1 mm (V1c)                             | I2C3 (SCL: PC0, SDA: PC1)        |
+| Jacdac         | Interface série                                                                         | USART1 (PB6/PB7, net UART2), 5V  |
+| Pads crocodile | P0, P1, P2 + P24-P29 + 3V3/GND                                                          | Analogique + GPIO (via MCP23009) |
+| SWD (J8)       | Pas de 1,27 mm : 1 rangée de 5 trous (V1b, V1c) ; 2 × 5 pastilles, dont 5 reliées (V1a) | GND, VREF, SWDIO, NRST, SWCLK    |
 
 | Caractéristique | Détail                                                                                                                                                                                                                             |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
