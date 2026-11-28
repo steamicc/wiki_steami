@@ -52,12 +52,20 @@ Le STM32F103 est accessible via le bus I2C1 à l'adresse **0x3B**.
 
 ## Architecture flash F103
 
+[![Schéma de la flash interne de 128 Ko du STM32F103 de la STeaMi : bootloader DAPLink de 47 Ko à 0x08000000, config zone STeaMi de 1 Ko à 0x0800BC00, firmware d'interface DAPLink de 79 Ko à 0x0800C000, paramètres DAPLink de 1 Ko à 0x0801FC00](/img/diagrams/flash-stm32f103.svg)](pathname:///img/diagrams/flash-stm32f103.svg)
+
 | Zone               | Adresse                 | Taille | Description                        |
 | ------------------ | ----------------------- | ------ | ---------------------------------- |
 | Bootloader         | 0x08000000 — 0x0800BBFF | 47 Ko  | Bootloader DAPLink (jamais touché) |
 | Config zone        | 0x0800BC00 — 0x0800BFFF | 1 Ko   | Données usine persistantes         |
 | Interface firmware | 0x0800C000 — 0x0801FBFF | 79 Ko  | Firmware DAPLink                   |
 | DAPLink settings   | 0x0801FC00 — 0x0801FFFF | 1 Ko   | Paramètres DAPLink                 |
+
+Les adresses viennent de [`daplink_addr.h`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/hic_hal/stm32/stm32f103xb/daplink_addr.h) et de [`steami_config.h`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_config.h). Elles sont les mêmes sur les trois releases, qui portent toutes un STM32F103CBT6. La flash s'efface par pages de 1 Ko : la config zone et les paramètres DAPLink occupent chacun une page.
+
+La config zone occupe l'intervalle laissé entre le bootloader et le firmware d'interface. Une mise à jour depuis le lecteur **MAINTENANCE** remplace le firmware d'interface sans l'effacer. Le firmware d'interface, lui, ne réécrit jamais le bootloader (option `DAPLINK_BOOTLOADER_UPDATE` absente de la configuration STeaMi).
+
+Les paramètres DAPLink gardent les options choisies en copiant un fichier de configuration sur le lecteur **STEAMI** : `AUTO_RST.CFG` ou `HARD_RST.CFG`, `AUTO_ON.CFG` ou `AUTO_OFF.CFG`, `OVFL_ON.CFG` ou `OVFL_OFF.CFG`, `COMP_ON.CFG` ou `COMP_OFF.CFG` ([`settings_rom.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/daplink/settings/settings_rom.c), [`vfs_user.c`](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/daplink/drag-n-drop/vfs_user.c)). DAPLink ne prend ces fichiers en compte que si l'automatisation est déjà autorisée ou si le bouton de reset est appuyé pendant la copie.
 
 ## API MicroPython
 
