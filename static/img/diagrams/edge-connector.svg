@@ -1,0 +1,294 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1012" width="800" height="1012"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Connecteur edge de la STeaMi (V1c)</title>
+  <desc id="desc">Les 25 contacts du connecteur edge compatible micro:bit, de gauche à droite sur la face avant : P0 à P20, 3V3 et GND, avec la broche du STM32WB55 et les fonctions de chaque contact. Brochage identique sur V1a, V1b et V1c.</desc>
+  <defs>
+    <style>
+      /* Classes préfixées sch- ; palette du guide de style des schémas. */
+      .sch-fond { fill: #ffffff; stroke: #d0d7de; }
+      .sch-zebre { fill: #f6f8fa; }
+      .sch-sep { fill: none; stroke: #d0d7de; stroke-width: 1; }
+      .sch-bloc { stroke-width: 1.5; }
+      .sch-ana { fill: #fff3e0; stroke: #b35400; }
+      .sch-num { fill: #f6f8fa; stroke: #57606a; }
+      .sch-spi { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-i2c { fill: #e0f2f1; stroke: #00796b; }
+      .sch-pwr { fill: #ffebee; stroke: #c62828; }
+      .sch-gnd { fill: #424a53; stroke: #1f2328; }
+      .sch-pwm { fill: #f3e5f5; stroke: #7b1fa2; }
+      .sch-btn { fill: #e8f5e9; stroke: #2e7d32; }
+      .sch-trou { fill: #ffffff; stroke-width: 1.5; }
+      .sch-titre { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-nom-inv { font-size: 14px; font-weight: 600; fill: #ffffff; }
+      .sch-mcu-txt { font-size: 14px; fill: #1f2328; }
+      .sch-entete { font-size: 12px; font-weight: 600; fill: #57606a; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-puce-txt { font-size: 12px; font-weight: 600; fill: #1f2328; }
+      .sch-puce-inv { font-size: 12px; font-weight: 600; fill: #ffffff; }
+      .sch-lien { fill: none; stroke-width: 2; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <!-- Fond propre : lisible en thème clair et sombre. -->
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="1011" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Connecteur edge (compatible micro:bit)</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+  <text class="sch-detail" x="24" y="62">Ici de haut en bas : les contacts de gauche à droite, carte vue de face (côté écran).</text>
+
+  <!-- En-têtes de colonnes -->
+  <text class="sch-entete" x="72" y="100" text-anchor="middle">Contact</text>
+  <text class="sch-entete" x="132" y="100">STM32WB55</text>
+  <text class="sch-entete" x="224" y="100">Fonctions</text>
+  <text class="sch-entete" x="440" y="100">Signal du schéma</text>
+  <path class="sch-sep" d="M24 108 H776"/>
+
+  <!-- Bandes alternées pour suivre une rangée -->
+  <rect class="sch-zebre" x="24" y="140" width="752" height="44"/>
+  <rect class="sch-zebre" x="24" y="208" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="256" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="324" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="372" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="420" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="488" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="536" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="584" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="652" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="700" width="752" height="24"/>
+  <rect class="sch-zebre" x="24" y="748" width="752" height="44"/>
+
+  <!-- P3 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="40" y="119" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="133" text-anchor="middle">P3</text>
+    <text class="sch-mcu-txt" x="132" y="133">PA2</text>
+    <rect class="sch-bloc sch-ana" x="224" y="119" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="132" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="119" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="132" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="132">ANALOG01_EDGE</text>
+  </g>
+  <!-- P0 (anneau) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="32" y="143" width="80" height="38" rx="8"/>
+    <circle class="sch-trou" cx="51" cy="162" r="10" stroke="#b35400"/>
+    <text class="sch-nom" x="86" y="167" text-anchor="middle">P0</text>
+    <text class="sch-mcu-txt" x="132" y="167">PC4</text>
+    <rect class="sch-bloc sch-ana" x="224" y="153" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="166" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="153" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="166" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="166">ANALOG02_EDGE</text>
+  </g>
+  <!-- P4 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="40" y="187" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="201" text-anchor="middle">P4</text>
+    <text class="sch-mcu-txt" x="132" y="201">PA4</text>
+    <rect class="sch-bloc sch-ana" x="224" y="187" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="200" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="187" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="200" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="200">ANALOG03_EDGE</text>
+  </g>
+  <!-- P5 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="211" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="225" text-anchor="middle">P5</text>
+    <text class="sch-mcu-txt" x="132" y="225">PA7</text>
+    <rect class="sch-bloc sch-num" x="224" y="211" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="224" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-btn" x="278" y="211" width="72" height="18" rx="9"/><text class="sch-puce-txt" x="314" y="224" text-anchor="middle">Bouton A</text>
+    <text class="sch-detail" x="440" y="224">GPIO1_EDGE_BOUTON_A</text>
+  </g>
+  <!-- P6 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="235" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="249" text-anchor="middle">P6</text>
+    <text class="sch-mcu-txt" x="132" y="249">PC3</text>
+    <rect class="sch-bloc sch-num" x="224" y="235" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="248" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="248">GPIO2_EDGE</text>
+  </g>
+  <!-- P7 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="259" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="273" text-anchor="middle">P7</text>
+    <text class="sch-mcu-txt" x="132" y="273">PA9</text>
+    <rect class="sch-bloc sch-num" x="224" y="259" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="272" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-pwm" x="278" y="259" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="302" y="272" text-anchor="middle">PWM</text>
+    <text class="sch-detail" x="440" y="272">GPIO3_EDGE</text>
+  </g>
+  <!-- P1 (anneau) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="32" y="283" width="80" height="38" rx="8"/>
+    <circle class="sch-trou" cx="51" cy="302" r="10" stroke="#b35400"/>
+    <text class="sch-nom" x="86" y="307" text-anchor="middle">P1</text>
+    <text class="sch-mcu-txt" x="132" y="307">PA5</text>
+    <rect class="sch-bloc sch-ana" x="224" y="293" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="306" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="293" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="306" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="306">ANALOG04_EDGE</text>
+  </g>
+  <!-- P8 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="327" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="341" text-anchor="middle">P8</text>
+    <text class="sch-mcu-txt" x="132" y="341">PA15</text>
+    <rect class="sch-bloc sch-num" x="224" y="327" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="340" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="340">GPIO4_EDGE</text>
+  </g>
+  <!-- P9 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="351" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="365" text-anchor="middle">P9</text>
+    <text class="sch-mcu-txt" x="132" y="365">PC2</text>
+    <rect class="sch-bloc sch-num" x="224" y="351" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="364" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="364">GPIO5_EDGE</text>
+  </g>
+  <!-- P10 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="40" y="375" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="389" text-anchor="middle">P10</text>
+    <text class="sch-mcu-txt" x="132" y="389">PA6</text>
+    <rect class="sch-bloc sch-ana" x="224" y="375" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="388" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="375" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="388" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-pwm" x="368" y="375" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="392" y="388" text-anchor="middle">PWM</text>
+    <text class="sch-detail" x="440" y="388">ANALOG05_EDGE</text>
+  </g>
+  <!-- P11 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="399" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="413" text-anchor="middle">P11</text>
+    <text class="sch-mcu-txt" x="132" y="413">PA8</text>
+    <rect class="sch-bloc sch-num" x="224" y="399" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="412" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-pwm" x="278" y="399" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="302" y="412" text-anchor="middle">PWM</text>
+    <rect class="sch-bloc sch-btn" x="332" y="399" width="72" height="18" rx="9"/><text class="sch-puce-txt" x="368" y="412" text-anchor="middle">Bouton B</text>
+    <text class="sch-detail" x="440" y="412">GPIO6_EDGE_BOUTON_B</text>
+  </g>
+  <!-- P12 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="423" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="437" text-anchor="middle">P12</text>
+    <text class="sch-mcu-txt" x="132" y="437">PC6</text>
+    <rect class="sch-bloc sch-num" x="224" y="423" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="436" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="436">GPIO7_EDGE</text>
+  </g>
+  <!-- P2 (anneau) -->
+  <g>
+    <rect class="sch-bloc sch-ana" x="32" y="447" width="80" height="38" rx="8"/>
+    <circle class="sch-trou" cx="51" cy="466" r="10" stroke="#b35400"/>
+    <text class="sch-nom" x="86" y="471" text-anchor="middle">P2</text>
+    <text class="sch-mcu-txt" x="132" y="471">PC5</text>
+    <rect class="sch-bloc sch-ana" x="224" y="457" width="84" height="18" rx="9"/><text class="sch-puce-txt" x="266" y="470" text-anchor="middle">Analogique</text>
+    <rect class="sch-bloc sch-num" x="314" y="457" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="338" y="470" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="470">ANALOG06_EDGE</text>
+  </g>
+  <!-- P13 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-spi" x="40" y="491" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="505" text-anchor="middle">P13</text>
+    <text class="sch-mcu-txt" x="132" y="505">PB13</text>
+    <rect class="sch-bloc sch-num" x="224" y="491" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="504" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-spi" x="278" y="491" width="74" height="18" rx="9"/><text class="sch-puce-txt" x="315" y="504" text-anchor="middle">SPI2 SCK</text>
+    <text class="sch-detail" x="440" y="504">SPI2_SCK_EDGE</text>
+  </g>
+  <!-- P14 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-spi" x="40" y="515" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="529" text-anchor="middle">P14</text>
+    <text class="sch-mcu-txt" x="132" y="529">PB14</text>
+    <rect class="sch-bloc sch-num" x="224" y="515" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="528" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-spi" x="278" y="515" width="82" height="18" rx="9"/><text class="sch-puce-txt" x="319" y="528" text-anchor="middle">SPI2 MISO</text>
+    <text class="sch-detail" x="440" y="528">SPI2_MISO_EDGE</text>
+  </g>
+  <!-- P15 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-spi" x="40" y="539" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="553" text-anchor="middle">P15</text>
+    <text class="sch-mcu-txt" x="132" y="553">PB15</text>
+    <rect class="sch-bloc sch-num" x="224" y="539" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="552" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-spi" x="278" y="539" width="82" height="18" rx="9"/><text class="sch-puce-txt" x="319" y="552" text-anchor="middle">SPI2 MOSI</text>
+    <text class="sch-detail" x="440" y="552">SPI2_MOSI_EDGE</text>
+  </g>
+  <!-- P16 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-num" x="40" y="563" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="577" text-anchor="middle">P16</text>
+    <text class="sch-mcu-txt" x="132" y="577">PE4</text>
+    <rect class="sch-bloc sch-num" x="224" y="563" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="576" text-anchor="middle">GPIO</text>
+    <text class="sch-detail" x="440" y="576">GPIO8_EDGE</text>
+  </g>
+  <!-- 3V3 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-pwr" x="40" y="587" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="601" text-anchor="middle">3V3</text>
+    <rect class="sch-bloc sch-pwr" x="224" y="587" width="128" height="18" rx="9"/><text class="sch-puce-txt" x="288" y="600" text-anchor="middle">Alimentation 3,3 V</text>
+  </g>
+  <!-- 3V3 (anneau) -->
+  <g>
+    <rect class="sch-bloc sch-pwr" x="32" y="611" width="80" height="38" rx="8"/>
+    <circle class="sch-trou" cx="51" cy="630" r="10" stroke="#c62828"/>
+    <text class="sch-nom" x="86" y="635" text-anchor="middle">3V3</text>
+    <rect class="sch-bloc sch-pwr" x="224" y="621" width="128" height="18" rx="9"/><text class="sch-puce-txt" x="288" y="634" text-anchor="middle">Alimentation 3,3 V</text>
+  </g>
+  <!-- 3V3 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-pwr" x="40" y="655" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="669" text-anchor="middle">3V3</text>
+    <rect class="sch-bloc sch-pwr" x="224" y="655" width="128" height="18" rx="9"/><text class="sch-puce-txt" x="288" y="668" text-anchor="middle">Alimentation 3,3 V</text>
+  </g>
+  <!-- P19 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-i2c" x="40" y="679" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="693" text-anchor="middle">P19</text>
+    <text class="sch-mcu-txt" x="132" y="693">PC0</text>
+    <rect class="sch-bloc sch-num" x="224" y="679" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="692" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-i2c" x="278" y="679" width="74" height="18" rx="9"/><text class="sch-puce-txt" x="315" y="692" text-anchor="middle">I2C3 SCL</text>
+    <text class="sch-detail" x="440" y="692">I2C3_SCL_EDGE</text>
+  </g>
+  <!-- P20 (fin) -->
+  <g>
+    <rect class="sch-bloc sch-i2c" x="40" y="703" width="72" height="18" rx="3"/>
+    <text class="sch-nom" x="76" y="717" text-anchor="middle">P20</text>
+    <text class="sch-mcu-txt" x="132" y="717">PC1</text>
+    <rect class="sch-bloc sch-num" x="224" y="703" width="48" height="18" rx="9"/><text class="sch-puce-txt" x="248" y="716" text-anchor="middle">GPIO</text>
+    <rect class="sch-bloc sch-i2c" x="278" y="703" width="74" height="18" rx="9"/><text class="sch-puce-txt" x="315" y="716" text-anchor="middle">I2C3 SDA</text>
+    <text class="sch-detail" x="440" y="716">I2C3_SDA_EDGE</text>
+  </g>
+  <!-- GND (fin) -->
+  <g>
+    <rect class="sch-bloc sch-gnd" x="40" y="727" width="72" height="18" rx="3"/>
+    <text class="sch-nom-inv" x="76" y="741" text-anchor="middle">GND</text>
+    <rect class="sch-bloc sch-gnd" x="224" y="727" width="56" height="18" rx="9"/><text class="sch-puce-inv" x="252" y="740" text-anchor="middle">Masse</text>
+  </g>
+  <!-- GND (anneau) -->
+  <g>
+    <rect class="sch-bloc sch-gnd" x="32" y="751" width="80" height="38" rx="8"/>
+    <circle class="sch-trou" cx="51" cy="770" r="10" stroke="#1f2328"/>
+    <text class="sch-nom-inv" x="86" y="775" text-anchor="middle">GND</text>
+    <rect class="sch-bloc sch-gnd" x="224" y="761" width="56" height="18" rx="9"/><text class="sch-puce-inv" x="252" y="774" text-anchor="middle">Masse</text>
+  </g>
+  <!-- GND (fin) -->
+  <g>
+    <rect class="sch-bloc sch-gnd" x="40" y="795" width="72" height="18" rx="3"/>
+    <text class="sch-nom-inv" x="76" y="809" text-anchor="middle">GND</text>
+    <rect class="sch-bloc sch-gnd" x="224" y="795" width="56" height="18" rx="9"/><text class="sch-puce-inv" x="252" y="808" text-anchor="middle">Masse</text>
+  </g>
+
+  <!-- Accolades des bus -->
+  <path class="sch-lien" stroke="#303f9f" d="M596 492 H604 V556 H596"/>
+  <text class="sch-nom" x="614" y="529">Bus SPI2</text>
+  <path class="sch-lien" stroke="#00796b" d="M596 680 H604 V720 H596"/>
+  <text class="sch-nom" x="614" y="697">Bus I2C3</text>
+  <text class="sch-detail" x="614" y="713">partagé avec J3 et J4</text>
+
+  <!-- Légende : seulement les types présents. -->
+  <rect x="24" y="840" width="752" height="148" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="866">Légende</text>
+  <g class="sch-detail">
+    <rect class="sch-bloc sch-ana" x="40" y="880" width="24" height="16" rx="3"/><text x="72" y="892">Analogique</text>
+    <rect class="sch-bloc sch-num" x="164" y="880" width="24" height="16" rx="3"/><text x="196" y="892">GPIO numérique</text>
+    <rect class="sch-bloc sch-spi" x="318" y="880" width="24" height="16" rx="3"/><text x="350" y="892">SPI2</text>
+    <rect class="sch-bloc sch-i2c" x="402" y="880" width="24" height="16" rx="3"/><text x="434" y="892">I2C3</text>
+    <rect class="sch-bloc sch-pwr" x="486" y="880" width="24" height="16" rx="3"/><text x="518" y="892">Alimentation 3,3 V</text>
+    <rect class="sch-bloc sch-gnd" x="650" y="880" width="24" height="16" rx="3"/><text x="682" y="892">Masse (GND)</text>
+    <rect class="sch-bloc sch-pwm" x="40" y="908" width="24" height="16" rx="8"/><text x="72" y="920">PWM (canal de timer)</text>
+    <rect class="sch-bloc sch-btn" x="226" y="908" width="24" height="16" rx="8"/><text x="258" y="920">Partagé avec un bouton de la carte</text>
+    <rect class="sch-bloc sch-ana" x="486" y="906" width="32" height="20" rx="5"/><circle class="sch-trou" cx="497" cy="916" r="6" stroke="#b35400"/><text x="526" y="920">Anneau pour pince crocodile</text>
+    <text x="40" y="948">Contacts fins 3V3 et GND : P17 et P18 (3V3), P21 et P22 (GND) dans la numérotation micro:bit.</text>
+    <text x="40" y="968">Brochage identique sur V1a, V1b et V1c (schémas aux indices A1, B1 et C, feuille FP13).</text>
+  </g>
+</svg>
