@@ -150,9 +150,14 @@ npm run optimize:image -- --max-width 800 static/img/hardware/ma-photo.png
 
 # Voir le gain sans réécrire le fichier
 npm run optimize:image -- --dry-run static/img/pinout/*.png
+
+# Schéma SVG avec une photo intégrée, posée sur un fond opaque #fffffc :
+# photo aplatie sur ce fond et intégrée en JPEG
+npm run optimize:image -- --svg-jpeg '#fffffc' --quality 80 static/img/pinout/pinout_steami.svg
 ```
 
 - Viser, avec `--max-width`, environ deux fois la largeur d'affichage réelle (écrans haute densité). Pour la trouver, chercher où l'image est utilisée (`grep -rn nom-image docs src`) : attribut `width` d'une balise `<img>`, règle CSS (vignettes de la page d'accueil dans `src/css/custom.css`), ou largeur de la colonne de texte pour une image Markdown (au plus 950 px environ).
+- Pour un SVG, `--svg-jpeg COULEUR` pose les images intégrées sur `COULEUR` et les intègre en JPEG (qualité `--quality`, couleurs non sous-échantillonnées). Une photo pèse alors bien moins qu'en PNG, mais perd sa transparence : réserver cette option à un SVG qui dessine, sous toute la photo, un fond opaque de cette couleur (chercher le `fill` du rectangle de fond dans le fichier). Le nom et le format du SVG ne changent pas.
 - Le fichier n'est réécrit que s'il devient plus léger. Un résultat trop dégradé (PSNR sous 32 dB, réglable avec `--min-psnr`) est refusé.
 - Ouvrir quand même l'image avant et après, zoomée, pour vérifier qu'aucune différence n'est visible.
 - Prérequis : Pillow avec libimagequant (paquet `python3-pil` d'Ubuntu) ou la commande `pngquant`. Sans l'un ni l'autre, `--lossless` recompresse un PNG sans palette, pour un gain faible.

@@ -185,6 +185,64 @@ class TestFichiers(unittest.TestCase):
         with Image.open(io.BytesIO(base64.b64decode(integree))) as image:
             self.assertEqual(image.size, (200, 150))
 
+    def ecrire_svg(self, image):
+        donnees = base64.b64encode(octets_png(image)).decode("ascii")
+        chemin = self.racine / "schema.svg"
+        chemin.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" '
+            'xmlns:xlink="http://www.w3.org/1999/xlink">'
+            '<rect width="30" height="20" style="fill:#fffffc" />'
+            f'<image width="20" height="15" xlink:href="data:image/png;base64,{donnees}" />'
+            "<text>GND</text></svg>",
+            encoding="utf-8",
+        )
+        return chemin
+
+    def test_svg_jpeg_aplatit_sur_le_fond(self):
+        chemin = self.ecrire_svg(photo())
+        avant = chemin.stat().st_size
+        code, sortie, _ = lancer("--svg-jpeg", "#fffffc", chemin)
+        self.assertEqual(code, 0)
+        texte = chemin.read_text(encoding="utf-8")
+        self.assertLess(len(texte), avant)
+        self.assertIn('style="fill:#fffffc"', texte)
+        self.assertIn("<text>GND</text>", texte)
+        self.assertNotIn("data:image/png", texte)
+        self.assertIn("PSNR", sortie)
+        integree = texte.split("data:image/jpeg;base64,")[1].split('"')[0]
+        with Image.open(io.BytesIO(base64.b64decode(integree))) as image:
+            self.assertEqual(image.format, "JPEG")
+            self.assertEqual(image.size, (200, 150))
+            # Colonnes transparentes de photo() : couleur du fond.
+            r, g, b = image.convert("RGB").getpixel((2, 75))
+        self.assertTrue(
+            all(abs(v - c) <= 3 for v, c in zip((r, g, b), (255, 255, 252)))
+        )
+
+    def test_svg_jpeg_perte_trop_forte_refusee(self):
+        chemin = self.ecrire_svg(photo())
+        contenu = chemin.read_bytes()
+        code, _, erreurs = lancer("--svg-jpeg", "white", "--min-psnr", 99, chemin)
+        self.assertEqual(code, 1)
+        self.assertEqual(chemin.read_bytes(), contenu)
+        self.assertIn("perte trop visible", erreurs)
+
+    def test_svg_jpeg_refuse_hors_svg(self):
+        chemin = self.racine / "photo.png"
+        photo().save(chemin)
+        contenu = chemin.read_bytes()
+        code, _, erreurs = lancer("--svg-jpeg", "white", chemin)
+        self.assertEqual(code, 1)
+        self.assertEqual(chemin.read_bytes(), contenu)
+        self.assertIn("SVG", erreurs)
+
+    def test_svg_jpeg_couleur_inconnue(self):
+        with (
+            contextlib.redirect_stderr(io.StringIO()),
+            self.assertRaises(SystemExit),
+        ):
+            module.main(["--svg-jpeg", "pas-une-couleur", "schema.svg"])
+
     def test_sans_outil_de_palette(self):
         chemin = self.racine / "photo.png"
         photo().save(chemin)
