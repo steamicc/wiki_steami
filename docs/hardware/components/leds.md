@@ -7,13 +7,17 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # LEDs
 
-| Composant                                | Description                | Fabricant                                                         | Reference                                                         | Couleur    | Qte | Datasheet |
-| ---------------------------------------- | -------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ---------- | --- | --------- |
-| 150060RS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060RS75000 <br/><OctopartButton q="150060RS75000" />           | Rouge      | 1   | —         |
-| 150060BS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060BS75000 <br/><OctopartButton q="150060BS75000" />           | Bleu       | 2   | —         |
-| 150060VS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060VS75000 <br/><OctopartButton q="150060VS75000" />           | Vert       | 1   | —         |
-| APHBM2012LSURKZGKC                       | LED bicolore 2x1.25 mm SMD | [Kingbright](https://www.kingbrightusa.com/)                      | APHBM2012LSURKZGKC <br/><OctopartButton q="APHBM2012LSURKZGKC" /> | Rouge/Vert | 1   | —         |
-| [150505M173300](../main-components/leds) | LED RGB SMD 5050           | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150505M173300 <br/><OctopartButton q="150505M173300" />           | RGB        | 1   | —         |
+:::info Release
+Les repères du tableau sont ceux de la nomenclature de l'indice B1 (V1b). Ceux de la V1c sont différents (voir [plus bas](#utilisation)).
+:::
+
+| Composant                                | Description                | Fabricant                                                         | Reference                                                         | Couleur    | Qte | Repères    | Datasheet |
+| ---------------------------------------- | -------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | ---------- | --- | ---------- | --------- |
+| 150060RS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060RS75000 <br/><OctopartButton q="150060RS75000" />           | Rouge      | 1   | LED2       | —         |
+| 150060BS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060BS75000 <br/><OctopartButton q="150060BS75000" />           | Bleu       | 2   | LED3, LED6 | —         |
+| 150060VS75000                            | LED CMS 0603               | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150060VS75000 <br/><OctopartButton q="150060VS75000" />           | Vert       | 1   | LED4       | —         |
+| APHBM2012LSURKZGKC                       | LED bicolore 2x1.25 mm SMD | [Kingbright](https://www.kingbrightusa.com/)                      | APHBM2012LSURKZGKC <br/><OctopartButton q="APHBM2012LSURKZGKC" /> | Rouge/Vert | 1   | LED5       | —         |
+| [150505M173300](../main-components/leds) | LED RGB SMD 5050           | [Wurth](https://www.we-online.com/en/components/products/WL-SMCW) | 150505M173300 <br/><OctopartButton q="150505M173300" />           | RGB        | 1   | LED7       | —         |
 
 ## Utilisation
 

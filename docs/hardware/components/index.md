@@ -9,6 +9,8 @@ Liste complète de tous les composants de la carte STeaMi, regroupés par catég
 
 :::info Release
 Les tableaux de cette section reprennent la nomenclature de l'indice **B1** (V1b), publiée dans le [reference design](https://github.com/steamicc/steami-reference-design). Les composants propres à une release sont signalés dans chaque page ; les différences sont résumées [plus bas](#différences-selon-la-release).
+
+La colonne « Repères » donne les repères de la nomenclature B1, et ceux de la nomenclature de l'indice C pour les lignes propres à la V1c. Un même repère peut donc désigner deux composants différents selon la release (par exemple J2, micro-USB sur la V1b et USB-C sur la V1c), et certains repères de l'indice B1 n'existent plus sur la V1c (voir [plus bas](#v1c-nomenclature-de-lindice-c)).
 :::
 
 Pour les composants actifs principaux avec liens datasheets, voir [Composants principaux](../main-components).
