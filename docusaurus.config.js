@@ -87,6 +87,12 @@ const config = {
             label: '🏗️ Conception',
           },
           {
+            type: 'docSidebar',
+            sidebarId: 'manufacturingSidebar',
+            position: 'left',
+            label: '🏭 Fabrication',
+          },
+          {
             href: 'https://steami.cc',
             label: 'steami.cc',
             position: 'right',
@@ -109,6 +115,7 @@ const config = {
               { label: 'Hardware', to: '/docs/hardware' },
               { label: 'Programmation', to: '/docs/software' },
               { label: 'Conception', to: '/docs/design' },
+              { label: 'Fabrication', to: '/docs/manufacturing' },
             ],
           },
           {

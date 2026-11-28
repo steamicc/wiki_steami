@@ -53,7 +53,8 @@ Les fichiers statiques sont générés dans `build/`.
 │   ├── hardware/          # Blocs fonctionnels hardware
 │   ├── pin-mapping/       # Mapping des broches
 │   ├── components/        # BOM et composants
-│   └── requirements/      # Exigences techniques
+│   ├── requirements/      # Exigences techniques
+│   └── manufacturing/     # Fabrication : préparation et qualification des cartes
 ├── src/
 │   ├── pages/             # Pages custom (homepage)
 │   └── css/               # Styles custom

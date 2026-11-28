@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Préparation d'une carte STeaMi V1c, de l'assemblage à la livraison</title>
+  <desc id="desc">Une carte assemblée reçoit le bootloader DAPLink par SWD avec une sonde ST-Link, puis le firmware DAPLink par le lecteur MAINTENANCE, avec DapLink-EasyFlash. Le même outil met le FUS du STM32WB55 en version 1.2.0 et installe la pile radio BLE HCI Layer 1.20.0. Le firmware MicroPython est copié sur le lecteur STEAMI, puis mpremote écrit la configuration d'usine dans la config zone du STM32F103. Dix tests de qualification suivent, lancés avec make test de micropython-steami-lib. Comme certains effacent la config zone, la configuration d'usine est réécrite avant que la carte soit prête.</desc>
+  <defs>
+    <style>
+      .sch-fond   { fill: #ffffff; stroke: #d0d7de; }
+      .sch-bloc   { stroke-width: 1.5; }
+      .sch-mcu    { fill: #e0f2f1; stroke: #00796b; }
+      .sch-capt   { fill: #fff3e0; stroke: #b35400; }
+      .sch-mem    { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-ihm    { fill: #e8f5e9; stroke: #2e7d32; }
+      .sch-ext    { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-test   { font-size: 12px; fill: #1f2328; }
+      .sch-lien   { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-etape  { stroke: #1f2328; stroke-width: 1.5; }
+      .sch-gpio   { stroke: #57606a; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-etape" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#1f2328"/>
+    </marker>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="999" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Préparation d'une carte</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+
+  <text class="sch-detail" x="244" y="68" text-anchor="middle">Étapes</text>
+  <text class="sch-detail" x="640" y="68" text-anchor="middle">Outil et liaison</text>
+
+  <!-- Départ -->
+  <rect class="sch-bloc sch-ext" x="24" y="80" width="440" height="48" rx="6"/>
+  <text class="sch-nom" x="244" y="100" text-anchor="middle">PCB assemblé</text>
+  <text class="sch-detail" x="244" y="118" text-anchor="middle">STM32F103 et STM32WB55 sans programme</text>
+  <path class="sch-lien sch-etape" d="M244 128 V146" marker-end="url(#fl-etape)"/>
+
+  <!-- 1. Bootloader -->
+  <rect class="sch-bloc sch-mcu" x="24" y="148" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="170" text-anchor="middle">1. Bootloader DAPLink</text>
+  <text class="sch-detail" x="244" y="188" text-anchor="middle">STM32F103, à 0x08000000 : présente le lecteur MAINTENANCE</text>
+  <path class="sch-lien sch-etape" d="M244 200 V218" marker-end="url(#fl-etape)"/>
+
+  <!-- 2. Firmware DAPLink -->
+  <rect class="sch-bloc sch-mcu" x="24" y="220" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="242" text-anchor="middle">2. Firmware DAPLink</text>
+  <text class="sch-detail" x="244" y="260" text-anchor="middle">STM32F103, à 0x0800C000 : lecteur STEAMI, port série, CMSIS-DAP</text>
+  <path class="sch-lien sch-etape" d="M244 272 V290" marker-end="url(#fl-etape)"/>
+
+  <!-- 3. FUS -->
+  <rect class="sch-bloc sch-mcu" x="24" y="292" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="314" text-anchor="middle">3. Mise à jour du FUS</text>
+  <text class="sch-detail" x="244" y="332" text-anchor="middle">STM32WB55, second cœur : FUS 1.2.0</text>
+  <path class="sch-lien sch-etape" d="M244 344 V362" marker-end="url(#fl-etape)"/>
+
+  <!-- 4. Pile radio -->
+  <rect class="sch-bloc sch-mcu" x="24" y="364" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="386" text-anchor="middle">4. Pile radio</text>
+  <text class="sch-detail" x="244" y="404" text-anchor="middle">STM32WB55, second cœur : BLE HCI Layer 1.20.0</text>
+  <path class="sch-lien sch-etape" d="M244 416 V434" marker-end="url(#fl-etape)"/>
+
+  <!-- 5. MicroPython -->
+  <rect class="sch-bloc sch-mcu" x="24" y="436" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="458" text-anchor="middle">5. Firmware MicroPython</text>
+  <text class="sch-detail" x="244" y="476" text-anchor="middle">STM32WB55, premier cœur : version retenue par le wiki</text>
+  <path class="sch-lien sch-etape" d="M244 488 V506" marker-end="url(#fl-etape)"/>
+
+  <!-- 6. Configuration d'usine -->
+  <rect class="sch-bloc sch-mem" x="24" y="508" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="530" text-anchor="middle">6. Configuration d'usine</text>
+  <text class="sch-detail" x="244" y="548" text-anchor="middle">Config zone du STM32F103 : révision 131 et nom de la carte</text>
+  <path class="sch-lien sch-etape" d="M244 560 V578" marker-end="url(#fl-etape)"/>
+
+  <!-- 7-16. Qualification -->
+  <rect class="sch-bloc sch-capt" x="24" y="580" width="440" height="176" rx="6"/>
+  <text class="sch-nom" x="244" y="602" text-anchor="middle">7 à 16. Qualification</text>
+  <g class="sch-test">
+    <text x="64" y="630">7. Bus I2C</text>
+    <text x="64" y="654">8. Capteurs</text>
+    <text x="64" y="678">9. LEDs</text>
+    <text x="64" y="702">10. Boutons</text>
+    <text x="64" y="726">11. Buzzer</text>
+    <text x="264" y="630">12. Écran</text>
+    <text x="264" y="654">13. USB</text>
+    <text x="264" y="678">14. Flash W25Q64</text>
+    <text x="264" y="702">15. Bluetooth</text>
+    <text x="264" y="726">16. Connecteurs</text>
+  </g>
+  <text class="sch-detail" x="244" y="746" text-anchor="middle">Le test 14 efface la config zone</text>
+  <path class="sch-lien sch-etape" d="M244 756 V774" marker-end="url(#fl-etape)"/>
+
+  <!-- 6 bis. Configuration réécrite -->
+  <rect class="sch-bloc sch-mem" x="24" y="776" width="440" height="52" rx="6"/>
+  <text class="sch-nom" x="244" y="798" text-anchor="middle">Configuration d'usine réécrite</text>
+  <text class="sch-detail" x="244" y="816" text-anchor="middle">Même script qu'à l'étape 6, puis relecture</text>
+  <path class="sch-lien sch-etape" d="M244 828 V846" marker-end="url(#fl-etape)"/>
+
+  <!-- Fin -->
+  <rect class="sch-bloc sch-ihm" x="24" y="848" width="440" height="48" rx="6"/>
+  <text class="sch-nom" x="244" y="868" text-anchor="middle">Carte prête</text>
+  <text class="sch-detail" x="244" y="886" text-anchor="middle">17. Première utilisation par l'utilisateur</text>
+
+  <!-- Outils -->
+  <rect class="sch-bloc sch-ext" x="504" y="148" width="272" height="124" rx="6"/>
+  <text class="sch-nom" x="640" y="174" text-anchor="middle">DapLink-EasyFlash</text>
+  <text class="sch-detail" x="640" y="192" text-anchor="middle">onglet DAPLink, un seul passage</text>
+  <text class="sch-detail" x="640" y="220" text-anchor="middle">1 : sonde ST-Link sur J8 (SWD)</text>
+  <text class="sch-detail" x="640" y="240" text-anchor="middle">2 : copie sur MAINTENANCE (USB)</text>
+  <path class="sch-lien sch-gpio" d="M464 174 H504"/>
+  <path class="sch-lien sch-gpio" d="M464 246 H504"/>
+
+  <rect class="sch-bloc sch-ext" x="504" y="292" width="272" height="124" rx="6"/>
+  <text class="sch-nom" x="640" y="318" text-anchor="middle">DapLink-EasyFlash</text>
+  <text class="sch-detail" x="640" y="336" text-anchor="middle">onglet Wireless Stack, un seul passage</text>
+  <text class="sch-detail" x="640" y="364" text-anchor="middle">USB : CMSIS-DAP (OpenOCD)</text>
+  <text class="sch-detail" x="640" y="384" text-anchor="middle">et port série (opérateur)</text>
+  <path class="sch-lien sch-gpio" d="M464 318 H504"/>
+  <path class="sch-lien sch-gpio" d="M464 390 H504"/>
+
+  <rect class="sch-bloc sch-ext" x="504" y="436" width="272" height="52" rx="6"/>
+  <text class="sch-nom" x="640" y="458" text-anchor="middle">Copie du firmware</text>
+  <text class="sch-detail" x="640" y="476" text-anchor="middle">USB : lecteur STEAMI</text>
+  <path class="sch-lien sch-gpio" d="M464 462 H504"/>
+
+  <rect class="sch-bloc sch-ext" x="504" y="508" width="272" height="52" rx="6"/>
+  <text class="sch-nom" x="640" y="530" text-anchor="middle">mpremote</text>
+  <text class="sch-detail" x="640" y="548" text-anchor="middle">USB : port série, pont I2C 0x3B</text>
+  <path class="sch-lien sch-gpio" d="M464 534 H504"/>
+
+  <rect class="sch-bloc sch-ext" x="504" y="580" width="272" height="176" rx="6"/>
+  <text class="sch-nom" x="640" y="606" text-anchor="middle">micropython-steami-lib</text>
+  <text class="sch-detail" x="640" y="624" text-anchor="middle">make test-hardware</text>
+  <text class="sch-detail" x="640" y="652" text-anchor="middle">USB : port série (mpremote)</text>
+  <text class="sch-detail" x="640" y="680" text-anchor="middle">Tests interactifs : l'opérateur</text>
+  <text class="sch-detail" x="640" y="698" text-anchor="middle">appuie, regarde, écoute</text>
+  <text class="sch-detail" x="640" y="726" text-anchor="middle">Certains tests sont à définir</text>
+  <path class="sch-lien sch-gpio" d="M464 668 H504"/>
+
+  <rect class="sch-bloc sch-ext" x="504" y="776" width="272" height="52" rx="6"/>
+  <text class="sch-nom" x="640" y="798" text-anchor="middle">mpremote</text>
+  <text class="sch-detail" x="640" y="816" text-anchor="middle">USB : port série, pont I2C 0x3B</text>
+  <path class="sch-lien sch-gpio" d="M464 802 H504"/>
+
+  <!-- Légende -->
+  <rect x="24" y="916" width="752" height="64" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="940">Légende</text>
+  <g class="sch-detail">
+    <rect class="sch-bloc sch-mcu" x="40" y="954" width="24" height="16" rx="3"/><text x="72" y="967">Programme installé</text>
+    <rect class="sch-bloc sch-mem" x="200" y="954" width="24" height="16" rx="3"/><text x="232" y="967">Configuration</text>
+    <rect class="sch-bloc sch-capt" x="336" y="954" width="24" height="16" rx="3"/><text x="368" y="967">Tests</text>
+    <rect class="sch-bloc sch-ext" x="424" y="954" width="24" height="16" rx="3"/><text x="456" y="967">Outil</text>
+    <path class="sch-lien sch-etape" d="M512 962 H548" marker-end="url(#fl-etape)"/><text x="556" y="967">Étape suivante</text>
+    <path class="sch-lien sch-gpio" d="M664 962 H696"/><text x="704" y="967">Outil utilisé</text>
+  </g>
+</svg>
