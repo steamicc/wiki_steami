@@ -25,7 +25,7 @@
   <rect class="sch-fond" x="0.5" y="0.5" width="799" height="699" rx="12"/>
   <text class="sch-titre" x="24" y="40">Trames I2C du pont DAPLink (0x3B)</text>
   <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
-  <text class="sch-detail" x="24" y="62">STM32WB55 maître (I2C1) ; STM32F103 esclave (I2C2, PB10/PB11) ; 100 kHz</text>
+  <text class="sch-detail" x="24" y="62">STM32WB55 maître (I2C1), qui fixe l'horloge SCL ; STM32F103 esclave (I2C2, PB10/PB11)</text>
 
   <!-- 1. Commande, avec ou sans arguments -->
   <text class="sch-nom" x="24" y="98">1. Commande, avec ou sans arguments</text>
