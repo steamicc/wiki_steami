@@ -22,10 +22,28 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 Le bus I2C1 connecte les capteurs internes, la jauge de batterie et l'expandeur GPIO.
 
+<ReleaseTabs>
+<Release releases="v1a">
+
 | Signal   | Pin STM32WB55 | Pin STM32F103 |
 | -------- | ------------- | ------------- |
 | I2C1_SCL | PB8           | PB6           |
 | I2C1_SDA | PB9           | PB7           |
+
+Côté STM32F103, le bus est relié à son I2C1 (feuille FP14 des indices A et A1).
+
+</Release>
+<Release releases="v1b v1c">
+
+| Signal   | Pin STM32WB55 | Pin STM32F103 |
+| -------- | ------------- | ------------- |
+| I2C1_SCL | PB8           | PB10          |
+| I2C1_SDA | PB9           | PB11          |
+
+Côté STM32F103, le bus est relié à son I2C2 (bloc « I2C2_STM32F103 = I2C1_STM32WB55 » de la feuille FP14 des indices B1 et C). Le firmware DAPLink de la carte configure bien l'I2C2 sur PB10 et PB11 ([steami_i2c.c](https://github.com/steamicc/DAPLink/blob/release_letssteam/source/board/steami/steami_i2c.c)). PB6 et PB7 portent l'USART1 du F103, relié au port série [J9](../components/not-fitted.md#notes).
+
+</Release>
+</ReleaseTabs>
 
 ### Périphériques sur I2C1
 

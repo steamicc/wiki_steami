@@ -80,16 +80,16 @@ La broche PB4 porte deux noms dans le firmware MicroPython : `SPI_INT_MISO` et `
 
 ## Signaux internes - Capteurs
 
-| Signal     | Broche associée | Description                               |
-| ---------- | --------------- | ----------------------------------------- |
-| I2C1_SCL   | I2C_INT_SCL     | I2C1 Clock interne (WB55: PB8, F103: PB6) |
-| I2C1_SDA   | I2C_INT_SDA     | I2C1 Data interne (WB55: PB9, F103: PB7)  |
-| INT_ACC    | INT_ACC         | Interruption accéléromètre (PC13)         |
-| INT_MAG    | INT_MAG         | Interruption magnétomètre (PD1)           |
-| INT_DIST   | INT_DIST        | Interruption distance (PB12)              |
-| MICRO_DATA | MIC_IN          | Données microphone (PA10)                 |
-| MICRO_CLK  | MIC_CLK         | Horloge microphone (PA3)                  |
-| BEEPER_OUT | SPEAKER         | Sortie buzzer (PA11)                      |
+| Signal     | Broche associée | Description                                                           |
+| ---------- | --------------- | --------------------------------------------------------------------- |
+| I2C1_SCL   | I2C_INT_SCL     | I2C1 Clock interne (WB55: PB8 ; F103: PB10 en V1b et V1c, PB6 en V1a) |
+| I2C1_SDA   | I2C_INT_SDA     | I2C1 Data interne (WB55: PB9 ; F103: PB11 en V1b et V1c, PB7 en V1a)  |
+| INT_ACC    | INT_ACC         | Interruption accéléromètre (PC13)                                     |
+| INT_MAG    | INT_MAG         | Interruption magnétomètre (PD1)                                       |
+| INT_DIST   | INT_DIST        | Interruption distance (PB12)                                          |
+| MICRO_DATA | MIC_IN          | Données microphone (PA10)                                             |
+| MICRO_CLK  | MIC_CLK         | Horloge microphone (PA3)                                              |
+| BEEPER_OUT | SPEAKER         | Sortie buzzer (PA11)                                                  |
 
 ## Signaux internes - Communication série
 

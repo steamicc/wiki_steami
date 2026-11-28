@@ -7,7 +7,7 @@ import ReleaseTabs, { Release } from '@site/src/components/ReleaseTabs';
 
 # Connecteurs externes
 
-Les connecteurs I2C (J3, J4), USB (J2) et écran (J7) dépendent de la release ; ils sont présentés en onglets. Les autres connecteurs sont communs aux trois releases.
+Les connecteurs I2C (J3, J4), USB (J2) et écran (J7) dépendent de la release ; ils sont présentés en onglets. L'empreinte du port SWD (J8) dépend aussi de la release, mais pas son brochage. Les autres connecteurs sont communs aux trois releases.
 
 ## Connecteur STEMMA/Qwiic (I2C3)
 
@@ -65,7 +65,22 @@ Interface série pour modules Jacdac. Les nets `UART2_TX` et `UART2_RX` du sché
 
 ## Port JTAG / SWD
 
-Port de programmation et débogage du STM32F103 (J8, sérigraphie « JTAG ») : 1 rangée de 5 trous au pas de 1,27 mm, sans connecteur soudé. Le symbole du schéma compte 10 positions, dont seules les broches impaires sont reliées. Détails dans [Port SWD](../main-components/connectors/swd.md).
+Port de programmation et débogage du STM32F103 (J8, sérigraphie « JTAG »). Le symbole du schéma compte 10 positions, dont seules les broches impaires sont reliées. Détails dans [Port SWD](../main-components/connectors/swd.md).
+
+<ReleaseTabs>
+<Release releases="v1a">
+
+Empreinte de 2 × 5 pastilles au pas de 1,27 mm, celle de l'embase FTS-105-01-F-D. Seules les broches impaires, sur la colonne intérieure, sont reliées ; la colonne paire n'a aucune piste et le contour de la carte la traverse. Les cinq broches utiles sont à la même place et dans le même ordre qu'en V1b et V1c. Aucune photo identifiée d'une V1a ne permet de savoir si un connecteur y était soudé.
+
+</Release>
+<Release releases="v1b v1c">
+
+1 rangée de 5 trous au pas de 1,27 mm, sans connecteur soudé sur les cartes photographiées.
+
+</Release>
+</ReleaseTabs>
+
+Le brochage est le même pour les trois releases :
 
 | Broche     | Broche J8 | Signal       | Pin STM32F103 | Test Point |
 | ---------- | --------- | ------------ | ------------- | ---------- |
