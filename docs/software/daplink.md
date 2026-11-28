@@ -75,9 +75,9 @@ Le registre ERROR est remis à 0 après chaque lecture :
 
 ### Séquence d'un enregistrement
 
-[![Diagramme de séquence sur la STeaMi V1c : le STM32WB55 envoie SET_FILENAME au STM32F103, attend que BUSY retombe en lisant STATUS, lit le BME280, envoie la ligne par morceaux de 30 octets avec WRITE_DATA, puis lit ERROR ; le STM32F103 écrit dans la W25Q64 par SPI](/img/diagrams/daplink-i2c-sequence.svg)](pathname:///img/diagrams/daplink-i2c-sequence.svg)
+[![Diagramme de séquence sur la STeaMi V1c : le STM32WB55 lit STATUS puis envoie SET_FILENAME au STM32F103 et rend la main, lit le BME280 pendant que le STM32F103 écrit le nom dans la W25Q64 par SPI, puis, dans write(), attend que BUSY retombe avant chaque morceau de 30 octets envoyé avec WRITE_DATA, attend encore et lit ERROR](/img/diagrams/daplink-i2c-sequence.svg)](pathname:///img/diagrams/daplink-i2c-sequence.svg)
 
-Ce diagramme suit `set_filename()` puis `write()` de [`DaplinkFlash`](#daplinkflash), comme dans l'[exemple CSV](#exemple--écrire-des-données-csv) : avant chaque commande, la bibliothèque lit STATUS toutes les 5 ms tant que BUSY vaut 1, et `write()` lit ERROR à la fin.
+Ce diagramme suit `set_filename()` puis `write()` de [`DaplinkFlash`](#daplinkflash), avec une mesure lue entre les deux. Avant chaque commande, la bibliothèque lit STATUS toutes les 5 ms tant que BUSY vaut 1. `set_filename()` rend la main dès SET_FILENAME envoyé : c'est `write()` qui attend la fin de cette commande, avant son premier WRITE_DATA. `write()` attend aussi la fin du dernier morceau, puis lit ERROR.
 
 ## Architecture flash F103
 
