@@ -23,13 +23,13 @@ Les repères sont ceux de la nomenclature de l'indice B1 (V1b). Les composants r
 
 Voir [Boutons et buzzer →](../main-components/buttons-audio) pour les details fonctionnels.
 
-### Bouton Menu / Reset
+### Bouton Reset
 
-- **PTS636 SM25J SMTR LFS** : Bouton tactile unique (probablement pour le bouton Menu ou Reset)
+- **PTS636 SM25J SMTR LFS** (SW1) : bouton Reset, relié à NRST du STM32WB55
 
 ### Boutons A, B et Menu
 
-- **PTS647SM38SMTR2LFS** (x3) : Boutons tactiles de hauteur 3.8 mm, utilises pour les boutons A, B et Menu
+- **PTS647SM38SMTR2LFS** (x3) : boutons tactiles de hauteur 3,8 mm : SW5 = bouton A, SW4 = bouton B, SW3 = bouton Menu
 
 ### Joystick 4 directions
 
