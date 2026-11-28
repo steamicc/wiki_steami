@@ -225,10 +225,10 @@ Les méthodes `set_*` et `increment_boot_count()` ne modifient que la copie en m
 Le firmware DAPLink se met à jour depuis le lecteur **MAINTENANCE**, que présente le bootloader du STM32F103. Quand le DAPLink de la carte est plus ancien que celui retenu par le wiki, la page Téléverser du Codespace et les boutons du wiki qui se connectent à la carte affichent ces étapes (voir [Mettre à jour le DAPLink depuis la page](./arduino/codespace#mettre-à-jour-le-daplink-depuis-la-page)). Cette mise à jour n'efface pas le programme de la carte.
 
 1. Télécharger [stm32f103xb_steami32_if_crc.bin](https://github.com/steamicc/DAPLink/releases/latest/download/stm32f103xb_steami32_if_crc.bin) (dernière release du DAPLink).
-2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton.
+2. Débrancher le câble USB de la carte, puis le rebrancher en maintenant le bouton **Reset** enfoncé : un lecteur **MAINTENANCE** apparaît à la place du lecteur de la carte (**STEAMI**). Relâcher alors le bouton. Si une batterie est branchée, la débrancher aussi : sinon la carte reste alimentée et le lecteur **MAINTENANCE** n'apparaît pas.
 3. Copier le fichier téléchargé sur le lecteur **MAINTENANCE**, puis attendre que le lecteur de la carte revienne.
 
-Si le lecteur **MAINTENANCE** n'apparaît pas, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Sous Windows, vérifier que le fichier ne s'appelle pas `START_BL.ACT.txt` (voir [le dépannage du Codespace](./arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas)).
+Si le lecteur **MAINTENANCE** n'apparaît pas, ou pour ne pas débrancher la batterie, créer un fichier vide nommé `START_BL.ACT` sur le lecteur de la carte (**STEAMI**) : la carte redémarre sur le lecteur **MAINTENANCE**. Sous Windows, vérifier que le fichier ne s'appelle pas `START_BL.ACT.txt` (voir [le dépannage du Codespace](./arduino/codespace#le-bouton-redémarrer-la-carte-ne-fonctionne-pas)).
 
 ## Installation initiale (DapLink-EasyFlash)
 
