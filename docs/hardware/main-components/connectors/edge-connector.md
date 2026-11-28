@@ -25,6 +25,8 @@ Le connecteur edge fournit un accès aux broches P0-P20, compatible avec l'écos
 
 ## Bus UART série
 
+Ces deux broches ne sortent pas sur le connecteur edge : elles relient le STM32WB55 au STM32F103 (DAPLink). Le net `T_UART2` du schéma correspond au périphérique LPUART1 du STM32WB55, qui porte la console série (REPL MicroPython, `Serial` en Arduino), et à l'USART2 du STM32F103.
+
 | Signal                 | Pin STM32WB55 |
 | ---------------------- | ------------- |
 | SERIAL_TX (T_UART2_TX) | PB11          |

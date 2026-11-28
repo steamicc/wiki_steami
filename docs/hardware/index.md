@@ -231,7 +231,7 @@ La carte offre plusieurs options de connectivité externe pour les capteurs, act
 | -------------- | ----------------------------------------------------------- | -------------------------------- |
 | Edge connector | Compatible micro:bit, P0-P20                                | GPIO, analogique, SPI, I2C, PWM  |
 | STEMMA/Qwiic   | 2x JST 4-pin : PH, pas 2 mm (V1a, V1b) ; SH, pas 1 mm (V1c) | I2C3 (SCL: PC0, SDA: PC1)        |
-| Jacdac         | Interface série                                             | UART2 (PB6/PB7), 5V              |
+| Jacdac         | Interface série                                             | USART1 (PB6/PB7, net UART2), 5V  |
 | Pads crocodile | P0, P1, P2 + P24-P29 + 3V3/GND                              | Analogique + GPIO (via MCP23009) |
 | SWD            | Header 1 rangée, pas 1.27 mm                                | GND, SWCLK, 3V3, SWDIO           |
 

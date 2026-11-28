@@ -1,0 +1,13 @@
+# Fichiers binaires surveillés par scripts/check-file-sizes.py (taille
+# vérifiée en CI sur chaque PR, https://github.com/steamicc/wiki_steami/issues/76).
+# « binary » : ni conversion des fins de ligne, ni diff texte, ni fusion ligne
+# à ligne.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.bin binary

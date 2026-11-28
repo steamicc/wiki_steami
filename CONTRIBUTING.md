@@ -20,17 +20,18 @@ Les hooks Git (husky) sont installés automatiquement via `npm ci`.
 
 ## Commandes utiles
 
-| Commande               | Description                                         |
-| ---------------------- | --------------------------------------------------- |
-| `npm start`            | Lancer le serveur de développement (localhost:3000) |
-| `npm run build`        | Builder le site en production                       |
-| `npm run format`       | Formater tous les fichiers (Prettier)               |
-| `npm run format:check` | Vérifier le formatage                               |
-| `npm run lint:md`      | Vérifier le Markdown sous `docs/` (markdownlint)    |
-| `npm run lint:md:fix`  | Corriger automatiquement le Markdown sous `docs/`   |
-| `npm run lint:js`      | Vérifier le JavaScript (ESLint)                     |
-| `npm run lint:js:fix`  | Corriger automatiquement le JavaScript              |
-| `npm run lint:links`   | Vérifier les liens externes (Docker requis)         |
+| Commande                  | Description                                                              |
+| ------------------------- | ------------------------------------------------------------------------ |
+| `npm start`               | Lancer le serveur de développement (localhost:3000)                      |
+| `npm run build`           | Builder le site en production                                            |
+| `npm run format`          | Formater tous les fichiers (Prettier)                                    |
+| `npm run format:check`    | Vérifier le formatage                                                    |
+| `npm run lint:md`         | Vérifier le Markdown sous `docs/` (markdownlint)                         |
+| `npm run lint:md:fix`     | Corriger automatiquement le Markdown sous `docs/`                        |
+| `npm run lint:js`         | Vérifier le JavaScript (ESLint)                                          |
+| `npm run lint:js:fix`     | Corriger automatiquement le JavaScript                                   |
+| `npm run lint:links`      | Vérifier les liens externes (Docker requis)                              |
+| `npm run lint:file-sizes` | Vérifier la taille des fichiers ajoutés ou modifiés depuis `origin/main` |
 
 ## Conventions de branche
 
@@ -110,9 +111,26 @@ chore: remove old requirements section
    ```
 
 5. **Ouvrir une Pull Request** avec une description du changement
-6. **Attendre la CI** : commitlint + format + lint:md + lint:js + build + broken links check
+6. **Attendre la CI** : commitlint + taille des fichiers + format + lint:md + lint:js + build + broken links check
 7. **Attendre la review** : 1 approbation requise
 8. **Merge** : squash merge sur main (historique linéaire)
+
+## Taille des fichiers
+
+La CI refuse, dans une PR, un fichier ajouté ou modifié trop volumineux (`scripts/check-file-sizes.py`, 1 Ko = 1024 octets) :
+
+| Fichiers                                         | Avertissement | Erreur |
+| ------------------------------------------------ | ------------- | ------ |
+| Images (`.png`, `.jpg`, `.gif`, `.webp`, `.svg`) | > 500 Ko      | > 2 Mo |
+| PDF                                              | > 1 Mo        | > 2 Mo |
+| Autres fichiers                                  | —             | > 1 Mo |
+
+Avant d'ajouter une image, la redimensionner et la compresser (PNG optimisé pour un schéma ou une capture, JPEG pour une photo). Les fichiers déjà présents au-delà d'un seuil d'erreur sont listés, avec une taille plafond, dans `scripts/tailles-fichiers-exceptions.txt`. Pour vérifier localement :
+
+```bash
+npm run lint:file-sizes            # fichiers commités depuis origin/main
+npm run lint:file-sizes -- --all   # tous les fichiers suivis
+```
 
 ## Hooks automatiques
 

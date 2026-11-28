@@ -54,7 +54,7 @@ Le bus I2C3 est partage entre le connecteur STEMMA/Qwiic et les broches P19/P20 
 
 ## Connecteur Jacdac
 
-Interface série pour modules Jacdac.
+Interface série pour modules Jacdac. Les nets `UART2_TX` et `UART2_RX` du schéma arrivent sur le périphérique USART1 du STM32WB55.
 
 | Broche           | Signal    | Pin STM32WB55 | Test Point |
 | ---------------- | --------- | ------------- | ---------- |

@@ -52,6 +52,11 @@ export function pileRadioVisible(id) {
   return typeof id === 'string' && id.startsWith('BLE/');
 }
 
+// À la place du bouton quand son code n'a pas pu être chargé
+// (EssayerExemple/limite.mjs) : l'exemple, lui, reste utilisable.
+export const TEXTE_PILE_INDISPONIBLE =
+  "Le bouton « Vérifier la pile radio » n'a pas pu être chargé. Recharger la page pour le retrouver.";
+
 // Téléverser et Déconnecter (EssayerExemple), sous tous les exemples : grisés
 // pendant une opération de la carte et pendant toute étape occupée de la
 // vérification, qui tient la carte.

@@ -31,6 +31,6 @@ Les composants propres à la V1c, le capteur BME280 et l'écran TFT GC9A01, ne f
 
 ## Voir aussi
 
-- [MicroPython](./micropython/) — Langage le plus complet (16 drivers)
+- [MicroPython](./micropython/) — Langage le plus complet (18 drivers)
 - [CODAL](./codal/) — Runtime C++
 - [Arduino](./arduino/) — Support partiel, en cours de développement
