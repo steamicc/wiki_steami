@@ -7,15 +7,19 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Connecteurs
 
-| Composant               | Description                                                                | Fabricant                                                           | Reference                                                                   | Qte | Datasheet |
-| ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --- | --------- |
-| USB3080-30-00-A         | Connecteur micro-USB B, Bottom-SMT (V1a, V1b)                              | [GCT](https://gct.co/)                                              | USB3080-30-00-A <br/><OctopartButton q="USB3080-30-00-A" />                 | 1   | —         |
-| 10114830-10102LF        | Connecteur batterie SMD 2 positions, pas 1.25 mm                           | [Amphenol](https://www.amphenol-cs.com/)                            | 10114830-10102LF <br/><OctopartButton q="10114830-10102LF" />               | 1   | —         |
-| 52435-2471              | Connecteur FFC/FPC 24 positions, pas 0.50 mm (écran OLED, V1a, V1b)        | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 52435-2471 <br/><OctopartButton q="52435-2471" />                           | 1   | —         |
-| S4B-PH-SM4-TB(LF)(SN)   | Connecteur I2C JST PH 4 positions, pas 2.00 mm, angle droit SMD (V1a, V1b) | [JST](https://www.jst.com/)                                         | S4B-PH-SM4-TB(LF)(SN) <br/><OctopartButton q="S4B-PH-SM4-TB" />             | 2   | —         |
-| UJ20-C-H-G-SMT-4-P16-TR | Connecteur USB-C 2.0, 16 broches, SMD (V1c)                                | [Same Sky](https://www.sameskydevices.com/)                         | UJ20-C-H-G-SMT-4-P16-TR <br/><OctopartButton q="UJ20-C-H-G-SMT-4-P16-TR" /> | 1   | —         |
-| F32R-1A7H1-11018        | Connecteur FFC/FPC 18 positions (écran TFT, V1c)                           | —                                                                   | F32R-1A7H1-11018 <br/><OctopartButton q="F32R-1A7H1-11018" />               | 1   | —         |
-| SM04B-SRSS-TB(LF)(SN)   | Connecteur Qwiic/STEMMA QT JST SH 4 positions, pas 1.00 mm, SMD (V1c)      | [JST](https://www.jst.com/)                                         | SM04B-SRSS-TB(LF)(SN) <br/><OctopartButton q="SM04B-SRSS-TB" />             | 2   | —         |
+:::info Release
+Les repères sont ceux de la nomenclature de l'indice B1 (V1b), sauf pour les lignes marquées V1c, qui donnent ceux de la nomenclature de l'indice C. Les composants retirés ou modifiés sur la V1c sont listés dans [BOM complète](./#différences-selon-la-release).
+:::
+
+| Composant               | Description                                                                | Fabricant                                                           | Reference                                                                   | Qte | Repères | Datasheet |
+| ----------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --- | ------- | --------- |
+| USB3080-30-00-A         | Connecteur micro-USB B, Bottom-SMT (V1a, V1b)                              | [GCT](https://gct.co/)                                              | USB3080-30-00-A <br/><OctopartButton q="USB3080-30-00-A" />                 | 1   | J2      | —         |
+| 10114830-10102LF        | Connecteur batterie SMD 2 positions, pas 1.25 mm                           | [Amphenol](https://www.amphenol-cs.com/)                            | 10114830-10102LF <br/><OctopartButton q="10114830-10102LF" />               | 1   | J1      | —         |
+| 52435-2471              | Connecteur FFC/FPC 24 positions, pas 0.50 mm (écran OLED, V1a, V1b)        | [Molex](https://www.molex.com/en-us/products/part-detail/524352471) | 52435-2471 <br/><OctopartButton q="52435-2471" />                           | 1   | J7      | —         |
+| S4B-PH-SM4-TB(LF)(SN)   | Connecteur I2C JST PH 4 positions, pas 2.00 mm, angle droit SMD (V1a, V1b) | [JST](https://www.jst.com/)                                         | S4B-PH-SM4-TB(LF)(SN) <br/><OctopartButton q="S4B-PH-SM4-TB" />             | 2   | J3, J4  | —         |
+| UJ20-C-H-G-SMT-4-P16-TR | Connecteur USB-C 2.0, 16 broches, SMD (V1c)                                | [Same Sky](https://www.sameskydevices.com/)                         | UJ20-C-H-G-SMT-4-P16-TR <br/><OctopartButton q="UJ20-C-H-G-SMT-4-P16-TR" /> | 1   | J2      | —         |
+| F32R-1A7H1-11018        | Connecteur FFC/FPC 18 positions (écran TFT, V1c)                           | —                                                                   | F32R-1A7H1-11018 <br/><OctopartButton q="F32R-1A7H1-11018" />               | 1   | J7      | —         |
+| SM04B-SRSS-TB(LF)(SN)   | Connecteur Qwiic/STEMMA QT JST SH 4 positions, pas 1.00 mm, SMD (V1c)      | [JST](https://www.jst.com/)                                         | SM04B-SRSS-TB(LF)(SN) <br/><OctopartButton q="SM04B-SRSS-TB" />             | 2   | J3, J4  | —         |
 
 ## Details
 

@@ -7,13 +7,17 @@ import OctopartButton from '@site/src/components/OctopartButton';
 
 # Composants mécaniques
 
+:::info Release
+Les repères sont ceux de la nomenclature de l'indice B1 (V1b). Les composants retirés ou modifiés sur la V1c sont listés dans [BOM complète](./#différences-selon-la-release).
+:::
+
 ## Boutons et interrupteurs
 
-| Composant                                      | Description                                             | Fabricant                             | Reference                                                         | Qte | Datasheet |
-| ---------------------------------------------- | ------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- | --- | --------- |
-| PTS636 SM25J SMTR LFS                          | Interrupteur tactile montage en surface                 | [C&K](https://www.ckswitches.com/)    | PTS636 SM25J SMTR LFS <br/><OctopartButton q="PTS636 SM25J" />    | 1   | —         |
-| PTS647SM38SMTR2LFS                             | Interrupteur tactile 50 mA 12 VDC, 1.8N, hauteur 3.8 mm | [C&K](https://www.ckswitches.com/)    | PTS647SM38SMTR2LFS <br/><OctopartButton q="PTS647SM38SMTR2LFS" /> | 3   | —         |
-| [SKRHABE010](../main-components/buttons-audio) | Joystick 4 directions avec fonction push central        | [ALPS](https://www.alpsalpine.com/e/) | SKRHABE010 <br/><OctopartButton q="SKRHABE010" />                 | 1   | —         |
+| Composant                                      | Description                                             | Fabricant                             | Reference                                                         | Qte | Repères       | Datasheet |
+| ---------------------------------------------- | ------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- | --- | ------------- | --------- |
+| PTS636 SM25J SMTR LFS                          | Interrupteur tactile montage en surface                 | [C&K](https://www.ckswitches.com/)    | PTS636 SM25J SMTR LFS <br/><OctopartButton q="PTS636 SM25J" />    | 1   | SW1           | —         |
+| PTS647SM38SMTR2LFS                             | Interrupteur tactile 50 mA 12 VDC, 1.8N, hauteur 3.8 mm | [C&K](https://www.ckswitches.com/)    | PTS647SM38SMTR2LFS <br/><OctopartButton q="PTS647SM38SMTR2LFS" /> | 3   | SW3, SW4, SW5 | —         |
+| [SKRHABE010](../main-components/buttons-audio) | Joystick 4 directions avec fonction push central        | [ALPS](https://www.alpsalpine.com/e/) | SKRHABE010 <br/><OctopartButton q="SKRHABE010" />                 | 1   | SW2           | —         |
 
 ## Details
 
