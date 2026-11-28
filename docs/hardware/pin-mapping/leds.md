@@ -25,10 +25,10 @@ La LED RGB peut être programmée par l'utilisateur.
 | ------- | ------------- | ------------- |
 | LED_BLE | BOOT0/LED_BLE | PH3           |
 
-Comportement :
+Comportement demandé par les exigences de l'[interface utilisateur](../../design/user-interface) :
 
-- Clignotement bleu (duty cycle 50%) pendant l'appairage BLE
-- Éteinte après 30 secondes d'inactivité
+- FCT-12 : clignotement bleu (duty cycle 50%) pendant l'appairage BLE. L'exigence demande aussi du rouge en cas d'erreur et du vert pendant la programmation, que LED_BLE, bleue, ne peut pas afficher.
+- FCT-11 : extinction de toutes les LEDs indicatrices après 30 secondes quand la carte est alimentée par sa batterie.
 
 ## LEDs d'interface (STM32F103)
 
