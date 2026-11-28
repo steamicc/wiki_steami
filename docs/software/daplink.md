@@ -189,14 +189,16 @@ Les méthodes `set_*` et `increment_boot_count()` ne modifient que la copie en m
 
 #### Capteurs supportés pour la calibration température
 
-| Clé   | Capteur   |
-| ----- | --------- |
-| `hts` | HTS221    |
-| `mag` | LIS2MDL   |
-| `ism` | ISM330DL  |
-| `hid` | WSEN-HIDS |
-| `pad` | WSEN-PADS |
-| `bme` | BME280    |
+| Clé   | Capteur                                          |
+| ----- | ------------------------------------------------ |
+| `mag` | LIS2MDL                                          |
+| `ism` | ISM330DL                                         |
+| `hid` | WSEN-HIDS                                        |
+| `pad` | WSEN-PADS                                        |
+| `bme` | BME280                                           |
+| `hts` | WSEN-HIDS (ancienne clé, lue pour compatibilité) |
+
+La clé `hts` vient d'anciens outils de calibration, qui rangeaient sous ce nom la calibration du capteur d'humidité à l'adresse `0x5F`. Ce capteur est le WSEN-HIDS : aucune carte STeaMi ne porte de HTS221. `steami_config` lit et écrit toujours cette clé sous le nom `hts221`, pour relire les zones déjà écrites. Le driver [`steami`](./micropython#drivers-disponibles) s'en sert pour le WSEN-HIDS quand la clé `hid` manque ou ne contient que la calibration neutre (gain 1, décalage 0).
 
 #### Format JSON de la config zone
 
@@ -204,7 +206,7 @@ Les méthodes `set_*` et `increment_boot_count()` ne modifient que la copie en m
 {
   "rev": 131,
   "name": "STeaMi-01",
-  "tc": { "hts": { "g": 1.0, "o": -0.5 }, "pad": { "g": 1.0, "o": -1.73 } },
+  "tc": { "hid": { "g": 1.0, "o": -0.5 }, "pad": { "g": 1.0, "o": -1.73 } },
   "cm": { "hx": 12.3, "hy": -5.1, "hz": 0.8, "sx": 1.01, "sy": 0.98, "sz": 1.0 },
   "ca": { "ox": 0.01, "oy": -0.02, "oz": 0.03 },
   "bc": 0
