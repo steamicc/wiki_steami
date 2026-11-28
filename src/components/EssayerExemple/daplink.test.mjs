@@ -3,7 +3,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { decisionEncart, estSteami, verificationDaplink } from './daplink.mjs';
+import {
+  ETAT_INITIAL_DAPLINK,
+  decisionEncart,
+  encartVisible,
+  estSteami,
+  verificationDaplink,
+} from './daplink.mjs';
 
 const EPINGLE = { release: '2026-11-25.3', numero: 3, date: 20261125 };
 const SERIE = '0839000012345';
@@ -128,7 +134,7 @@ test('plus tard : vaut pour toute la page', async () => {
   await verifier(ancienne);
   assert.equal(verificationDaplink.etat.release, '2026-11-25.3');
   verificationDaplink.reporter();
-  assert.deepEqual(verificationDaplink.etat, { release: null, reporte: true });
+  assert.deepEqual(verificationDaplink.etat, { release: null, reporte: true, autreEncart: false });
   await verifier(ancienne);
   assert.equal(verificationDaplink.etat.release, null);
 });
@@ -151,4 +157,52 @@ test('abonner : appelé à chaque changement, plus après désabonnement', async
   fin();
   verificationDaplink.reinitialiser();
   assert.equal(appels, 2);
+});
+
+test("encartVisible : sous l'exemple cliqué en dernier, avec une release", () => {
+  const aProposer = { ...ETAT_INITIAL_DAPLINK, release: '2026-11-25.3' };
+  assert.equal(encartVisible(aProposer, true), true);
+  assert.equal(encartVisible(aProposer, false), false);
+  assert.equal(encartVisible(ETAT_INITIAL_DAPLINK, true), false);
+  assert.equal(encartVisible({ ...aProposer, autreEncart: true }, true), false);
+});
+
+test('un seul encart : masqué tant que la pile radio affiche ses étapes', async () => {
+  verificationDaplink.reinitialiser();
+  await verifier(reponse('STM1', 1, 20200101));
+  assert.equal(encartVisible(verificationDaplink.etat, true), true);
+  const retirer = verificationDaplink.afficherAutreEncart();
+  assert.equal(encartVisible(verificationDaplink.etat, true), false);
+  // Rien n'est perdu : une reconnexion pendant ce temps garde la release.
+  await verifier(reponse('STM1', 1, 20200101));
+  assert.equal(verificationDaplink.etat.release, '2026-11-25.3');
+  assert.equal(encartVisible(verificationDaplink.etat, true), false);
+  retirer();
+  assert.equal(encartVisible(verificationDaplink.etat, true), true);
+});
+
+test("plus tard dans les étapes de la pile radio : vaut pour l'encart du bouton Essayer", async () => {
+  verificationDaplink.reinitialiser();
+  const ancienne = reponse('STM1', 1, 20200101);
+  await verifier(ancienne);
+  const retirer = verificationDaplink.afficherAutreEncart();
+  verificationDaplink.reporter();
+  retirer();
+  assert.deepEqual(verificationDaplink.etat, { release: null, reporte: true, autreEncart: false });
+  assert.equal(encartVisible(verificationDaplink.etat, true), false);
+  await verifier(ancienne);
+  assert.equal(encartVisible(verificationDaplink.etat, true), false);
+});
+
+test('afficherAutreEncart : masqué jusqu’au dernier retrait, retrait unique', async () => {
+  verificationDaplink.reinitialiser();
+  await verifier(reponse('STM1', 1, 20200101));
+  const premier = verificationDaplink.afficherAutreEncart();
+  const second = verificationDaplink.afficherAutreEncart();
+  premier();
+  premier();
+  assert.equal(verificationDaplink.etat.autreEncart, true);
+  second();
+  assert.equal(verificationDaplink.etat.autreEncart, false);
+  assert.equal(encartVisible(verificationDaplink.etat, true), true);
 });

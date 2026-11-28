@@ -196,7 +196,7 @@ La carte dispose de plusieurs LEDs pour le retour visuel : une LED RGB programma
 
 ### Boutons
 
-La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un bouton reset. Les boutons directionnels passent par l'expandeur GPIO MCP23009 pour économiser des broches MCU.
+La carte dispose de 7 boutons utilisateur (4 directions + A + B + Menu) plus un bouton Reset. Les boutons directionnels passent par l'expandeur GPIO MCP23009 pour économiser des broches MCU.
 
 | Bouton                            | Composant                                     | Connexion              |
 | --------------------------------- | --------------------------------------------- | ---------------------- |
