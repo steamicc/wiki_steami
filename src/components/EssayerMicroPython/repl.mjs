@@ -99,13 +99,13 @@ function verifierArret(op) {
 
 function erreurDelai(quoi) {
   return new ErreurDelai(
-    `MicroPython ne répond pas (attente de ${quoi}) : appuyer sur le bouton RESET de la carte, puis réessayer.`,
+    `MicroPython ne répond pas (attente de ${quoi}) : appuyer sur le bouton Reset de la carte, puis réessayer.`,
   );
 }
 
 function erreurProtocole(quoi) {
   return new ErreurLecteur(
-    `Réponse inattendue de MicroPython (${quoi}) : appuyer sur le bouton RESET de la carte, puis réessayer.`,
+    `Réponse inattendue de MicroPython (${quoi}) : appuyer sur le bouton Reset de la carte, puis réessayer.`,
   );
 }
 
@@ -644,7 +644,7 @@ export function creerRepl({
   // Arrête le programme en cours (Ctrl-C) et les opérations en file, puis
   // remet MicroPython à zéro (remettreAZero). Renvoie true si la carte est
   // revenue au repos sur « >>> », false si elle n'a pas répondu (programme
-  // qui ignore Ctrl-C, pas d'invite) : il faut alors appuyer sur RESET.
+  // qui ignore Ctrl-C, pas d'invite) : il faut alors appuyer sur Reset.
   async function arreter() {
     for (const op of operations) op.arretDemande = true;
     const courante = operation;

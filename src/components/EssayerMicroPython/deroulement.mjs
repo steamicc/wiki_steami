@@ -62,13 +62,13 @@ export const DELAIS_DEROULEMENT = Object.freeze({
 export const LIMITE_SORTIE = 100_000;
 
 export const TEXTE_RESET =
-  'La carte ne répond pas : appuyer sur le bouton RESET de la carte, puis réessayer.';
+  'La carte ne répond pas : appuyer sur le bouton Reset de la carte, puis réessayer.';
 
 export const TEXTE_APRES_INSTALLATION =
-  "MicroPython ne répond pas après l'installation : appuyer sur le bouton RESET de la carte, puis réessayer.";
+  "MicroPython ne répond pas après l'installation : appuyer sur le bouton Reset de la carte, puis réessayer.";
 
 export const TEXTE_AUTRE_CAUSE =
-  "Si MicroPython est déjà installé, un autre outil (Thonny, mpremote) ou un programme en cours tient peut-être la carte : fermer l'outil, ou appuyer sur RESET, puis réessayer au lieu d'installer.";
+  "Si MicroPython est déjà installé, un autre outil (Thonny, mpremote) ou un programme en cours tient peut-être la carte : fermer l'outil, ou appuyer sur Reset, puis réessayer au lieu d'installer.";
 
 export const TEXTE_EPINGLAGE_ILLISIBLE =
   'Impossible de lire la version de MicroPython proposée par le wiki : vérifier la connexion à Internet, puis recharger la page.';
@@ -544,7 +544,7 @@ async function sonder(
 // pile radio » lit son état occupé.
 export const sessionMicroPython = creerSession();
 
-// Remet MicroPython à zéro (repl.arreter) ; false : il faut appuyer sur RESET.
+// Remet MicroPython à zéro (repl.arreter) ; false : il faut appuyer sur Reset.
 async function remettreAZero(repl, session, changer) {
   changer({ etape: 'arret' });
   const ok = await repl.arreter();
@@ -777,7 +777,7 @@ export async function essayer({ id, code, fichiers = [], confirmation }, dependa
 }
 
 // Bouton « Arrêter » (étape 6) : Ctrl-C puis remise à zéro. Renvoie true si
-// la carte est revenue au repos, false s'il faut appuyer sur RESET, null s'il
+// la carte est revenue au repos, false s'il faut appuyer sur Reset, null s'il
 // n'y avait rien à arrêter.
 export async function arreter({ session }) {
   const repl = session.repl;

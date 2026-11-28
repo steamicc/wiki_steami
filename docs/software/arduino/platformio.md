@@ -172,7 +172,7 @@ Le fichier `boards/steami.json` est absent ou mal placé : il doit se trouver da
 
 ### Le moniteur série n'affiche rien
 
-Vérifier `monitor_speed = 115200` dans `platformio.ini`. Les messages écrits dans `setup()` partent avant l'ouverture du moniteur : appuyer sur le bouton reset de la carte une fois le moniteur ouvert.
+Vérifier `monitor_speed = 115200` dans `platformio.ini`. Les messages écrits dans `setup()` partent avant l'ouverture du moniteur : appuyer sur le bouton Reset de la carte une fois le moniteur ouvert.
 
 ## Voir aussi
 

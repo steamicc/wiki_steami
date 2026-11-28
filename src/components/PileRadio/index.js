@@ -8,6 +8,7 @@ import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { ETAT_INITIAL, carte } from '../EssayerExemple/carte.mjs';
 import EtapesDaplink from '../EssayerExemple/EtapesDaplink';
+import { verificationDaplink } from '../EssayerExemple/daplink.mjs';
 import {
   TEXTE_DERNIERE_ETAPE_DAPLINK,
   boutonPileActif,
@@ -16,9 +17,11 @@ import {
   doitAbandonner,
   issueFocus,
   lireForcer,
+  masqueEncartEssayer,
   messageEtape,
   morceauxTexte,
   questionEnAttente,
+  reporteDaplink,
   retenirCarte,
   retenirOnglet,
   texteDecompte,
@@ -71,6 +74,7 @@ function Encart({ encart, surReponse }) {
             className={principal ? communs.bouton : communs.boutonSecondaire}
             onClick={() => {
               surReponse();
+              if (reporteDaplink(encart, valeur)) verificationDaplink.reporter();
               parcoursPile.confirmer(valeur);
             }}
           >
@@ -130,7 +134,10 @@ export default function PileRadio({ id }) {
     focaliserApresRef.current = true;
   };
   // Étapes du DAPLink fermées par « Plus tard » : l'objet daplink du
-  // parcours, qui change à chaque nouvelle vérification.
+  // parcours, qui change à chaque nouvelle vérification. Ces étapes ne
+  // s'affichent qu'à la demande (« Mettre à jour le DAPLink… ») : un
+  // « Plus tard » choisi avant dans l'encart du bouton Essayer ne les
+  // masque pas.
   const [daplinkFerme, setDaplinkFerme] = useState(null);
 
   const actif = etat.id === id;
@@ -153,6 +160,23 @@ export default function PileRadio({ id }) {
   useEffect(() => {
     if (!etatCarte.connectee && questionEnAttente(etat, id)) parcoursPile.annuler();
   }, [etatCarte.connectee, etat, id]);
+
+  // Un seul encart d'étapes du DAPLink par page : tant que celles-ci sont
+  // affichées, et pendant une vérification relancée après elles (voir
+  // masqueEncartEssayer), celui du bouton Essayer se masque. Avant
+  // l'affichage, pour que les deux ne soient jamais peints ensemble.
+  const masqueRef = useRef(false);
+  const masque = masqueEncartEssayer({
+    actif,
+    etapesDaplink,
+    etat,
+    precedent: masqueRef.current,
+  });
+  useLayoutEffect(() => {
+    masqueRef.current = masque;
+    if (!masque) return undefined;
+    return verificationDaplink.afficherAutreEncart();
+  }, [masque]);
 
   // La demande ne vit que le temps du parcours (voir issueFocus).
   useLayoutEffect(() => {
@@ -225,6 +249,9 @@ export default function PileRadio({ id }) {
           surPlusTard={() => {
             focaliserApres();
             setDaplinkFerme(etat.daplink);
+            // Vaut aussi pour l'encart du bouton Essayer, jusqu'au
+            // rechargement de la page.
+            verificationDaplink.reporter();
           }}
         />
       )}

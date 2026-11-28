@@ -94,7 +94,7 @@ export const TEXTE_EFFACEMENT =
   "Attention : l'installation efface les fichiers enregistrés sur la carte. Les copier avant de continuer.";
 
 export const TEXTE_CARTE_OCCUPEE =
-  "La carte ne répond pas : un autre outil (Thonny, mpremote) ou un programme en cours peut la tenir. Fermer l'outil, ou appuyer sur RESET, puis réessayer.";
+  "La carte ne répond pas : un autre outil (Thonny, mpremote) ou un programme en cours peut la tenir. Fermer l'outil, ou appuyer sur Reset, puis réessayer.";
 
 export function texteMiseAJourDaplink(release) {
   return `Une mise à jour du DAPLink de cette carte est disponible (release ${release}).`;
