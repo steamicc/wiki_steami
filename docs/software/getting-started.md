@@ -14,6 +14,10 @@ Guide de démarrage rapide pour la carte STeaMi avec MicroPython.
    - Un **disque USB** (STEAMI) — pour le drag-and-drop de firmware
    - Un **port série** (CDC) — pour la communication REPL
 
+Ces deux interfaces viennent du firmware DAPLink du STM32F103. Pendant ce temps, le STM32WB55 démarre le programme de sa flash, ici MicroPython. Le détail de chaque étape est dans [STM32F103 — Chaîne de démarrage](../hardware/main-components/stm32f103#chaîne-de-démarrage).
+
+[![Chaîne de démarrage de la STeaMi V1c : le STM32F103 lance le firmware DAPLink, qui présente le lecteur STEAMI et le port série, programme le STM32WB55 par SWD puis le relance ; le STM32WB55 démarre en flash sur MicroPython ou sur un croquis Arduino](/img/diagrams/chaine-demarrage.svg)](pathname:///img/diagrams/chaine-demarrage.svg)
+
 ## Installer mpremote
 
 [mpremote](https://docs.micropython.org/en/latest/reference/mpremote.html) est l'outil officiel MicroPython pour interagir avec la carte depuis le terminal.

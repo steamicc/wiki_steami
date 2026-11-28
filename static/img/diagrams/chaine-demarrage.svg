@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 908" width="800" height="908"
+     role="img" aria-labelledby="titre desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title id="titre">Chaîne de démarrage de la STeaMi V1c : DAPLink puis STM32WB55</title>
+  <desc id="desc">À la mise sous tension, le STM32F103 lance son bootloader DAPLink. Bouton Reset tenu au branchement (batterie débranchée) ou fichier START_BL.ACT : le bootloader reste en mode MAINTENANCE. Sinon il démarre l'interface DAPLink, qui présente le lecteur STEAMI, le port série et CMSIS-DAP, programme le STM32WB55 par SWD puis le relance par T_NRST. Le STM32WB55 démarre en flash (BOOT0 à 0) sur MicroPython ou sur un croquis Arduino.</desc>
+  <defs>
+    <style>
+      .sch-fond   { fill: #ffffff; stroke: #d0d7de; }
+      .sch-cadre  { fill: none; stroke: #d0d7de; stroke-width: 1.5; }
+      .sch-bloc   { stroke-width: 1.5; }
+      .sch-mcu    { fill: #e0f2f1; stroke: #00796b; }
+      .sch-alim   { fill: #ffebee; stroke: #c62828; }
+      .sch-mem    { fill: #e8eaf6; stroke: #303f9f; }
+      .sch-ext    { fill: #f6f8fa; stroke: #57606a; }
+      .sch-titre  { font-size: 18px; font-weight: 700; fill: #1f2328; }
+      .sch-nom    { font-size: 14px; font-weight: 600; fill: #1f2328; }
+      .sch-detail { font-size: 12px; fill: #57606a; }
+      .sch-lien-txt { font-size: 12px; font-weight: 600; }
+      .sch-lien   { fill: none; stroke-width: 2; stroke-linecap: round; }
+      .sch-etape  { stroke: #1f2328; stroke-width: 1.5; }
+      .sch-swd    { stroke: #6e40c9; stroke-dasharray: 10 4 2 4; }
+      .sch-usb    { stroke: #1f2328; stroke-width: 3; }
+      .sch-pwr    { stroke: #c62828; stroke-width: 2.5; }
+      .sch-gpio   { stroke: #57606a; stroke-width: 1.5; }
+    </style>
+    <marker id="fl-etape" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#1f2328"/>
+    </marker>
+    <marker id="fl-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c62828"/>
+    </marker>
+    <marker id="fl-gpio" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect class="sch-fond" x="0.5" y="0.5" width="799" height="907" rx="12"/>
+  <text class="sch-titre" x="24" y="40">Chaîne de démarrage : DAPLink puis STM32WB55</text>
+  <text class="sch-detail" x="776" y="40" text-anchor="end">STeaMi V1c</text>
+
+  <!-- Mise sous tension -->
+  <rect class="sch-bloc sch-ext" x="24" y="64" width="176" height="48" rx="6"/>
+  <text class="sch-nom" x="112" y="84" text-anchor="middle">Câble USB</text>
+  <text class="sch-detail" x="112" y="102" text-anchor="middle">5 V et données</text>
+
+  <rect class="sch-bloc sch-alim" x="240" y="64" width="520" height="48" rx="6"/>
+  <text class="sch-nom" x="500" y="84" text-anchor="middle">Mise sous tension</text>
+  <text class="sch-detail" x="500" y="102" text-anchor="middle">USB 5 V, ou batterie seule : rail POWER (chargeur BQ24075)</text>
+
+  <path class="sch-lien sch-pwr" d="M200 88 H238" marker-end="url(#fl-pwr)"/>
+  <text class="sch-lien-txt" x="219" y="80" text-anchor="middle" fill="#c62828">5 V</text>
+
+  <rect class="sch-bloc sch-alim" x="240" y="144" width="240" height="56" rx="6"/>
+  <text class="sch-nom" x="360" y="168" text-anchor="middle">Rail +3V3_STLINK</text>
+  <text class="sch-detail" x="360" y="186" text-anchor="middle">LD3985 ; USB, ou PB2 du WB55</text>
+
+  <rect class="sch-bloc sch-alim" x="576" y="144" width="184" height="56" rx="6"/>
+  <text class="sch-nom" x="668" y="168" text-anchor="middle">Rail +3V3@1200mA</text>
+  <text class="sch-detail" x="668" y="186" text-anchor="middle">DIO7003 puis TPS63000</text>
+
+  <path class="sch-lien sch-pwr" d="M440 112 V142" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M720 112 V142" marker-end="url(#fl-pwr)"/>
+
+  <!-- Cadres des deux microcontrôleurs -->
+  <rect class="sch-cadre" x="224" y="224" width="272" height="480" rx="8"/>
+  <text class="sch-nom" x="236" y="248">STM32F103 · DAPLink</text>
+  <rect class="sch-cadre" x="560" y="224" width="216" height="480" rx="8"/>
+  <text class="sch-nom" x="572" y="248">STM32WB55</text>
+
+  <path class="sch-lien sch-pwr" d="M440 200 V266" marker-end="url(#fl-pwr)"/>
+  <path class="sch-lien sch-pwr" d="M720 200 V266" marker-end="url(#fl-pwr)"/>
+
+  <!-- STM32F103 : bootloader -->
+  <rect class="sch-bloc sch-mcu" x="240" y="268" width="240" height="56" rx="6"/>
+  <text class="sch-nom" x="360" y="292" text-anchor="middle">Bootloader DAPLink</text>
+  <text class="sch-detail" x="360" y="310" text-anchor="middle">0x08000000 ; lit T_NRST sur PB0</text>
+
+  <!-- Mode MAINTENANCE -->
+  <path class="sch-lien sch-etape" d="M240 296 H56 V382" marker-end="url(#fl-etape)"/>
+  <g class="sch-lien-txt" fill="#1f2328">
+    <text x="66" y="322">Reset tenu au</text>
+    <text x="66" y="338">branchement, batterie</text>
+    <text x="66" y="354">débranchée ;</text>
+    <text x="66" y="370">ou START_BL.ACT</text>
+  </g>
+  <rect class="sch-bloc sch-ext" x="24" y="384" width="176" height="56" rx="6"/>
+  <text class="sch-nom" x="112" y="408" text-anchor="middle">Lecteur MAINTENANCE</text>
+  <text class="sch-detail" x="112" y="426" text-anchor="middle">copier le .bin d'interface</text>
+  <path class="sch-lien sch-etape" d="M200 412 H238" marker-end="url(#fl-etape)"/>
+
+  <!-- STM32F103 : interface -->
+  <path class="sch-lien sch-etape" d="M360 324 V382" marker-end="url(#fl-etape)"/>
+  <text class="sch-lien-txt" x="368" y="358" fill="#1f2328">sinon</text>
+  <rect class="sch-bloc sch-mcu" x="240" y="384" width="240" height="56" rx="6"/>
+  <text class="sch-nom" x="360" y="408" text-anchor="middle">Interface DAPLink</text>
+  <text class="sch-detail" x="360" y="426" text-anchor="middle">0x0800C000 ; I2C 0x3B, W25Q64</text>
+
+  <path class="sch-lien sch-etape" d="M360 440 V502" marker-end="url(#fl-etape)"/>
+  <rect class="sch-bloc sch-mcu" x="240" y="504" width="240" height="56" rx="6"/>
+  <text class="sch-nom" x="360" y="528" text-anchor="middle">Périphériques USB</text>
+  <text class="sch-detail" x="360" y="546" text-anchor="middle">STEAMI, CDC, CMSIS-DAP, WebUSB</text>
+
+  <rect class="sch-bloc sch-ext" x="24" y="504" width="176" height="56" rx="6"/>
+  <text class="sch-nom" x="112" y="528" text-anchor="middle">Ordinateur</text>
+  <text class="sch-detail" x="112" y="546" text-anchor="middle">lecteur STEAMI, CMSIS-DAP</text>
+  <path class="sch-lien sch-usb" d="M200 532 H240"/>
+
+  <path class="sch-lien sch-etape" d="M360 560 V622" marker-end="url(#fl-etape)"/>
+  <g class="sch-lien-txt" fill="#1f2328">
+    <text x="368" y="588">fichier .hex/.bin</text>
+    <text x="368" y="604">ou CMSIS-DAP</text>
+  </g>
+  <rect class="sch-bloc sch-mcu" x="240" y="624" width="240" height="56" rx="6"/>
+  <text class="sch-nom" x="360" y="648" text-anchor="middle">Programmation du WB55</text>
+  <text class="sch-detail" x="360" y="666" text-anchor="middle">écrit la flash, puis relance</text>
+
+  <!-- Liaisons entre les deux microcontrôleurs -->
+  <path class="sch-lien sch-gpio" d="M480 644 H512 V300 H574" marker-end="url(#fl-gpio)"/>
+  <text class="sch-lien-txt" x="544" y="292" text-anchor="middle" fill="#57606a">T_NRST</text>
+  <path class="sch-lien sch-swd" d="M480 668 H536 V420 H576"/>
+  <text class="sch-lien-txt" x="556" y="412" text-anchor="middle" fill="#6e40c9">SWD</text>
+
+  <!-- STM32WB55 -->
+  <rect class="sch-bloc sch-mcu" x="576" y="268" width="184" height="56" rx="6"/>
+  <text class="sch-nom" x="668" y="292" text-anchor="middle">Sortie de reset</text>
+  <text class="sch-detail" x="668" y="310" text-anchor="middle">BOOT0 à 0 (R116)</text>
+
+  <path class="sch-lien sch-etape" d="M668 324 V382" marker-end="url(#fl-etape)"/>
+  <rect class="sch-bloc sch-mem" x="576" y="384" width="184" height="56" rx="6"/>
+  <text class="sch-nom" x="668" y="408" text-anchor="middle">Programme en flash</text>
+  <text class="sch-detail" x="668" y="426" text-anchor="middle">à l'adresse 0x08000000</text>
+
+  <path class="sch-lien sch-etape" d="M652 440 V502" marker-end="url(#fl-etape)"/>
+  <rect class="sch-bloc sch-mcu" x="576" y="504" width="152" height="56" rx="6"/>
+  <text class="sch-nom" x="652" y="528" text-anchor="middle">MicroPython</text>
+  <text class="sch-detail" x="652" y="546" text-anchor="middle">main.py, REPL (CDC)</text>
+
+  <path class="sch-lien sch-etape" d="M744 440 V622" marker-end="url(#fl-etape)"/>
+  <text class="sch-lien-txt" x="736" y="596" text-anchor="end" fill="#1f2328">ou</text>
+  <rect class="sch-bloc sch-mcu" x="576" y="624" width="184" height="56" rx="6"/>
+  <text class="sch-nom" x="668" y="648" text-anchor="middle">Croquis Arduino</text>
+  <text class="sch-detail" x="668" y="666" text-anchor="middle">setup(), puis loop()</text>
+
+  <!-- Légende -->
+  <rect x="24" y="728" width="752" height="156" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="sch-nom" x="40" y="752">Légende</text>
+  <g class="sch-detail">
+    <rect class="sch-bloc sch-mcu"  x="40"  y="766" width="24" height="16" rx="3"/><text x="72"  y="779">Étape d'un MCU</text>
+    <rect class="sch-bloc sch-mem"  x="200" y="766" width="24" height="16" rx="3"/><text x="232" y="779">Mémoire</text>
+    <rect class="sch-bloc sch-alim" x="320" y="766" width="24" height="16" rx="3"/><text x="352" y="779">Alimentation</text>
+    <rect class="sch-bloc sch-ext"  x="470" y="766" width="24" height="16" rx="3"/><text x="502" y="779">Vu de l'ordinateur</text>
+
+    <path class="sch-lien sch-etape" d="M40 802 H80" marker-end="url(#fl-etape)"/><text x="88" y="806">Étape suivante</text>
+    <path class="sch-lien sch-pwr" d="M200 802 H240" marker-end="url(#fl-pwr)"/><text x="248" y="806">Alimentation</text>
+    <path class="sch-lien sch-usb" d="M350 802 H390"/><text x="398" y="806">USB</text>
+    <path class="sch-lien sch-swd" d="M450 802 H490"/><text x="498" y="806">SWD</text>
+    <path class="sch-lien sch-gpio" d="M560 802 H600" marker-end="url(#fl-gpio)"/><text x="608" y="806">Signal (reset)</text>
+
+    <text x="40" y="836">V1b : même chaîne. V1a (indices A, A1) : le LD3985 prend le rail POWER sans passer par T4, et le bouton</text>
+    <text x="40" y="852">Reset est placé après le tampon U18 : d'après le schéma, le bootloader ne le voit pas sur PB0. Sur une V1a,</text>
+    <text x="40" y="868">le lecteur MAINTENANCE s'obtient donc avec START_BL.ACT (non vérifié sur carte).</text>
+  </g>
+</svg>
