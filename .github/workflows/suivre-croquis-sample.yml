@@ -51,6 +51,12 @@
 # PR est ouverte en brouillon, donc sans fusion automatique, jusqu'à ce
 # qu'un humain ait lu le diff et l'ait passée en « Ready for review ».
 #
+# Croquis nouveaux : ensuite, scripts/completer-attente-arduino.py --source
+# sample lit l'index.json de l'archive et ajoute à la liste d'attente chaque
+# croquis ni utilisé dans une page (source="sample") ni déjà en attente, pour que
+# lint:arduino-examples ne bloque pas la PR ; le corps de la PR les nomme. Les
+# croquis retirés ou renommés encore cités restent bloquants.
+#
 # Tout passe par un jeton d'installation de la GitHub App de l'organisation
 # (celle des releases de steamicc/arduino-steami-lib), limité à ce dépôt :
 # une PR ouverte avec ce jeton déclenche build.yml (pull_request) sans
@@ -290,7 +296,7 @@ jobs:
           TETE: ${{ steps.comparaison.outputs.tete }}
         run: |
           set -euo pipefail
-          # L'archive n'est pas décompressée ici : seul son sha256 est utile.
+          # L'archive n'est pas décompressée ici : seuls son sha256 et son index.json servent.
           dl="$RUNNER_TEMP/croquis-sample"
           mkdir -p "$dl"
           curl -fL --retry 3 --silent --show-error -o "$dl/$ARCHIVE" \
@@ -310,6 +316,15 @@ jobs:
           src="$RUNNER_TEMP/arduino-steami-sample"
           git clone --depth 1 --quiet --branch "$DERNIERE" https://github.com/steamicc/arduino-steami-sample.git "$src"
           python3 scripts/convertir-croquis.py "$src" --sortie-github "$GITHUB_OUTPUT"
+          # Nouveaux croquis de l'index, ni utilisés dans une page (source="sample") ni
+          # en attente : ajoutés à scripts/exemples-arduino-sample-a-documenter.txt
+          # (sortie « ajoutes », citée dans la PR), sinon lint:arduino-examples
+          # bloquerait la PR. Après la conversion, qui retire de la liste les croquis
+          # désormais utilisés. Un croquis retiré ou renommé encore cité reste
+          # bloquant : à corriger à la main.
+          unzip -p "$dl/$ARCHIVE" index.json > "$dl/index.json"
+          python3 scripts/completer-attente-arduino.py --source sample --index "$dl/index.json" \
+            --sortie-github "$GITHUB_OUTPUT"
           # Commit au nom du compte robot de l'App (<slug>[bot]).
           bot_id=$(gh api "users/${APP_SLUG}[bot]" --jq .id)
           git config user.name "${APP_SLUG}[bot]"
@@ -337,10 +352,17 @@ jobs:
           # Vides si la branche existait déjà (conversion faite lors d'une exécution précédente).
           CONVERTIS: ${{ steps.epinglage.outputs.convertis }}
           DIFFERENTS: ${{ steps.epinglage.outputs.differents }}
+          AJOUTES: ${{ steps.epinglage.outputs.ajoutes }}
         run: |
           set -euo pipefail
           conversion=""
           ecarts=""
+          attente=""
+          if [ -n "$AJOUTES" ]; then
+            read -ra ids <<<"$AJOUTES"
+            liste=$(printf "\`%s\`, " "${ids[@]}")
+            attente="Les nouveaux croquis de cette release, qui ne sont ni utilisés dans une page ni en attente, sont ajoutés à \`scripts/exemples-arduino-sample-a-documenter.txt\` : ${liste%, }. Ils restent à documenter plus tard : écrire leur section dans une page Arduino du wiki (bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id=\"G/N\" source=\"sample\" />\`) et retirer leur ligne de la liste."
+          fi
           brouillon=()
           if [ -n "$CONVERTIS" ]; then
             read -ra ids <<<"$CONVERTIS"
@@ -359,7 +381,7 @@ jobs:
           elif [ "$POUSSE" != "true" ]; then
             # Branche poussée par une exécution précédente : les écarts éventuels
             # de sa conversion ne sont plus connus.
-            ecarts="**À vérifier avant de fusionner :** la branche a été préparée par une exécution précédente du robot, qui n'a pas pu ouvrir la PR : les croquis convertis et leurs écarts éventuels avec les pages ne sont plus connus. Lire le diff des pages, puis passer la PR en « Ready for review » : le robot active la fusion automatique à son passage suivant."
+            ecarts="**À vérifier avant de fusionner :** la branche a été préparée par une exécution précédente du robot, qui n'a pas pu ouvrir la PR : les croquis convertis, les croquis ajoutés à \`scripts/exemples-arduino-sample-a-documenter.txt\` et les écarts éventuels avec les pages ne sont plus connus (le diff les montre). Lire le diff des pages, puis passer la PR en « Ready for review » : le robot active la fusion automatique à son passage suivant."
             brouillon=(--draft)
           fi
           if [ "${#brouillon[@]}" -gt 0 ]; then
@@ -378,7 +400,9 @@ jobs:
 
           $ecarts
 
-          La vérification \`lint:arduino-examples\` (build.yml) nomme chaque nouveau croquis qui n'est pas encore utilisé. Pour chacun, il faut soit une section sur une page Arduino du wiki (dossier \`docs/\`) avec un bloc \`\` \`\`\`cpp file=.external/arduino-steami-sample/examples/G/N/N.ino \`\` suivi de \`<EssayerExemple id="G/N" source="sample" />\` (G/N : groupe et nom du croquis), soit une ligne dans \`scripts/exemples-arduino-sample-a-documenter.txt\`, à ajouter sur cette branche avant de fusionner. Elle signale aussi les croquis retirés ou renommés encore cités dans une page ou dans la liste : corriger la page ou la liste. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
+          $attente
+
+          La vérification \`lint:arduino-examples\` (build.yml) signale encore les croquis retirés ou renommés encore cités dans une page (\`<EssayerExemple id=... source="sample" />\`) ou dans la liste d'attente : corriger la page ou la liste sur cette branche avant de fusionner. Dans ce cas, le build échoue aussi (fichier \`.ino\` introuvable) ; la vérification tourne quand même et nomme les croquis en cause.
 
           $fusion
           EOT
@@ -398,9 +422,15 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           PR: ${{ steps.comparaison.outputs.pr }}
           DIFFERENTS: ${{ steps.epinglage.outputs.differents }}
+          AJOUTES: ${{ steps.epinglage.outputs.ajoutes }}
         run: |
           set -euo pipefail
           corps="Branche reconstruite depuis main par le robot : la PR était en conflit avec main (un autre épinglage y a été fusionné entre-temps). La conversion des croquis écrits en ligne a été refaite sur main."
+          if [ -n "$AJOUTES" ]; then
+            read -ra ids <<<"$AJOUTES"
+            liste=$(printf "\`%s\`, " "${ids[@]}")
+            corps+=" Croquis ajoutés à \`scripts/exemples-arduino-sample-a-documenter.txt\` : ${liste%, }."
+          fi
           if [ -n "$DIFFERENTS" ]; then
             read -ra ids <<<"$DIFFERENTS"
             liste=$(printf "\`%s\`, " "${ids[@]}")
