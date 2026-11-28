@@ -43,6 +43,8 @@ La carte n'offre donc pas le connecteur Cortex Debug standard (2 × 5 broches). 
 
 Le port est identique sur la V1b et la V1c : même feuille FP11 dans les schémas B1 et C, même position et même empreinte dans les fichiers de placement des deux indices.
 
+À l'indice A de la V1a, le dessin d'assemblage montre une autre empreinte : 2 x 5 pastilles au pas de 1,27 mm (PAJ801 à PAJ8010), faite pour l'embase SAMTEC FTS-105-01-F-D de la nomenclature A. Le brochage de la feuille FP11 est le même : seules les broches impaires sont reliées. Aucun dessin d'assemblage n'existe pour l'indice A1.
+
 ## Schémas
 
 [![Schéma FP11-Port_JTAG](/img/schematics/FP11-Port_JTAG.png)](/docs/schematics/FP11-Port_JTAG.pdf)

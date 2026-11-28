@@ -13,17 +13,17 @@ Les exigences sont communes aux trois releases de la carte. Quand l'implémentat
 
 ## Exigences — Capteurs internes
 
-| ID     | Nom                                  | Description                                                                            | Implémentation                                                                                                                                                                                                                           |
-| ------ | ------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| FCT-40 | Magnetometer (LIS2MDL)               | Le système doit intégrer un magnétomètre (LIS2MDL).                                    | LIS2MDLTR (I2C, INT_MAG → PD1)                                                                                                                                                                                                           |
-| FCT-41 | Distance (VL53L1X)                   | Le système doit intégrer un capteur de distance (VL53L1X).                             | VL53L1CXV0FY/1 (I2C, INT_DIST → PB12)                                                                                                                                                                                                    |
-| FCT-42 | PDM MEMS Microphone                  | Le système doit intégrer un microphone MEMS PDM (MP34DT01 / IMP34DT05).                | IMP34DT05 (PDM, PA10/PA3)                                                                                                                                                                                                                |
-| FCT-43 | Light, Color, Gesture (APDS9960)     | Le système doit intégrer un capteur de lumière, couleur et geste (APDS9960).           | <ReleaseValue><Release releases="v1a">APDS-9960 (I2C), à confirmer</Release><Release releases="v1b">APDS-9960 (I2C)</Release><Release releases="v1c">**Écart** : aucun capteur de lumière, couleur ou geste</Release></ReleaseValue>     |
-| FCT-44 | Barometer (LPS22HH)                  | Le système doit intégrer un baromètre (LPS22HH / WSEN-PADS).                           | <ReleaseValue><Release releases="v1a">WSEN-PADS 2511020213301 (I2C), à confirmer</Release><Release releases="v1b">WSEN-PADS 2511020213301 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue> |
-| FCT-45 | Humidity and temperature             | Le système doit intégrer un capteur d'humidité et de température.                      | <ReleaseValue><Release releases="v1a">WSEN-HIDS 2525020210001 (I2C), à confirmer</Release><Release releases="v1b">WSEN-HIDS 2525020210001 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue> |
-| FCT-46 | Humidity and temperature - Isolation | Le capteur de température doit être thermiquement éloigné de tout composant chauffant. | Placement PCB isolé                                                                                                                                                                                                                      |
-| FCT-47 | Accel/Gyro (LSM6DS33)                | Le système doit intégrer un accéléromètre/gyroscope (LSM6DS33 / ISM330DLC).            | ISM330DLCTR (I2C, INT_ACC → PC13)                                                                                                                                                                                                        |
-| FCT-48 | IMU alignment                        | L'orientation des deux capteurs de l'IMU doit être alignée.                            | Alignement ISM330DLC + LIS2MDL sur PCB                                                                                                                                                                                                   |
+| ID     | Nom                                  | Description                                                                            | Implémentation                                                                                                                                                                                                                                                                                                                                           |
+| ------ | ------------------------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FCT-40 | Magnetometer (LIS2MDL)               | Le système doit intégrer un magnétomètre (LIS2MDL).                                    | LIS2MDLTR (I2C, INT_MAG → PD1)                                                                                                                                                                                                                                                                                                                           |
+| FCT-41 | Distance (VL53L1X)                   | Le système doit intégrer un capteur de distance (VL53L1X).                             | VL53L1CXV0FY/1 (I2C, INT_DIST → PB12)                                                                                                                                                                                                                                                                                                                    |
+| FCT-42 | PDM MEMS Microphone                  | Le système doit intégrer un microphone MEMS PDM (MP34DT01 / IMP34DT05).                | IMP34DT05 (PDM, PA10/PA3)                                                                                                                                                                                                                                                                                                                                |
+| FCT-43 | Light, Color, Gesture (APDS9960)     | Le système doit intégrer un capteur de lumière, couleur et geste (APDS9960).           | <ReleaseValue><Release releases="v1a">APDS-9960 (U15, I2C) : listé monté, sans marque de non-montage, dans la nomenclature A ; présent aux schémas A et A1 et au dessin d'assemblage A</Release><Release releases="v1b">APDS-9960 (I2C)</Release><Release releases="v1c">**Écart** : aucun capteur de lumière, couleur ou geste</Release></ReleaseValue> |
+| FCT-44 | Barometer (LPS22HH)                  | Le système doit intégrer un baromètre (LPS22HH / WSEN-PADS).                           | <ReleaseValue><Release releases="v1a">WSEN-PADS 2511020213301 (U12, I2C) : listé monté dans la nomenclature A, qui liste aussi le BME280 (U14) et le BNO055 (U16) sans marque de non-montage</Release><Release releases="v1b">WSEN-PADS 2511020213301 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue>     |
+| FCT-45 | Humidity and temperature             | Le système doit intégrer un capteur d'humidité et de température.                      | <ReleaseValue><Release releases="v1a">WSEN-HIDS 2525020210001 (U13, I2C, face arrière) : listé monté dans la nomenclature A ; présent aux schémas A et A1</Release><Release releases="v1b">WSEN-HIDS 2525020210001 (I2C)</Release><Release releases="v1c">**Écart** : BME280 (I2C, 0x76)</Release></ReleaseValue>                                        |
+| FCT-46 | Humidity and temperature - Isolation | Le capteur de température doit être thermiquement éloigné de tout composant chauffant. | Placement PCB isolé                                                                                                                                                                                                                                                                                                                                      |
+| FCT-47 | Accel/Gyro (LSM6DS33)                | Le système doit intégrer un accéléromètre/gyroscope (LSM6DS33 / ISM330DLC).            | ISM330DLCTR (I2C, INT_ACC → PC13)                                                                                                                                                                                                                                                                                                                        |
+| FCT-48 | IMU alignment                        | L'orientation des deux capteurs de l'IMU doit être alignée.                            | Alignement ISM330DLC + LIS2MDL sur PCB                                                                                                                                                                                                                                                                                                                   |
 
 ## Exigences — Capteurs et connecteurs externes
 
@@ -132,10 +132,28 @@ Le capteur de température doit être thermiquement éloigné de tout composant 
 
 ### Bus I2C interne
 
-| Signal   | Pin STM32WB55 | Pin STM32F103 |
-| -------- | ------------- | ------------- |
-| I2C1_SCL | PB8           | PB6           |
-| I2C1_SDA | PB9           | PB7           |
+Le bus I2C1 du STM32WB55 relie aussi le STM32F103, qui sert de pont I2C. Côté STM32F103, les broches changent entre la V1a et la V1b.
+
+<ReleaseTabs>
+<Release releases="v1a">
+
+| Signal   | Pin STM32WB55 | Pin STM32F103 (I2C1) |
+| -------- | ------------- | -------------------- |
+| I2C1_SCL | PB8           | PB6                  |
+| I2C1_SDA | PB9           | PB7                  |
+
+</Release>
+<Release releases="v1b v1c">
+
+| Signal   | Pin STM32WB55 | Pin STM32F103 (I2C2) |
+| -------- | ------------- | -------------------- |
+| I2C1_SCL | PB8           | PB10 (broche 21)     |
+| I2C1_SDA | PB9           | PB11 (broche 22)     |
+
+Le schéma note « I2C2_STM32F103 = I2C1_STM32WB55 ». Sur ces deux releases, les broches PB6 et PB7 du STM32F103 portent USART1_TX et USART1_RX.
+
+</Release>
+</ReleaseTabs>
 
 ### Extension GPIO (FP7)
 

@@ -23,9 +23,9 @@ Les repères sont ceux de la nomenclature de l'indice B1 (V1b). Les composants r
 
 Voir [Boutons et buzzer →](../main-components/buttons-audio) pour les details fonctionnels.
 
-### Bouton Menu / Reset
+### Bouton Reset
 
-- **PTS636 SM25J SMTR LFS** : Bouton tactile unique (probablement pour le bouton menu ou reset)
+- **PTS636 SM25J SMTR LFS** (SW1) : bouton Reset, relié à NRST et monté en face arrière
 
 ### Boutons A, B et Menu
 
