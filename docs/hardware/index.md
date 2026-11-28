@@ -276,6 +276,21 @@ Le processeur d'interface (STM32F103) gère les communications USB. Il exécute 
 | USB WebUSB      | Interface web directe                                                                                                                                                                                                                                           |
 | Plus d'infos    | [Conception — Service et USB](../design/service-usb), [Schéma — FP14](https://github.com/steamicc/steami-reference-design/blob/main/Altium/STeaMi-FP14-Microcontroleur_interface.SchDoc), [Datasheet](https://www.st.com/resource/en/datasheet/stm32f103cb.pdf) |
 
+Les deux microcontrôleurs sont reliés par le SWD, le reset, la console série, une commande d'alimentation (V1b, V1c) et le pont I2C. Le rôle de chaque liaison et le brochage sont détaillés dans [STM32WB55 — Liaisons avec le STM32F103](./main-components/stm32wb55#liaisons-avec-le-stm32f103).
+
+<ReleaseTabs>
+<Release releases="v1b v1c">
+
+[![Schéma des liaisons entre les deux microcontrôleurs de la STeaMi V1b et V1c : SWD de PB13 et PB14 du STM32F103 vers PA14 et PA13 du STM32WB55 pour flasher et déboguer, reset par PB0, console série UART à 115 200 bauds entre l'USART2 (PA2, PA3) et le LPUART1 (PB10, PB11), commande d'alimentation du STM32F103 par PB2, et I2C avec le STM32F103 esclave 0x3B pour la flash W25Q64 et la config zone](/img/diagrams/liaisons-mcu-v1c.svg)](pathname:///img/diagrams/liaisons-mcu-v1c.svg)
+
+</Release>
+<Release releases="v1a">
+
+[![Schéma des liaisons entre les deux microcontrôleurs de la STeaMi V1a : SWD, reset par le tampon 74LVC1G07 et console série UART comme en V1b, ligne I2C_INT entre les broches PB2 des deux microcontrôleurs, et bus I2C arrivant sur PB6 et PB7 du STM32F103 alors que le firmware DAPLink l'attend sur PB10 et PB11](/img/diagrams/liaisons-mcu-v1a.svg)](pathname:///img/diagrams/liaisons-mcu-v1a.svg)
+
+</Release>
+</ReleaseTabs>
+
 ### Mémoire flash externe
 
 La mémoire flash externe est connectée au processeur d'interface (STM32F103) pour le stockage des données capteurs, accessible via USB Mass Storage.
