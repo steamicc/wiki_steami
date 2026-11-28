@@ -26,7 +26,7 @@ Les codes des autres releases (110, 111, 120, 121, 130) sont dans le même table
 
 ## Script
 
-Le script part d'une configuration vide : `save()` efface la config zone avant de l'écrire, et seules les deux valeurs d'usine y sont rangées. Il s'arrête si le firmware DAPLink n'a pas de config zone (DAPLink trop ancien), car un tel firmware se bloque sur les commandes de configuration.
+Le script part d'une configuration vide : `save()` efface la config zone avant de l'écrire, et seules les deux valeurs d'usine y sont rangées. Avant d'écrire, il vérifie avec `has_config_zone()` que le firmware DAPLink a une config zone, car un firmware trop ancien se bloque sur les commandes de configuration. Cette vérification renvoie aussi `False` quand le pont I2C est occupé ou ne répond pas ([`daplink_bridge/device.py`](https://github.com/steamicc/micropython-steami-lib/blob/main/lib/daplink_bridge/daplink_bridge/device.py)). Le script n'écrit alors rien et affiche un message : relancer le script, puis refaire l'[étape 2](./firmware-daplink) si le message revient.
 
 ```python title="config_usine.py"
 from machine import I2C
@@ -37,18 +37,20 @@ REVISION = 131  # V1c de série (indice C1)
 NOM = "STeaMi-01"  # exemple : règle de nommage à définir
 
 bridge = DaplinkBridge(I2C(1))
-if not bridge.has_config_zone():
-    raise SystemExit("DAPLink sans config zone : refaire l'étape 2")
+if bridge.has_config_zone():
+    config = SteamiConfig(bridge)
+    config.board_revision = REVISION
+    config.board_name = NOM
+    config.save()
 
-config = SteamiConfig(bridge)
-config.board_revision = REVISION
-config.board_name = NOM
-config.save()
-
-relue = SteamiConfig(bridge)
-relue.load()
-print("rev =", relue.board_revision, "name =", relue.board_name)
+    relue = SteamiConfig(bridge)
+    relue.load()
+    print("rev =", relue.board_revision, "name =", relue.board_name)
+else:
+    print("DAPLink sans config zone (ou pont sans réponse) : relancer, puis refaire l'étape 2 si le message revient")
 ```
+
+Le message est écrit avec `print()` plutôt qu'avec `raise SystemExit(...)` : sur le port stm32, MicroPython n'affiche pas le texte d'un `SystemExit` (`MICROPY_PYEXEC_ENABLE_EXIT_CODE_HANDLING` vaut 0, voir [`shared/runtime/pyexec.c`](https://github.com/micropython/micropython/blob/master/shared/runtime/pyexec.c)), et l'opérateur ne verrait rien.
 
 Lancer le script depuis l'ordinateur, sans le copier sur la carte : `daplink_bridge` et `steami_config` sont compilés dans le firmware.
 
@@ -60,7 +62,7 @@ mpremote connect /dev/ttyACM0 run config_usine.py
 
 ## Résultat attendu
 
-Le script écrit `rev = 131 name = STeaMi-01` (avec le nom choisi). La config zone ne contient alors que ces deux clés, `rev` et `name`, en JSON compact. La même lecture se fait depuis le navigateur avec le programme de [Identifier sa version](/docs/hardware/revisions#identifier-sa-version).
+Le script écrit `rev = 131 name = STeaMi-01` (avec le nom choisi). La config zone ne contient alors que ces deux clés, `rev` et `name`, en JSON compact. La même lecture se fait avec le programme de [Identifier sa version](/docs/hardware/revisions#identifier-sa-version), lancé avec [mpremote](/docs/software/micropython/mpremote) ou [Thonny](/docs/software/micropython/thonny).
 
 ## Après la qualification
 
