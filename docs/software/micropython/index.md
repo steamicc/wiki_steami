@@ -58,4 +58,5 @@ Tous les drivers suivent des [**conventions standardisées**](./conventions) (is
 
 - [Premiers pas](../getting-started) — Premier programme
 - [DAPLink](../daplink) — Flash externe et config persistante
+- [Stockage](./stockage) — Fichiers de la carte, fichier du disque USB, zone de configuration et calibrations
 - [Code source](https://github.com/steamicc/micropython-steami-lib) — Tous les drivers
